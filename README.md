@@ -9,7 +9,7 @@ poetry shell
 pip install <path to stormpy> # TODO: Package stormpy nicely
 ```
 
-## Developments
+## Development
 
 Install `pre-commit` hook:
 ```
