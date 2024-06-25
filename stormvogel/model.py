@@ -103,7 +103,7 @@ class Transition:
 # How the user is allowed to specify a transition:
 # - using only the action and the target state (implies probability=1),
 # - using only the probability and the target state (implies default action when in an MDP),
-type TransitionShorthand = list[tuple[float, State]] | list[tuple[float, State]]
+TransitionShorthand = list[tuple[float, State]] | list[tuple[float, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
