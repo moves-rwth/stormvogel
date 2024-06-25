@@ -2,6 +2,11 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from fractions import Fraction
+
+Parameter = str
+
+Number = float | Fraction | Parameter
 
 
 class ModelType(Enum):
@@ -71,7 +76,7 @@ class Branch:
         branch: The branch.
     """
 
-    branch: list[tuple[float, State]]
+    branch: list[tuple[Number, State]]
 
     def __str__(self):
         parts = []
@@ -103,7 +108,7 @@ class Transition:
 # How the user is allowed to specify a transition:
 # - using only the action and the target state (implies probability=1),
 # - using only the probability and the target state (implies default action when in an MDP),
-TransitionShorthand = list[tuple[float, State]] | list[tuple[float, State]]
+TransitionShorthand = list[tuple[Number, State]] | list[tuple[Number, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
@@ -118,7 +123,12 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
             assert isinstance(action, Action)
             transition_content[action] = Branch([(1, state)])
         return Transition(transition_content)
-    elif isinstance(first_element, float) or isinstance(first_element, int):
+    elif (
+        isinstance(first_element, float)
+        or isinstance(first_element, int)
+        or isinstance(first_element, Fraction)
+        or isinstance(first_element, str)
+    ):
         return Transition({EmptyAction: Branch(shorthand)})
     raise RuntimeError(
         f"Type of {first_element} not supported in transition {shorthand}"
