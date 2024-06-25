@@ -309,7 +309,7 @@ class Model:
 
 def new_dtmc(name: str | None = None):
     """Creates a DTMC."""
-    return Model(name, ModelType.MDP)
+    return Model(name, ModelType.DTMC)
 
 
 def new_mdp(name: str | None = None):
