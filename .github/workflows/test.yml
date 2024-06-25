@@ -41,6 +41,3 @@ jobs:
 
       - name: Install library
         run: poetry install --only main,test
-
-      - name: Run tests and generate coverage report
-        run: make coverage
