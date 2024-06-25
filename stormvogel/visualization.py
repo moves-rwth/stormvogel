@@ -2,5 +2,6 @@
 
 from model import Model
 
-def show(m: Model) -> any:
+
+def show(m: Model):
     pass

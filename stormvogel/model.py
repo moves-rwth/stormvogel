@@ -208,7 +208,7 @@ class Model:
                 "Called get_action on a model that does not support actions"
             )
         assert self.actions is not None
-        if not name in self.actions:
+        if name not in self.actions:
             raise RuntimeError(
                 f"Tried to get action {name} but that action does not exist"
             )
@@ -258,7 +258,7 @@ class Model:
 
     def get_state_by_id(self, state_id):
         """Get a state by its id."""
-        if not state_id in self.states:
+        if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
         return self.states[state_id]
 

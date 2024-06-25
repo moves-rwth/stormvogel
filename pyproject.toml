@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "stormvogel"
 version = "0.1.0"
@@ -8,9 +12,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-black = "^24.4.2"
+
+[tool.poetry.group.lint.dependencies]
+pre-commit = "^3.7.1"
+ruff = "^0.4.6"
 pyright = "^1.1.368"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff]
+src = ["stormvogel", "examples"]
+line-length = 88
+target-version = "py311"
+fix = true
