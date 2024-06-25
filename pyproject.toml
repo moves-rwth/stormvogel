@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "stormvogel"
+version = "0.1.0"
+description = "User-friendly frontend to the Storm model checker"
+authors = ["The stormvogel team"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+black = "^24.4.2"
+pyright = "^1.1.368"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
