@@ -4,7 +4,7 @@ from stormvogel.model import Model, EmptyAction
 from ipywidgets import interact
 from IPython.display import display
 from fractions import Fraction
-#
+##
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
     def __init__(self, model: Model, name: str, notebook: bool=True, cdn_resources: str="remote") -> None:
