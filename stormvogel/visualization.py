@@ -27,7 +27,7 @@ class Visualization:
         self.model = model
         if (
             name[-5:] != ".html"
-        ):  # We do not require the user to explicitly type .html in their names.
+        ):  # We do not require the user to explicitly type .html in their names
             name += ".html"
         self.name = name
         self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
