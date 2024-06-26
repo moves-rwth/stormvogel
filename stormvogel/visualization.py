@@ -5,6 +5,7 @@ from ipywidgets import interact
 from IPython.display import display
 from fractions import Fraction
 ######
+sejfi sief #Syntax error
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
     def __init__(self, model: Model, name: str, notebook: bool=True, cdn_resources: str="remote") -> None:
