@@ -10,10 +10,12 @@ from fractions import Fraction
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
+    ACTION_ID_OFFSET = 20**6
+
     def __init__(
         self,
         model: Model,
-        name: str,
+        name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
     ) -> None:
@@ -21,7 +23,7 @@ class Visualization:
 
         Args:
             model (Model): The stormvogel model to be displayed.
-            name (str): The name of the resulting html file.
+            name (str): The name of the resulting html file. May or may not include .html extension.
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
         self.model = model
@@ -43,9 +45,6 @@ var options = {
             "background": "white",
             "border": "black"
         }
-    },
-    "edge": {
-        "color": "blue"
     }
 }""")
 
@@ -60,6 +59,7 @@ var options = {
                 label=",".join(state.labels),
                 color=None,  # type: ignore
                 borderWidth=borderWidth,
+                shape="circle",
             )
 
     def __formatted_prob(self, prob: Number) -> str:
@@ -67,6 +67,7 @@ var options = {
         return str(Fraction(prob).limit_denominator(20))
 
     def __add_transitions(self):
+        no_actions = 0
         """For each transition in the model, add a transition in the graph."""
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -80,9 +81,16 @@ var options = {
                             label=self.__formatted_prob(prob),
                         )
                 else:
-                    raise NotImplementedError(
-                        "Non-empty actions are not supported yet."
+                    self.g.add_node(
+                        n_id=self.ACTION_ID_OFFSET + no_actions,
+                        label=action.name,
+                        shape="box",
                     )
+                    print(action.name)
+                    no_actions += 1
+                    # raise NotImplementedError(
+                    #     "Non-empty actions are not supported yet."
+                    # )
 
     def show(self):
         """Show the constructed model"""

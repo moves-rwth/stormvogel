@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        
+
             <script>function neighbourhoodHighlight(params) {
   // console.log("in nieghbourhoodhighlight");
   allNodes = nodes.get({ returnType: "Object" });
@@ -193,14 +193,14 @@ function highlightFilter(filter) {
 }</script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            
-            
-            
-            
-            
-            
 
-        
+
+
+
+
+
+
+
 <center>
 <h1></h1>
 </center>
@@ -234,24 +234,24 @@ function highlightFilter(filter) {
                  float: left;
              }
 
-             
 
-             
 
-             
+
+
+
         </style>
     </head>
 
 
     <body>
         <div class="card" style="width: 100%">
-            
-            
+
+
             <div id="mynetwork" class="card-body"></div>
         </div>
 
-        
-        
+
+
 
         <script type="text/javascript">
 
@@ -271,18 +271,18 @@ function highlightFilter(filter) {
                   value : []
               };
 
-              
 
-              
+
+
 
               // This method is responsible for drawing the graph, returns the drawn network
               function drawGraph() {
                   var container = document.getElementById('mynetwork');
 
-                  
+
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"borderWidth": 3, "color": null, "id": 0, "label": "init", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 1, "label": "carchosen", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 2, "label": "carchosen", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 3, "label": "carchosen", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 4, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 5, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 6, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 7, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 8, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 9, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 10, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 11, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 12, "label": "open", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 13, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 14, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 15, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 16, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 17, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 18, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 19, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 20, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 21, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 22, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 23, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 24, "label": "goatrevealed", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 25, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 26, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 27, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 28, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 29, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 30, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 31, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 32, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 33, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 34, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 35, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 36, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 37, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 38, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 39, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 40, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 41, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 42, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 43, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 44, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 45, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 46, "label": "done", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 47, "label": "done,target", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 48, "label": "done", "shape": "dot"}]);
+                  nodes = new vis.DataSet([{"borderWidth": 3, "color": null, "id": 0, "label": "init", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 1, "label": "carchosen", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 2, "label": "carchosen", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 3, "label": "carchosen", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 4, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 5, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 6, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 7, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 8, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 9, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 10, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 11, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 12, "label": "open", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 13, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 14, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 15, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 16, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 17, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 18, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 19, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 20, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 21, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 22, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 23, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 24, "label": "goatrevealed", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 25, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 26, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 27, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 28, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 29, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 30, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 31, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 32, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 33, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 34, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 35, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 36, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 37, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 38, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 39, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 40, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 41, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 42, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 43, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 44, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 45, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 46, "label": "done", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 47, "label": "done,target", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 48, "label": "done", "shape": "circle"}, {"color": "#97c2fc", "id": 64000000, "label": "open0", "shape": "circle"}, {"color": "#97c2fc", "id": 64000001, "label": "open1", "shape": "circle"}, {"color": "#97c2fc", "id": 64000002, "label": "open2", "shape": "circle"}, {"color": "#97c2fc", "id": 64000003, "label": "open0", "shape": "circle"}, {"color": "#97c2fc", "id": 64000004, "label": "open1", "shape": "circle"}, {"color": "#97c2fc", "id": 64000005, "label": "open2", "shape": "circle"}, {"color": "#97c2fc", "id": 64000006, "label": "open0", "shape": "circle"}, {"color": "#97c2fc", "id": 64000007, "label": "open1", "shape": "circle"}, {"color": "#97c2fc", "id": 64000008, "label": "open2", "shape": "circle"}, {"color": "#97c2fc", "id": 64000009, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000010, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000011, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000012, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000013, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000014, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000015, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000016, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000017, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000018, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000019, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000020, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000021, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000022, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000023, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000024, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000025, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000026, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000027, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000028, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000029, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000030, "label": "switch", "shape": "circle"}, {"color": "#97c2fc", "id": 64000031, "label": "stay", "shape": "circle"}, {"color": "#97c2fc", "id": 64000032, "label": "switch", "shape": "circle"}]);
                   edges = new vis.DataSet([{"arrows": "to", "color": "red", "from": 0, "label": "1/3", "to": 1}, {"arrows": "to", "color": "red", "from": 0, "label": "1/3", "to": 2}, {"arrows": "to", "color": "red", "from": 0, "label": "1/3", "to": 3}, {"arrows": "to", "color": "red", "from": 4, "label": "1/2", "to": 13}, {"arrows": "to", "color": "red", "from": 4, "label": "1/2", "to": 14}, {"arrows": "to", "color": "red", "from": 5, "label": "1", "to": 15}, {"arrows": "to", "color": "red", "from": 6, "label": "1", "to": 16}, {"arrows": "to", "color": "red", "from": 7, "label": "1", "to": 17}, {"arrows": "to", "color": "red", "from": 8, "label": "1/2", "to": 18}, {"arrows": "to", "color": "red", "from": 8, "label": "1/2", "to": 19}, {"arrows": "to", "color": "red", "from": 9, "label": "1", "to": 20}, {"arrows": "to", "color": "red", "from": 10, "label": "1", "to": 21}, {"arrows": "to", "color": "red", "from": 11, "label": "1", "to": 22}, {"arrows": "to", "color": "red", "from": 12, "label": "1/2", "to": 23}, {"arrows": "to", "color": "red", "from": 12, "label": "1/2", "to": 24}, {"arrows": "to", "color": "red", "from": 25, "label": "1", "to": 25}, {"arrows": "to", "color": "red", "from": 26, "label": "1", "to": 26}, {"arrows": "to", "color": "red", "from": 27, "label": "1", "to": 27}, {"arrows": "to", "color": "red", "from": 28, "label": "1", "to": 28}, {"arrows": "to", "color": "red", "from": 29, "label": "1", "to": 29}, {"arrows": "to", "color": "red", "from": 30, "label": "1", "to": 30}, {"arrows": "to", "color": "red", "from": 31, "label": "1", "to": 31}, {"arrows": "to", "color": "red", "from": 32, "label": "1", "to": 32}, {"arrows": "to", "color": "red", "from": 33, "label": "1", "to": 33}, {"arrows": "to", "color": "red", "from": 34, "label": "1", "to": 34}, {"arrows": "to", "color": "red", "from": 35, "label": "1", "to": 35}, {"arrows": "to", "color": "red", "from": 36, "label": "1", "to": 36}, {"arrows": "to", "color": "red", "from": 37, "label": "1", "to": 37}, {"arrows": "to", "color": "red", "from": 38, "label": "1", "to": 38}, {"arrows": "to", "color": "red", "from": 39, "label": "1", "to": 39}, {"arrows": "to", "color": "red", "from": 40, "label": "1", "to": 40}, {"arrows": "to", "color": "red", "from": 41, "label": "1", "to": 41}, {"arrows": "to", "color": "red", "from": 42, "label": "1", "to": 42}, {"arrows": "to", "color": "red", "from": 43, "label": "1", "to": 43}, {"arrows": "to", "color": "red", "from": 44, "label": "1", "to": 44}, {"arrows": "to", "color": "red", "from": 45, "label": "1", "to": 45}, {"arrows": "to", "color": "red", "from": 46, "label": "1", "to": 46}, {"arrows": "to", "color": "red", "from": 47, "label": "1", "to": 47}, {"arrows": "to", "color": "red", "from": 48, "label": "1", "to": 48}]);
 
                   nodeColors = {};
@@ -294,23 +294,23 @@ function highlightFilter(filter) {
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"nodes": {"color": {"background": "white", "border": "black"}}, "edge": {"color": "blue"}};
-
-                  
+                  var options = {"nodes": {"color": {"background": "white", "border": "black"}}};
 
 
-                  
+
+
+
 
                   network = new vis.Network(container, data, options);
 
-                  
-
-                  
-
-                  
 
 
-                  
+
+
+
+
+
+
 
                   return network;
 
