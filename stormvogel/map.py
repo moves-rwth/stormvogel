@@ -1,12 +1,12 @@
-from stormpy.core import SparseMatrixBuilder, SparseMatrix
+import stormpy.storage
 import stormvogel.model
 
 
-def simple_to_matrix(model: stormvogel.model.Model) -> SparseMatrix:
+def simple_to_matrix(model: stormvogel.model.Model) -> stormpy.storage.SparseMatrix:
     """
     Takes a simple representation as input and outputs a sparsematrix
     """
-    builder = SparseMatrixBuilder()
+    builder = stormpy.storage.SparseMatrixBuilder()
 
     for transition in model.transitions.items():
         for branch in transition[1].transition.values():
