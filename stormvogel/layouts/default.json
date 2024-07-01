@@ -1,3 +1,12 @@
 {
-  "color": "blue"
+  "nodes": {
+    "color": {
+      "background": "white",
+      "border": "black"
+    }
+  },
+  "init": {
+    "borderWidth": 10,
+    "color": "green"
+  }
 }

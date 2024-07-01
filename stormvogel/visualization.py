@@ -2,7 +2,7 @@
 
 from pyvis.network import Network
 from stormvogel.model import Model, EmptyAction, Number
-from stormvogel.layout import Layout
+from stormvogel.layout import Layout, DEFAULT
 from ipywidgets import interact
 from IPython.display import display
 from fractions import Fraction
@@ -33,6 +33,10 @@ class Visualization:
             name (str, optional): The name of the resulting html file. May or may not include .html extension.
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
+        if layout is None:
+            self.layout = DEFAULT
+        else:
+            self.layout = layout
         self.model = model
         if (
             name[-5:] != ".html"
@@ -42,10 +46,6 @@ class Visualization:
         self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
         self.__add_states()
         self.__add_transitions()
-        if layout is None:
-            self.layout = Layout(custom=False)
-        else:
-            self.layout = layout
 
         self.layout.set_nt_layout(self.g)
 
@@ -54,7 +54,7 @@ class Visualization:
         for state in self.model.states.values():
             borderWidth = 1
             if state == self.model.get_initial_state():
-                borderWidth = 3
+                borderWidth = self.layout["init"]["borderWidth"]  # type: ignore
             self.g.add_node(
                 state.id,
                 label=",".join(state.labels),
