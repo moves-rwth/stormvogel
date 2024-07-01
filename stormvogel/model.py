@@ -161,13 +161,13 @@ class Model:
         self.states = {}
 
         # Initialize actions if those are supported by the model type
-        if self.__supports_actions():
+        if self.supports_actions():
             self.actions = {}
 
         # Add the initial state
         self.new_state(["init"])
 
-    def __supports_actions(self):
+    def supports_actions(self):
         """Returns whether this model supports actions."""
         return self.type in (ModelType.MDP, ModelType.MA)
 
@@ -187,7 +187,7 @@ class Model:
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Add new transitions from a state."""
-        if not self.__supports_actions():
+        if not self.supports_actions():
             raise RuntimeError(
                 "In a model that does not support actions, you have to set transitions, not add them"
             )
@@ -198,7 +198,7 @@ class Model:
 
     def new_action(self, name: str) -> Action:
         """Creates a new action and returns it."""
-        if not self.__supports_actions():
+        if not self.supports_actions():
             raise RuntimeError(
                 "Called new_action on a model that does not support actions"
             )
@@ -213,7 +213,7 @@ class Model:
 
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
-        if not self.__supports_actions():
+        if not self.supports_actions():
             raise RuntimeError(
                 "Called get_action on a model that does not support actions"
             )
@@ -226,7 +226,7 @@ class Model:
 
     def action(self, name: str) -> Action:
         """New action or get action if it exists."""
-        if not self.__supports_actions():
+        if not self.supports_actions():
             raise RuntimeError(
                 "Called get_action on a model that does not support actions"
             )

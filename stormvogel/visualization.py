@@ -1,4 +1,4 @@
-"""Contains stuff for visualization"""
+"""Contains the code responsible for model visualization."""
 
 from pyvis.network import Network
 from stormvogel.model import Model, EmptyAction, Number
@@ -10,7 +10,9 @@ from fractions import Fraction
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
-    ACTION_ID_OFFSET = 20**6
+    ACTION_ID_OFFSET = 10**8
+    # In the visualization, both actions and states are nodes with an id.
+    # This offset is used to keep their ids from colliding. It should be some high constant.
 
     def __init__(
         self,
@@ -23,7 +25,7 @@ class Visualization:
 
         Args:
             model (Model): The stormvogel model to be displayed.
-            name (str): The name of the resulting html file. May or may not include .html extension.
+            name (str, optional): The name of the resulting html file. May or may not include .html extension.
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
         self.model = model
@@ -33,7 +35,7 @@ class Visualization:
             name += ".html"
         self.name = name
         self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
-        self.__add_nodes()
+        self.__add_states()
         self.__add_transitions()
         self.__set_layout()
 
@@ -45,10 +47,21 @@ var options = {
             "background": "white",
             "border": "black"
         }
+    },
+    "physics": {
+        "barnesHut": {
+            "gravitationalConstant": -22660,
+            "centralGravity": 4.5,
+            "springLength": 50,
+            "springConstant": 0.08,
+            "damping": 0.32,
+            "avoidOverlap": 1
+        },
+        "minVelocity": 0.75
     }
 }""")
 
-    def __add_nodes(self):
+    def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
             borderWidth = 1
@@ -59,16 +72,18 @@ var options = {
                 label=",".join(state.labels),
                 color=None,  # type: ignore
                 borderWidth=borderWidth,
-                shape="circle",
+                shape="dot",
             )
 
-    def __formatted_prob(self, prob: Number) -> str:
-        """Take a probability value and format it nicely"""
+    def __formatted_probability(self, prob: Number) -> str:
+        """Take a probability value and format it nicely using a fraction."""
         return str(Fraction(prob).limit_denominator(20))
 
     def __add_transitions(self):
-        no_actions = 0
-        """For each transition in the model, add a transition in the graph."""
+        """For each transition in the model, add a transition in the graph.
+        Also handles actions by calling __add_action"""
+        action_id = self.ACTION_ID_OFFSET
+        # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
                 if action == EmptyAction:
@@ -78,31 +93,39 @@ var options = {
                             state_id,
                             target.id,
                             color="red",
-                            label=self.__formatted_prob(prob),
+                            label=self.__formatted_probability(prob),
                         )
                 else:
+                    # Add the action's node
                     self.g.add_node(
-                        n_id=self.ACTION_ID_OFFSET + no_actions,
+                        n_id=action_id,
+                        color=None,  # type: ignore
                         label=action.name,
                         shape="box",
                     )
-                    print(action.name)
-                    no_actions += 1
-                    # raise NotImplementedError(
-                    #     "Non-empty actions are not supported yet."
-                    # )
+                    # Add transition from this state TO the action.
+                    self.g.add_edge(state_id, action_id, color="red")  # type: ignore
+                    # Add transition FROM the action to the values in its branch.
+                    for prob, target in branch.branch:
+                        self.g.add_edge(
+                            action_id,
+                            target.id,
+                            color="red",
+                            label=self.__formatted_probability(prob),
+                        )
+                    action_id += 1
 
     def show(self):
-        """Show the constructed model"""
+        """Show the constructed graph."""
         display(self.g.show(name=self.name))
 
 
-def show(model: Model, name: str, notebook: bool = True):
-    """Create visualization of a Model using a pyvis Network
+def show(model: Model, name: str = "model", notebook: bool = True):
+    """Create and show a visualization of a Model using a pyvis Network
 
     Args:
         model (Model): The stormvogel model to be displayed.
-        name (str): The name of the resulting html file.
+        name (str, optional): The name of the resulting html file.
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
     """
     vis = Visualization(model, name, notebook)
