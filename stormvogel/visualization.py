@@ -2,6 +2,7 @@
 
 from pyvis.network import Network
 from stormvogel.model import Model, EmptyAction, Number
+from stormvogel.layout import Layout
 from ipywidgets import interact
 from IPython.display import display
 from fractions import Fraction
@@ -10,7 +11,10 @@ from fractions import Fraction
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
+    name: str
+    g: Network
     ACTION_ID_OFFSET = 10**8
+    layout: Layout
     # In the visualization, both actions and states are nodes with an id.
     # This offset is used to keep their ids from colliding. It should be some high constant.
 
@@ -20,6 +24,7 @@ class Visualization:
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
+        layout: Layout | None = None,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -37,29 +42,12 @@ class Visualization:
         self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
         self.__add_states()
         self.__add_transitions()
-        self.__set_layout()
+        if layout is None:
+            self.layout = Layout(custom=False)
+        else:
+            self.layout = layout
 
-    def __set_layout(self):
-        self.g.set_options("""
-var options = {
-    "nodes": {
-        "color": {
-            "background": "white",
-            "border": "black"
-        }
-    },
-    "physics": {
-        "barnesHut": {
-            "gravitationalConstant": -22660,
-            "centralGravity": 4.5,
-            "springLength": 50,
-            "springConstant": 0.08,
-            "damping": 0.32,
-            "avoidOverlap": 1
-        },
-        "minVelocity": 0.75
-    }
-}""")
+        self.layout.set_nt_layout(self.g)
 
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
