@@ -47,3 +47,4 @@ jobs:
 
       - name: Show pre-commit log file
         run: cat /github/home/.cache/pre-commit/pre-commit.log
+        if: always()
