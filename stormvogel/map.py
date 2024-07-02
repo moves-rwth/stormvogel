@@ -24,7 +24,6 @@ def matrix_to_simple(matrix: stormpy.SparseMatrix) -> stormvogel.model.Model:
 
     Takes a sparsematrix as input and outputs a simple representation
 
-
     return simple
 """
 
@@ -40,3 +39,4 @@ if __name__ == "__main__":
     )
 
     print(simple_to_matrix(dtmc))
+    "test"
