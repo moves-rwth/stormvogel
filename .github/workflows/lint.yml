@@ -40,7 +40,7 @@ jobs:
         run: poetry env use /opt/venv/bin/python
 
       - name: Install dependencies
-        run: poetry install --no-root
+        run: poetry install
 
       - name: Git thinks the directories are sus
         run: git config --global --add safe.directory '*'
@@ -52,7 +52,7 @@ jobs:
           key: precommit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: poetry run pre-commit run --all-files
 
       - name: Show pre-commit log file
         run: cat /github/home/.cache/pre-commit/pre-commit.log
