@@ -42,6 +42,9 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root
 
+      - name: Git thinks the directories are sus
+        run: git config --global --add safe.directory '*'
+
       - name: Run pre-commit
         run: pre-commit run --all-files
 
