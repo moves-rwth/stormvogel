@@ -40,16 +40,7 @@ jobs:
         run: poetry env use /opt/venv/bin/python
 
       - name: Install dependencies
-        run: poetry install --no-root --only main,test
-
-      - name: Install pre-commit
-        run: pip install pre-commit==${{ env.PRECOMMIT_VERSION }}
-
-      - name: Cache pre-commit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: precommit-${{ hashFiles('.pre-commit-config.yaml') }}
+        run: poetry install --no-root
 
       - name: Run pre-commit
         run: pre-commit run --all-files

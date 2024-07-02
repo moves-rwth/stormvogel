@@ -40,10 +40,7 @@ jobs:
         run: poetry env use /opt/venv/bin/python
 
       - name: Install dependencies
-        run: poetry install --no-root --only main,test
-
-      - name: Install stormpy manually
-        run: poetry run pip install /opt/stormpy
+        run: poetry install --no-root
 
       - name: Run tests
         run: poetry run pytest
