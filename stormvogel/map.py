@@ -38,6 +38,16 @@ def stormvogel_to_stormpy_dtmc(
 
 
 """
+def stormpy_to_stormvogel_dtmc(matrix: stormpy.SparseMatrix) -> stormvogel.model.Model:
+    Takes a dtmc stormpy representation as input and outputs a simple stormvogel representation
+
+
+
+    return simple
+"""
+
+
+"""
 def stormvogel_to_stormpy_mdp(model: stormvogel.model.Model) -> stormpy.storage.SparseMdp:
     Takes a simple representation as input and outputs an mdp how it is represented in stormpy
 
@@ -53,13 +63,7 @@ def stormvogel_to_stormpy_mdp(model: stormvogel.model.Model) -> stormpy.storage.
     matrix = builder.build()
     return matrix
 """
-"""
-def stormpy_to_stormvogel_dtmc(matrix: stormpy.SparseMatrix) -> stormvogel.model.Model:
 
-    Takes a sparsematrix as input and outputs a simple representation
-
-    return simple
-"""
 
 """
 def stormpy_to_stormvogel_mdp(matrix: stormpy.SparseMatrix) -> stormvogel.model.Model:
