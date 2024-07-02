@@ -47,5 +47,8 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-root --only main,test
 
-      - name: Install library
-        run: poetry install --only main,test
+      - name: Install stormpy manually
+        run: poetry run pip install /opt/stormpy
+
+      - name: Run tests
+        run: poetry run pytest
