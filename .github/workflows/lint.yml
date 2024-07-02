@@ -45,6 +45,12 @@ jobs:
       - name: Git thinks the directories are sus
         run: git config --global --add safe.directory '*'
 
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: precommit-${{ hashFiles('.pre-commit-config.yaml') }}
+
       - name: Run pre-commit
         run: pre-commit run --all-files
 
