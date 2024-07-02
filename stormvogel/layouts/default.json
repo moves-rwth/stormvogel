@@ -6,7 +6,23 @@
     }
   },
   "init": {
-    "borderWidth": 10,
-    "color": "green"
+    "borderWidth": 3,
+    "color": "lightgreen",
+    "shape": "circle"
+  },
+  "states": {
+    "borderWidth": 1,
+    "color": "None",
+    "shape": "drop"
+  },
+  "actions": {
+    "borderWidth": 1,
+    "color": "lightblue",
+    "shape": "box"
+  },
+  "rounding": {
+    "fractions": "True",
+    "digits": 5,
+    "max_denominator": 20
   }
 }

@@ -1,42 +1,43 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+from functools import reduce
+from typing import Any
 from pyvis.network import Network
 import os
 import json
+
+PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class Layout:
     layout: dict[str, str]
 
     def __init__(self, path: str, path_relative: bool = True) -> None:
-        """Load a new Layout from a json file. Use either a custom or a template file.
+        """Load a new Layout from a json file.
+        Whenever keys are not present in the provided json file, their default values are used instead
+        as specified in DEFAULTS (=layouts/default.json).
 
         Args:
-            path (str, optional): Relavant if custom is true. Path to your custom layout file, relative to the current working directory. Defaults to None.
-            path_relative (bool): Relavant if custom is true. If set to true, then stormvogel will look for a custom layout file relative to the current working directory.
+            path (str): Path to your custom layout file, relative to the current working directory.
+            path_relative (bool, optional): If set to true, then stormvogel will look for a custom layout
+                file relative to the current working directory. Defaults to True.
         """
         if path_relative:
             complete_path = os.path.join(os.getcwd(), path)
         else:
             complete_path = path
         with open(complete_path) as f:
-            json_string = f.read()
-            self.layout = json.loads(json_string)
+            parsed_str = f.read()
+            parsed_dict = json.loads(parsed_str)
+        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json")) as f:
+            default_str = f.read()
+            default_dict = json.loads(default_str)
+        # Combine the parsed dict with default to fill missing keys as default values.
+        self.layout = Layout.merge_dict(default_dict, parsed_dict)
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""
-        # We here use <> instead of {} because the f-string formatting already uses them.
-        #         option_string = f"""
-        # var options = <
-        #     "nodes": <
-        #         "color": <
-        #             "background": "{self.layout["color"]}",
-        #             "border": "black"
-        #         >
-        #     >
-        # >""".replace("<", "{").replace(">", "}")
         options = "var options = " + str(self.layout).replace("'", '"')
-        print(options)
         nt.set_options(options)
 
     def save(self) -> None:
@@ -45,19 +46,58 @@ class Layout:
     def show_buttons(self) -> None:
         raise NotImplementedError()
 
+    @staticmethod
+    def merge_dict(dict1: dict, dict2: dict):
+        """Merge two nested dictionaries recursively.
+        Args:
+            dict1 (dict):
+            dict2 (dict):
+
+        If dict2 has a value that dict1 does not have, then the value in dict2 is chosen.
+        If dict1 has a DICTIONARY and dict2 has a VALUE with the same key, then dict1 gets priority.
+
+        Taken from StackOverflow user Anatoliy R on July 2 2024.
+        https://stackoverflow.com/questions/43797333/how-to-merge-two-nested-dict-in-python"""
+        for key, val in dict1.items():
+            if isinstance(val, dict):
+                if key in dict2 and type(dict2[key] == dict):
+                    Layout.merge_dict(dict1[key], dict2[key])
+            else:
+                if key in dict2:
+                    dict1[key] = dict2[key]
+
+        for key, val in dict2.items():
+            if key not in dict1:
+                dict1[key] = val
+
+        return dict1
+
+    def rget(self, *keys) -> Any:
+        """Recursively get an entry from the layout.
+        If a key is not present, KeyError will be thrown.
+        This should never happen to users because the default values will be used in the case of missing entries."""
+        res = reduce(
+            lambda c, k: c.__getitem__(k), list(keys), self.layout
+        )  # Throws KeyError if key not present.
+        if isinstance(res, str):
+            if res == "None":
+                return None
+            elif res == "True":
+                return True
+            elif res == "False":
+                return False
+            elif res.isdigit():
+                return int(res)
+            else:
+                return res
+        else:
+            return res
+
     def __str__(self) -> str:
-        raise NotImplementedError()
+        return str(self.layout)
 
-    def __getitem__(self, key: str) -> str | None:
-        try:
-            return self.layout[key]
-        except KeyError:
-            return None
-
-
-package_root_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Define template layouts.
 DEFAULT = Layout(
-    os.path.join(package_root_dir, "layouts/default.json"), path_relative=False
+    os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json"), path_relative=False
 )
