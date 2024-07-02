@@ -13,6 +13,8 @@ env:
 jobs:
   pre-commit:
     runs-on: ubuntu-22.04
+    container:
+      image: movesrwth/stormpy:latest-debug
     steps:
       - uses: actions/checkout@v4
 
