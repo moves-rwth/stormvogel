@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        
+
             <script>function neighbourhoodHighlight(params) {
   // console.log("in nieghbourhoodhighlight");
   allNodes = nodes.get({ returnType: "Object" });
@@ -193,14 +193,14 @@ function highlightFilter(filter) {
 }</script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            
-            
-            
-            
-            
-            
 
-        
+
+
+
+
+
+
+
 <center>
 <h1></h1>
 </center>
@@ -234,24 +234,24 @@ function highlightFilter(filter) {
                  float: left;
              }
 
-             
 
-             
 
-             
+
+
+
         </style>
     </head>
 
 
     <body>
         <div class="card" style="width: 100%">
-            
-            
+
+
             <div id="mynetwork" class="card-body"></div>
         </div>
 
-        
-        
+
+
 
         <script type="text/javascript">
 
@@ -271,18 +271,18 @@ function highlightFilter(filter) {
                   value : []
               };
 
-              
 
-              
+
+
 
               // This method is responsible for drawing the graph, returns the drawn network
               function drawGraph() {
                   var container = document.getElementById('mynetwork');
 
-                  
+
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"borderWidth": 3, "color": null, "id": 0, "label": "init", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 1, "label": "rolled0", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 2, "label": "rolled1", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 3, "label": "rolled2", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 4, "label": "rolled3", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 5, "label": "rolled4", "shape": "dot"}, {"borderWidth": 1, "color": null, "id": 6, "label": "rolled5", "shape": "dot"}]);
+                  nodes = new vis.DataSet([{"borderWidth": 3, "color": null, "id": 0, "label": "init", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 1, "label": "rolled0", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 2, "label": "rolled1", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 3, "label": "rolled2", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 4, "label": "rolled3", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 5, "label": "rolled4", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 6, "label": "rolled5", "shape": "circle"}]);
                   edges = new vis.DataSet([{"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 1}, {"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 2}, {"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 3}, {"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 4}, {"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 5}, {"arrows": "to", "color": "red", "from": 0, "label": "1/6", "to": 6}, {"arrows": "to", "color": "red", "from": 1, "label": "1", "to": 1}, {"arrows": "to", "color": "red", "from": 2, "label": "1", "to": 2}, {"arrows": "to", "color": "red", "from": 3, "label": "1", "to": 3}, {"arrows": "to", "color": "red", "from": 4, "label": "1", "to": 4}, {"arrows": "to", "color": "red", "from": 5, "label": "1", "to": 5}, {"arrows": "to", "color": "red", "from": 6, "label": "1", "to": 6}]);
 
                   nodeColors = {};
@@ -294,23 +294,23 @@ function highlightFilter(filter) {
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"nodes": {"color": {"background": "white", "border": "black"}}, "edge": {"color": "blue"}};
-
-                  
+                  var options = {"nodes": {"color": {"background": "white", "border": "black"}}};
 
 
-                  
+
+
+
 
                   network = new vis.Network(container, data, options);
 
-                  
-
-                  
-
-                  
 
 
-                  
+
+
+
+
+
+
 
                   return network;
 
