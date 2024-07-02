@@ -1,5 +1,6 @@
 {
   "venvPath": ".",
   "venv": ".venv",
-  "reportAttributeAccessIssue": false
+  "reportAttributeAccessIssue": false,
+  "reportMissingImports": false
 }
