@@ -14,14 +14,14 @@ jobs:
   pre-commit:
     runs-on: ubuntu-22.04
     container:
-      image: movesrwth/stormpy:latest-debug
+      image: movesrwth/stormpy:ci-debug
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get -y install curl
+          apt-get update
+          apt-get -y install curl
 
       - name: Configure Python
         uses: actions/setup-python@v5
