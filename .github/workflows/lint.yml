@@ -53,7 +53,3 @@ jobs:
 
       - name: Run pre-commit
         run: poetry run pre-commit run --all-files
-
-      - name: Show pre-commit log file
-        run: cat /github/home/.cache/pre-commit/pre-commit.log
-        if: always()
