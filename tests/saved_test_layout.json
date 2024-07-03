@@ -7,7 +7,7 @@
   },
   "init": {
     "borderWidth": 3,
-    "color": null,
+    "color": "TEST_COLOR",
     "shape": "circle"
   },
   "states": {
