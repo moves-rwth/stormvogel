@@ -2,7 +2,7 @@
 
 from pyvis.network import Network
 from stormvogel.model import Model, EmptyAction, Number
-from ipywidgets import interact
+from stormvogel.layout import Layout, DEFAULT
 from IPython.display import display
 from fractions import Fraction
 
@@ -10,7 +10,11 @@ from fractions import Fraction
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
-    ACTION_ID_OFFSET = 10**8
+    name: str
+    nt: Network
+    layout: Layout
+
+    ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
     # This offset is used to keep their ids from colliding. It should be some high constant.
 
@@ -20,6 +24,7 @@ class Visualization:
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
+        layout: Layout = DEFAULT,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -29,59 +34,54 @@ class Visualization:
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
         self.model = model
+        self.layout = layout
         if (
             name[-5:] != ".html"
         ):  # We do not require the user to explicitly type .html in their names
             name += ".html"
         self.name = name
-        self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
+        self.nt = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
         self.__add_states()
         self.__add_transitions()
-        self.__set_layout()
-
-    def __set_layout(self):
-        self.g.set_options("""
-var options = {
-    "nodes": {
-        "color": {
-            "background": "white",
-            "border": "black"
-        }
-    },
-    "physics": {
-        "barnesHut": {
-            "gravitationalConstant": -22660,
-            "centralGravity": 4.5,
-            "springLength": 50,
-            "springConstant": 0.08,
-            "damping": 0.32,
-            "avoidOverlap": 1
-        },
-        "minVelocity": 0.75
-    }
-}""")
+        self.layout.set_nt_layout(self.nt)
 
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            borderWidth = 1
             if state == self.model.get_initial_state():
-                borderWidth = 3
-            self.g.add_node(
-                state.id,
-                label=",".join(state.labels),
-                color=None,  # type: ignore
-                borderWidth=borderWidth,
-                shape="dot",
-            )
+                self.nt.add_node(
+                    state.id,
+                    label=",".join(state.labels),
+                    color=self.layout.rget("init", "color"),
+                    borderWidth=self.layout.rget("init", "borderWidth"),
+                    shape=self.layout.rget("init", "shape"),
+                )
+
+            else:
+                self.nt.add_node(
+                    state.id,
+                    label=",".join(state.labels),
+                    color=self.layout.rget("states", "color"),
+                    borderWidth=self.layout.rget("states", "borderWidth"),
+                    shape=self.layout.rget("states", "shape"),
+                )
 
     def __formatted_probability(self, prob: Number) -> str:
-        """Take a probability value and format it nicely using a fraction."""
-        return str(Fraction(prob).limit_denominator(20))
+        """Take a probability value and format it nicely using a fraction or rounding it.
+        Which one of these to pick is specified in the layout."""
+        if self.layout.rget("rounding", "fractions"):
+            return str(
+                Fraction(prob).limit_denominator(
+                    self.layout.rget("rounding", "max_denominator")
+                )
+            )
+        else:
+            return str(round(float(prob), self.layout.rget("rounding", "digits")))
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
-        Also handles actions by calling __add_action"""
+        Also handles creating nodes for actions and their respective transitions.
+        Note that an action may appear multiple times in the model with a different state as source."""
         action_id = self.ACTION_ID_OFFSET
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
@@ -89,38 +89,45 @@ var options = {
                 if action == EmptyAction:
                     # Only draw probabilities
                     for prob, target in branch.branch:
-                        self.g.add_edge(
+                        self.nt.add_edge(
                             state_id,
                             target.id,
-                            color="red",
+                            color=None,  # type: ignore
                             label=self.__formatted_probability(prob),
                         )
                 else:
                     # Add the action's node
-                    self.g.add_node(
+                    self.nt.add_node(
                         n_id=action_id,
-                        color=None,  # type: ignore
                         label=action.name,
-                        shape="box",
+                        color=self.layout.rget("actions", "color"),  # type: ignore
+                        borderWidth=self.layout.rget("actions", "borderWidth"),
+                        shape=self.layout.rget("actions", "shape"),
                     )
                     # Add transition from this state TO the action.
-                    self.g.add_edge(state_id, action_id, color="red")  # type: ignore
-                    # Add transition FROM the action to the values in its branch.
+                    self.nt.add_edge(state_id, action_id, color=None)  # type: ignore
+                    # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
-                        self.g.add_edge(
+                        self.nt.add_edge(
                             action_id,
                             target.id,
-                            color="red",
+                            color=None,  # type: ignore
                             label=self.__formatted_probability(prob),
                         )
                     action_id += 1
 
     def show(self):
-        """Show the constructed graph."""
-        display(self.g.show(name=self.name))
+        """Show the constructed graph as a html file."""
+        display(self.nt.show(name=self.name))
 
 
-def show(model: Model, name: str = "model", notebook: bool = True):
+def show(
+    model: Model,
+    name: str = "model",
+    notebook: bool = True,
+    cdn_resources: str = "remote",
+    layout: Layout = DEFAULT,
+):
     """Create and show a visualization of a Model using a pyvis Network
 
     Args:
@@ -128,9 +135,5 @@ def show(model: Model, name: str = "model", notebook: bool = True):
         name (str, optional): The name of the resulting html file.
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
     """
-    vis = Visualization(model, name, notebook)
+    vis = Visualization(model, name, notebook, cdn_resources, layout)
     vis.show()
-
-
-def make_slider():
-    return interact(lambda x: x, x=10)
