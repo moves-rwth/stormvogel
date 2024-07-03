@@ -34,6 +34,17 @@ def test_layout_loading():
     assert expected == actual
 
 
+def test_empyt_layout_loading():
+    """Same as previous test but now with an empty layout."""
+    with open(os.path.join(os.getcwd(), "stormvogel/layouts/default.json")) as f:
+        default_str = f.read()
+    default_dict = json.loads(default_str)
+
+    expected = json.dumps(default_dict, indent=2)
+    actual = str(Layout())
+    assert expected == actual
+
+
 def test_layout_saving():
     """Tests if the saved layout from Layout.save() is equal to str(Layout)."""
     layout = Layout("tests/test_layout.json")
