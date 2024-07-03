@@ -27,7 +27,7 @@ def test_layout_loading():
     default_dict = json.loads(default_str)
     test_dict = json.loads(test_str)
     expected = json.dumps(
-        Layout.merge_dict(default_dict, test_dict)
+        Layout.merge_dict(default_dict, test_dict), indent=2
     )  # We can use Layout.merge_dict since we have already tested it.
     actual = str(Layout("tests/test_layout.json"))
 

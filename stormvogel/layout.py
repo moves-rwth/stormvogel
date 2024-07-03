@@ -59,7 +59,7 @@ class Layout:
         else:
             complete_path = path
         with open(complete_path, "w") as f:
-            json.dump(self.layout, f)
+            json.dump(self.layout, f, indent=2)
 
     def show_buttons(self) -> None:
         raise NotImplementedError()
@@ -100,7 +100,7 @@ class Layout:
         )  # Throws KeyError if key not present.
 
     def __str__(self) -> str:
-        return json.dumps(self.layout)
+        return json.dumps(self.layout, indent=2)
 
 
 # Define template layouts.
