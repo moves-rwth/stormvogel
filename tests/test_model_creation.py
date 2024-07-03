@@ -1,5 +1,6 @@
 # content of test_sysexit.py
 import stormvogel.model
+from stormvogel.model import EmptyAction
 
 
 def test_mdp_creation():
@@ -17,7 +18,4 @@ def test_mdp_creation():
     # Check that all states 1..6 have self loops
     for i in range(1, 7):
         # yeah we need transition getting syntax
-        assert (
-            dtmc.transitions[i].transition[stormvogel.model.EmptyAction].branch[0][1].id
-            == i
-        )
+        assert dtmc.transitions[i].transition[EmptyAction].branch[0][1].id == i
