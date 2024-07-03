@@ -25,7 +25,6 @@ class State:
     """Represents a state in a Model.
 
     Args:
-        name: An optional name for this state.
         labels: The labels of this state. Corresponds to Storm labels.
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
@@ -52,6 +51,8 @@ class State:
 @dataclass(frozen=True)
 class Action:
     """Represents an action, e.g., in MDPs.
+        Note that this action object is completely independent of its corresponding branch.
+        Their relation is managed by Transitions.
 
     Args:
         name: A name for this action.
@@ -59,13 +60,14 @@ class Action:
     """
 
     name: str
+    labels: frozenset[str]
 
     def __str__(self):
         return f"Action {self.name}"
 
 
-# The empty action. Used for DTMCs.
-EmptyAction = Action("empty")
+# The empty action. Used for DTMCs and empty action transitions in mdps.
+EmptyAction = Action("empty", frozenset())
 
 
 @dataclass
@@ -73,7 +75,8 @@ class Branch:
     """Represents a branch, which is a distribution over states.
 
     Args:
-        branch: The branch.
+        branch: The branch as a list of tuples.
+            The first element is the probability and the second element is the target state.
     """
 
     branch: list[tuple[Number, State]]
@@ -88,6 +91,8 @@ class Branch:
 @dataclass
 class Transition:
     """Represents a transition, which map actions to branches.
+        Note that an EmptyAction may be used if we want a non-action transition.
+        Note that a single Transition might correspond to multiple 'arrows'.
 
     Args:
         transition: The transition.
@@ -105,10 +110,12 @@ class Transition:
         return "; ".join(parts + [])
 
 
+# TODO I still don't really understand how this shorthand notation works. Could you explain in a bit more detail or give examples?
+
 # How the user is allowed to specify a transition:
 # - using only the action and the target state (implies probability=1),
 # - using only the probability and the target state (implies default action when in an MDP),
-TransitionShorthand = list[tuple[Number, State]] | list[tuple[Number, State]]
+TransitionShorthand = list[tuple[Number, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
@@ -207,7 +214,7 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        action = Action(name)
+        action = Action(name, frozenset())
         self.actions[name] = action
         return action
 
