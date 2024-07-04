@@ -104,14 +104,14 @@ class Visualization:
     def __formatted_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
-        if self.layout.rget("rounding", "fractions"):
+        if self.layout.rget("numbers", "fractions"):
             return str(
                 Fraction(prob).limit_denominator(
-                    self.layout.rget("rounding", "max_denominator")
+                    self.layout.rget("numbers", "max_denominator")
                 )
             )
         else:
-            return str(round(float(prob), self.layout.rget("rounding", "digits")))
+            return str(round(float(prob), self.layout.rget("numbers", "digits")))
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.

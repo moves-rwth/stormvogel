@@ -1,8 +1,8 @@
 {
   "nodes": {
     "color": {
-      "background": "white",
-      "border": "black"
+      "background": "#8ff0a4",
+      "border": "#26a269"
     }
   },
   "init": {
@@ -24,5 +24,9 @@
     "fractions": true,
     "digits": 5,
     "max_denominator": 20
+  },
+  "rounding": {
+    "fractions": "False",
+    "digits": 2
   }
 }
