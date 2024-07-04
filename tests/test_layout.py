@@ -1,6 +1,7 @@
 from stormvogel.layout import Layout
 import os
 import json
+import pytest
 
 
 def test_layout_merge_dict():
@@ -70,3 +71,6 @@ def test_layout_rget():
     assert layout.rget("states", "color") is None
     # bool
     assert layout.rget("rounding", "fractions")
+
+    with pytest.raises(KeyError):
+        layout.rget("init", "ernie")
