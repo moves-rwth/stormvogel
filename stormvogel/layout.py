@@ -5,13 +5,29 @@ from typing import Any
 from pyvis.network import Network
 import os
 import json
+from ipywidgets import interact, IntSlider
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-class Layout:
+class EditorMethods:
+    """Stores methods that are called by ipython widgets (to keep Layout less cluttered).
+    Layout should inherit from this method."""
+
+    def maybe_update(self):
+        """Update if auto_update is enabled."""
+        if self.auto_update:
+            self.vis.update()
+
+    def slider_init_borderWidth(self, x: int) -> None:
+        self.layout["init"]["borderWidth"] = x
+        self.maybe_update()
+
+
+class Layout(EditorMethods):
+    """Responsible for loading/saving layout jsons."""
+
     layout: dict[str, str]
-    # TODO Write unit test
 
     def __init__(self, path: str | None = None, path_relative: bool = True) -> None:
         """Load a new Layout from a json file.
@@ -40,6 +56,19 @@ class Layout:
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
             self.layout = Layout.merge_dict(default_dict, parsed_dict)
+
+    def show_editor(self, vis, auto_update: bool = True):
+        """Display an interactive layout editor."""
+        self.vis = vis
+        self.auto_update = auto_update
+        interact(
+            self.slider_init_borderWidth,
+            x=IntSlider(min=0, max=20, step=1, value=10, description="Border width"),
+        )
+        interact(
+            self.slider_init_borderWidth,
+            x=IntSlider(min=0, max=20, step=1, value=10, description="Border width"),
+        )
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""
