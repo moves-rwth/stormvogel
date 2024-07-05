@@ -11,7 +11,7 @@ from stormvogel.editors import (
     NodeGroupEditor,
     NumberEditor,
     SaveEditor,
-    EditorSettingsEditor,
+    AutoUpdateSettingEditor,
 )
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -54,7 +54,7 @@ class Layout:
         self.vis = vis
         self.auto_update = auto_update
         display(HTML("<h2>Interactive layout editor</h1>"))
-        EditorSettingsEditor(self)
+        AutoUpdateSettingEditor(self)
         NodeEditor(self)
         NodeGroupEditor("init", self)
         NodeGroupEditor("states", self)

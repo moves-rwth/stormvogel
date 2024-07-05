@@ -27,8 +27,8 @@ class Editor:
             pass
 
 
-class EditorSettingsEditor(Editor):
-    """Settings for the editor itself that are not related to saving."""
+class AutoUpdateSettingEditor(Editor):
+    """Toggle auto update."""
 
     def __init__(self, layout) -> None:
         self.layout = layout
@@ -40,10 +40,13 @@ class EditorSettingsEditor(Editor):
 
     def set_auto_update(self, x):
         self.layout.auto_update = x
+        # If it's set to true, then we probably want to apply changes right away.
+        self.maybe_update()
 
 
 class SaveEditor(Editor):
-    """Menu responsible for saving the file."""
+    """Menu responsible for saving the file.
+    Includes a checkbox for toggling relative path, a text field for the file name, a save button and an apply changes button."""
 
     def __init__(self, layout) -> None:
         self.layout = layout
@@ -83,7 +86,8 @@ class SaveEditor(Editor):
 
 
 class NumberEditor(Editor):
-    """Editing menu about how numbers should be handled (fractions, rounding)"""
+    """Editing menu about how numbers should be handled (fractions, rounding).
+    Includes checkbox for enabling fractions, rounding digits, and the max denominator when using fractions."""
 
     def __init__(self, layout) -> None:
         self.layout = layout
@@ -133,6 +137,8 @@ class NumberEditor(Editor):
 
 
 class NodeEditor(Editor):
+    """General settings for nodes. Includes background and border color ."""
+
     def __init__(self, layout) -> None:
         self.layout = layout
         display(HTML("<h4>Nodes</h4>"))
