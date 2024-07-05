@@ -1,0 +1,13 @@
+{
+  "nodes": {
+    "color": {
+      "background": "red",
+      "border": "orange"
+    }
+  },
+  "init": {},
+  "rounding": {
+    "fractions": "False",
+    "digits": 2
+  }
+}
