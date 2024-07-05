@@ -1,17 +1,13 @@
 {
   "nodes": {
     "color": {
-      "background": "white",
-      "border": "black",
-      "highlight": {
-        "background": "white",
-        "border": "black"
-      }
+      "background": "#8ff0a4",
+      "border": "#26a269"
     }
   },
   "init": {
     "borderWidth": 3,
-    "color": "TEST_COLOR",
+    "color": null,
     "shape": "circle"
   },
   "states": {
@@ -29,7 +25,8 @@
     "digits": 5,
     "max_denominator": 20
   },
-  "layout": {
-    "randomSeed": 5
+  "rounding": {
+    "fractions": "False",
+    "digits": 2
   }
 }

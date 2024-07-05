@@ -5,13 +5,20 @@ from typing import Any
 from pyvis.network import Network
 import os
 import json
+from IPython.display import display, HTML
+from stormvogel.editors import (
+    NodeEditor,
+    NodeGroupEditor,
+    NumberEditor,
+    SaveEditor,
+    AutoUpdateSettingEditor,
+)
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class Layout:
-    layout: dict[str, str]
-    # TODO Write unit test
+    """Responsible for loading/saving layout jsons."""
 
     def __init__(self, path: str | None = None, path_relative: bool = True) -> None:
         """Load a new Layout from a json file.
@@ -40,6 +47,20 @@ class Layout:
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
             self.layout = Layout.merge_dict(default_dict, parsed_dict)
+        self.vis = None
+
+    def show_editor(self, vis=None, auto_update: bool = True):
+        """Display an interactive layout editor."""
+        self.vis = vis
+        self.auto_update = auto_update
+        display(HTML("<h2>Interactive layout editor</h1>"))
+        AutoUpdateSettingEditor(self)
+        NodeEditor(self)
+        NodeGroupEditor("init", self)
+        NodeGroupEditor("states", self)
+        NodeGroupEditor("actions", self)
+        NumberEditor(self)
+        SaveEditor(self)
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""
@@ -60,9 +81,6 @@ class Layout:
             complete_path = path
         with open(complete_path, "w") as f:
             json.dump(self.layout, f, indent=2)
-
-    def show_buttons(self) -> None:
-        raise NotImplementedError()
 
     @staticmethod
     def merge_dict(dict1: dict, dict2: dict) -> dict:

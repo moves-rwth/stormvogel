@@ -1,23 +1,19 @@
 {
   "nodes": {
     "color": {
-      "background": "white",
-      "border": "black",
-      "highlight": {
-        "background": "white",
-        "border": "black"
-      }
+      "background": "#99c1f1",
+      "border": "#000000"
     }
   },
   "init": {
     "borderWidth": 3,
-    "color": "TEST_COLOR",
+    "color": null,
     "shape": "circle"
   },
   "states": {
     "borderWidth": 1,
-    "color": null,
-    "shape": "dot"
+    "color": "#f8e45c",
+    "shape": "star"
   },
   "actions": {
     "borderWidth": 1,
@@ -25,11 +21,12 @@
     "shape": "box"
   },
   "numbers": {
-    "fractions": true,
+    "fractions": false,
     "digits": 5,
     "max_denominator": 20
   },
-  "layout": {
-    "randomSeed": 5
+  "rounding": {
+    "fractions": "False",
+    "digits": 2
   }
 }

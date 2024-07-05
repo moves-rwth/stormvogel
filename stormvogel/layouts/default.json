@@ -2,7 +2,11 @@
   "nodes": {
     "color": {
       "background": "white",
-      "border": "black"
+      "border": "black",
+      "highlight": {
+        "background": "white",
+        "border": "black"
+      }
     }
   },
   "init": {
@@ -13,16 +17,19 @@
   "states": {
     "borderWidth": 1,
     "color": null,
-    "shape": "drop"
+    "shape": "dot"
   },
   "actions": {
     "borderWidth": 1,
     "color": null,
     "shape": "box"
   },
-  "rounding": {
+  "numbers": {
     "fractions": true,
     "digits": 5,
     "max_denominator": 20
+  },
+  "layout": {
+    "randomSeed": 5
   }
 }
