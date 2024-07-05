@@ -153,15 +153,18 @@ def show(
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT,
     show_editor: bool = False,
-):
+) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
 
     Args:
         model (Model): The stormvogel model to be displayed.
         name (str, optional): The name of the resulting html file.
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
+
+    Returns: Visualization object.
     """
     vis = Visualization(model, name, notebook, cdn_resources, layout)
     if show_editor:
         vis.show_editor()
     vis.show()
+    return vis

@@ -6,7 +6,13 @@ from pyvis.network import Network
 import os
 import json
 from IPython.display import display, HTML
-from stormvogel.editors import NodeEditor, NodeGroupEditor, NumberEditor, SaveEditor
+from stormvogel.editors import (
+    NodeEditor,
+    NodeGroupEditor,
+    NumberEditor,
+    SaveEditor,
+    EditorSettingsEditor,
+)
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -41,24 +47,20 @@ class Layout:
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
             self.layout = Layout.merge_dict(default_dict, parsed_dict)
+        self.vis = None
 
-    def show_editor(self, vis, auto_update: bool = True):
+    def show_editor(self, vis=None, auto_update: bool = True):
         """Display an interactive layout editor."""
         self.vis = vis
         self.auto_update = auto_update
         display(HTML("<h2>Interactive layout editor</h1>"))
+        EditorSettingsEditor(self)
         NodeEditor(self)
         NodeGroupEditor("init", self)
         NodeGroupEditor("states", self)
         NodeGroupEditor("actions", self)
         NumberEditor(self)
         SaveEditor(self)
-
-    def update_vis(self):
-        try:
-            self.vis.update()
-        except AttributeError:
-            pass
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""

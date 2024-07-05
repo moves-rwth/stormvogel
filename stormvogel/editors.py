@@ -16,13 +16,35 @@ class Editor:
     def maybe_update(self):
         """Update if auto_update is enabled."""
         if self.layout.auto_update:
-            try:
-                self.layout.vis.update()
-            except Exception:
-                pass  # Happens if auto_update is enabled but show was not called yet
+            self.update_changes()
+
+    def update_changes(self):
+        try:
+            self.layout.vis.update()
+        except AttributeError:  # self.layout.vis is still None, so layout.show_editor was called with vis=None
+            pass
+        except Exception:  # self.layout.vis.update throws an exception because show() wasn't called yet.
+            pass
+
+
+class EditorSettingsEditor(Editor):
+    """Settings for the editor itself that are not related to saving."""
+
+    def __init__(self, layout) -> None:
+        self.layout = layout
+        # Auto update checkbox
+        interact(
+            self.set_auto_update,
+            x=Checkbox(value=self.layout.auto_update, description="Auto apply changes"),
+        )
+
+    def set_auto_update(self, x):
+        self.layout.auto_update = x
 
 
 class SaveEditor(Editor):
+    """Menu responsible for saving the file."""
+
     def __init__(self, layout) -> None:
         self.layout = layout
         self.filename = "layouts/SAVE_FILE_NAME.json"
@@ -35,10 +57,15 @@ class SaveEditor(Editor):
             x=Checkbox(value=self.path_relative, description="Relative path"),
         )
         # Save button
-        b = Button(description="Save")
-        b.on_click(self.save)
-        self.output = Output()
-        display(b, self.output)
+        saveButton = Button(description="Save")
+        saveButton.on_click(self.save)
+        self.saveOutput = Output()
+        display(saveButton, self.saveOutput)
+        # Apply button
+        applyButton = Button(description="Apply")
+        applyButton.on_click(self.apply)
+        self.applyOutput = Output()
+        display(applyButton, self.applyOutput)
 
     def set_relative_path(self, x: bool):
         self.path_relative = x
@@ -47,11 +74,17 @@ class SaveEditor(Editor):
         self.filename = x
 
     def save(self, b):
-        with self.output:
+        with self.saveOutput:
             self.layout.save(self.filename, path_relative=self.path_relative)
+
+    def apply(self, b):
+        with self.applyOutput:
+            self.update_changes()
 
 
 class NumberEditor(Editor):
+    """Editing menu about how numbers should be handled (fractions, rounding)"""
+
     def __init__(self, layout) -> None:
         self.layout = layout
         display(HTML("<h4>Numbers</h4>"))
@@ -130,6 +163,8 @@ class NodeEditor(Editor):
 
 
 class NodeGroupEditor(Editor):
+    """Editing menu for node groups: i.e. 'init', 'states', 'actions'"""
+
     DEFAULT_COLOR = "#ffffff"
 
     def __init__(self, group: str, layout) -> None:
