@@ -15,8 +15,8 @@ class ModelType(Enum):
     # implemented
     DTMC = 1
     MDP = 2
-    # not implemented yet
     CTMC = 3
+    # not implemented yet
     MA = 4
 
 
@@ -107,7 +107,7 @@ class Transition:
 
 # How the user is allowed to specify a transition:
 # - using only the action and the target state (implies probability=1),
-# - using only the probability and the target state (implies default action when in an MDP),
+# - using only the probability and the target state (implies default action when in an MDP)
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Number, State]]
 
 
@@ -136,6 +136,28 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
 
 
 @dataclass
+class RewardModel:
+    """Represents a state-exit reward model.
+
+    Args:
+        name: Name of the reward model.
+        rewards: The rewards, the keys are the state's ids.
+    """
+
+    name: str
+    # Hashed by the id of the state (=number in the matrix)
+    rewards: dict[int, Number]
+
+    def get(self, state: State) -> Number:
+        """Gets the reward at said state."""
+        return self.rewards[state.id]
+
+    def set(self, state: State, value: Number):
+        """Sets the reward at said state."""
+        self.rewards[state.id] = value
+
+
+@dataclass
 class Model:
     """Represents a model.
 
@@ -153,6 +175,8 @@ class Model:
     states: dict[int, State]
     transitions: dict[int, Transition]
     actions: dict[str, Action] | None
+    rewards: list[RewardModel]
+    rates: dict[int, Number] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -164,12 +188,20 @@ class Model:
         if self.supports_actions():
             self.actions = {}
 
+        # Initialize rates if those are supported by the model type
+        if self.supports_rates():
+            self.rates = {}
+
         # Add the initial state
         self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
         return self.type in (ModelType.MDP, ModelType.MA)
+
+    def supports_rates(self):
+        """Returns whether this model supports rates."""
+        return self.type == ModelType.CTMC
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -257,7 +289,7 @@ class Model:
 
         return state
 
-    def get_states_with(self, label: str):
+    def get_states_with(self, label: str) -> list[State]:
         """Get all states with a given label."""
         # TODO: slow, not sure if that will become a problem though
         collected_states = []
@@ -266,22 +298,56 @@ class Model:
                 collected_states.append(state)
         return collected_states
 
-    def get_state_by_id(self, state_id):
+    def get_state_by_id(self, state_id) -> State:
         """Get a state by its id."""
         if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
         return self.states[state_id]
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
         return self.states[0]
 
-    def get_labels(self):
+    def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
         collected_labels: set[str] = set()
         for _id, state in self.states.items():
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
+
+    def get_default_rewards(self) -> RewardModel:
+        """Gets the default reward model, throws a RuntimeError if there is none."""
+        if len(self.rewards) == 0:
+            raise RuntimeError("This model has no reward models.")
+        return self.rewards[0]
+
+    def get_rewards(self, name: str) -> RewardModel:
+        """Gets the reward model with the specified name. Throws a RuntimeError if said model does not exist."""
+        for model in self.rewards:
+            if model.name == name:
+                return model
+        raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def add_rewards(self, name: str) -> RewardModel:
+        """Creates a reward model with the specified name and adds returns it."""
+        for model in self.rewards:
+            if model.name == name:
+                raise RuntimeError(f"Reward model {name} already present in model.")
+        reward_model = RewardModel(name, {})
+        self.rewards.append(reward_model)
+        return reward_model
+
+    def get_rate(self, state: State) -> Number:
+        """Gets the rate of a state."""
+        if not self.supports_rates() or self.rates is None:
+            raise RuntimeError("Cannot get a rate of a deterministic-time model.")
+        return self.rates[state.id]
+
+    def set_rate(self, state: State, rate: Number):
+        """Sets the rate of a state."""
+        if not self.supports_rates() or self.rates is None:
+            raise RuntimeError("Cannot set a rate of a deterministic-time model.")
+        self.rates[state.id] = rate
 
     def to_dot(self) -> str:
         """Generates a dot representation of this model."""
@@ -325,3 +391,8 @@ def new_dtmc(name: str | None = None):
 def new_mdp(name: str | None = None):
     """Creates an MDP."""
     return Model(name, ModelType.MDP)
+
+
+def new_ctmc(name: str | None = None):
+    """Creates a CTMC."""
+    return Model(name, ModelType.CTMC)
