@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
+from typing import cast
 
 Parameter = str
 
@@ -115,7 +116,7 @@ class Transition:
 # How the user is allowed to specify a transition:
 # - using only the action and the target state (implies probability=1),
 # - using only the probability and the target state (implies default action when in an MDP),
-TransitionShorthand = list[tuple[Number, State]]
+TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
@@ -136,7 +137,9 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
     ):
-        return Transition({EmptyAction: Branch(shorthand)})
+        return Transition(
+            {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
+        )
     raise RuntimeError(
         f"Type of {first_element} not supported in transition {shorthand}"
     )
