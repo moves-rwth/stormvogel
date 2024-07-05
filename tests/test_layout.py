@@ -70,5 +70,7 @@ def test_layout_rget():
     # None/null
     assert layout.rget("states", "color") is None
     # bool
+    assert layout.rget("numbers", "fractions")
+
     with pytest.raises(KeyError):
-        layout.rget("rounding", "fractions")
+        layout.rget("init", "ernie")
