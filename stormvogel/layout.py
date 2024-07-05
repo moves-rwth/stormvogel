@@ -14,8 +14,6 @@ PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 class Layout:
     """Responsible for loading/saving layout jsons."""
 
-    layout: dict[str, str]
-
     def __init__(self, path: str | None = None, path_relative: bool = True) -> None:
         """Load a new Layout from a json file.
         Whenever keys are not present in the provided json file, their default values are used instead
@@ -55,6 +53,12 @@ class Layout:
         NodeGroupEditor("actions", self)
         NumberEditor(self)
         SaveEditor(self)
+
+    def update_vis(self):
+        try:
+            self.vis.update()
+        except AttributeError:
+            pass
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""

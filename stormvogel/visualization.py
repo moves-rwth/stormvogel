@@ -3,7 +3,7 @@
 from pyvis.network import Network
 from stormvogel.model import Model, EmptyAction, Number
 from stormvogel.layout import Layout, DEFAULT
-from IPython.display import display, DisplayHandle
+from IPython.display import display
 from fractions import Fraction
 from IPython.display import IFrame
 import random
@@ -11,11 +11,6 @@ import random
 
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
-
-    name: str
-    nt: Network
-    layout: Layout
-    handle: DisplayHandle | None = None
 
     ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
@@ -157,6 +152,7 @@ def show(
     notebook: bool = True,
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT,
+    show_editor: bool = False,
 ):
     """Create and show a visualization of a Model using a pyvis Network
 
@@ -166,4 +162,6 @@ def show(
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
     """
     vis = Visualization(model, name, notebook, cdn_resources, layout)
+    if show_editor:
+        vis.show_editor()
     vis.show()
