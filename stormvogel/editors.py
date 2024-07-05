@@ -6,7 +6,7 @@ from ipywidgets import (
     Checkbox,
     Text,
     Button,
-    ToggleButtons,
+    Dropdown,
     Output,
 )
 from IPython.display import display, HTML
@@ -32,10 +32,15 @@ class AutoUpdateSettingEditor(Editor):
 
     def __init__(self, layout) -> None:
         self.layout = layout
+        display(
+            HTML(
+                "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>"
+            )
+        )
         # Auto update checkbox
         interact(
             self.set_auto_update,
-            x=Checkbox(value=self.layout.auto_update, description="Auto apply changes"),
+            x=Checkbox(value=self.layout.auto_update, description="Enable"),
         )
 
     def set_auto_update(self, x):
@@ -52,6 +57,7 @@ class SaveEditor(Editor):
         self.layout = layout
         self.filename = "layouts/SAVE_FILE_NAME.json"
         self.path_relative = True
+        display(HTML("<h4>Save / apply changes</h4>"))
         # Text box for file name
         interact(self.set_filename, x=Text(value=self.filename, description="Filename"))
         # Relative checkbox
@@ -60,12 +66,12 @@ class SaveEditor(Editor):
             x=Checkbox(value=self.path_relative, description="Relative path"),
         )
         # Save button
-        saveButton = Button(description="Save")
+        saveButton = Button(description="Save", button_style="success")
         saveButton.on_click(self.save)
         self.saveOutput = Output()
         display(saveButton, self.saveOutput)
         # Apply button
-        applyButton = Button(description="Apply")
+        applyButton = Button(description="Apply", button_style="info")
         applyButton.on_click(self.apply)
         self.applyOutput = Output()
         display(applyButton, self.applyOutput)
@@ -141,7 +147,11 @@ class NodeEditor(Editor):
 
     def __init__(self, layout) -> None:
         self.layout = layout
-        display(HTML("<h4>Nodes</h4>"))
+        display(
+            HTML(
+                "<h4>Default node colors</h4>\n<p>These can be overwritten per group by enabling 'Overwrite color'</p>"
+            )
+        )
         # Background color
         interact(
             self.set_background_color,
@@ -173,7 +183,14 @@ class NodeGroupEditor(Editor):
 
     DEFAULT_COLOR = "#ffffff"
 
-    def __init__(self, group: str, layout) -> None:
+    def __init__(self, layout, group: str, group_display_name: str) -> None:
+        """_summary_
+
+        Args:
+            layout (Layout):
+            group (str): Name of the group in the json file.
+            group_display_name (str): The displayed name of this group in the GUI.
+        """
         self.group = group
         self.layout = layout
         self.color = (
@@ -185,25 +202,7 @@ class NodeGroupEditor(Editor):
             False if self.layout.rget(self.group, "color") is None else True
         )
         # Group title
-        display(HTML(f"<h4>{self.group}</h4>"))
-        # Border width
-        interact(
-            self.set_borderWdith,
-            x=IntSlider(
-                min=0,
-                max=20,
-                step=1,
-                value=self.layout.rget(self.group, "borderWidth"),
-                description="Border width",
-            ),
-        )
-        # Enable color
-        interact(
-            self.set_color_enabled,
-            x=Checkbox(value=self.color_enabled, description="Enable color"),
-        )
-        # Color
-        interact(self.set_color, x=ColorPicker(description="Color", value=self.color))
+        display(HTML(f"<h4>{group_display_name}</h4>"))
         # Shape
         SHAPES = [
             "ellipse",
@@ -222,10 +221,28 @@ class NodeGroupEditor(Editor):
         initial_shape = loaded_shape if loaded_shape in SHAPES else "circle"
         interact(
             self.set_shape,
-            x=ToggleButtons(
+            x=Dropdown(
                 options=SHAPES, value=initial_shape, description="shape", width=30
             ),
         )
+        # Border width
+        interact(
+            self.set_borderWdith,
+            x=IntSlider(
+                min=0,
+                max=20,
+                step=1,
+                value=self.layout.rget(self.group, "borderWidth"),
+                description="Border width",
+            ),
+        )
+        # Enable color
+        interact(
+            self.set_color_enabled,
+            x=Checkbox(value=self.color_enabled, description="Overwrite color"),
+        )
+        # Color
+        interact(self.set_color, x=ColorPicker(description="Color", value=self.color))
 
     def set_shape(self, x: str) -> None:
         self.layout.layout[self.group]["shape"] = x
