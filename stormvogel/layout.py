@@ -56,9 +56,9 @@ class Layout:
         display(HTML("<h2>Interactive layout editor</h1>"))
         AutoUpdateSettingEditor(self)
         NodeEditor(self)
-        NodeGroupEditor("init", self)
-        NodeGroupEditor("states", self)
-        NodeGroupEditor("actions", self)
+        NodeGroupEditor(self, "init", "Initial state")
+        NodeGroupEditor(self, "states", "Other states")
+        NodeGroupEditor(self, "actions", "Actions")
         NumberEditor(self)
         SaveEditor(self)
 
