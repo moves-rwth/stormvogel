@@ -91,7 +91,6 @@ class Visualization:
                     borderWidth=self.layout.rget("init", "borderWidth"),
                     shape=self.layout.rget("init", "shape"),
                 )
-
             else:
                 self.nt.add_node(
                     state.id,
