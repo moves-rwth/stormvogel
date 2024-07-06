@@ -48,6 +48,13 @@ class State:
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"
 
+    def __eq__(self, other):
+        if isinstance(other, State):
+            if self.id == other.id:
+                return self.labels == other.labels
+            return True
+        return False
+
 
 @dataclass(frozen=True)
 class Action:
@@ -62,6 +69,11 @@ class Action:
 
     def __str__(self):
         return f"Action {self.name}"
+
+    def __eq__(self, other):
+        if isinstance(other, Action):
+            return self.name == other.name
+        return False
 
 
 # The empty action. Used for DTMCs.
@@ -84,6 +96,13 @@ class Branch:
             parts.append(f"{prob} -> {state}")
         return ", ".join(parts)
 
+    def __eq__(self, other):
+        if isinstance(other, Branch):
+            self.branch.sort()
+            other.branch.sort()
+            return self.branch == other.branch
+        return False
+
 
 @dataclass
 class Transition:
@@ -103,6 +122,11 @@ class Transition:
             else:
                 parts.append(f"{action} => {branch}")
         return "; ".join(parts + [])
+
+    def __eq__(self, other):
+        if isinstance(other, Transition):
+            return self.transition == other.transition
+        return False
 
 
 # How the user is allowed to specify a transition:
@@ -163,6 +187,8 @@ class Model:
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
             self.actions = {}
+        else:
+            self.actions = None
 
         # Add the initial state
         self.new_state(["init"])
@@ -315,6 +341,16 @@ class Model:
         ]
 
         return "\n".join(res)
+
+    def __eq__(self, other):
+        if isinstance(other, Model):
+            return (
+                self.type == other.type
+                and self.actions == other.actions
+                and self.states == other.states
+                and self.transitions == other.transitions
+            )
+        return False
 
 
 def new_dtmc(name: str | None = None):

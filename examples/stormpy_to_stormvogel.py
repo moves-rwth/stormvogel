@@ -33,7 +33,7 @@ def example_building_dtmcs_01():
 
     # Build matrix
     transition_matrix = builder.build()
-    print(transition_matrix)
+    # print(transition_matrix)
 
     # State labeling
     state_labeling = stormpy.storage.StateLabeling(13)
@@ -45,7 +45,7 @@ def example_building_dtmcs_01():
 
     # Set label of state 0
     state_labeling.add_label_to_state("init", 0)
-    print(state_labeling.get_states("init"))
+    # print(state_labeling.get_states("init"))
 
     # Set remaining labels
     state_labeling.add_label_to_state("one", 7)
@@ -57,7 +57,7 @@ def example_building_dtmcs_01():
 
     # Set label 'done' for multiple states
     state_labeling.set_states("done", stormpy.BitVector(13, [7, 8, 9, 10, 11, 12]))
-    print(state_labeling)
+    # print(state_labeling)
 
     # Reward models:
     reward_models = {}
@@ -75,8 +75,8 @@ def example_building_dtmcs_01():
 
     dtmc = stormpy.storage.SparseDtmc(components)
 
-    print(dtmc)
+    return dtmc
 
 
 if __name__ == "__main__":
-    example_building_dtmcs_01()
+    print(example_building_dtmcs_01())
