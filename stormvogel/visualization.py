@@ -1,7 +1,7 @@
 """Contains the code responsible for model visualization."""
 
 from pyvis.network import Network
-from stormvogel.model import Model, EmptyAction, Number
+from stormvogel.model import Model, EmptyAction, Number, State
 from stormvogel.layout import Layout, DEFAULT
 from IPython.display import display
 from fractions import Fraction
@@ -75,13 +75,25 @@ class Visualization:
         """Display an interactive layout editor. Use the update() method to apply changes."""
         self.layout.show_editor(self)
 
+    def __format_rewards(self, s: State) -> str:
+        """Create a string that contains the state-exit reward for this state. Starts with newline"""
+        res = ""
+        for reward_model in self.model.rewards:
+            try:
+                res += f"\n{reward_model.name}: {reward_model.get(s)}"
+            except (
+                KeyError
+            ):  # If this reward model does not have a reward for this state.
+                pass
+        return res
+
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
-                    label=",".join(state.labels),
+                    label=",".join(state.labels) + self.__format_rewards(state),
                     color=self.layout.rget("init", "color"),
                     borderWidth=self.layout.rget("init", "borderWidth"),
                     shape=self.layout.rget("init", "shape"),
@@ -89,7 +101,7 @@ class Visualization:
             else:
                 self.nt.add_node(
                     state.id,
-                    label=",".join(state.labels),
+                    label=",".join(state.labels) + self.__format_rewards(state),
                     color=self.layout.rget("states", "color"),
                     borderWidth=self.layout.rget("states", "borderWidth"),
                     shape=self.layout.rget("states", "shape"),
