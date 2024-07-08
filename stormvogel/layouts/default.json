@@ -17,7 +17,7 @@
   "states": {
     "borderWidth": 1,
     "color": null,
-    "shape": "dot"
+    "shape": "elipse"
   },
   "actions": {
     "borderWidth": 1,

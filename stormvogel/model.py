@@ -192,6 +192,7 @@ class Model:
         self.type = model_type
         self.transitions = {}
         self.states = {}
+        self.rewards = []
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
