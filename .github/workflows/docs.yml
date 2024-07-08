@@ -23,6 +23,7 @@ jobs:
           apt-get update
           apt-get -y install curl
           apt-get -y install git
+          apt-get -y install pandoc
 
       - name: Configure Python
         uses: actions/setup-python@v5
