@@ -1,0 +1,63 @@
+name: Docs
+
+on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  PRECOMMIT_VERSION: '3.7.1'
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-22.04
+    container:
+      image: movesrwth/stormpy:ci-debug
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get -y install curl
+          apt-get -y install git
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load existing venv
+        run: poetry env use /opt/venv/bin/python
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Generate docs
+        run: make html
+        with:
+          path: "doc/"
+
+      - name: Generate docs
+        run: make html
+        with:
+          path: "doc/"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "doc/_build/html/"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

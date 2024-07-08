@@ -1,12 +1,14 @@
 """Contains the code responsible for model visualization."""
 
-from pyvis.network import Network
-from stormvogel.model import Model, EmptyAction, Number, State
-from stormvogel.layout import Layout, DEFAULT
-from IPython.display import display
-from fractions import Fraction
-from IPython.display import IFrame
 import random
+from fractions import Fraction
+from html import escape
+
+from IPython.display import HTML, IFrame, display
+from pyvis.network import Network
+
+from stormvogel.layout import DEFAULT, Layout
+from stormvogel.model import EmptyAction, Model, Number, State
 
 
 class Visualization:
@@ -66,10 +68,22 @@ class Visualization:
     def show(self):
         """Show or update the constructed graph as a html file."""
         self.__reload_nt()
+
+        html_code = self.nt.generate_html(name=self.name, notebook=True)
+
+        # We build our own iframe because we want to embed the model in the
+        # output instead of saving it to a file
+        custom_iframe = f"""
+        <iframe
+            style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
+            frameborder="0"
+            srcdoc="{escape(html_code)}"
+            border:none !important;
+            allowfullscreen webkitallowfullscreen mozallowfullscreen
+        ></iframe>"""
+
         # We use a random id which will avoid collisions in most cases.
-        self.handle = display(
-            self.nt.show(name=self.name), display_id=random.randrange(0, 10**31)
-        )
+        return display(HTML(custom_iframe), display_id=random.randrange(0, 10**31))
 
     def show_editor(self):
         """Display an interactive layout editor. Use the update() method to apply changes."""
