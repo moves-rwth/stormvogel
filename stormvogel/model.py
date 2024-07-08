@@ -111,16 +111,15 @@ class Transition:
         return "; ".join(parts + [])
 
 
-# TODO I still don't really understand how this shorthand notation works. Could you explain in a bit more detail or give examples?
-
-# How the user is allowed to specify a transition:
-# - using only the action and the target state (implies probability=1),
-# - using only the probability and the target state (implies default action when in an MDP),
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
-    """Get a Transition object from a TransitionShorthand."""
+    """Get a Transition object from a TransitionShorthand. Use for all transitions in DTMCs and for empty actions in MDPs.
+
+    There are two possible ways to define a TransitionShorthand.
+    - using only the probability and the target state (implies default action when in an MDP).
+    - using only the action and the target state (implies probability=1)."""
     if len(shorthand) == 0:
         raise RuntimeError("Transition cannot be empty")
     # Check the type of the first element
