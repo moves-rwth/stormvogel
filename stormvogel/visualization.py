@@ -170,8 +170,12 @@ def show(
 
     Args:
         model (Model): The stormvogel model to be displayed.
-        name (str, optional): The name of the resulting html file.
+        name (str, optional): The name of the resulting html file. Defaults to "model".
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
+        cdn_resources (str): Related to the pyvis library. Use "remote", "inline" or "local".
+            Try changing this setting if you experience rendering issues. Defaults to "remote".
+        layout (Layout): Which layout should be used. Defaults to DEFAULT.
+        show_editor (bool): Show an interactive layout editor. Defaults to False.
 
     Returns: Visualization object.
     """

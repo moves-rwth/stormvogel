@@ -6,28 +6,41 @@
       "highlight": {
         "background": "white",
         "border": "black"
+      },
+      "font": {
+        "color": "black",
+        "size": 14
       }
     }
   },
   "init": {
     "borderWidth": 3,
     "color": null,
-    "shape": "circle"
+    "shape": "circle",
+    "repulsion": 1
   },
   "states": {
     "borderWidth": 1,
     "color": null,
-    "shape": "elipse"
+    "shape": "elipse",
+    "repulsion": 1
   },
   "actions": {
     "borderWidth": 1,
     "color": null,
-    "shape": "box"
+    "shape": "box",
+    "repulsion": 1
   },
   "numbers": {
     "fractions": true,
     "digits": 5,
     "max_denominator": 20
+  },
+  "edges": {
+    "font": {
+      "color": "black",
+      "size": 14
+    }
   },
   "layout": {
     "randomSeed": 5
