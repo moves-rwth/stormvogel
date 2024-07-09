@@ -8,11 +8,7 @@
         "border": "black"
       },
       "shape": "circle",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
+      "mass": 1
     },
     "states": {
       "borderWidth": 1,
@@ -21,11 +17,7 @@
         "border": "black"
       },
       "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
+      "mass": 1
     },
     "actions": {
       "borderWidth": 1,
@@ -34,19 +26,16 @@
         "border": "black"
       },
       "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
+      "mass": 1
     }
   },
   "edges": {
+    "inherit": false,
     "font": {
       "color": "black",
       "size": 14
     },
-    "color": "black"
+    "color": "red"
   },
   "numbers": {
     "fractions": true,

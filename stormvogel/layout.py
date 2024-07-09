@@ -1,18 +1,14 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
-from functools import reduce
-from typing import Any
 from pyvis.network import Network
 import os
 import json
-from IPython.display import display, HTML
-from stormvogel.editors import (
-    NodeEditor,
-    NodeGroupEditor,
-    NumberEditor,
-    SaveEditor,
-    AutoUpdateSettingEditor,
+from stormvogel.buttons import (
+    ApplyButton,
+    SaveButton,
 )
+from stormvogel.dict_editor import Editor
+from stormvogel.rdict import merge_dict, rget
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -46,21 +42,28 @@ class Layout:
                 parsed_str = f.read()
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
-            self.layout = Layout.merge_dict(default_dict, parsed_dict)
+            self.layout = merge_dict(default_dict, parsed_dict)
         self.vis = None
 
-    def show_editor(self, vis=None, auto_update: bool = True):
-        """Display an interactive layout editor."""
-        self.vis = vis
-        self.auto_update = auto_update
-        display(HTML("<h2>Interactive layout editor</h1>"))
-        AutoUpdateSettingEditor(self)
-        NodeEditor(self)
-        NodeGroupEditor(self, "init", "Initial state")
-        NodeGroupEditor(self, "states", "Other states")
-        NodeGroupEditor(self, "actions", "Actions")
-        NumberEditor(self)
-        SaveEditor(self)
+    def show_editor(self, vis=None):
+        """Display an interactive layout editor, according to the schema."""
+        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
+            schema_str = f.read()
+        schema = json.loads(schema_str)
+
+        def try_update():
+            """Try to update unless impossible (happens if show was not called yet)."""
+            if hasattr(vis, "update"):
+                vis.update()  # type: ignore
+
+        def maybe_update():
+            """Try to update if autoApply is enabled."""
+            if rget(self.layout, ["autoApply"]):
+                try_update()
+
+        Editor(schema=schema, update_dict=self.layout, on_update=maybe_update)
+        SaveButton(self)
+        ApplyButton(self, try_update)
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""
@@ -82,46 +85,18 @@ class Layout:
         with open(complete_path, "w") as f:
             json.dump(self.layout, f, indent=2)
 
-    @staticmethod
-    def merge_dict(dict1: dict, dict2: dict) -> dict:
-        """Merge two nested dictionaries recursively. Note that dict1 is modified by reference and also returned.
-
-        Args:
-            dict1 (dict):
-            dict2 (dict):
-
-        If dict2 has a value that dict1 does not have, then the value in dict2 is chosen.
-        If dict1 has a DICTIONARY and dict2 has a VALUE with the same key, then dict1 gets priority.
-
-        Taken from StackOverflow user Anatoliy R on July 2 2024.
-        https://stackoverflow.com/questions/43797333/how-to-merge-two-nested-dict-in-python"""
-        for key, val in dict1.items():
-            if isinstance(val, dict):
-                if key in dict2 and type(dict2[key] == dict):
-                    Layout.merge_dict(dict1[key], dict2[key])
-            else:
-                if key in dict2:
-                    dict1[key] = dict2[key]
-
-        for key, val in dict2.items():
-            if key not in dict1:
-                dict1[key] = val
-
-        return dict1
-
-    def rget(self, *keys) -> Any:
-        """Recursively get an entry from the layout.
-        If a key is not present, KeyError will be thrown.
-        This should never happen to users because the default values will be used in the case of missing entries."""
-        return reduce(
-            lambda c, k: c.__getitem__(k), list(keys), self.layout
-        )  # Throws KeyError if key not present.
-
     def __str__(self) -> str:
         return json.dumps(self.layout, indent=2)
 
 
 # Define template layouts.
-DEFAULT = Layout(
-    os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json"), path_relative=False
-)
+def DEFAULT():
+    return Layout(
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json"), path_relative=False
+    )
+
+
+def RAINBOW():
+    return Layout(
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/rainbow.json"), path_relative=False
+    )

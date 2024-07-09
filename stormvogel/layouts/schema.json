@@ -35,14 +35,25 @@
           ]
         }
       },
+      "font": {
+        "__html": "<h4>Font</h4>",
+        "color": {
+          "__title": "Color",
+          "__widget": "ColorPicker"
+        },
+        "size": {
+          "__title": "Size",
+          "__widget": "IntSlider"
+        }
+      },
       "mass": {
-        "__html": "<p>Controls degree of repulsion of nodes.</p>",
+        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
         "__title": "Mass",
         "__widget": "IntSlider"
       }
     }
   },
-  "__html": "<h3>Interactive layout editor</h3>",
+  "__html": "<h2>Interactive layout editor</h2>",
   "autoApply": {
     "__html": "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
     "__title": "Enabled",
@@ -50,16 +61,45 @@
   },
   "groups": {
     "init": {
-      "__html": "<h4>Initial state</h4>",
+      "__html": "<h3>Initial state</h3>",
       "__use_macro": "__group_macro"
     },
     "states": {
-      "__html": "<h4>Other states</h4>",
+      "__html": "<h3>Other states</h3>",
       "__use_macro": "__group_macro"
     },
     "actions": {
-      "__html": "<h4>Actions</h4>",
+      "__html": "<h3>Actions</h3>",
       "__use_macro": "__group_macro"
+    }
+  },
+  "edges": {
+    "__html": "<h3>Edges</h3>",
+    "color": {
+      "__title": "Color",
+      "__widget": "ColorPicker"
+    },
+    "font": {
+      "__html": "<h4>Font</h4>",
+      "color": {
+        "__title": "Color",
+        "__widget": "ColorPicker"
+      },
+      "size": {
+        "__title": "Size",
+        "__widget": "IntSlider"
+      }
+    }
+  },
+  "saving": {
+    "__html": "<h4>Save / apply changes</h4>",
+    "relative_path": {
+      "__title": "Relative path",
+      "__widget": "Checkbox"
+    },
+    "filename": {
+      "__title": "File name",
+      "__widget": "Text"
     }
   }
 }

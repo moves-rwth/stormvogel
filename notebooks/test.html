@@ -237,6 +237,12 @@ function highlightFilter(filter) {
 
 
 
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+
 
 
         </style>
@@ -251,6 +257,8 @@ function highlightFilter(filter) {
         </div>
 
 
+
+            <div id="config"></div>
 
 
         <script type="text/javascript">
@@ -296,7 +304,7 @@ function highlightFilter(filter) {
 
                   var options = {
     "configure": {
-        "enabled": false
+        "enabled": true
     },
     "edges": {
         "color": {
@@ -327,6 +335,10 @@ function highlightFilter(filter) {
 
 
 
+
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
 
 
                   network = new vis.Network(container, data, options);

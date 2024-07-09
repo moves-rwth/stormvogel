@@ -4,7 +4,7 @@
     "init": {
       "borderWidth": 3,
       "color": {
-        "background": "white",
+        "background": "#e01b24",
         "border": "black"
       },
       "shape": "circle",
@@ -42,6 +42,7 @@
     }
   },
   "edges": {
+    "inherit": false,
     "font": {
       "color": "black",
       "size": 14
@@ -57,6 +58,6 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json"
+    "filename": "layouts/red_init.json"
   }
 }

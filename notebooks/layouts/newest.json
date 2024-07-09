@@ -4,7 +4,7 @@
     "init": {
       "borderWidth": 3,
       "color": {
-        "background": "white",
+        "background": "#f9f06b",
         "border": "black"
       },
       "shape": "circle",
@@ -15,16 +15,16 @@
       }
     },
     "states": {
-      "borderWidth": 1,
+      "borderWidth": 5,
       "color": {
-        "background": "white",
-        "border": "black"
+        "background": "#e01b24",
+        "border": "#1c71d8"
       },
-      "shape": "ellipse",
-      "mass": 1,
+      "shape": "circle",
+      "mass": 19,
       "font": {
-        "color": "black",
-        "size": 14
+        "color": "#e66100",
+        "size": 44
       }
     },
     "actions": {
@@ -42,9 +42,10 @@
     }
   },
   "edges": {
+    "inherit": false,
     "font": {
-      "color": "black",
-      "size": 14
+      "color": "#26a269",
+      "size": 100
     },
     "color": "black"
   },
@@ -57,6 +58,6 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json"
+    "filename": "layouts/newest.json"
   }
 }
