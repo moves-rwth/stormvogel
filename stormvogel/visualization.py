@@ -4,7 +4,7 @@ import random
 from fractions import Fraction
 from html import escape
 
-from IPython.display import HTML, IFrame, display
+from IPython.display import HTML, display
 from pyvis.network import Network
 
 from stormvogel.layout import DEFAULT, Layout
@@ -58,12 +58,12 @@ class Visualization:
         try:
             self.nt.write_html(self.name, open_browser=False, notebook=self.notebook)
             # Not using show here to stop the print message.
-            iframe = IFrame(self.name, width=self.nt.width, height=self.nt.height)
-            self.handle.update(iframe)  # type: ignore
+            self.handle.update(self.custom_iframe)  # type: ignore
         except AttributeError:
             raise Exception(
                 "show should be called at least once before calling update."
             )
+        return self.handle
 
     def show(self):
         """Show or update the constructed graph as a html file."""
@@ -73,7 +73,7 @@ class Visualization:
 
         # We build our own iframe because we want to embed the model in the
         # output instead of saving it to a file
-        custom_iframe = f"""
+        self.custom_iframe = f"""
         <iframe
             style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
             frameborder="0"
@@ -83,7 +83,10 @@ class Visualization:
         ></iframe>"""
 
         # We use a random id which will avoid collisions in most cases.
-        return display(HTML(custom_iframe), display_id=random.randrange(0, 10**31))
+        self.handle = display(
+            HTML(self.custom_iframe), display_id=random.randrange(0, 10**31)
+        )
+        return self.handle
 
     def show_editor(self):
         """Display an interactive layout editor. Use the update() method to apply changes."""
