@@ -5,18 +5,20 @@
 
 Welcome to stormvogel's documentation!
 ======================================
+Last update: |today|
+
+These are our current files:
 
 .. toctree::
    :maxdepth: 2
    :glob:
 
-   die
+   getting_started/die
+   getting_started/study
 
 
-
-
-Indices and tables
-==================
+Search for a specific page:
+===========================
 
 * :ref:`genindex`
 * :ref:`modindex`

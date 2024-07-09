@@ -1,0 +1,32 @@
+{
+  "nodes": {
+    "color": {
+      "background": "#99c1f1",
+      "border": "#000000"
+    }
+  },
+  "init": {
+    "borderWidth": 3,
+    "color": null,
+    "shape": "circle"
+  },
+  "states": {
+    "borderWidth": 1,
+    "color": "#f8e45c",
+    "shape": "star"
+  },
+  "actions": {
+    "borderWidth": 1,
+    "color": null,
+    "shape": "box"
+  },
+  "numbers": {
+    "fractions": false,
+    "digits": 5,
+    "max_denominator": 20
+  },
+  "rounding": {
+    "fractions": "False",
+    "digits": 2
+  }
+}
