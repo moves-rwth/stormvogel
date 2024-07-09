@@ -63,7 +63,6 @@ class Visualization:
             raise Exception(
                 "show should be called at least once before calling update."
             )
-        return self.handle
 
     def show(self):
         """Show or update the constructed graph as a html file."""
@@ -86,7 +85,6 @@ class Visualization:
         self.handle = display(
             HTML(self.custom_iframe), display_id=random.randrange(0, 10**31)
         )
-        return self.handle
 
     def show_editor(self):
         """Display an interactive layout editor. Use the update() method to apply changes."""
@@ -111,28 +109,22 @@ class Visualization:
                 self.nt.add_node(
                     state.id,
                     label=",".join(state.labels) + self.__format_rewards(state),
-                    color=self.layout.rget("init", "color"),
-                    borderWidth=self.layout.rget("init", "borderWidth"),
-                    shape=self.layout.rget("init", "shape"),
+                    color=None,  # type: ignore
+                    group="init",
                 )
             else:
                 self.nt.add_node(
                     state.id,
                     label=",".join(state.labels) + self.__format_rewards(state),
-                    color=self.layout.rget("states", "color"),
-                    borderWidth=self.layout.rget("states", "borderWidth"),
-                    shape=self.layout.rget("states", "shape"),
+                    color=None,  # type: ignore
+                    group="states",
                 )
 
     def __formatted_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
         if self.layout.rget("numbers", "fractions"):
-            return str(
-                Fraction(prob).limit_denominator(
-                    self.layout.rget("numbers", "max_denominator")
-                )
-            )
+            return str(Fraction(prob).limit_denominator(20))
         else:
             return str(round(float(prob), self.layout.rget("numbers", "digits")))
 
@@ -158,9 +150,8 @@ class Visualization:
                     self.nt.add_node(
                         n_id=action_id,
                         label=action.name,
-                        color=self.layout.rget("actions", "color"),  # type: ignore
-                        borderWidth=self.layout.rget("actions", "borderWidth"),
-                        shape=self.layout.rget("actions", "shape"),
+                        color=None,  # type: ignore
+                        group="actions",
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id, color=None)  # type: ignore

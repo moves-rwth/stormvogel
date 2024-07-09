@@ -1,0 +1,65 @@
+{
+  "__define_macro": {
+    "__name": "__group_macro",
+    "__value": {
+      "borderWidth": {
+        "__title": "Border width",
+        "__widget": "IntSlider"
+      },
+      "color": {
+        "background": {
+          "__title": "Bg color",
+          "__widget": "ColorPicker"
+        },
+        "border": {
+          "__title": "Border color",
+          "__widget": "ColorPicker"
+        }
+      },
+      "shape": {
+        "__title": "Shape",
+        "__widget": "Dropdown",
+        "__kwargs": {
+          "options": [
+            "ellipse",
+            "circle",
+            "database",
+            "box",
+            "text",
+            "diamond",
+            "dot",
+            "star",
+            "triangle",
+            "triangleDown",
+            "square"
+          ]
+        }
+      },
+      "mass": {
+        "__html": "<p>Controls degree of repulsion of nodes.</p>",
+        "__title": "Mass",
+        "__widget": "IntSlider"
+      }
+    }
+  },
+  "__html": "<h3>Interactive layout editor</h3>",
+  "autoApply": {
+    "__html": "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
+    "__title": "Enabled",
+    "__widget": "Checkbox"
+  },
+  "groups": {
+    "init": {
+      "__html": "<h4>Initial state</h4>",
+      "__use_macro": "__group_macro"
+    },
+    "states": {
+      "__html": "<h4>Other states</h4>",
+      "__use_macro": "__group_macro"
+    },
+    "actions": {
+      "__html": "<h4>Actions</h4>",
+      "__use_macro": "__group_macro"
+    }
+  }
+}

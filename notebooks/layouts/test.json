@@ -1,32 +1,31 @@
 {
-  "autoApply": true,
   "groups": {
     "init": {
       "borderWidth": 3,
       "color": {
-        "background": "white",
-        "border": "black"
+        "background": "red",
+        "border": "green"
       },
       "shape": "circle",
-      "mass": 1
+      "repulsion": 1
     },
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
-        "border": "black"
+        "background": "red",
+        "border": "green"
       },
-      "shape": "ellipse",
-      "mass": 1
+      "shape": "elipse",
+      "repulsion": 1
     },
     "actions": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
-        "border": "black"
+        "background": "red",
+        "border": "green"
       },
       "shape": "box",
-      "mass": 1
+      "repulsion": 1
     }
   },
   "edges": {

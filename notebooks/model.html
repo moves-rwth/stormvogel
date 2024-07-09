@@ -282,8 +282,8 @@ function highlightFilter(filter) {
 
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"borderWidth": 3, "color": null, "id": 0, "label": "init", "shape": "circle"}, {"borderWidth": 1, "color": null, "id": 1, "label": "rolled0", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 2, "label": "rolled1", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 3, "label": "rolled2", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 4, "label": "rolled3", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 5, "label": "rolled4", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 6, "label": "rolled5", "shape": "elipse"}, {"borderWidth": 1, "color": null, "id": 7, "label": "test", "shape": "elipse"}]);
-                  edges = new vis.DataSet([{"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 1}, {"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 2}, {"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 3}, {"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 4}, {"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 5}, {"arrows": "to", "color": null, "from": 0, "label": "1/6", "to": 6}, {"arrows": "to", "color": null, "from": 1, "label": "1", "to": 1}, {"arrows": "to", "color": null, "from": 2, "label": "1", "to": 2}, {"arrows": "to", "color": null, "from": 3, "label": "1", "to": 3}, {"arrows": "to", "color": null, "from": 4, "label": "1", "to": 4}, {"arrows": "to", "color": null, "from": 5, "label": "1", "to": 5}, {"arrows": "to", "color": null, "from": 6, "label": "1", "to": 6}, {"arrows": "to", "color": null, "from": 7, "label": "1", "to": 7}]);
+                  nodes = new vis.DataSet([{"color": null, "id": 0, "label": "init", "shape": "dot"}]);
+                  edges = new vis.DataSet([]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -294,7 +294,7 @@ function highlightFilter(filter) {
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"nodes": {"color": {"background": "white", "border": "black", "highlight": {"background": "white", "border": "black"}, "font": {"color": "black", "size": 14}}}, "init": {"borderWidth": 3, "color": null, "shape": "circle", "repulsion": 1}, "states": {"borderWidth": 1, "color": null, "shape": "elipse", "repulsion": 1}, "actions": {"borderWidth": 1, "color": null, "shape": "box", "repulsion": 1}, "numbers": {"fractions": true, "digits": 5, "max_denominator": 20}, "edges": {"font": {"color": "black", "size": 14}}, "layout": {"randomSeed": 5}};
+                  var options = {"groups": {"init": {"borderWidth": 3, "color": {"background": "red", "border": "green"}, "shape": "circle", "repulsion": 1}, "states": {"borderWidth": 1, "color": {"background": "red", "border": "green"}, "shape": "elipse", "repulsion": 1}, "actions": {"borderWidth": 1, "color": {"background": "red", "border": "green"}, "shape": "box", "repulsion": 1}}, "edges": {"inherit": false, "font": {"color": "black", "size": 14}, "color": "red"}, "numbers": {"fractions": true, "digits": 5}, "layout": {"randomSeed": 5}};
 
 
 
