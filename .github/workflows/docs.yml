@@ -60,7 +60,7 @@ jobs:
 
       - name: Run documentation notebooks
         run: |
-          poetry run jupyter nbconvert --execute --to notebook --inplace "${{ steps.glob.outputs.paths }}"
+          poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }}
 
       - name: Generate docs
         working-directory: docs/
