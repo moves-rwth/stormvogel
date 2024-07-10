@@ -1,0 +1,105 @@
+{
+  "__define_macro": {
+    "__name": "__group_macro",
+    "__value": {
+      "borderWidth": {
+        "__title": "Border width",
+        "__widget": "IntSlider"
+      },
+      "color": {
+        "background": {
+          "__title": "Bg color",
+          "__widget": "ColorPicker"
+        },
+        "border": {
+          "__title": "Border color",
+          "__widget": "ColorPicker"
+        }
+      },
+      "shape": {
+        "__title": "Shape",
+        "__widget": "Dropdown",
+        "__kwargs": {
+          "options": [
+            "ellipse",
+            "circle",
+            "database",
+            "box",
+            "text",
+            "diamond",
+            "dot",
+            "star",
+            "triangle",
+            "triangleDown",
+            "square"
+          ]
+        }
+      },
+      "font": {
+        "__html": "<h4>Font</h4>",
+        "color": {
+          "__title": "Color",
+          "__widget": "ColorPicker"
+        },
+        "size": {
+          "__title": "Size",
+          "__widget": "IntSlider"
+        }
+      },
+      "mass": {
+        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
+        "__title": "Mass",
+        "__widget": "IntSlider"
+      }
+    }
+  },
+  "__html": "<h2>Interactive layout editor</h2>",
+  "autoApply": {
+    "__html": "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
+    "__title": "Enabled",
+    "__widget": "Checkbox"
+  },
+  "groups": {
+    "init": {
+      "__html": "<h3>Initial state</h3>",
+      "__use_macro": "__group_macro"
+    },
+    "states": {
+      "__html": "<h3>Other states</h3>",
+      "__use_macro": "__group_macro"
+    },
+    "actions": {
+      "__html": "<h3>Actions</h3>",
+      "__use_macro": "__group_macro"
+    }
+  },
+  "edges": {
+    "__html": "<h3>Edges</h3>",
+    "color": {
+      "__title": "Color",
+      "__widget": "ColorPicker"
+    },
+    "font": {
+      "__html": "<h4>Font</h4>",
+      "color": {
+        "__title": "Color",
+        "__widget": "ColorPicker"
+      },
+      "size": {
+        "__title": "Size",
+        "__widget": "IntSlider"
+      }
+    }
+  },
+  "saving": {
+    "__html": "<h4>Save / apply changes</h4>",
+    "relative_path": {
+      "__title": "Relative path",
+      "__widget": "Checkbox"
+    },
+    "filename": {
+      "__title": "File name",
+      "__widget": "Text"
+    }
+  }
+}

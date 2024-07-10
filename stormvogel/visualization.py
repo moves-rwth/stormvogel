@@ -9,6 +9,7 @@ from pyvis.network import Network
 
 from stormvogel.layout import DEFAULT, Layout
 from stormvogel.model import EmptyAction, Model, Number, State
+from stormvogel.rdict import rget
 
 
 class Visualization:
@@ -24,7 +25,7 @@ class Visualization:
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
-        layout: Layout = DEFAULT,
+        layout: Layout = DEFAULT(),
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -52,41 +53,35 @@ class Visualization:
         self.__add_transitions()
         self.layout.set_nt_layout(self.nt)
 
+    def __generate_iframe(self):
+        # We build our own iframe because we want to embed the model in the
+        # output instead of saving it to a file
+        html_code = self.nt.generate_html(name=self.name, notebook=True)
+        return f"""
+            <iframe
+                style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
+                frameborder="0"
+                srcdoc="{escape(html_code)}"
+                border:none !important;
+                allowfullscreen webkitallowfullscreen mozallowfullscreen
+            ></iframe>"""
+
     def update(self):
-        """Update an existing visualization (so it uses a modified layout)."""
+        """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
         self.__reload_nt()
         try:
-            self.nt.write_html(self.name, open_browser=False, notebook=self.notebook)
-            # Not using show here to stop the print message.
-            self.handle.update(self.custom_iframe)  # type: ignore
+            self.handle.update(HTML(self.__generate_iframe()))  # type: ignore
         except AttributeError:
-            raise Exception(
-                "show should be called at least once before calling update."
-            )
-        return self.handle
+            pass
 
     def show(self):
         """Show or update the constructed graph as a html file."""
         self.__reload_nt()
 
-        html_code = self.nt.generate_html(name=self.name, notebook=True)
-
-        # We build our own iframe because we want to embed the model in the
-        # output instead of saving it to a file
-        self.custom_iframe = f"""
-        <iframe
-            style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
-            frameborder="0"
-            srcdoc="{escape(html_code)}"
-            border:none !important;
-            allowfullscreen webkitallowfullscreen mozallowfullscreen
-        ></iframe>"""
-
         # We use a random id which will avoid collisions in most cases.
         self.handle = display(
-            HTML(self.custom_iframe), display_id=random.randrange(0, 10**31)
+            HTML(self.__generate_iframe()), display_id=random.randrange(0, 10**31)
         )
-        return self.handle
 
     def show_editor(self):
         """Display an interactive layout editor. Use the update() method to apply changes."""
@@ -111,30 +106,28 @@ class Visualization:
                 self.nt.add_node(
                     state.id,
                     label=",".join(state.labels) + self.__format_rewards(state),
-                    color=self.layout.rget("init", "color"),
-                    borderWidth=self.layout.rget("init", "borderWidth"),
-                    shape=self.layout.rget("init", "shape"),
+                    color=None,  # type: ignore
+                    shape=None,  # type: ignore
+                    group="init",
                 )
             else:
                 self.nt.add_node(
                     state.id,
                     label=",".join(state.labels) + self.__format_rewards(state),
-                    color=self.layout.rget("states", "color"),
-                    borderWidth=self.layout.rget("states", "borderWidth"),
-                    shape=self.layout.rget("states", "shape"),
+                    color=None,  # type: ignore
+                    shape=None,  # type: ignore
+                    group="states",
                 )
 
-    def __formatted_probability(self, prob: Number) -> str:
+    def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
-        if self.layout.rget("numbers", "fractions"):
-            return str(
-                Fraction(prob).limit_denominator(
-                    self.layout.rget("numbers", "max_denominator")
-                )
-            )
+        if rget(self.layout.layout, ["numbers", "fractions"]):
+            return str(Fraction(prob).limit_denominator(20))
         else:
-            return str(round(float(prob), self.layout.rget("numbers", "digits")))
+            return str(
+                round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
+            )
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
@@ -151,16 +144,16 @@ class Visualization:
                             state_id,
                             target.id,
                             color=None,  # type: ignore
-                            label=self.__formatted_probability(prob),
+                            label=self.__format_probability(prob),
                         )
                 else:
                     # Add the action's node
                     self.nt.add_node(
                         n_id=action_id,
                         label=action.name,
-                        color=self.layout.rget("actions", "color"),  # type: ignore
-                        borderWidth=self.layout.rget("actions", "borderWidth"),
-                        shape=self.layout.rget("actions", "shape"),
+                        color=None,  # type: ignore
+                        shape=None,  # type: ignore
+                        group="actions",
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id, color=None)  # type: ignore
@@ -170,7 +163,7 @@ class Visualization:
                             action_id,
                             target.id,
                             color=None,  # type: ignore
-                            label=self.__formatted_probability(prob),
+                            label=self.__format_probability(prob),
                         )
                     action_id += 1
 
@@ -180,7 +173,7 @@ def show(
     name: str = "model",
     notebook: bool = True,
     cdn_resources: str = "remote",
-    layout: Layout = DEFAULT,
+    layout: Layout = DEFAULT(),
     show_editor: bool = False,
 ) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
