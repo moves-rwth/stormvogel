@@ -309,6 +309,10 @@ class Model:
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
 
+    def get_type(self):
+        """Gets the type of this model"""
+        return self.type
+
     def to_dot(self) -> str:
         """Generates a dot representation of this model."""
         dot = "digraph model {\n"
@@ -346,9 +350,9 @@ class Model:
         if isinstance(other, Model):
             return (
                 self.type == other.type
-                and self.actions == other.actions
                 and self.states == other.states
                 and self.transitions == other.transitions
+                # and self.actions == other.actions
             )
         return False
 
