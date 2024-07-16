@@ -13,8 +13,7 @@ These are our current files:
    :maxdepth: 2
    :glob:
 
-   getting_started/die
-   getting_started/study
+   **
 
 
 Search for a specific page:
