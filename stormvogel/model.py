@@ -197,10 +197,14 @@ class Model:
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
             self.actions = {}
+        else:
+            self.actions = None
 
         # Initialize rates if those are supported by the model type
         if self.supports_rates():
             self.rates = {}
+        else:
+            self.rates = None
 
         # Add the initial state
         self.new_state(["init"])
