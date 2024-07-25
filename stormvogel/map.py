@@ -36,6 +36,19 @@ def add_labels(model: stormvogel.model.Model) -> stormpy.storage.StateLabeling:
     return state_labeling
 
 
+def add_rewards(model: stormvogel.model.Model) -> dict[str, stormpy.SparseRewardModel]:
+    """
+    Takes a model creates a dictionary of all the reward models
+    """
+    reward_models = {}
+    for rewardmodel in model.rewards:
+        reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
+            optional_state_action_reward_vector=list(rewardmodel.rewards.values())
+        )
+
+    return reward_models
+
+
 def stormvogel_to_stormpy(
     model: stormvogel.model.Model,
 ) -> stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp | None:
@@ -50,11 +63,16 @@ def stormvogel_to_stormpy(
         # then we add the state labels
         state_labeling = add_labels(model)
 
-        # TODO rewards
+        # then we add the rewards
+        reward_models = add_rewards(model)
+
+        # TODO rates
 
         # then we build the dtmc
         components = stormpy.SparseModelComponents(
-            transition_matrix=matrix, state_labeling=state_labeling
+            transition_matrix=matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models,
         )
         dtmc = stormpy.storage.SparseDtmc(components)
 
@@ -107,11 +125,16 @@ def stormvogel_to_stormpy(
         # then we add the state labels
         state_labeling = add_labels(model)
 
-        # TODO rewards
+        # then we add the rewards
+        reward_models = add_rewards(model)
+
+        # TODO rates
 
         # then we build the mdp
         components = stormpy.SparseModelComponents(
-            transition_matrix=matrix, state_labeling=state_labeling
+            transition_matrix=matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models,
         )
         components.choice_labeling = choice_labeling
         mdp = stormpy.storage.SparseMdp(components)
@@ -157,7 +180,15 @@ def stormpy_to_stormvogel(
             )
             model.set_transitions(model.get_state_by_id(state.id), transitions)
 
-        # TODO rewards
+        # TODO rates
+
+        # we add the reward models
+        for reward_model in sparsedtmc.reward_models:
+            rewards = sparsedtmc.get_reward_model(reward_model)
+            rewardmodel = model.add_rewards(reward_model)
+            for index, reward in enumerate(rewards.state_action_rewards):
+                rewardmodel.set(model.get_state_by_id(index), reward)
+                model.update_reward_model(reward_model, rewardmodel)
 
         return model
 
@@ -202,7 +233,15 @@ def stormpy_to_stormvogel(
 
                 model.set_transitions(model.get_state_by_id(state.id), transitions)
 
-        # TODO rewards
+        # we add the reward models
+        # for reward_model in sparsemdp.reward_models:
+        #    rewards = sparsemdp.get_reward_model(reward_model)
+        #    rewardmodel = model.add_rewards(reward_model)
+        #    for index, reward in enumerate(rewards.state_action_rewards):
+        #        rewardmodel.set(model.get_state_by_id(index), reward)
+        #        model.update_reward_model(reward_model, rewardmodel)
+
+        # TODO rates
 
         return model
 

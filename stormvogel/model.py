@@ -208,6 +208,11 @@ class RewardModel:
         """Sets the reward at said state."""
         self.rewards[state.id] = value
 
+    def __eq__(self, other):
+        if isinstance(other, RewardModel):
+            return self.rewards == other.rewards and self.name == other.name
+        return False
+
 
 @dataclass
 class Model:
@@ -394,6 +399,14 @@ class Model:
         self.rewards.append(reward_model)
         return reward_model
 
+    def update_reward_model(self, name: str, rewardmodel: RewardModel) -> bool:
+        """Updates an existing reward model."""
+        for index, model in enumerate(self.rewards):
+            if model.name == name:
+                self.rewards[index] == rewardmodel
+                return True
+        return False
+
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
         if not self.supports_rates() or self.rates is None:
@@ -449,6 +462,7 @@ class Model:
                 self.type == other.type
                 and self.states == other.states
                 and self.transitions == other.transitions
+                and self.rewards == other.rewards
                 # and self.actions == other.actions
             )
         return False

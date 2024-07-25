@@ -41,18 +41,6 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
     assert new_stormvogel_dtmc == stormvogel_dtmc
 
 
-def test_stormvogel_to_stormpy_and_back_mdp():
-    # we test it for monty hall mdp
-    stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
-    # print(stormvogel_mdp)
-    stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
-    # print(stormpy_mdp)
-    new_stormvogel_mdp = stormvogel.map.stormpy_to_stormvogel(stormpy_mdp)
-    # print(new_stormvogel_mdp)
-
-    assert new_stormvogel_mdp == stormvogel_mdp
-
-
 def test_stormpy_to_stormvogel_and_back_mdp():
     # we test it for monty hall mdp
     stormpy_mdp = examples.stormpy_mdp.example_building_mdps_01()
@@ -64,3 +52,15 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 
     # TODO also compare other parts than the matrix
     assert matrix_equals(stormpy_mdp, new_stormpy_mdp)
+
+
+def test_stormvogel_to_stormpy_and_back_mdp():
+    # we test it for monty hall mdp
+    stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
+    # print(stormvogel_mdp)
+    stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
+    # print(stormpy_mdp)
+    new_stormvogel_mdp = stormvogel.map.stormpy_to_stormvogel(stormpy_mdp)
+    # print(new_stormvogel_mdp)
+
+    assert new_stormvogel_mdp == stormvogel_mdp
