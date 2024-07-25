@@ -44,6 +44,12 @@ class Visualization:
         self.notebook = notebook
         self.cdn_resources = cdn_resources
 
+    def __update_physics_enabled(self):
+        """Enable physics iff the model has less than 10000 states."""
+        if "physics" not in self.layout.layout:
+            self.layout.layout["physics"] = {}
+        self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
+
     def __reload_nt(self):
         """(Re)load the pyvis network."""
         self.nt = Network(
@@ -51,6 +57,7 @@ class Visualization:
         )
         self.__add_states()
         self.__add_transitions()
+        self.__update_physics_enabled()
         self.layout.set_nt_layout(self.nt)
 
     def __generate_iframe(self):
@@ -123,8 +130,9 @@ class Visualization:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
         if rget(self.layout.layout, ["numbers", "fractions"]):
-            return str(Fraction(prob).limit_denominator(20))
+            return str(Fraction(prob).limit_denominator(1000))
         else:
+            print(rget(self.layout.layout, ["numbers", "digits"]))
             return str(
                 round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
             )
