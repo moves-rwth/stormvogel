@@ -192,7 +192,7 @@ def stormpy_to_stormvogel(
 
                 # for now assign a name based on index
                 # TODO assign the correct labels and name
-                action = stormvogel.model.Action(str(i))
+                action = stormvogel.model.Action(str(i), frozenset())
 
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
 
