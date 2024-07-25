@@ -79,6 +79,7 @@ class Action:
 
     name: str
     labels: frozenset[str]
+
     def __str__(self):
         return f"Action {self.name}"
 
@@ -371,7 +372,6 @@ class Model:
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
 
-
     def get_default_rewards(self) -> RewardModel:
         """Gets the default reward model, throws a RuntimeError if there is none."""
         if len(self.rewards) == 0:
@@ -406,7 +406,6 @@ class Model:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
         self.rates[state.id] = rate
 
-        
     def get_type(self):
         """Gets the type of this model"""
         return self.type
