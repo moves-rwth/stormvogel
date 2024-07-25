@@ -6,7 +6,7 @@ from fractions import Fraction
 
 Parameter = str
 
-Number = float | Fraction | Parameter
+Number = float | Parameter | Fraction
 
 
 class ModelType(Enum):
@@ -32,10 +32,18 @@ class State:
         model: The model this state belongs to.
     """
 
+    # name: str | None
     labels: list[str]
     features: dict[str, int]
     id: int
     model: "Model"
+
+    def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
+        self.labels = labels
+        self.features = features
+        self.id = id
+        self.model = model
+        # TODO how to handle state names?
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -51,6 +59,8 @@ class State:
     def __eq__(self, other):
         if isinstance(other, State):
             if self.id == other.id:
+                self.labels.sort()
+                other.labels.sort()
                 return self.labels == other.labels
             return True
         return False
@@ -66,13 +76,22 @@ class Action:
     """
 
     name: str
+    # labels: list[str]
+
+    # TODO action labels
+
+    # def __init__(self, name: str):
+    #    self.name = name
+
+    # def set_labels(labels: list[str]):
+    #    self.labels = labels
 
     def __str__(self):
         return f"Action {self.name}"
 
     def __eq__(self, other):
         if isinstance(other, Action):
-            return self.name == other.name
+            return True
         return False
 
 
@@ -103,6 +122,11 @@ class Branch:
             return self.branch == other.branch
         return False
 
+    def __lt__(self, other):
+        if not isinstance(other, Branch):
+            return NotImplemented
+        return str(self.branch) < str(other.branch)
+
 
 @dataclass
 class Transition:
@@ -125,7 +149,11 @@ class Transition:
 
     def __eq__(self, other):
         if isinstance(other, Transition):
-            return self.transition == other.transition
+            self_values = list(self.transition.values())
+            other_values = list(other.transition.values())
+            self_values.sort()
+            other_values.sort()
+            return self_values == other_values
         return False
 
 

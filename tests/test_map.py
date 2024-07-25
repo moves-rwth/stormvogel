@@ -1,4 +1,5 @@
 import examples.monty_hall
+import examples.stormpy_mdp
 import stormvogel.map
 import stormvogel.model
 import examples.stormpy_to_stormvogel
@@ -7,14 +8,13 @@ import stormpy
 
 
 def matrix_equals(
-    dtmc0: stormpy.storage.SparseDtmc, dtmc1: stormpy.storage.SparseDtmc
+    model0: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
+    model1: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
 ) -> bool:
-    """
-    outputs true if the sparsematrices of the two sparsedtmcs are the same and false otherwise
-    """
+    # outputs true if the sparsematrices of the two sparsedtmcs are the same and false otherwise
 
     # TODO is there a better check for equality for matrices in storm(py)? otherwise one should perhaps be implemented
-    return str(dtmc0.transition_matrix) == str(dtmc1.transition_matrix)
+    return str(model0.transition_matrix) == str(model1.transition_matrix)
 
 
 def test_stormpy_to_stormvogel_and_back_dtmc():
@@ -44,10 +44,23 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
     stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
-    print(stormvogel_mdp)
+    # print(stormvogel_mdp)
     stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
-    print(stormpy_mdp)
+    # print(stormpy_mdp)
     new_stormvogel_mdp = stormvogel.map.stormpy_to_stormvogel(stormpy_mdp)
-    print(new_stormvogel_mdp)
+    # print(new_stormvogel_mdp)
 
     assert new_stormvogel_mdp == stormvogel_mdp
+
+
+def test_stormpy_to_stormvogel_and_back_mdp():
+    # we test it for monty hall mdp
+    stormpy_mdp = examples.stormpy_mdp.example_building_mdps_01()
+    # print(stormpy_mdp)
+    stormvogel_mdp = stormvogel.map.stormpy_to_stormvogel(stormpy_mdp)
+    # print(stormvogel_mdp)
+    new_stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
+    # print(new_stormpy_mdp)
+
+    # TODO also compare other parts than the matrix
+    assert matrix_equals(stormpy_mdp, new_stormpy_mdp)

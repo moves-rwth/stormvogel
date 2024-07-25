@@ -41,7 +41,7 @@ def stormvogel_to_stormpy(
 ) -> stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp | None:
     def map_dtmc(model: stormvogel.model.Model) -> stormpy.storage.SparseDtmc:
         """
-        Takes a simple representation as input and outputs a dtmc how it is represented in stormpy
+        Takes a simple representation of a dtmc as input and outputs a dtmc how it is represented in stormpy
         """
 
         # we first build the SparseMatrix
@@ -62,7 +62,7 @@ def stormvogel_to_stormpy(
 
     def map_mdp(model: stormvogel.model.Model) -> stormpy.storage.SparseMdp:
         """
-        Takes a simple representation as input and outputs an mdp how it is represented in stormpy
+        Takes a simple representation of an mdp as input and outputs an mdp how it is represented in stormpy
         """
 
         # we determine the number of choices and the choice labels
@@ -128,7 +128,7 @@ def stormvogel_to_stormpy(
 
 
 def stormpy_to_stormvogel(
-    sparsedtmc: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
+    sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
 ) -> stormvogel.model.Model:
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """
@@ -155,55 +155,61 @@ def stormpy_to_stormvogel(
             transitions = stormvogel.model.transition_from_shorthand(
                 transitionshorthand
             )
-            # print("state:", state.id)
-            # print("type", type(state))
             model.set_transitions(model.get_state_by_id(state.id), transitions)
 
         # TODO rewards
 
         return model
 
-    def map_mdp(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
+    def map_mdp(sparsemdp: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """
-        Takes a dtmc stormpy representation as input and outputs a simple stormvogel representation
+        Takes a mdp stormpy representation as input and outputs a simple stormvogel representation
         """
 
         # we create the model
-        model = stormvogel.model.new_dtmc(name=None)
+        model = stormvogel.model.new_mdp(name=None)
 
         # we add the states
-        # print("states:", len(sparsedtmc.states))
-        for state in sparsedtmc.states:
+        for state in sparsemdp.states:
             # the initial state is automatically added so we don't add it
             if state.id > 0:
                 model.new_state(labels=list(state.labels))
 
         # we add the transitions
-        matrix = sparsedtmc.transition_matrix
-
-        for index, state in enumerate(sparsedtmc.states):
-            # we add the transitions
+        matrix = sparsemdp.transition_matrix
+        for index, state in enumerate(sparsemdp.states):
             row_group_start = matrix.get_row_group_start(index)
             row_group_end = matrix.get_row_group_end(index)
-            # print("rowgroupstart:", row_group_start)
-            # print("rowgroupend:", row_group_end)
+            # within a row group we add for each action the transitions
+            transition = dict()
+
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
-                transitionshorthand = [
-                    (x.value(), model.get_state_by_id(x.column)) for x in row
-                ]
-                transitions = stormvogel.model.transition_from_shorthand(
-                    transitionshorthand
-                )
+
+                # actionlabels = sparsemdp.choice_labeling.get_labels_of_choice(i)
+                # actionlabelslist = [str(x) for x in actionlabels]
+                # print(actionlabelslist)
+
+                # for now assign a name based on index
+                # TODO assign the correct labels and name
+                action = stormvogel.model.Action(str(i))
+
+                branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
+
+                transition[action] = stormvogel.model.Branch(branch)
+
+                transitions = stormvogel.model.Transition(transition)
+
                 model.set_transitions(model.get_state_by_id(state.id), transitions)
+
         # TODO rewards
 
         return model
 
-    if sparsedtmc.transition_matrix.has_trivial_row_grouping:
-        return map_dtmc(sparsedtmc)
+    if sparsemodel.transition_matrix.has_trivial_row_grouping:
+        return map_dtmc(sparsemodel)
     else:
-        return map_mdp(sparsedtmc)
+        return map_mdp(sparsemodel)
 
 
 if __name__ == "__main__":
