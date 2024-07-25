@@ -1,16 +1,21 @@
 """Contains the code responsible for model visualization."""
 
-from pyvis.network import Network
-from stormvogel.model import Model, EmptyAction, Number
-from ipywidgets import interact
-from IPython.display import display
+import random
 from fractions import Fraction
+from html import escape
+
+from IPython.display import HTML, display
+from pyvis.network import Network
+
+from stormvogel.layout import DEFAULT, Layout
+from stormvogel.model import EmptyAction, Model, Number, State
+from stormvogel.rdict import rget
 
 
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
-    ACTION_ID_OFFSET = 10**8
+    ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
     # This offset is used to keep their ids from colliding. It should be some high constant.
 
@@ -20,6 +25,7 @@ class Visualization:
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
+        layout: Layout = DEFAULT(),
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -29,59 +35,104 @@ class Visualization:
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
         self.model = model
+        self.layout = layout
         if (
             name[-5:] != ".html"
         ):  # We do not require the user to explicitly type .html in their names
             name += ".html"
         self.name = name
-        self.g = Network(notebook=notebook, directed=True, cdn_resources=cdn_resources)
+        self.notebook = notebook
+        self.cdn_resources = cdn_resources
+
+    def __reload_nt(self):
+        """(Re)load the pyvis network."""
+        self.nt = Network(
+            notebook=self.notebook, directed=True, cdn_resources=self.cdn_resources
+        )
         self.__add_states()
         self.__add_transitions()
-        self.__set_layout()
+        self.layout.set_nt_layout(self.nt)
 
-    def __set_layout(self):
-        self.g.set_options("""
-var options = {
-    "nodes": {
-        "color": {
-            "background": "white",
-            "border": "black"
-        }
-    },
-    "physics": {
-        "barnesHut": {
-            "gravitationalConstant": -22660,
-            "centralGravity": 4.5,
-            "springLength": 50,
-            "springConstant": 0.08,
-            "damping": 0.32,
-            "avoidOverlap": 1
-        },
-        "minVelocity": 0.75
-    }
-}""")
+    def __generate_iframe(self):
+        # We build our own iframe because we want to embed the model in the
+        # output instead of saving it to a file
+        html_code = self.nt.generate_html(name=self.name, notebook=True)
+        return f"""
+            <iframe
+                style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
+                frameborder="0"
+                srcdoc="{escape(html_code)}"
+                border:none !important;
+                allowfullscreen webkitallowfullscreen mozallowfullscreen
+            ></iframe>"""
+
+    def update(self):
+        """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
+        self.__reload_nt()
+        try:
+            self.handle.update(HTML(self.__generate_iframe()))  # type: ignore
+        except AttributeError:
+            pass
+
+    def show(self):
+        """Show or update the constructed graph as a html file."""
+        self.__reload_nt()
+
+        # We use a random id which will avoid collisions in most cases.
+        self.handle = display(
+            HTML(self.__generate_iframe()), display_id=random.randrange(0, 10**31)
+        )
+
+    def show_editor(self):
+        """Display an interactive layout editor. Use the update() method to apply changes."""
+        self.layout.show_editor(self)
+
+    def __format_rewards(self, s: State) -> str:
+        """Create a string that contains the state-exit reward for this state. Starts with newline"""
+        res = ""
+        for reward_model in self.model.rewards:
+            try:
+                res += f"\n{reward_model.name}: {reward_model.get(s)}"
+            except (
+                KeyError
+            ):  # If this reward model does not have a reward for this state.
+                pass
+        return res
 
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            borderWidth = 1
             if state == self.model.get_initial_state():
-                borderWidth = 3
-            self.g.add_node(
-                state.id,
-                label=",".join(state.labels),
-                color=None,  # type: ignore
-                borderWidth=borderWidth,
-                shape="dot",
-            )
+                self.nt.add_node(
+                    state.id,
+                    label=",".join(state.labels) + self.__format_rewards(state),
+                    color=None,  # type: ignore
+                    shape=None,  # type: ignore
+                    group="init",
+                )
+            else:
+                self.nt.add_node(
+                    state.id,
+                    label=",".join(state.labels) + self.__format_rewards(state),
+                    color=None,  # type: ignore
+                    shape=None,  # type: ignore
+                    group="states",
+                )
 
-    def __formatted_probability(self, prob: Number) -> str:
-        """Take a probability value and format it nicely using a fraction."""
-        return str(Fraction(prob).limit_denominator(20))
+    def __format_probability(self, prob: Number) -> str:
+        """Take a probability value and format it nicely using a fraction or rounding it.
+        Which one of these to pick is specified in the layout."""
+        if rget(self.layout.layout, ["numbers", "fractions"]):
+            return str(Fraction(prob).limit_denominator(20))
+        else:
+            return str(
+                round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
+            )
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
-        Also handles actions by calling __add_action"""
+        Also handles creating nodes for actions and their respective transitions.
+        Note that an action may appear multiple times in the model with a different state as source."""
         action_id = self.ACTION_ID_OFFSET
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
@@ -89,48 +140,57 @@ var options = {
                 if action == EmptyAction:
                     # Only draw probabilities
                     for prob, target in branch.branch:
-                        self.g.add_edge(
+                        self.nt.add_edge(
                             state_id,
                             target.id,
-                            color="red",
-                            label=self.__formatted_probability(prob),
+                            color=None,  # type: ignore
+                            label=self.__format_probability(prob),
                         )
                 else:
                     # Add the action's node
-                    self.g.add_node(
+                    self.nt.add_node(
                         n_id=action_id,
-                        color=None,  # type: ignore
                         label=action.name,
-                        shape="box",
+                        color=None,  # type: ignore
+                        shape=None,  # type: ignore
+                        group="actions",
                     )
                     # Add transition from this state TO the action.
-                    self.g.add_edge(state_id, action_id, color="red")  # type: ignore
-                    # Add transition FROM the action to the values in its branch.
+                    self.nt.add_edge(state_id, action_id, color=None)  # type: ignore
+                    # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
-                        self.g.add_edge(
+                        self.nt.add_edge(
                             action_id,
                             target.id,
-                            color="red",
-                            label=self.__formatted_probability(prob),
+                            color=None,  # type: ignore
+                            label=self.__format_probability(prob),
                         )
                     action_id += 1
 
-    def show(self):
-        """Show the constructed graph."""
-        display(self.g.show(name=self.name))
 
-
-def show(model: Model, name: str = "model", notebook: bool = True):
+def show(
+    model: Model,
+    name: str = "model",
+    notebook: bool = True,
+    cdn_resources: str = "remote",
+    layout: Layout = DEFAULT(),
+    show_editor: bool = False,
+) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
 
     Args:
         model (Model): The stormvogel model to be displayed.
-        name (str, optional): The name of the resulting html file.
+        name (str, optional): The name of the resulting html file. Defaults to "model".
         notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
+        cdn_resources (str): Related to the pyvis library. Use "remote", "inline" or "local".
+            Try changing this setting if you experience rendering issues. Defaults to "remote".
+        layout (Layout): Which layout should be used. Defaults to DEFAULT.
+        show_editor (bool): Show an interactive layout editor. Defaults to False.
+
+    Returns: Visualization object.
     """
-    vis = Visualization(model, name, notebook)
+    vis = Visualization(model, name, notebook, cdn_resources, layout)
+    if show_editor:
+        vis.show_editor()
     vis.show()
-
-
-def make_slider():
-    return interact(lambda x: x, x=10)
+    return vis

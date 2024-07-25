@@ -26,6 +26,9 @@ pyright = "^1.1.368"
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"
 jupyterlab = "^4.2.2"
+sphinx = "^7.3.7"
+furo = "^2024.5.6"
+nbsphinx = "^0.9.4"
 
 [tool.ruff]
 src = ["stormvogel", "examples"]

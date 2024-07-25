@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
+from typing import cast
 
 Parameter = str
 
@@ -15,8 +16,8 @@ class ModelType(Enum):
     # implemented
     DTMC = 1
     MDP = 2
-    # not implemented yet
     CTMC = 3
+    # not implemented yet
     MA = 4
 
 
@@ -25,7 +26,6 @@ class State:
     """Represents a state in a Model.
 
     Args:
-        name: An optional name for this state.
         labels: The labels of this state. Corresponds to Storm labels.
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
@@ -69,6 +69,8 @@ class State:
 @dataclass(frozen=True)
 class Action:
     """Represents an action, e.g., in MDPs.
+        Note that this action object is completely independent of its corresponding branch.
+        Their relation is managed by Transitions.
 
     Args:
         name: A name for this action.
@@ -76,16 +78,7 @@ class Action:
     """
 
     name: str
-    # labels: list[str]
-
-    # TODO action labels
-
-    # def __init__(self, name: str):
-    #    self.name = name
-
-    # def set_labels(labels: list[str]):
-    #    self.labels = labels
-
+    labels: frozenset[str]
     def __str__(self):
         return f"Action {self.name}"
 
@@ -95,8 +88,8 @@ class Action:
         return False
 
 
-# The empty action. Used for DTMCs.
-EmptyAction = Action("empty")
+# The empty action. Used for DTMCs and empty action transitions in mdps.
+EmptyAction = Action("empty", frozenset())
 
 
 @dataclass
@@ -104,7 +97,8 @@ class Branch:
     """Represents a branch, which is a distribution over states.
 
     Args:
-        branch: The branch.
+        branch: The branch as a list of tuples.
+            The first element is the probability and the second element is the target state.
     """
 
     branch: list[tuple[Number, State]]
@@ -131,6 +125,8 @@ class Branch:
 @dataclass
 class Transition:
     """Represents a transition, which map actions to branches.
+        Note that an EmptyAction may be used if we want a non-action transition.
+        Note that a single Transition might correspond to multiple 'arrows'.
 
     Args:
         transition: The transition.
@@ -157,14 +153,15 @@ class Transition:
         return False
 
 
-# How the user is allowed to specify a transition:
-# - using only the action and the target state (implies probability=1),
-# - using only the probability and the target state (implies default action when in an MDP),
-TransitionShorthand = list[tuple[Number, State]] | list[tuple[Number, State]]
+TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
-    """Get a Transition object from a TransitionShorthand."""
+    """Get a Transition object from a TransitionShorthand. Use for all transitions in DTMCs and for empty actions in MDPs.
+
+    There are two possible ways to define a TransitionShorthand.
+    - using only the probability and the target state (implies default action when in an MDP).
+    - using only the action and the target state (implies probability=1)."""
     if len(shorthand) == 0:
         raise RuntimeError("Transition cannot be empty")
     # Check the type of the first element
@@ -181,10 +178,34 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
     ):
-        return Transition({EmptyAction: Branch(shorthand)})
+        return Transition(
+            {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
+        )
     raise RuntimeError(
         f"Type of {first_element} not supported in transition {shorthand}"
     )
+
+
+@dataclass
+class RewardModel:
+    """Represents a state-exit reward model.
+
+    Args:
+        name: Name of the reward model.
+        rewards: The rewards, the keys are the state's ids.
+    """
+
+    name: str
+    # Hashed by the id of the state (=number in the matrix)
+    rewards: dict[int, Number]
+
+    def get(self, state: State) -> Number:
+        """Gets the reward at said state."""
+        return self.rewards[state.id]
+
+    def set(self, state: State, value: Number):
+        """Sets the reward at said state."""
+        self.rewards[state.id] = value
 
 
 @dataclass
@@ -205,12 +226,15 @@ class Model:
     states: dict[int, State]
     transitions: dict[int, Transition]
     actions: dict[str, Action] | None
+    rewards: list[RewardModel]
+    rates: dict[int, Number] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
         self.type = model_type
         self.transitions = {}
         self.states = {}
+        self.rewards = []
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
@@ -218,12 +242,22 @@ class Model:
         else:
             self.actions = None
 
+        # Initialize rates if those are supported by the model type
+        if self.supports_rates():
+            self.rates = {}
+        else:
+            self.rates = None
+
         # Add the initial state
         self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
         return self.type in (ModelType.MDP, ModelType.MA)
+
+    def supports_rates(self):
+        """Returns whether this model supports rates."""
+        return self.type == ModelType.CTMC
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -261,7 +295,7 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        action = Action(name)
+        action = Action(name, frozenset())
         self.actions[name] = action
         return action
 
@@ -311,7 +345,7 @@ class Model:
 
         return state
 
-    def get_states_with(self, label: str):
+    def get_states_with(self, label: str) -> list[State]:
         """Get all states with a given label."""
         # TODO: slow, not sure if that will become a problem though
         collected_states = []
@@ -320,23 +354,59 @@ class Model:
                 collected_states.append(state)
         return collected_states
 
-    def get_state_by_id(self, state_id):
+    def get_state_by_id(self, state_id) -> State:
         """Get a state by its id."""
         if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
         return self.states[state_id]
 
-    def get_initial_state(self):
+    def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
         return self.states[0]
 
-    def get_labels(self):
+    def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
         collected_labels: set[str] = set()
         for _id, state in self.states.items():
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
 
+
+    def get_default_rewards(self) -> RewardModel:
+        """Gets the default reward model, throws a RuntimeError if there is none."""
+        if len(self.rewards) == 0:
+            raise RuntimeError("This model has no reward models.")
+        return self.rewards[0]
+
+    def get_rewards(self, name: str) -> RewardModel:
+        """Gets the reward model with the specified name. Throws a RuntimeError if said model does not exist."""
+        for model in self.rewards:
+            if model.name == name:
+                return model
+        raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def add_rewards(self, name: str) -> RewardModel:
+        """Creates a reward model with the specified name and adds returns it."""
+        for model in self.rewards:
+            if model.name == name:
+                raise RuntimeError(f"Reward model {name} already present in model.")
+        reward_model = RewardModel(name, {})
+        self.rewards.append(reward_model)
+        return reward_model
+
+    def get_rate(self, state: State) -> Number:
+        """Gets the rate of a state."""
+        if not self.supports_rates() or self.rates is None:
+            raise RuntimeError("Cannot get a rate of a deterministic-time model.")
+        return self.rates[state.id]
+
+    def set_rate(self, state: State, rate: Number):
+        """Sets the rate of a state."""
+        if not self.supports_rates() or self.rates is None:
+            raise RuntimeError("Cannot set a rate of a deterministic-time model.")
+        self.rates[state.id] = rate
+
+        
     def get_type(self):
         """Gets the type of this model"""
         return self.type
@@ -393,3 +463,8 @@ def new_dtmc(name: str | None = None):
 def new_mdp(name: str | None = None):
     """Creates an MDP."""
     return Model(name, ModelType.MDP)
+
+
+def new_ctmc(name: str | None = None):
+    """Creates a CTMC."""
+    return Model(name, ModelType.CTMC)

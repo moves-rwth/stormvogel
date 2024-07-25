@@ -1,0 +1,62 @@
+{
+  "autoApply": true,
+  "groups": {
+    "init": {
+      "borderWidth": 3,
+      "color": {
+        "background": "#e01b24",
+        "border": "#1a5fb4"
+      },
+      "shape": "circle",
+      "mass": 1,
+      "font": {
+        "color": "#000000",
+        "size": 14
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ff7800",
+        "border": "black"
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#f6d32d",
+        "border": "black"
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edges": {
+    "font": {
+      "color": "#813d9c",
+      "size": 14
+    },
+    "color": "#2ec27e"
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/rainbow.json"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "autoApply": true,
+  "groups": {
+    "init": {
+      "borderWidth": 3,
+      "color": {
+        "background": "#f9f06b",
+        "border": "black"
+      },
+      "shape": "circle",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "states": {
+      "borderWidth": 5,
+      "color": {
+        "background": "#e01b24",
+        "border": "#1c71d8"
+      },
+      "shape": "circle",
+      "mass": 19,
+      "font": {
+        "color": "#e66100",
+        "size": 44
+      }
+    },
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black"
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edges": {
+    "inherit": false,
+    "font": {
+      "color": "#26a269",
+      "size": 100
+    },
+    "color": "black"
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/newest.json"
+  }
+}
