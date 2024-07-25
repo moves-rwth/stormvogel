@@ -7,7 +7,7 @@ from typing import cast
 
 Parameter = str
 
-Number = float | Fraction | Parameter
+Number = float | Parameter | Fraction
 
 
 class ModelType(Enum):
@@ -32,10 +32,18 @@ class State:
         model: The model this state belongs to.
     """
 
+    # name: str | None
     labels: list[str]
     features: dict[str, int]
     id: int
     model: "Model"
+
+    def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
+        self.labels = labels
+        self.features = features
+        self.id = id
+        self.model = model
+        # TODO how to handle state names?
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -47,6 +55,15 @@ class State:
 
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"
+
+    def __eq__(self, other):
+        if isinstance(other, State):
+            if self.id == other.id:
+                self.labels.sort()
+                other.labels.sort()
+                return self.labels == other.labels
+            return True
+        return False
 
 
 @dataclass(frozen=True)
@@ -62,9 +79,13 @@ class Action:
 
     name: str
     labels: frozenset[str]
-
     def __str__(self):
         return f"Action {self.name}"
+
+    def __eq__(self, other):
+        if isinstance(other, Action):
+            return True
+        return False
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -88,6 +109,18 @@ class Branch:
             parts.append(f"{prob} -> {state}")
         return ", ".join(parts)
 
+    def __eq__(self, other):
+        if isinstance(other, Branch):
+            self.branch.sort()
+            other.branch.sort()
+            return self.branch == other.branch
+        return False
+
+    def __lt__(self, other):
+        if not isinstance(other, Branch):
+            return NotImplemented
+        return str(self.branch) < str(other.branch)
+
 
 @dataclass
 class Transition:
@@ -109,6 +142,15 @@ class Transition:
             else:
                 parts.append(f"{action} => {branch}")
         return "; ".join(parts + [])
+
+    def __eq__(self, other):
+        if isinstance(other, Transition):
+            self_values = list(self.transition.values())
+            other_values = list(other.transition.values())
+            self_values.sort()
+            other_values.sort()
+            return self_values == other_values
+        return False
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -329,6 +371,7 @@ class Model:
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
 
+
     def get_default_rewards(self) -> RewardModel:
         """Gets the default reward model, throws a RuntimeError if there is none."""
         if len(self.rewards) == 0:
@@ -363,6 +406,11 @@ class Model:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
         self.rates[state.id] = rate
 
+        
+    def get_type(self):
+        """Gets the type of this model"""
+        return self.type
+
     def to_dot(self) -> str:
         """Generates a dot representation of this model."""
         dot = "digraph model {\n"
@@ -395,6 +443,16 @@ class Model:
         ]
 
         return "\n".join(res)
+
+    def __eq__(self, other):
+        if isinstance(other, Model):
+            return (
+                self.type == other.type
+                and self.states == other.states
+                and self.transitions == other.transitions
+                # and self.actions == other.actions
+            )
+        return False
 
 
 def new_dtmc(name: str | None = None):

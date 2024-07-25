@@ -1,14 +1,20 @@
 import stormvogel.model
 
-# Create a new model with the name "Die"
-dtmc = stormvogel.model.new_dtmc("Die")
 
-init = dtmc.get_initial_state()
+def create_die_dtmc():
+    # Create a new model with the name "Die"
+    dtmc = stormvogel.model.new_dtmc("Die")
 
-# From the initial state, add the transition to 6 new states with probability 1/6th.
-init.set_transitions(
-    [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
-)
+    init = dtmc.get_initial_state()
 
-# Print the resulting model in dot format.
-print(dtmc.to_dot())
+    # From the initial state, add the transition to 6 new states with probability 1/6th.
+    init.set_transitions(
+        [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
+    )
+    return dtmc
+
+
+if __name__ == "__main__":
+    # Print the resulting model in dot format.
+
+    print(create_die_dtmc().to_dot())
