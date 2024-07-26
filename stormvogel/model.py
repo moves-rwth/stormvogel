@@ -208,6 +208,10 @@ class RewardModel:
         """Sets the reward at said state."""
         self.rewards[state.id] = value
 
+    def set_action_state(self, state_action_pair: int, value: Number):
+        """sets the reward at said state action pair"""
+        self.rewards[state_action_pair] = value
+
     def __eq__(self, other):
         if isinstance(other, RewardModel):
             return self.rewards == other.rewards and self.name == other.name
@@ -403,7 +407,7 @@ class Model:
         """Updates an existing reward model."""
         for index, model in enumerate(self.rewards):
             if model.name == name:
-                self.rewards[index] == rewardmodel
+                self.rewards[index] = rewardmodel
                 return True
         return False
 
