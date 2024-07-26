@@ -85,7 +85,7 @@ def example_building_mdps_01():
     # Set labels
     choice_labeling.add_label_to_choice("a", 0)
     choice_labeling.add_label_to_choice("b", 1)
-    print(choice_labeling)
+    # print(choice_labeling)
 
     # Reward models
     reward_models = {}

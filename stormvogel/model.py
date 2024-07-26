@@ -85,8 +85,13 @@ class Action:
 
     def __eq__(self, other):
         if isinstance(other, Action):
-            return True
+            return self.labels == other.labels
         return False
+
+    def __lt__(self, other):
+        if not isinstance(other, Action):
+            return NotImplemented
+        return str(self.labels) < str(other.labels)
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -309,6 +314,21 @@ class Model:
         self.actions[name] = action
         return action
 
+    def new_action_with_labels(self, name: str, labels: frozenset[str]) -> Action:
+        """Creates a new action with labels and returns it."""
+        if not self.supports_actions():
+            raise RuntimeError(
+                "Called new_action on a model that does not support actions"
+            )
+        assert self.actions is not None
+        if name in self.actions:
+            raise RuntimeError(
+                f"Tried to add action {name} but that action already exists"
+            )
+        action = Action(name, labels)
+        self.actions[name] = action
+        return action
+
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
         if not self.supports_actions():
@@ -403,14 +423,6 @@ class Model:
         self.rewards.append(reward_model)
         return reward_model
 
-    def update_reward_model(self, name: str, rewardmodel: RewardModel) -> bool:
-        """Updates an existing reward model."""
-        for index, model in enumerate(self.rewards):
-            if model.name == name:
-                self.rewards[index] = rewardmodel
-                return True
-        return False
-
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
         if not self.supports_rates() or self.rates is None:
@@ -467,7 +479,6 @@ class Model:
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
-                # and self.actions == other.actions
             )
         return False
 

@@ -25,7 +25,7 @@ def test_stormpy_to_stormvogel_and_back_dtmc():
     new_stormpy_dtmc = stormvogel.map.stormvogel_to_stormpy(stormvogel_dtmc)
     # print(new_stormpy_dtmc.transition_matrix)
 
-    # TODO also compare other parts than the matrix
+    # TODO also compare other parts than the matrix (e.g. state labels)
     assert matrix_equals(stormpy_dtmc, new_stormpy_dtmc)
 
 
@@ -50,7 +50,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
     new_stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
     # print(new_stormpy_mdp)
 
-    # TODO also compare other parts than the matrix
+    # TODO also compare other parts than the matrix (e.g. choice labels)
     assert matrix_equals(stormpy_mdp, new_stormpy_mdp)
 
 
