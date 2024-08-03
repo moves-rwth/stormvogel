@@ -4,7 +4,12 @@ import stormvogel.model
 
 def stormvogel_to_stormpy(
     model: stormvogel.model.Model,
-) -> stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp | None:
+) -> (
+    stormpy.storage.SparseDtmc
+    | stormpy.storage.SparseMdp
+    | stormpy.storage.SparseCtmc
+    | None
+):
     def build_matrix(
         model: stormvogel.model.Model,
         choice_labeling: stormpy.storage.ChoiceLabeling | None,
@@ -139,19 +144,51 @@ def stormvogel_to_stormpy(
 
         return mdp
 
+    def map_ctmc(model: stormvogel.model.Model) -> stormpy.storage.SparseCtmc:
+        """
+        Takes a simple representation of a ctmc as input and outputs a ctmc how it is represented in stormpy
+        """
+
+        # we first build the SparseMatrix
+        matrix = build_matrix(model, None)
+
+        # then we add the state labels
+        state_labeling = add_labels(model)
+
+        # then we add the rewards
+        reward_models = add_rewards(model)
+
+        # then we build the dtmc and we add the exit rates if necessary
+        components = stormpy.SparseModelComponents(
+            transition_matrix=matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models,
+            rate_transitions=True,  # for now we always set this to True since we always work with rate transitions in stormvogel
+        )
+        if not model.rates == {} and model.rates is not None:
+            components.exit_rates = list(model.rates.values())
+
+        ctmc = stormpy.storage.SparseCtmc(components)
+
+        return ctmc
+
     # we check the type to handle the model correctly
-    if model.get_type() == stormvogel.model.ModelType(1):
+    if model.get_type() == stormvogel.model.ModelType.DTMC:
         return map_dtmc(model)
-    elif model.get_type() == stormvogel.model.ModelType(2):
+    elif model.get_type() == stormvogel.model.ModelType.MDP:
         return map_mdp(model)
+    elif model.get_type() == stormvogel.model.ModelType.CTMC:
+        return map_ctmc(model)
     else:
         print("This type of model is not yet supported for this action")
         return None
 
 
 def stormpy_to_stormvogel(
-    sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
-) -> stormvogel.model.Model:
+    sparsemodel: stormpy.storage.SparseDtmc
+    | stormpy.storage.SparseMdp
+    | stormpy.storage.SparseCtmc,
+) -> stormvogel.model.Model | None:
     def add_states(
         model: stormvogel.model.Model,
         sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
@@ -245,11 +282,48 @@ def stormpy_to_stormvogel(
 
         return model
 
+    def map_ctmc(sparsectmc: stormpy.storage.SparseCtmc) -> stormvogel.model.Model:
+        """
+        Takes a ctmc stormpy representation as input and outputs a simple stormvogel representation
+        """
+
+        # we create the model (it seems names are not stored in sparsedtmcs)
+        model = stormvogel.model.new_ctmc(name=None)
+
+        # we add the states
+        add_states(model, sparsectmc)
+
+        # we add the transitions
+        matrix = sparsectmc.transition_matrix
+        for state in sparsectmc.states:
+            row = matrix.get_row(state.id)
+            transitionshorthand = [
+                (x.value(), model.get_state_by_id(x.column)) for x in row
+            ]
+            transitions = stormvogel.model.transition_from_shorthand(
+                transitionshorthand
+            )
+            model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add the reward models to the states
+        add_rewards(model, sparsectmc)
+
+        # we set the correct exit rates
+        for state in model.states.items():
+            model.set_rate(state[1], sparsectmc.exit_rates[0])
+
+        return model
+
     # we check the type to handle the sparse model correctly
-    if sparsemodel.transition_matrix.has_trivial_row_grouping:
+    if sparsemodel.model_type.name == "DTMC":
         return map_dtmc(sparsemodel)
-    else:
+    elif sparsemodel.model_type.name == "MDP":
         return map_mdp(sparsemodel)
+    elif sparsemodel.model_type.name == "CTMC":
+        return map_ctmc(sparsemodel)
+    else:
+        print("This type of model is not yet supported for this action")
+        return
 
 
 if __name__ == "__main__":

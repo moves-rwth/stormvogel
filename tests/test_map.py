@@ -4,6 +4,7 @@ import stormvogel.map
 import stormvogel.model
 import examples.stormpy_to_stormvogel
 import examples.die
+import examples.stormpy_ctmc
 import stormpy
 
 
@@ -18,10 +19,12 @@ def matrix_equals(
 
 
 def test_stormpy_to_stormvogel_and_back_dtmc():
+    # we test it for an example stormpy representation of a dtmc
     stormpy_dtmc = examples.stormpy_to_stormvogel.example_building_dtmcs_01()
     # print(stormpy_dtmc.transition_matrix)
     stormvogel_dtmc = stormvogel.map.stormpy_to_stormvogel(stormpy_dtmc)
     # print(stormvogel_dtmc)
+    assert stormvogel_dtmc is not None
     new_stormpy_dtmc = stormvogel.map.stormvogel_to_stormpy(stormvogel_dtmc)
     # print(new_stormpy_dtmc.transition_matrix)
 
@@ -42,11 +45,12 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
 
 
 def test_stormpy_to_stormvogel_and_back_mdp():
-    # we test it for monty hall mdp
+    # we test it for an example stormpy representation of an mdp
     stormpy_mdp = examples.stormpy_mdp.example_building_mdps_01()
     # print(stormpy_mdp)
     stormvogel_mdp = stormvogel.map.stormpy_to_stormvogel(stormpy_mdp)
     # print(stormvogel_mdp)
+    assert stormvogel_mdp is not None
     new_stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
     # print(new_stormpy_mdp)
 
@@ -64,3 +68,30 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     # print(new_stormvogel_mdp)
 
     assert new_stormvogel_mdp == stormvogel_mdp
+
+
+"""
+def test_stormvogel_to_stormpy_and_back_ctmc():
+    # we create a stormpy representation of an example ctmc
+    stormvogel_ctmc = examples.stormpy_ctmc.example_building_ctmcs_01()
+    # print(stormvogel_ctmc)
+    stormpy_ctmc = stormvogel.map.stormvogel_to_stormpy(stormvogel_ctmc)
+    # print(stormpy_ctmc)
+    new_stormvogel_ctmc = stormvogel.map.stormpy_to_stormvogel(stormpy_cmc)
+    # print(new_stormvogel_ctmc)
+
+    assert new_stormvogel_ctmc == stormvogel_ctmc
+"""
+
+
+def test_stormpy_to_stormvogel_and_back_ctmc():
+    # we create a stormpy representation of an example ctmc
+    stormpy_ctmc = examples.stormpy_ctmc.example_building_ctmcs_01()
+    # print(stormpy_ctmc)
+    stormvogel_ctmc = stormvogel.map.stormpy_to_stormvogel(stormpy_ctmc)
+    # print(stormvogel_ctmc)
+    assert stormvogel_ctmc is not None
+    new_stormpy_ctmc = stormvogel.map.stormvogel_to_stormpy(stormvogel_ctmc)
+    # print(new_stormpy_ctmc)
+
+    assert matrix_equals(stormpy_ctmc, new_stormpy_ctmc)
