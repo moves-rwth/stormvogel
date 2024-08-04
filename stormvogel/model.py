@@ -242,6 +242,7 @@ class Model:
     transitions: dict[int, Transition]
     actions: dict[str, Action] | None
     rewards: list[RewardModel]
+    # In ctmcs we work with rate transitions but additionally we can optionally have exit rates
     rates: dict[int, Number] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
