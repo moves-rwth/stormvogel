@@ -22,6 +22,7 @@ class Visualization:
     def __init__(
         self,
         model: Model,
+        # TODO add model checking result as optional input
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
@@ -35,6 +36,7 @@ class Visualization:
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
         self.model = model
+        # TODO self.result = result
         self.layout = layout
         if (
             name[-5:] != ".html"
@@ -112,6 +114,7 @@ class Visualization:
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
+                    # TODO add result at this state to label string
                     label=",".join(state.labels) + self.__format_rewards(state),
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
@@ -120,6 +123,7 @@ class Visualization:
             else:
                 self.nt.add_node(
                     state.id,
+                    # TODO add result at this state to label string
                     label=",".join(state.labels) + self.__format_rewards(state),
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
@@ -179,6 +183,7 @@ class Visualization:
 def show(
     model: Model,
     name: str = "model",
+    # TODO add model checking result as optional input
     notebook: bool = True,
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),

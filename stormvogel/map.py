@@ -274,6 +274,8 @@ def stormpy_to_stormvogel(
                 # TODO assign the correct action name and not only an index
                 actionlabels = frozenset(
                     sparsemdp.choice_labeling.get_labels_of_choice(i)
+                    if sparsemdp.has_choice_labeling()
+                    else str(i)
                 )
                 action = model.new_action_with_labels(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
