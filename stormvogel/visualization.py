@@ -11,6 +11,8 @@ from stormvogel.layout import DEFAULT, Layout
 from stormvogel.model import EmptyAction, Model, Number, State
 from stormvogel.rdict import rget
 
+from stormvogel import result
+
 
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
@@ -22,7 +24,7 @@ class Visualization:
     def __init__(
         self,
         model: Model,
-        # TODO add model checking result as optional input
+        result: result.Result | None,
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
@@ -42,6 +44,7 @@ class Visualization:
             name[-5:] != ".html"
         ):  # We do not require the user to explicitly type .html in their names
             name += ".html"
+        self.result = result
         self.name = name
         self.notebook = notebook
         self.cdn_resources = cdn_resources
@@ -111,11 +114,16 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
+            if self.result is not None:
+                res = "\n" + self.__format_probability(
+                    self.result.get_result_of_state(state)
+                )
+            else:
+                res = ""
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
+                    label=",".join(state.labels) + self.__format_rewards(state) + res,
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
                     group="init",
@@ -123,8 +131,7 @@ class Visualization:
             else:
                 self.nt.add_node(
                     state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
+                    label=",".join(state.labels) + self.__format_rewards(state) + res,
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
                     group="states",
@@ -182,8 +189,8 @@ class Visualization:
 
 def show(
     model: Model,
+    result: result.Result | None = None,
     name: str = "model",
-    # TODO add model checking result as optional input
     notebook: bool = True,
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),
@@ -202,7 +209,7 @@ def show(
 
     Returns: Visualization object.
     """
-    vis = Visualization(model, name, notebook, cdn_resources, layout)
+    vis = Visualization(model, result, name, notebook, cdn_resources, layout)
     if show_editor:
         vis.show_editor()
     vis.show()
