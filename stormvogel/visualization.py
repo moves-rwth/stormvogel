@@ -46,6 +46,9 @@ class Visualization:
         self.notebook = notebook
         self.cdn_resources = cdn_resources
 
+    def get_labels(self):
+        return self.model.get_labels()
+
     def __update_physics_enabled(self):
         """Enable physics iff the model has less than 10000 states."""
         if "physics" not in self.layout.layout:
@@ -63,8 +66,7 @@ class Visualization:
         self.layout.set_nt_layout(self.nt)
 
     def __generate_iframe(self):
-        # We build our own iframe because we want to embed the model in the
-        # output instead of saving it to a file
+        """We build our own iframe because we want to embed the model in the output instead of saving it to a file."""
         html_code = self.nt.generate_html(name=self.name, notebook=True)
         return f"""
             <iframe
@@ -111,24 +113,27 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            if state == self.model.get_initial_state():
-                self.nt.add_node(
-                    state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="init",
-                )
-            else:
-                self.nt.add_node(
-                    state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="states",
-                )
+            # Pick the first label that has overwritten layout.
+            group = None
+            for label in state.labels:
+                if label in ["init", "states", "actions"] or rget(
+                    self.layout.layout, ["groups", label, "enabled"]
+                ):
+                    group = label
+            # If no enabled lable colour group was found.
+            if group is None:
+                if state == self.model.get_initial_state():
+                    group = "init"
+                else:
+                    group = "states"
+            self.nt.add_node(
+                state.id,
+                # TODO add result at this state to label string
+                label=",".join(state.labels) + self.__format_rewards(state),
+                color=None,  # type: ignore
+                shape=None,  # type: ignore
+                group=group,
+            )
 
     def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.

@@ -2,6 +2,7 @@
   "autoApply": true,
   "groups": {
     "init": {
+      "enabled": true,
       "borderWidth": 3,
       "color": {
         "background": "white",
@@ -15,12 +16,13 @@
       }
     },
     "states": {
+      "enabled": true,
       "borderWidth": 1,
       "color": {
         "background": "white",
         "border": "black"
       },
-      "shape": "ellipse",
+      "shape": "diamond",
       "mass": 1,
       "font": {
         "color": "black",
@@ -28,6 +30,7 @@
       }
     },
     "actions": {
+      "enabled": true,
       "borderWidth": 1,
       "color": {
         "background": "white",

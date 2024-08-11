@@ -1,5 +1,6 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+import copy
 from pyvis.network import Network
 import os
 import json
@@ -45,6 +46,31 @@ class Layout:
             self.layout = merge_dict(default_dict, parsed_dict)
         self.vis = None
 
+    def __update_dynamic_labels(self, labels: list[str]):
+        """Add the following labels to the layout."""
+        for label in labels:
+            states_group_copy = copy.deepcopy(self.layout["groups"]["states"])
+            if label not in self.layout["groups"]:
+                states_group_copy["color"]["background"] = "white"
+                states_group_copy["enabled"] = False
+            else:
+                states_group_copy["color"]["background"] = self.layout["groups"][label][
+                    "color"
+                ]["background"]
+                states_group_copy["enabled"] = self.layout["groups"][label]["enabled"]
+            self.layout["groups"][label] = states_group_copy
+
+    def __add_labels_to_schema(self, schema: dict, labels: list[str]):
+        """Dynamically add options to change color for each label to gui."""
+        if len(labels) > 0:
+            schema["groups"]["__label_title"] = {"__html": "<h3>Labels</h3>"}
+        for label in labels:
+            if label not in schema["groups"]:
+                schema["groups"][label] = {
+                    "__html": f"<h4>{label}</h4>",
+                    "__use_macro": "__label_color_macro",
+                }
+
     def show_editor(self, vis=None):
         """Display an interactive layout editor, according to the schema."""
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
@@ -54,12 +80,16 @@ class Layout:
         def try_update():
             """Try to update unless impossible (happens if show was not called yet)."""
             if hasattr(vis, "update"):
+                self.__update_dynamic_labels(vis.get_labels())  # type: ignore
                 vis.update()  # type: ignore
 
         def maybe_update():
             """Try to update if autoApply is enabled."""
             if rget(self.layout, ["autoApply"]):
                 try_update()
+
+        if hasattr(vis, "get_labels"):
+            self.__add_labels_to_schema(schema, vis.get_labels())  # type: ignore
 
         Editor(schema=schema, update_dict=self.layout, on_update=maybe_update)
         SaveButton(self)

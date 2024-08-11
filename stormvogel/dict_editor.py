@@ -74,8 +74,8 @@ class Editor:
         for k, v in sub_schema.items():
             new_path = copy.deepcopy(path)
             new_path.append(k)
-            if k == "__define_macro":
-                self.macros[v["__name"]] = v["__value"]
+            if k == "__macros":
+                self.macros = v
             elif k == "__html":
                 display(HTML(v))
             elif isinstance(v, dict):
