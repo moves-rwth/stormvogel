@@ -156,6 +156,7 @@ class Visualization:
         Also handles creating nodes for actions and their respective transitions.
         Note that an action may appear multiple times in the model with a different state as source."""
         action_id = self.ACTION_ID_OFFSET
+        scheduler = self.result.scheduler if self.result is not None else None
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -173,7 +174,10 @@ class Visualization:
                     self.nt.add_node(
                         n_id=action_id,
                         label=action.name,
-                        color=None,  # type: ignore
+                        color=None
+                        if scheduler is not None
+                        and scheduler[state_id] == str(list(action.labels)[0])
+                        else None,  # TODO set different color if scheduler chooses this action # type: ignore
                         shape=None,  # type: ignore
                         group="actions",
                     )
