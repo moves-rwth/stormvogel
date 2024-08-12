@@ -115,11 +115,17 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            res = (
-                "\n" + self.__format_probability(self.result.get_result_of_state(state))
+            result_of_state = (
+                self.result.get_result_of_state(state)
                 if self.result is not None
                 else ""
             )
+            formatted_result_of_state = (
+                self.__format_probability(result_of_state)
+                if result_of_state is not None
+                else ""
+            )
+            res = "\n" + formatted_result_of_state
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
