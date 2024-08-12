@@ -15,6 +15,7 @@ class Result:
     """
 
     model: stormvogel.model.Model
+    # these are both hashed by the state id:
     values: dict[int, stormvogel.model.Number]
     scheduler: dict[int, stormvogel.model.Action] | None
 
@@ -61,6 +62,13 @@ class Result:
         else:
             print("this result does not have a scheduler")
             return None
+
+    def __str__(self) -> str:
+        s = {}
+        if self.scheduler is not None:
+            for index, action in enumerate(self.scheduler.values()):
+                s[index] = str(list(action.labels)[0])
+        return "values: \n " + str(self.values) + "\n" + "scheduler: \n " + str(s)
 
 
 def convert_model_checking_result(
