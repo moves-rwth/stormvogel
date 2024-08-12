@@ -1,6 +1,7 @@
 """Contains the code responsible for model visualization."""
 
 import random
+import math
 from fractions import Fraction
 from html import escape
 
@@ -114,12 +115,11 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            if self.result is not None:
-                res = "\n" + self.__format_probability(
-                    self.result.get_result_of_state(state)
-                )
-            else:
-                res = ""
+            res = (
+                "\n" + self.__format_probability(self.result.get_result_of_state(state))
+                if self.result is not None
+                else ""
+            )
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
@@ -140,13 +140,16 @@ class Visualization:
     def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
-        if rget(self.layout.layout, ["numbers", "fractions"]):
-            return str(Fraction(prob).limit_denominator(1000))
+        if isinstance(prob, str) or math.isinf(prob):
+            return str(prob)
         else:
-            print(rget(self.layout.layout, ["numbers", "digits"]))
-            return str(
-                round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
-            )
+            if rget(self.layout.layout, ["numbers", "fractions"]):
+                return str(Fraction(prob).limit_denominator(1000))
+            else:
+                print(rget(self.layout.layout, ["numbers", "digits"]))
+                return str(
+                    round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
+                )
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
