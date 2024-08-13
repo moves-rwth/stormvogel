@@ -121,11 +121,11 @@ class Visualization:
                 else ""
             )
             formatted_result_of_state = (
-                self.__format_probability(result_of_state)
+                "\n" + self.__format_probability(result_of_state)
                 if result_of_state is not None
                 else ""
             )
-            res = "\n" + formatted_result_of_state
+            res = formatted_result_of_state
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,

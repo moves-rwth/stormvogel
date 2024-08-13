@@ -68,7 +68,11 @@ class Result:
         if self.scheduler is not None:
             for index, action in enumerate(self.scheduler.values()):
                 s[index] = str(list(action.labels)[0])
-        return "values: \n " + str(self.values) + "\n" + "scheduler: \n " + str(s)
+
+        add = ""
+        if self.model.name is not None:
+            add = "model: " + str(self.model.name) + "\n"
+        return add + "values: \n " + str(self.values) + "\n" + "scheduler: \n " + str(s)
 
 
 def convert_model_checking_result(
