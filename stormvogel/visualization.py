@@ -1,6 +1,7 @@
 """Contains the code responsible for model visualization."""
 
 import random
+import math
 from fractions import Fraction
 from html import escape
 
@@ -10,6 +11,8 @@ from pyvis.network import Network
 from stormvogel.layout import DEFAULT, Layout
 from stormvogel.model import EmptyAction, Model, Number, State
 from stormvogel.rdict import rget
+
+from stormvogel import result
 
 
 class Visualization:
@@ -22,7 +25,7 @@ class Visualization:
     def __init__(
         self,
         model: Model,
-        # TODO add model checking result as optional input
+        result: result.Result | None,
         name: str = "model",
         notebook: bool = True,
         cdn_resources: str = "remote",
@@ -42,6 +45,7 @@ class Visualization:
             name[-5:] != ".html"
         ):  # We do not require the user to explicitly type .html in their names
             name += ".html"
+        self.result = result
         self.name = name
         self.notebook = notebook
         self.cdn_resources = cdn_resources
@@ -111,11 +115,21 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
+            result_of_state = (
+                self.result.get_result_of_state(state)
+                if self.result is not None
+                else ""
+            )
+            formatted_result_of_state = (
+                "\n" + self.__format_probability(result_of_state)
+                if result_of_state is not None
+                else ""
+            )
+            res = formatted_result_of_state
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
+                    label=",".join(state.labels) + self.__format_rewards(state) + res,
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
                     group="init",
@@ -123,8 +137,7 @@ class Visualization:
             else:
                 self.nt.add_node(
                     state.id,
-                    # TODO add result at this state to label string
-                    label=",".join(state.labels) + self.__format_rewards(state),
+                    label=",".join(state.labels) + self.__format_rewards(state) + res,
                     color=None,  # type: ignore
                     shape=None,  # type: ignore
                     group="states",
@@ -133,19 +146,23 @@ class Visualization:
     def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
-        if rget(self.layout.layout, ["numbers", "fractions"]):
-            return str(Fraction(prob).limit_denominator(1000))
+        if isinstance(prob, str) or math.isinf(prob):
+            return str(prob)
         else:
-            print(rget(self.layout.layout, ["numbers", "digits"]))
-            return str(
-                round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
-            )
+            if rget(self.layout.layout, ["numbers", "fractions"]):
+                return str(Fraction(prob).limit_denominator(1000))
+            else:
+                print(rget(self.layout.layout, ["numbers", "digits"]))
+                return str(
+                    round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
+                )
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
         Also handles creating nodes for actions and their respective transitions.
         Note that an action may appear multiple times in the model with a different state as source."""
         action_id = self.ACTION_ID_OFFSET
+        scheduler = self.result.scheduler if self.result is not None else None
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -163,7 +180,10 @@ class Visualization:
                     self.nt.add_node(
                         n_id=action_id,
                         label=action.name,
-                        color=None,  # type: ignore
+                        color=None
+                        if scheduler is not None
+                        and scheduler[state_id] == str(list(action.labels)[0])
+                        else None,  # TODO set different color if scheduler chooses this action # type: ignore
                         shape=None,  # type: ignore
                         group="actions",
                     )
@@ -182,8 +202,8 @@ class Visualization:
 
 def show(
     model: Model,
+    result: result.Result | None = None,
     name: str = "model",
-    # TODO add model checking result as optional input
     notebook: bool = True,
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),
@@ -202,7 +222,7 @@ def show(
 
     Returns: Visualization object.
     """
-    vis = Visualization(model, name, notebook, cdn_resources, layout)
+    vis = Visualization(model, result, name, notebook, cdn_resources, layout)
     if show_editor:
         vis.show_editor()
     vis.show()
