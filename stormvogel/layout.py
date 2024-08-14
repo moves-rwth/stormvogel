@@ -65,8 +65,7 @@ class Layout:
                 self.schema["groups"][
                     g
                 ] = {  # dict_editor already handles macros, so there is no need to do it manually here.
-                    "__html": f"<h3>{g}</h3>",
-                    "__use_macro": "__group_macro",
+                    "__use_macro": "__group_macro"
                 }
 
         # Remove unused groups, so that the Misc values can be used.

@@ -1,8 +1,19 @@
 """Generate editor menu from a schema dict."""
 
 from typing import Any, Callable
-from IPython.display import display, HTML
-from ipywidgets import interact, IntSlider, ColorPicker, Checkbox, Text, Dropdown
+from IPython.display import display
+from ipywidgets import (
+    interactive,
+    IntSlider,
+    ColorPicker,
+    Checkbox,
+    Text,
+    Dropdown,
+    Accordion,
+    VBox,
+    HTML,
+    Widget,
+)
 import copy
 
 from stormvogel.rdict import rget, rset
@@ -44,7 +55,7 @@ class WidgetWrapper:
         self.update_dict = update_dict
         self.path = path
         self.on_update = on_update
-        interact(
+        self.widget = interactive(
             self.on_edit, x=w(value=initial_value, description=description, **kwargs)
         )
 
@@ -70,29 +81,30 @@ class Editor:
         self.on_update = on_update
         self.update_dict = update_dict
         self.macros = {}
-        self.recurse_create(schema, [])
+        result = self.recurse_create(schema, [])
+        print(result.children)
+        display(result)
 
-    def recurse_create(self, sub_schema: dict, path: list) -> None:
+    def recurse_create(self, sub_schema: dict, path: list) -> Widget:
+        acc_items = []
         for k, v in sub_schema.items():
             new_path = copy.deepcopy(path)
             new_path.append(k)
+            if k == "__html":
+                acc_items.append(HTML(v))
             if k == "__macros":
                 self.macros = v
-            elif k == "__html":
-                display(HTML(v))
             elif isinstance(v, dict):
-                if (
-                    "__use_macro" in v or "__description" in v
-                ) and "__html" in v:  # Also render html within widgets and marcos.
-                    display(HTML(v["__html"]))
+                if "__html" in v and "__widget" in v:
+                    acc_items.append(HTML(v["__html"]))
                 if "__use_macro" in v:
                     macro_value = self.macros[v["__use_macro"]]
-                    self.recurse_create(macro_value, new_path)
+                    acc_items.append(self.recurse_create(macro_value, new_path))
                 elif (
                     "__description" in v
                 ):  # v is a widget, because it has a defined __description.
                     if "__kwargs" in v:  # Also pass arguments if relevant.
-                        WidgetWrapper(
+                        w = WidgetWrapper(
                             description=v["__description"],
                             widget=v["__widget"],
                             initial_value=rget(self.update_dict, new_path),
@@ -102,7 +114,7 @@ class Editor:
                             **v["__kwargs"],
                         )
                     else:
-                        WidgetWrapper(
+                        w = WidgetWrapper(
                             description=v["__description"],
                             widget=v["__widget"],
                             initial_value=rget(self.update_dict, new_path),
@@ -110,5 +122,11 @@ class Editor:
                             update_dict=self.update_dict,
                             on_update=self.on_update,
                         )
+                    acc_items.append(w.widget)
                 else:  # v is not a widget or macro, then call recursively.
-                    self.recurse_create(v, new_path)
+                    acc_items.append(self.recurse_create(v, new_path))
+        if "__collapse" in sub_schema and sub_schema["__collapse"]:
+            acc = Accordion(children=[VBox(children=acc_items)], titles=[path[-1]])
+        else:
+            acc = VBox(children=acc_items)
+        return acc

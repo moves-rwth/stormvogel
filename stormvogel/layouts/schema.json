@@ -1,6 +1,7 @@
 {
   "__macros": {
     "__group_macro": {
+      "__collapse": true,
       "borderWidth": {
         "__description": "Border width",
         "__widget": "IntSlider"
@@ -34,6 +35,11 @@
           ]
         }
       },
+      "mass": {
+        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
+        "__description": "Mass",
+        "__widget": "IntSlider"
+      },
       "font": {
         "__html": "<h4>Font</h4>",
         "color": {
@@ -44,38 +50,31 @@
           "__description": "Size",
           "__widget": "IntSlider"
         }
-      },
-      "mass": {
-        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
-        "__description": "Mass",
-        "__widget": "IntSlider"
       }
     }
   },
   "__html": "<h2>Interactive layout editor</h2>",
   "autoApply": {
-    "__html": "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
-    "__description": "Enabled",
+    "__html": "<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
+    "__description": "Auto apply",
     "__widget": "Checkbox"
   },
   "groups": {
     "states": {
-      "__html": "<h3>Misc states</h3>",
       "__use_macro": "__group_macro"
     },
     "actions": {
-      "__html": "<h3>Misc Actions</h3>",
       "__use_macro": "__group_macro"
     }
   },
   "edges": {
-    "__html": "<h3>Edges</h3>",
+    "__collapse": true,
     "color": {
       "__description": "Color",
       "__widget": "ColorPicker"
     },
     "font": {
-      "__html": "<h4>Font</h4>",
+      "__html": "<p>Font</p>",
       "color": {
         "__description": "Color",
         "__widget": "ColorPicker"
