@@ -85,7 +85,9 @@ class Action:
 
     def __eq__(self, other):
         if isinstance(other, Action):
-            return self.labels == other.labels
+            return (
+                self.labels == other.labels and self.name == other.name
+            )  # TODO I think we should also compare names like this.
         return False
 
     def __lt__(self, other):

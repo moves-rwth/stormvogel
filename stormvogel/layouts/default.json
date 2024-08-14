@@ -1,28 +1,28 @@
 {
   "autoApply": true,
-  "groups": {
-    "init": {
-      "enabled": true,
-      "borderWidth": 3,
-      "color": {
-        "background": "white",
-        "border": "black"
-      },
-      "shape": "circle",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "states": {
-      "enabled": true,
+  "__fake_macros": {
+    "__group_macro": {
       "borderWidth": 1,
       "color": {
         "background": "white",
         "border": "black"
       },
-      "shape": "diamond",
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "groups": {
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black"
+      },
+      "shape": "ellipse",
       "mass": 1,
       "font": {
         "color": "black",
@@ -30,13 +30,12 @@
       }
     },
     "actions": {
-      "enabled": true,
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "lightblue",
         "border": "black"
       },
-      "shape": "box",
+      "shape": "diamond",
       "mass": 1,
       "font": {
         "color": "black",

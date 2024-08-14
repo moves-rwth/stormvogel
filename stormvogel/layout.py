@@ -44,43 +44,44 @@ class Layout:
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
             self.layout = merge_dict(default_dict, parsed_dict)
-        self.vis = None
 
-    def __update_dynamic_labels(self, labels: list[str]):
-        """Add the following labels to the layout."""
-        for label in labels:
-            states_group_copy = copy.deepcopy(self.layout["groups"]["states"])
-            if label not in self.layout["groups"]:
-                states_group_copy["color"]["background"] = "white"
-                states_group_copy["enabled"] = False
-            else:
-                states_group_copy["color"]["background"] = self.layout["groups"][label][
-                    "color"
-                ]["background"]
-                states_group_copy["enabled"] = self.layout["groups"][label]["enabled"]
-            self.layout["groups"][label] = states_group_copy
+        # Load in schema for the dict_editor.
+        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
+            schema_str = f.read()
+        self.schema = json.loads(schema_str)
 
-    def __add_labels_to_schema(self, schema: dict, labels: list[str]):
-        """Dynamically add options to change color for each label to gui."""
-        if len(labels) > 0:
-            schema["groups"]["__label_title"] = {"__html": "<h3>Labels</h3>"}
-        for label in labels:
-            if label not in schema["groups"]:
-                schema["groups"][label] = {
-                    "__html": f"<h4>{label}</h4>",
-                    "__use_macro": "__label_color_macro",
+    def set_groups(self, groups: list[str]):
+        """Add the specified groups to the layout and schema.
+        They will use the specified __group_macro.
+        Note that the changes to schema won't be saved to schema.json.
+        Remove groups that aren't used."""
+        for g in groups:
+            if g not in self.layout["groups"]:
+                layout_group_macro = copy.deepcopy(
+                    self.layout["__fake_macros"]["__group_macro"]
+                )
+                self.layout["groups"][g] = layout_group_macro
+            if g not in self.schema["groups"]:
+                self.schema["groups"][
+                    g
+                ] = {  # dict_editor already handles macros, so there is no need to do it manually here.
+                    "__html": f"<h3>{g}</h3>",
+                    "__use_macro": "__group_macro",
                 }
+
+        # Remove unused groups, so that the Misc values can be used.
+        for existing_group in self.layout["groups"].keys():
+            if existing_group not in groups + ["states", "actions"]:
+                self.layout["groups"].pop(existing_group)
+        # print(f"""layout: {self.layout["groups"]}""")
+        # print(f"""schema: {self.schema["groups"]}""")
 
     def show_editor(self, vis=None):
         """Display an interactive layout editor, according to the schema."""
-        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
-            schema_str = f.read()
-        schema = json.loads(schema_str)
 
         def try_update():
             """Try to update unless impossible (happens if show was not called yet)."""
             if hasattr(vis, "update"):
-                self.__update_dynamic_labels(vis.get_labels())  # type: ignore
                 vis.update()  # type: ignore
 
         def maybe_update():
@@ -88,10 +89,7 @@ class Layout:
             if rget(self.layout, ["autoApply"]):
                 try_update()
 
-        if hasattr(vis, "get_labels"):
-            self.__add_labels_to_schema(schema, vis.get_labels())  # type: ignore
-
-        Editor(schema=schema, update_dict=self.layout, on_update=maybe_update)
+        Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
         SaveButton(self)
         ApplyButton(self, try_update)
 
@@ -123,10 +121,4 @@ class Layout:
 def DEFAULT():
     return Layout(
         os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json"), path_relative=False
-    )
-
-
-def RAINBOW():
-    return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/rainbow.json"), path_relative=False
     )

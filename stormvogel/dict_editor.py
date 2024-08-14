@@ -22,7 +22,7 @@ class WidgetWrapper:
 
     def __init__(
         self,
-        title: str,
+        description: str,
         widget: str,
         path: list[str],
         initial_value: Any,
@@ -44,7 +44,9 @@ class WidgetWrapper:
         self.update_dict = update_dict
         self.path = path
         self.on_update = on_update
-        interact(self.on_edit, x=w(value=initial_value, description=title, **kwargs))
+        interact(
+            self.on_edit, x=w(value=initial_value, description=description, **kwargs)
+        )
 
     def on_edit(self, x: Any) -> None:
         """Called when a user changes something in the widget."""
@@ -80,16 +82,18 @@ class Editor:
                 display(HTML(v))
             elif isinstance(v, dict):
                 if (
-                    "__use_macro" in v or "__title" in v
+                    "__use_macro" in v or "__description" in v
                 ) and "__html" in v:  # Also render html within widgets and marcos.
                     display(HTML(v["__html"]))
                 if "__use_macro" in v:
                     macro_value = self.macros[v["__use_macro"]]
                     self.recurse_create(macro_value, new_path)
-                elif "__title" in v:  # v is a widget, because it has a defined title.
+                elif (
+                    "__description" in v
+                ):  # v is a widget, because it has a defined __description.
                     if "__kwargs" in v:  # Also pass arguments if relevant.
                         WidgetWrapper(
-                            title=v["__title"],
+                            description=v["__description"],
                             widget=v["__widget"],
                             initial_value=rget(self.update_dict, new_path),
                             path=new_path,
@@ -99,7 +103,7 @@ class Editor:
                         )
                     else:
                         WidgetWrapper(
-                            title=v["__title"],
+                            description=v["__description"],
                             widget=v["__widget"],
                             initial_value=rget(self.update_dict, new_path),
                             path=new_path,
