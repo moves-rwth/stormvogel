@@ -74,7 +74,7 @@ def test_stormvogel_to_stormpy_and_back_mdp():
 def test_stormvogel_to_stormpy_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
     stormvogel_ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    print(stormvogel_ctmc)
+    # print(stormvogel_ctmc)
     stormpy_ctmc = stormvogel.map.stormvogel_to_stormpy(stormvogel_ctmc)
     # print(stormpy_ctmc)
     new_stormvogel_ctmc = stormvogel.map.stormpy_to_stormvogel(stormpy_ctmc)
