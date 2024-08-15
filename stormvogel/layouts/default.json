@@ -35,7 +35,20 @@
         "background": "lightblue",
         "border": "black"
       },
-      "shape": "diamond",
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
+        "border": "black"
+      },
+      "shape": "box",
       "mass": 1,
       "font": {
         "color": "black",
@@ -48,11 +61,18 @@
       "color": "black",
       "size": 14
     },
-    "color": "black"
+    "color": {
+      "color": "black"
+    }
   },
   "numbers": {
     "fractions": true,
     "digits": 5
+  },
+  "resultSymbol": "\u2606",
+  "schedColor": true,
+  "physics": {
+    "enabled": true
   },
   "layout": {
     "randomSeed": 5

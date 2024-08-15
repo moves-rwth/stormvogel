@@ -69,18 +69,18 @@ class Layout:
                 }
 
         # Remove unused groups, so that the Misc values can be used.
-        for existing_group in self.layout["groups"].keys():
-            if existing_group not in groups + ["states", "actions"]:
-                self.layout["groups"].pop(existing_group)
-        # print(f"""layout: {self.layout["groups"]}""")
-        # print(f"""schema: {self.schema["groups"]}""")
+        # for existing_group in self.layout["groups"].keys():
+        #     if existing_group not in groups + ["states", "actions"]:
+        #         self.layout["groups"].pop(existing_group)
 
     def show_editor(self, vis=None):
         """Display an interactive layout editor, according to the schema."""
+        done_loading = False
 
         def try_update():
-            """Try to update unless impossible (happens if show was not called yet)."""
-            if hasattr(vis, "update"):
+            """Try to update the visualization unless impossible (happens if show was not called yet),
+            or the editor menu is not done loading yet."""
+            if hasattr(vis, "update") and done_loading:
                 vis.update()  # type: ignore
 
         def maybe_update():
@@ -91,6 +91,7 @@ class Layout:
         Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
         SaveButton(self)
         ApplyButton(self, try_update)
+        done_loading = True
 
     def set_nt_layout(self, nt: Network) -> None:
         """Set the layout of the network passed as the arugment."""

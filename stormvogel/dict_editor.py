@@ -82,7 +82,6 @@ class Editor:
         self.update_dict = update_dict
         self.macros = {}
         result = self.recurse_create(schema, [])
-        print(result.children)
         display(result)
 
     def recurse_create(self, sub_schema: dict, path: list) -> Widget:
