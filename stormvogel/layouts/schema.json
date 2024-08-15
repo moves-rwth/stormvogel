@@ -53,10 +53,8 @@
       }
     }
   },
-  "__html": "<h2>Interactive layout editor</h2>",
   "autoApply": {
-    "__html": "<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
-    "__description": "Auto apply",
+    "__description": "Auto apply changes",
     "__widget": "Checkbox"
   },
   "groups": {
@@ -65,13 +63,18 @@
     },
     "actions": {
       "__use_macro": "__group_macro"
+    },
+    "scheduled_actions": {
+      "__use_macro": "__group_macro"
     }
   },
   "edges": {
     "__collapse": true,
     "color": {
-      "__description": "Color",
-      "__widget": "ColorPicker"
+      "color": {
+        "__description": "Color",
+        "__widget": "ColorPicker"
+      }
     },
     "font": {
       "__html": "<p>Font</p>",
@@ -84,6 +87,33 @@
         "__widget": "IntSlider"
       }
     }
+  },
+  "numbers": {
+    "__collapse": true,
+    "fractions": {
+      "__description": "Fractions",
+      "__widget": "Checkbox"
+    },
+    "digits": {
+      "__description": "Round digits",
+      "__widget": "IntSlider"
+    }
+  },
+  "physics": {
+    "__collapse": true,
+    "__html": "<p>Always disabled if over 10000 states.</p>",
+    "enabled": {
+      "__description": "enabled",
+      "__widget": "Checkbox"
+    }
+  },
+  "resultSymbol": {
+    "__description": "Result symbol",
+    "__widget": "Text"
+  },
+  "schedColor": {
+    "__description": "Scheduled edge color",
+    "__widget": "Checkbox"
   },
   "saving": {
     "__html": "<h4>Save / apply changes</h4>",

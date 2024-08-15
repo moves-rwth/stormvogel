@@ -9,7 +9,7 @@ from IPython.display import HTML, display
 from pyvis.network import Network
 
 from stormvogel.layout import DEFAULT, Layout
-from stormvogel.model import EmptyAction, Model, Number, State
+from stormvogel.model import EmptyAction, Model, Number, State, Action
 from stormvogel.rdict import rget
 
 from stormvogel import result
@@ -57,16 +57,17 @@ class Visualization:
         self.notebook = notebook
         self.cdn_resources = cdn_resources
         self.reformatted_labels = list(map(und, separate_edit_labels))
-        self.__reload_nt()
+        self.layout.set_groups(self.reformatted_labels)
 
     def get_labels(self):
         return self.model.get_labels()
 
     def __update_physics_enabled(self):
-        """Enable physics iff the model has less than 10000 states."""
+        """Disable physics if the model has more than 10000 states."""
         if "physics" not in self.layout.layout:
             self.layout.layout["physics"] = {}
-        self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
+        if len(self.model.states) > 10000:
+            self.layout.layout["physics"]["enabled"] = False
 
     def __reload_nt(self):
         """(Re)load the pyvis network."""
@@ -113,39 +114,45 @@ class Visualization:
         self.layout.show_editor(self)
 
     def __format_rewards(self, s: State) -> str:
-        """Create a string that contains the state-exit reward for this state. Starts with newline."""
+        """Create a string that represents the state-exit reward for this state. Starts with newline."""
         res = ""
         for reward_model in self.model.rewards:
             try:
-                res += f"\n{reward_model.name}: {reward_model.get(s)}"
+                res += f"\n{reward_model.name} {reward_model.get(s)}"
             except (
                 KeyError
             ):  # If this reward model does not have a reward for this state.
                 pass
         return res
 
+    def __format_result(self, s: State) -> str:
+        """Create a string that represents the result of this state. Starts with a newline."""
+        if self.result is None or self.result.get_result_of_state(s) is None:
+            return ""
+        result_symbol = self.layout.layout["resultSymbol"]
+        return (
+            "\n"
+            + result_symbol
+            + " "
+            + self.__format_probability(self.result.get_result_of_state(s))  # type: ignore
+        )
+
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            maybe_result = (
-                self.result.get_result_of_state(state)
-                if self.result is not None
-                else None
-            )
-            state_result = maybe_result if maybe_result is not None else ""
-            result_prob = "\nResult: " + self.__format_probability(state_result)
+            result = self.__format_result(state)
             reward = self.__format_rewards(state)
-
             # Check if this state's first label is specified in the layout.
             group = (
                 und(state.labels[0])
-                if und(state.labels[0]) in self.layout.layout["groups"].keys()
-                else "states"
+                if len(state.labels) > 0
+                and und(state.labels[0]) in self.layout.layout["groups"].keys()
+                else "states"  # If no label is specified, simply add it to "states".
             )
 
             self.nt.add_node(
                 state.id,
-                label=",".join(state.labels) + result_prob + reward,
+                label="{" + ",".join(state.labels) + "}" + result + reward,
                 color=None,  # type: ignore
                 shape=None,  # type: ignore
                 group=group,
@@ -165,17 +172,27 @@ class Visualization:
                 round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
             )
 
+    def __determine_group(self, state_id: int, a: Action) -> str:
+        """Determine the group of Action a, coming from the state with state_id."""
+        if self.result is None or self.result.scheduler is None:
+            return "actions"
+        if self.result.scheduler[state_id] == a:
+            return "scheduled_actions"
+        else:
+            return "actions"
+
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
         Also handles creating nodes for actions and their respective transitions.
         Note that an action may appear multiple times in the model with a different state as source."""
         action_id = self.ACTION_ID_OFFSET
-        scheduler = self.result.scheduler if self.result is not None else None
+
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
-                if action == EmptyAction:
-                    # Only draw probabilities
+                if (
+                    action == EmptyAction
+                ):  # If an action is empty, simply draw a transition from state to state.
                     for prob, target in branch.branch:
                         self.nt.add_edge(
                             state_id,
@@ -183,26 +200,32 @@ class Visualization:
                             color=None,  # type: ignore
                             label=self.__format_probability(prob),
                         )
-                else:
+                else:  # An actual action.
+                    group = self.__determine_group(state_id, action)
+                    edge_color = None
+                    if (
+                        group == "scheduled_actions"
+                        and self.layout.layout["schedColor"]
+                    ):
+                        edge_color = self.layout.layout["groups"]["scheduled_actions"][
+                            "color"
+                        ]["background"]
                     # Add the action's node
                     self.nt.add_node(
                         n_id=action_id,
                         label=action.name,
-                        color=None
-                        if scheduler is not None
-                        and scheduler[state_id] == str(list(action.labels)[0])
-                        else None,  # TODO set different color if scheduler chooses this action # type: ignore
+                        color=None,  # type: ignore
                         shape=None,  # type: ignore
-                        group="actions",
+                        group=group,
                     )
                     # Add transition from this state TO the action.
-                    self.nt.add_edge(state_id, action_id, color=None)  # type: ignore
+                    self.nt.add_edge(state_id, action_id, color=edge_color)  # type: ignore
                     # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
                         self.nt.add_edge(
                             action_id,
                             target.id,
-                            color=None,  # type: ignore
+                            color=edge_color,  # type: ignore
                             label=self.__format_probability(prob),
                         )
                     action_id += 1
@@ -235,7 +258,6 @@ def show(
     vis = Visualization(
         model, result, name, notebook, cdn_resources, layout, separate_edit_labels
     )
-    print(vis.layout.layout)
     if show_editor:
         vis.show_editor()
     vis.show()
