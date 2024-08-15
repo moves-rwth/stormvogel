@@ -1,19 +1,21 @@
 {
   "autoApply": true,
-  "groups": {
-    "init": {
-      "borderWidth": 3,
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
       "color": {
         "background": "white",
         "border": "black"
       },
-      "shape": "circle",
+      "shape": "ellipse",
       "mass": 1,
       "font": {
         "color": "black",
         "size": 14
       }
-    },
+    }
+  },
+  "groups": {
     "states": {
       "borderWidth": 1,
       "color": {
@@ -30,7 +32,20 @@
     "actions": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "lightblue",
+        "border": "black"
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
         "border": "black"
       },
       "shape": "box",
@@ -46,11 +61,18 @@
       "color": "black",
       "size": 14
     },
-    "color": "black"
+    "color": {
+      "color": "black"
+    }
   },
   "numbers": {
     "fractions": true,
     "digits": 5
+  },
+  "resultSymbol": "\u2606",
+  "schedColor": true,
+  "physics": {
+    "enabled": true
   },
   "layout": {
     "randomSeed": 5
