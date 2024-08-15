@@ -15,6 +15,11 @@ from stormvogel.rdict import rget
 from stormvogel import result
 
 
+def und(x: str) -> str:
+    """Replace space by underscore"""
+    return x.replace(" ", "_")
+
+
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
@@ -30,6 +35,7 @@ class Visualization:
         notebook: bool = True,
         cdn_resources: str = "remote",
         layout: Layout = DEFAULT(),
+        separate_edit_labels: list[str] = [],
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -37,6 +43,7 @@ class Visualization:
             model (Model): The stormvogel model to be displayed.
             name (str, optional): The name of the resulting html file. May or may not include .html extension.
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
+            separate_edit_labels (list[str]): List of labels that are edited separately. Defaults to [].
         """
         self.model = model
         # TODO self.result = result
@@ -49,6 +56,11 @@ class Visualization:
         self.name = name
         self.notebook = notebook
         self.cdn_resources = cdn_resources
+        self.reformatted_labels = list(map(und, separate_edit_labels))
+        self.__reload_nt()
+
+    def get_labels(self):
+        return self.model.get_labels()
 
     def __update_physics_enabled(self):
         """Enable physics iff the model has less than 10000 states."""
@@ -61,14 +73,14 @@ class Visualization:
         self.nt = Network(
             notebook=self.notebook, directed=True, cdn_resources=self.cdn_resources
         )
+        self.layout.set_groups(self.reformatted_labels)
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
         self.layout.set_nt_layout(self.nt)
 
     def __generate_iframe(self):
-        # We build our own iframe because we want to embed the model in the
-        # output instead of saving it to a file
+        """We build our own iframe because we want to embed the model in the output instead of saving it to a file."""
         html_code = self.nt.generate_html(name=self.name, notebook=True)
         return f"""
             <iframe
@@ -101,7 +113,7 @@ class Visualization:
         self.layout.show_editor(self)
 
     def __format_rewards(self, s: State) -> str:
-        """Create a string that contains the state-exit reward for this state. Starts with newline"""
+        """Create a string that contains the state-exit reward for this state. Starts with newline."""
         res = ""
         for reward_model in self.model.rewards:
             try:
@@ -115,47 +127,43 @@ class Visualization:
     def __add_states(self):
         """For each state in the model, add a node to the graph."""
         for state in self.model.states.values():
-            result_of_state = (
+            maybe_result = (
                 self.result.get_result_of_state(state)
                 if self.result is not None
-                else ""
+                else None
             )
-            formatted_result_of_state = (
-                "\n" + self.__format_probability(result_of_state)
-                if result_of_state is not None
-                else ""
+            state_result = maybe_result if maybe_result is not None else ""
+            result_prob = "\nResult: " + self.__format_probability(state_result)
+            reward = self.__format_rewards(state)
+
+            # Check if this state's first label is specified in the layout.
+            group = (
+                und(state.labels[0])
+                if und(state.labels[0]) in self.layout.layout["groups"].keys()
+                else "states"
             )
-            res = formatted_result_of_state
-            if state == self.model.get_initial_state():
-                self.nt.add_node(
-                    state.id,
-                    label=",".join(state.labels) + self.__format_rewards(state) + res,
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="init",
-                )
-            else:
-                self.nt.add_node(
-                    state.id,
-                    label=",".join(state.labels) + self.__format_rewards(state) + res,
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="states",
-                )
+
+            self.nt.add_node(
+                state.id,
+                label=",".join(state.labels) + result_prob + reward,
+                color=None,  # type: ignore
+                shape=None,  # type: ignore
+                group=group,
+            )
 
     def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
         if isinstance(prob, str) or math.isinf(prob):
             return str(prob)
+        elif rget(
+            self.layout.layout, ["numbers", "fractions"]
+        ):  # If fractions are enabled
+            return str(Fraction(prob).limit_denominator(1000))
         else:
-            if rget(self.layout.layout, ["numbers", "fractions"]):
-                return str(Fraction(prob).limit_denominator(1000))
-            else:
-                print(rget(self.layout.layout, ["numbers", "digits"]))
-                return str(
-                    round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
-                )
+            return str(
+                round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
+            )
 
     def __add_transitions(self):
         """For each transition in the model, add a transition in the graph.
@@ -208,6 +216,7 @@ def show(
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),
     show_editor: bool = False,
+    separate_edit_labels=[],
 ) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
 
@@ -219,10 +228,14 @@ def show(
             Try changing this setting if you experience rendering issues. Defaults to "remote".
         layout (Layout): Which layout should be used. Defaults to DEFAULT.
         show_editor (bool): Show an interactive layout editor. Defaults to False.
+        separate_edit_labels (list[str]): List of labels that are edited separately. Defaults to [].
 
     Returns: Visualization object.
     """
-    vis = Visualization(model, result, name, notebook, cdn_resources, layout)
+    vis = Visualization(
+        model, result, name, notebook, cdn_resources, layout, separate_edit_labels
+    )
+    print(vis.layout.layout)
     if show_editor:
         vis.show_editor()
     vis.show()
