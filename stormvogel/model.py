@@ -62,7 +62,7 @@ class State:
                 self.labels.sort()
                 other.labels.sort()
                 return self.labels == other.labels
-            return True
+            return False
         return False
 
     # TODO get available actions function?

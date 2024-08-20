@@ -1,23 +1,23 @@
 {
-  "__define_macro": {
-    "__name": "__group_macro",
-    "__value": {
+  "__macros": {
+    "__group_macro": {
+      "__collapse": true,
       "borderWidth": {
-        "__title": "Border width",
+        "__description": "Border width",
         "__widget": "IntSlider"
       },
       "color": {
         "background": {
-          "__title": "Bg color",
+          "__description": "Bg color",
           "__widget": "ColorPicker"
         },
         "border": {
-          "__title": "Border color",
+          "__description": "Border color",
           "__widget": "ColorPicker"
         }
       },
       "shape": {
-        "__title": "Shape",
+        "__description": "Shape",
         "__widget": "Dropdown",
         "__kwargs": {
           "options": [
@@ -35,70 +35,94 @@
           ]
         }
       },
+      "mass": {
+        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
+        "__description": "Mass",
+        "__widget": "IntSlider"
+      },
       "font": {
         "__html": "<h4>Font</h4>",
         "color": {
-          "__title": "Color",
+          "__description": "Color",
           "__widget": "ColorPicker"
         },
         "size": {
-          "__title": "Size",
+          "__description": "Size",
           "__widget": "IntSlider"
         }
-      },
-      "mass": {
-        "__html": "<p>Mass controls degree of repulsion of nodes.</p>",
-        "__title": "Mass",
-        "__widget": "IntSlider"
       }
     }
   },
-  "__html": "<h2>Interactive layout editor</h2>",
   "autoApply": {
-    "__html": "<h4>Auto apply</h4>\n<p>If enabled, any changes to the layout will be applied to the visualization immediately.</p>",
-    "__title": "Enabled",
+    "__description": "Auto apply changes",
     "__widget": "Checkbox"
   },
   "groups": {
-    "init": {
-      "__html": "<h3>Initial state</h3>",
-      "__use_macro": "__group_macro"
-    },
     "states": {
-      "__html": "<h3>Other states</h3>",
       "__use_macro": "__group_macro"
     },
     "actions": {
-      "__html": "<h3>Actions</h3>",
+      "__use_macro": "__group_macro"
+    },
+    "scheduled_actions": {
       "__use_macro": "__group_macro"
     }
   },
   "edges": {
-    "__html": "<h3>Edges</h3>",
+    "__collapse": true,
     "color": {
-      "__title": "Color",
-      "__widget": "ColorPicker"
+      "color": {
+        "__description": "Color",
+        "__widget": "ColorPicker"
+      }
     },
     "font": {
-      "__html": "<h4>Font</h4>",
+      "__html": "<p>Font</p>",
       "color": {
-        "__title": "Color",
+        "__description": "Color",
         "__widget": "ColorPicker"
       },
       "size": {
-        "__title": "Size",
+        "__description": "Size",
         "__widget": "IntSlider"
       }
     }
   },
+  "numbers": {
+    "__collapse": true,
+    "fractions": {
+      "__description": "Fractions",
+      "__widget": "Checkbox"
+    },
+    "digits": {
+      "__description": "Round digits",
+      "__widget": "IntSlider"
+    }
+  },
+  "physics": {
+    "__collapse": true,
+    "__html": "<p>Always disabled if over 10000 states.</p>",
+    "enabled": {
+      "__description": "enabled",
+      "__widget": "Checkbox"
+    }
+  },
+  "resultSymbol": {
+    "__description": "Result symbol",
+    "__widget": "Text"
+  },
+  "schedColor": {
+    "__description": "Scheduled edge color",
+    "__widget": "Checkbox"
+  },
   "saving": {
     "__html": "<h4>Save / apply changes</h4>",
     "relative_path": {
-      "__title": "Relative path",
+      "__description": "Relative path",
       "__widget": "Checkbox"
     },
     "filename": {
-      "__title": "File name",
+      "__description": "File name",
       "__widget": "Text"
     }
   }
