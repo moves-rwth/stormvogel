@@ -3,7 +3,6 @@
 import math
 from fractions import Fraction
 
-from IPython.display import HTML
 from stormvogel.visjs import Network
 
 from stormvogel.layout import DEFAULT, Layout
@@ -47,6 +46,10 @@ class Visualization:
         self.name = name
         self.notebook = notebook
         self.cdn_resources = cdn_resources
+        self.nt = Network()
+        self.__add_states()
+        self.__add_transitions()
+        self.__update_physics_enabled()
 
     def __update_physics_enabled(self):
         """Enable physics iff the model has less than 10000 states."""
@@ -56,10 +59,7 @@ class Visualization:
 
     def __reload_nt(self):
         """(Re)load the pyvis network."""
-        self.nt = Network()
-        self.__add_states()
-        self.__add_transitions()
-        self.__update_physics_enabled()
+
         self.nt.set_options(str(self.layout))
 
     # def __generate_iframe(self):
@@ -78,19 +78,11 @@ class Visualization:
     def update(self):
         """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
         self.__reload_nt()
-        try:
-            self.handle.update(HTML(self.__generate_iframe()))  # type: ignore
-        except AttributeError:
-            pass
+        self.nt.update()
 
     def show(self):
         """Show or update the constructed graph as a html file."""
         self.__reload_nt()
-
-        # We use a random id which will avoid collisions in most cases.
-        # self.handle = display(
-        #     HTML(self.__generate_iframe()), display_id=random.randrange(0, 10**31)
-        # )
         self.nt.show()
 
     def show_editor(self):
@@ -123,6 +115,7 @@ class Visualization:
                 else ""
             )
             res = formatted_result_of_state
+
             if state == self.model.get_initial_state():
                 self.nt.add_node(
                     state.id,

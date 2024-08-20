@@ -2,6 +2,7 @@
 
 from IPython.display import display, HTML
 from html import escape
+import random
 
 import stormvogel.html_templates as ht
 
@@ -13,6 +14,7 @@ class Network:
         self.nodes_js = ""
         self.edges_js = ""
         self.options_js = "var options = {}"
+        self.handle = None
 
     def add_node(
         self,
@@ -41,7 +43,11 @@ class Network:
         shape=None,  # type: ignore
     ) -> None:
         """Add an edge. Only use before calling show."""
-        self.edges_js += "{ from: " + str(from_) + ", to: " + str(to) + " },\n"
+        current = "{ from: " + str(from_) + ", to: " + str(to)
+        if label is not None:
+            current += f', label: "{label}"'
+        current += " },\n"
+        self.edges_js += current
         pass
 
     def set_options(self, options: str):
@@ -65,7 +71,6 @@ class Network:
         """Generate an iframe for the network, using the html."""
         return f"""
           <iframe
-              id="targetFrame"
               width="650"
               height="450"
               frameborder="0"
@@ -77,5 +82,12 @@ class Network:
     def show(self) -> None:
         """Generate the iframe and show it using iPython HTML."""
         iframe = self.generate_iframe()
-        print(iframe)
-        display(HTML(iframe))
+        # A random display id should avoid collisions in most cases.
+        self.display_id = random.randrange(0, 10**31)
+        self.handle = display(HTML(iframe), display_id=self.display_id)
+
+    def update(self) -> None:
+        """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
+        if self.handle is not None:
+            iframe = self.generate_iframe()
+            self.handle.update(HTML(iframe))

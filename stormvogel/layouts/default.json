@@ -57,6 +57,7 @@
     }
   },
   "edges": {
+    "arrows": "to",
     "font": {
       "color": "black",
       "size": 14
