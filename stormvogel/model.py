@@ -65,8 +65,10 @@ class State:
             return True
         return False
 
+    # TODO get available actions function?
 
-@dataclass(frozen=True)
+
+@dataclass(frozen=True, order=True)
 class Action:
     """Represents an action, e.g., in MDPs.
         Note that this action object is completely independent of its corresponding branch.
@@ -83,6 +85,7 @@ class Action:
     def __str__(self):
         return f"Action {self.name}"
 
+    """
     def __eq__(self, other):
         if isinstance(other, Action):
             return self.labels == other.labels
@@ -92,6 +95,7 @@ class Action:
         if not isinstance(other, Action):
             return NotImplemented
         return str(self.labels) < str(other.labels)
+    """
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.

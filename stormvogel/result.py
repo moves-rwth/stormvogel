@@ -5,6 +5,33 @@ import stormpy.examples.files
 import stormpy.examples
 
 
+class Scheduler:
+    """
+    Scheduler object specifiec what action to take in each state
+    """
+
+    model: stormvogel.model.Model
+    taken_actions: dict[int, stormvogel.model.Action]
+
+    def __init__(
+        self,
+        model: stormvogel.model.Model,
+        taken_actions: dict[int, stormvogel.model.Action],
+    ):
+        self.model = model
+        self.taken_actions = taken_actions
+
+    def get_choice_of_state(
+        self, state: stormvogel.model.State
+    ) -> stormvogel.model.Action | None:
+        """returns the choice in the scheduler for the given state if present in the model"""
+        if state in self.model.states.values():
+            return self.taken_actions[state.id]
+        else:
+            print("This state is not a part of the model")
+            return None
+
+
 class Result:
     """Result object represents the model checking results for a given model
 
@@ -17,7 +44,7 @@ class Result:
     model: stormvogel.model.Model
     # these are both hashed by the state id:
     values: dict[int, stormvogel.model.Number]
-    scheduler: dict[int, stormvogel.model.Action] | None
+    scheduler: Scheduler | None
 
     def __init__(
         self, model: stormvogel.model.Model, values: list[stormvogel.model.Number]
@@ -32,12 +59,16 @@ class Result:
 
     def add_scheduler(self, stormpy_scheduler: stormpy.storage.Scheduler):
         """adds a scheduler to the result"""
-        stormvogel_scheduler = {}
-        for i in range(len(self.values)):
-            stormvogel_scheduler[i] = self.model.get_action(
-                str(stormpy_scheduler.get_choice(i))
-            )
-        self.scheduler = stormvogel_scheduler
+        if self.scheduler is None:
+            self.stormpy_scheduler = stormpy_scheduler
+            taken_actions = {}
+            for state in self.model.states.values():
+                taken_actions[state.id] = self.model.get_action(
+                    str(stormpy_scheduler.get_choice(state.id))
+                )
+            self.scheduler = Scheduler(self.model, taken_actions)
+        else:
+            print("This result already has a scheduler")
 
     def get_result_of_state(
         self, state: stormvogel.model.State
@@ -49,25 +80,32 @@ class Result:
             print("This state is not a part of the model")
             return None
 
-    def get_choice_of_state(
-        self, state: stormvogel.model.State
-    ) -> stormvogel.model.Action | None:
-        """returns the choice in the sceduler for the given state if present in the model"""
-        if self.scheduler is not None:
-            if state in self.model.states.values():
-                return self.scheduler[state.id]
+    def generate_induced_dtmc(self) -> stormvogel.model.Model | None:
+        """Given an mdp that has a scheduler, this function creates and returns the scheduler induced markov chain"""
+        if (
+            self.model.get_type() == stormvogel.model.ModelType.MDP
+            and self.scheduler is not None
+        ):
+            stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(self.model)
+            if stormpy_mdp is not None:
+                stormpy_dtmc = stormpy_mdp.apply_scheduler(self.stormpy_scheduler)
+                stormvogel_dtmc = stormvogel.map.stormpy_to_stormvogel(stormpy_dtmc)
+                return stormvogel_dtmc
             else:
-                print("This state is not a part of the model")
-            return None
+                print("something went wrong")
+                return
         else:
-            print("this result does not have a scheduler")
+            if self.scheduler is not None:
+                print("This model is not an mdp")
+            else:
+                print("This result does not have a scheduler")
             return None
 
     def __str__(self) -> str:
         s = {}
         if self.scheduler is not None:
-            for index, action in enumerate(self.scheduler.values()):
-                s[index] = str(list(action.labels)[0])
+            for index, action in enumerate(self.scheduler.taken_actions.values()):
+                s[index] = str(list(action.labels))
 
         add = ""
         if self.model.name is not None:
