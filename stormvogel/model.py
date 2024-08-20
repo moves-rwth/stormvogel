@@ -219,6 +219,8 @@ class Model:
         type: The model type.
         states: The states of the model. The keys are the state's ids.
         actions: The actions of the model, if this is a model that supports actions.
+        rewards: The rewardsmodels of this model.
+        rates: The rates of the model, if this model supports rates.
         transitions: The transitions of this model.
     """
 
@@ -229,7 +231,7 @@ class Model:
     transitions: dict[int, Transition]
     actions: dict[str, Action] | None
     rewards: list[RewardModel]
-    # In ctmcs we work with rate transitions but additionally we can optionally have exit rates
+    # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     rates: dict[int, Number] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
