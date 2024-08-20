@@ -41,9 +41,9 @@ def stormvogel_to_stormpy(
                     not action[0] == stormvogel.model.EmptyAction
                     and choice_labeling is not None
                 ):
-                    choice_labeling.add_label_to_choice(
-                        list(action[0].labels)[0], row_index
-                    )
+                    # print(str(list(action[0].labels)))
+                    for label in action[0].labels:
+                        choice_labeling.add_label_to_choice(str(label), row_index)
                 row_index += 1
 
         matrix = builder.build()
@@ -112,17 +112,18 @@ def stormvogel_to_stormpy(
 
         # we determine the number of choices and the labels
         count = 0
-        labels = []
+        labels = set()
         for transition in model.transitions.items():
             for action in transition[1].transition.items():
                 count += 1
                 if not action[0] == stormvogel.model.EmptyAction:
-                    labels.append(action[0].labels)
+                    for label in action[0].labels:
+                        labels.add(label)
 
         # we add the labels to the choice labeling object
         choice_labeling = stormpy.storage.ChoiceLabeling(count)
         for label in labels:
-            choice_labeling.add_label(str(list(label)[0]))
+            choice_labeling.add_label(str(label))
 
         # then we create the matrix and simultanuously add the correct labels to the choices
         matrix = build_matrix(model, choice_labeling=choice_labeling)

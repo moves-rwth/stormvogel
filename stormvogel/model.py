@@ -21,7 +21,7 @@ class ModelType(Enum):
     MA = 4
 
 
-@dataclass
+@dataclass()
 class State:
     """Represents a state in a Model.
 
@@ -65,8 +65,15 @@ class State:
             return False
         return False
 
+    def __lt__(self, other):
+        if not isinstance(other, State):
+            return NotImplemented
+        return str(self.id) < str(other.id)
 
-@dataclass(frozen=True)
+    # TODO get available actions function?
+
+
+@dataclass(frozen=True, order=True)
 class Action:
     """Represents an action, e.g., in MDPs.
         Note that this action object is completely independent of its corresponding branch.
@@ -83,24 +90,12 @@ class Action:
     def __str__(self):
         return f"Action {self.name}"
 
-    def __eq__(self, other):
-        if isinstance(other, Action):
-            return (
-                self.labels == other.labels and self.name == other.name
-            )  # TODO I think we should also compare names like this.
-        return False
-
-    def __lt__(self, other):
-        if not isinstance(other, Action):
-            return NotImplemented
-        return str(self.labels) < str(other.labels)
-
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action("empty", frozenset())
 
 
-@dataclass
+@dataclass(order=True)
 class Branch:
     """Represents a branch, which is a distribution over states.
 
@@ -123,11 +118,6 @@ class Branch:
             other.branch.sort()
             return self.branch == other.branch
         return False
-
-    def __lt__(self, other):
-        if not isinstance(other, Branch):
-            return NotImplemented
-        return str(self.branch) < str(other.branch)
 
 
 @dataclass
@@ -218,11 +208,6 @@ class RewardModel:
     def set_action_state(self, state_action_pair: int, value: Number):
         """sets the reward at said state action pair"""
         self.rewards[state_action_pair] = value
-
-    def __eq__(self, other):
-        if isinstance(other, RewardModel):
-            return self.rewards == other.rewards and self.name == other.name
-        return False
 
 
 @dataclass
