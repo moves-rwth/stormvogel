@@ -1,12 +1,10 @@
 """Contains the code responsible for model visualization."""
 
-import random
 import math
 from fractions import Fraction
-from html import escape
 
-from IPython.display import HTML, display
-from pyvis.network import Network
+from IPython.display import HTML
+from stormvogel.visjs import Network
 
 from stormvogel.layout import DEFAULT, Layout
 from stormvogel.model import EmptyAction, Model, Number, State
@@ -58,26 +56,24 @@ class Visualization:
 
     def __reload_nt(self):
         """(Re)load the pyvis network."""
-        self.nt = Network(
-            notebook=self.notebook, directed=True, cdn_resources=self.cdn_resources
-        )
+        self.nt = Network()
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
-        self.layout.set_nt_layout(self.nt)
+        self.nt.set_options(str(self.layout))
 
-    def __generate_iframe(self):
-        # We build our own iframe because we want to embed the model in the
-        # output instead of saving it to a file
-        html_code = self.nt.generate_html(name=self.name, notebook=True)
-        return f"""
-            <iframe
-                style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
-                frameborder="0"
-                srcdoc="{escape(html_code)}"
-                border:none !important;
-                allowfullscreen webkitallowfullscreen mozallowfullscreen
-            ></iframe>"""
+    # def __generate_iframe(self):
+    #     # We build our own iframe because we want to embed the model in the
+    #     # output instead of saving it to a file
+    #     html_code = self.nt.generate_html(name=self.name, notebook=True)
+    #     return f"""
+    #         <iframe
+    #             style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
+    #             frameborder="0"
+    #             srcdoc="{escape(html_code)}"
+    #             border:none !important;
+    #             allowfullscreen webkitallowfullscreen mozallowfullscreen
+    #         ></iframe>"""
 
     def update(self):
         """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
@@ -92,9 +88,10 @@ class Visualization:
         self.__reload_nt()
 
         # We use a random id which will avoid collisions in most cases.
-        self.handle = display(
-            HTML(self.__generate_iframe()), display_id=random.randrange(0, 10**31)
-        )
+        # self.handle = display(
+        #     HTML(self.__generate_iframe()), display_id=random.randrange(0, 10**31)
+        # )
+        self.nt.show()
 
     def show_editor(self):
         """Display an interactive layout editor. Use the update() method to apply changes."""
@@ -178,7 +175,7 @@ class Visualization:
                 else:
                     # Add the action's node
                     self.nt.add_node(
-                        n_id=action_id,
+                        id=action_id,
                         label=action.name,
                         color=None
                         if scheduler is not None
