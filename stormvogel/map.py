@@ -41,7 +41,6 @@ def stormvogel_to_stormpy(
                     not action[0] == stormvogel.model.EmptyAction
                     and choice_labeling is not None
                 ):
-                    # print(str(list(action[0].labels)))
                     for label in action[0].labels:
                         choice_labeling.add_label_to_choice(str(label), row_index)
                 row_index += 1
@@ -150,7 +149,7 @@ def stormvogel_to_stormpy(
         Takes a simple representation of a ctmc as input and outputs a ctmc how it is represented in stormpy
         """
 
-        # we first build the SparseMatrix
+        # we first build the SparseMatrix (in stormvogel these are always the rate transitions)
         matrix = build_matrix(model, None)
 
         # then we add the state labels
@@ -164,7 +163,7 @@ def stormvogel_to_stormpy(
             transition_matrix=matrix,
             state_labeling=state_labeling,
             reward_models=reward_models,
-            rate_transitions=True,  # for now we always set this to True since we always work with rate transitions in stormvogel
+            rate_transitions=True,
         )
         if not model.rates == {} and model.rates is not None:
             components.exit_rates = list(model.rates.values())
