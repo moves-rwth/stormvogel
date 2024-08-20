@@ -21,7 +21,7 @@ class ModelType(Enum):
     MA = 4
 
 
-@dataclass
+@dataclass()
 class State:
     """Represents a state in a Model.
 
@@ -64,6 +64,11 @@ class State:
                 return self.labels == other.labels
             return False
         return False
+
+    def __lt__(self, other):
+        if not isinstance(other, State):
+            return NotImplemented
+        return str(self.id) < str(other.id)
 
     # TODO get available actions function?
 
