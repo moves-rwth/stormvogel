@@ -182,7 +182,10 @@ class Visualization:
                         label=action.name,
                         color=None
                         if scheduler is not None
-                        and scheduler[state_id] == str(list(action.labels)[0])
+                        and scheduler.get_choice_of_state(
+                            self.model.get_state_by_id(state_id)
+                        )
+                        == str(list(action.labels))
                         else None,  # TODO set different color if scheduler chooses this action # type: ignore
                         shape=None,  # type: ignore
                         group="actions",

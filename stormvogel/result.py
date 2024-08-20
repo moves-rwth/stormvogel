@@ -11,6 +11,7 @@ class Scheduler:
     """
 
     model: stormvogel.model.Model
+    # taken actions are hashed by the state id
     taken_actions: dict[int, stormvogel.model.Action]
 
     def __init__(
@@ -31,6 +32,13 @@ class Scheduler:
             print("This state is not a part of the model")
             return None
 
+    def __str__(self) -> str:
+        if self.model.name is not None:
+            add = "Scheduler for model: " + self.model.name + "\n"
+        else:
+            add = ""
+        return add + "taken actions: " + str(self.taken_actions)
+
 
 class Result:
     """Result object represents the model checking results for a given model
@@ -42,7 +50,7 @@ class Result:
     """
 
     model: stormvogel.model.Model
-    # these are both hashed by the state id:
+    # values are hashed by the state id:
     values: dict[int, stormvogel.model.Number]
     scheduler: Scheduler | None
 
