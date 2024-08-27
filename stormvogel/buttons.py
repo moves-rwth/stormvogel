@@ -23,14 +23,14 @@ class SaveButton:
             )
 
 
-class ApplyButton:
-    """Apply button."""
+class ReloadButton:
+    """Reload button."""
 
     def __init__(self, layout, maybe_update) -> None:
         self.layout = layout
         self.maybe_update = maybe_update
         # Apply button
-        applyButton = Button(description="Apply", button_style="info")
+        applyButton = Button(description="Reload", button_style="info")
         applyButton.on_click(self.apply)
         self.applyOutput = Output()
         display(applyButton, self.applyOutput)

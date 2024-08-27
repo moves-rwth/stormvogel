@@ -86,8 +86,14 @@ class Network:
         self.display_id = random.randrange(0, 10**31)
         self.handle = display(HTML(iframe), display_id=self.display_id)
 
-    def update(self) -> None:
-        """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
+    def reload(self) -> None:
+        """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens."""
         if self.handle is not None:
             iframe = self.generate_iframe()
             self.handle.update(HTML(iframe))
+
+    def update(self) -> None:
+        """Tries to update (apply an updated layout) WITHOUT refreshing. If show was not called before, nothing happens."""
+        if self.handle is None:
+            return
+        display(HTML("<script>alert('TEST UPDATE')"))

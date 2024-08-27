@@ -12,6 +12,10 @@ from stormvogel.rdict import rget
 from stormvogel import result
 
 
+def und(x: str) -> str:
+    return x.replace(" ", "_")
+
+
 class Visualization:
     """Handles visualization of a Model using a pyvis Network."""
 
@@ -27,6 +31,7 @@ class Visualization:
         notebook: bool = True,
         cdn_resources: str = "remote",
         layout: Layout = DEFAULT(),
+        separate_labels: list[str] = [],
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -44,12 +49,12 @@ class Visualization:
             name += ".html"
         self.result = result
         self.name = name
-        self.notebook = notebook
-        self.cdn_resources = cdn_resources
+        self.separate_labels = list(map(und, separate_labels))
         self.nt = Network()
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
+        self.reload()
 
     def __update_physics_enabled(self):
         """Enable physics iff the model has less than 10000 states."""
@@ -57,32 +62,15 @@ class Visualization:
             self.layout.layout["physics"] = {}
         self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
 
-    def __reload_nt(self):
-        """(Re)load the pyvis network."""
-
+    def reload(self):
+        """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
+        self.layout.set_groups(self.separate_labels)
         self.nt.set_options(str(self.layout))
-
-    # def __generate_iframe(self):
-    #     # We build our own iframe because we want to embed the model in the
-    #     # output instead of saving it to a file
-    #     html_code = self.nt.generate_html(name=self.name, notebook=True)
-    #     return f"""
-    #         <iframe
-    #             style="width: {self.nt.width}; height: calc({self.nt.height} + 50px);"
-    #             frameborder="0"
-    #             srcdoc="{escape(html_code)}"
-    #             border:none !important;
-    #             allowfullscreen webkitallowfullscreen mozallowfullscreen
-    #         ></iframe>"""
-
-    def update(self):
-        """Tries to update an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
-        self.__reload_nt()
-        self.nt.update()
+        self.nt.reload()
 
     def show(self):
         """Show or update the constructed graph as a html file."""
-        self.__reload_nt()
+        self.reload()
         self.nt.show()
 
     def show_editor(self):
@@ -116,22 +104,17 @@ class Visualization:
             )
             res = formatted_result_of_state
 
-            if state == self.model.get_initial_state():
-                self.nt.add_node(
-                    state.id,
-                    label=",".join(state.labels) + self.__format_rewards(state) + res,
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="init",
-                )
-            else:
-                self.nt.add_node(
-                    state.id,
-                    label=",".join(state.labels) + self.__format_rewards(state) + res,
-                    color=None,  # type: ignore
-                    shape=None,  # type: ignore
-                    group="states",
-                )
+            group = "states"  # Use a specific group if specified.
+            if und(state.labels[0]) in self.separate_labels:
+                group = und(state.labels[0])
+
+            self.nt.add_node(
+                state.id,
+                label=",".join(state.labels) + self.__format_rewards(state) + res,
+                color=None,  # type: ignore
+                shape=None,  # type: ignore
+                group=group,
+            )
 
     def __format_probability(self, prob: Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
@@ -201,6 +184,7 @@ def show(
     cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),
     show_editor: bool = False,
+    separate_labels: list[str] = [],
 ) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
 
@@ -215,7 +199,9 @@ def show(
 
     Returns: Visualization object.
     """
-    vis = Visualization(model, result, name, notebook, cdn_resources, layout)
+    vis = Visualization(
+        model, result, name, notebook, cdn_resources, layout, separate_labels
+    )
     if show_editor:
         vis.show_editor()
     vis.show()
