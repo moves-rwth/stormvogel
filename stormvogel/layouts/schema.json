@@ -125,5 +125,29 @@
       "__description": "File name",
       "__widget": "Text"
     }
+  },
+  "show_rewards": {
+    "__description": "Show rewards",
+    "__widget": "Checkbox"
+  },
+  "show_results": {
+    "__description": "Show results",
+    "__widget": "Checkbox"
+  },
+  "width": {
+    "__description": "Width",
+    "__widget": "IntSlider",
+    "__kwargs": {
+      "min": 0,
+      "max": 2000
+    }
+  },
+  "height": {
+    "__description": "Height",
+    "__widget": "IntSlider",
+    "__kwargs": {
+      "min": 0,
+      "max": 2000
+    }
   }
 }

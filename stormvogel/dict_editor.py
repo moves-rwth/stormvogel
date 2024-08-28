@@ -1,7 +1,6 @@
 """Generate editor menu from a schema dict."""
 
 from typing import Any, Callable
-from IPython.display import display
 from ipywidgets import (
     interactive,
     IntSlider,
@@ -81,8 +80,7 @@ class Editor:
         self.on_update = on_update
         self.update_dict = update_dict
         self.macros = {}
-        result = self.recurse_create(schema, [])
-        display(result)
+        self.editor = self.recurse_create(schema, [])
 
     def recurse_create(self, sub_schema: dict, path: list) -> Widget:
         acc_items = []

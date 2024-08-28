@@ -1,6 +1,6 @@
 """Our own Python bindings to the vis.js library in JavaScript."""
 
-from IPython.display import display, HTML
+from IPython.display import display, HTML, DisplayHandle
 from html import escape
 import random
 
@@ -8,13 +8,19 @@ import stormvogel.html_templates as ht
 
 
 class Network:
-    def __init__(self) -> None:
-        """Create a Network."""
+    def __init__(self, name: str, width: int = 800, height: int = 600) -> None:
+        """Create a Network.
 
-        self.nodes_js = ""
-        self.edges_js = ""
-        self.options_js = "var options = {}"
-        self.handle = None
+        Args:
+            name (str): Used to name the iframe. You should never create two networks with the same name, they might clash."""
+
+        self.name: str = name
+        self.width: int = width
+        self.height: int = height
+        self.nodes_js: str = ""
+        self.edges_js: str = ""
+        self.options_js: str = "var options = {}"
+        self.handle: DisplayHandle | None = None
 
     def add_node(
         self,
@@ -64,19 +70,22 @@ class Network:
         """
             + ht.CONTAINER_JS
         )
-        html = ht.START_HTML.replace("__JAVASCRIPT__", js)
+        html = ht.start_html(width=self.width, height=self.height).replace(
+            "__JAVASCRIPT__", js
+        )
         return html
 
     def generate_iframe(self) -> str:
         """Generate an iframe for the network, using the html."""
         return f"""
           <iframe
-              width="650"
-              height="450"
-              frameborder="0"
-              srcdoc="{escape(self.generate_html())}"
-              border:none !important;
-              allowfullscreen webkitallowfullscreen mozallowfullscreen
+                id="{self.name}"
+                width="{self.width}"
+                height="{self.height}"
+                frameborder="0"
+                srcdoc="{escape(self.generate_html())}"
+                border:none !important;
+                allowfullscreen webkitallowfullscreen mozallowfullscreen
           ></iframe>"""
 
     def show(self) -> None:
@@ -84,7 +93,12 @@ class Network:
         iframe = self.generate_iframe()
         # A random display id should avoid collisions in most cases.
         self.display_id = random.randrange(0, 10**31)
-        self.handle = display(HTML(iframe), display_id=self.display_id)
+        self.handle = display(
+            HTML(iframe),
+            display_id=self.display_id,
+            width=self.width,
+            height=self.height,
+        )
 
     def reload(self) -> None:
         """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens."""
@@ -92,8 +106,8 @@ class Network:
             iframe = self.generate_iframe()
             self.handle.update(HTML(iframe))
 
-    def update(self) -> None:
-        """Tries to update (apply an updated layout) WITHOUT refreshing. If show was not called before, nothing happens."""
-        if self.handle is None:
-            return
-        display(HTML("<script>alert('TEST UPDATE')"))
+    def update_options(self, options: str):
+        """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
+        self.set_options(options)
+        html = f"""<script>document.getElementById('{self.name}').contentWindow.network.setOptions({options});</script>"""
+        display(HTML(html))

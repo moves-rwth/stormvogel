@@ -11,6 +11,12 @@ from stormvogel.rdict import rget
 
 from stormvogel import result
 
+from ipywidgets import HBox, HTML
+from IPython.display import display, clear_output
+
+import random
+import string
+
 
 def und(x: str) -> str:
     return x.replace(" ", "_")
@@ -27,30 +33,28 @@ class Visualization:
         self,
         model: Model,
         result: result.Result | None,
-        name: str = "model",
-        notebook: bool = True,
-        cdn_resources: str = "remote",
+        name: str | None = None,
         layout: Layout = DEFAULT(),
         separate_labels: list[str] = [],
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
+        NEVER CREATE TWO VISUALIZATIONS WITH THE SAME NAME, STUFF MIGHT BREAK.
+
         Args:
             model (Model): The stormvogel model to be displayed.
-            name (str, optional): The name of the resulting html file. May or may not include .html extension.
+            name (str, optional): Internally used name. Will be randomly generated if left as None.
             notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
         """
+        if name is None:
+            self.name = "".join(random.choices(string.ascii_letters, k=10))
         self.model = model
         # TODO self.result = result
         self.layout = layout
-        if (
-            name[-5:] != ".html"
-        ):  # We do not require the user to explicitly type .html in their names
-            name += ".html"
         self.result = result
         self.name = name
         self.separate_labels = list(map(und, separate_labels))
-        self.nt = Network()
+        self.nt = Network(name=self.name)  # type: ignore
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
@@ -63,19 +67,27 @@ class Visualization:
         self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
 
     def reload(self):
-        """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens"""
+        """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens."""
         self.layout.set_groups(self.separate_labels)
         self.nt.set_options(str(self.layout))
+        self.nt.width = self.layout.layout["width"]
+        self.nt.height = self.layout.layout["height"]
         self.nt.reload()
+
+    def update(self):
+        """Tries to update an existing visualization to apply layout changes WITHOUT reloading. If show was not called before, nothing happens."""
+        self.layout.set_groups(self.separate_labels)
+        self.nt.update_options(str(self.layout))
 
     def show(self):
         """Show or update the constructed graph as a html file."""
         self.reload()
         self.nt.show()
+        return self.nt.handle
 
-    def show_editor(self):
+    def show_editor(self, display_: bool = True) -> None:
         """Display an interactive layout editor. Use the update() method to apply changes."""
-        self.layout.show_editor(self)
+        return self.layout.show_editor(self, display_=display_)  # type: ignore
 
     def __format_rewards(self, s: State) -> str:
         """Create a string that contains the state-exit reward for this state. Starts with newline"""
@@ -102,7 +114,14 @@ class Visualization:
                 if result_of_state is not None
                 else ""
             )
-            res = formatted_result_of_state
+            res = (
+                formatted_result_of_state if self.layout.layout["show_results"] else ""
+            )
+            rewards = (
+                self.__format_rewards(state)
+                if self.layout.layout["show_rewards"]
+                else ""
+            )
 
             group = "states"  # Use a specific group if specified.
             if und(state.labels[0]) in self.separate_labels:
@@ -110,7 +129,7 @@ class Visualization:
 
             self.nt.add_node(
                 state.id,
-                label=",".join(state.labels) + self.__format_rewards(state) + res,
+                label=",".join(state.labels) + rewards + res,
                 color=None,  # type: ignore
                 shape=None,  # type: ignore
                 group=group,
@@ -176,12 +195,28 @@ class Visualization:
                     action_id += 1
 
 
+class CustomBox:
+    def __init__(self, vis) -> None:
+        self.vis = vis
+        display(self.create_box())
+
+    def create_box(self) -> None:
+        iframe = self.vis.nt.generate_iframe()
+        editor = self.vis.layout.show_editor(
+            vis=self.vis, display_=False, reload_function=clear_output
+        )
+        return HBox(children=[HTML(iframe), editor])  # type: ignore
+
+    def reload(self) -> None:
+        print("hi")
+        clear_output(wait=True)
+        # display(self.create_box(), self.vis.nt.width, self.vis.nt.height)
+
+
 def show(
     model: Model,
     result: result.Result | None = None,
     name: str = "model",
-    notebook: bool = True,
-    cdn_resources: str = "remote",
     layout: Layout = DEFAULT(),
     show_editor: bool = False,
     separate_labels: list[str] = [],
@@ -199,10 +234,17 @@ def show(
 
     Returns: Visualization object.
     """
+
     vis = Visualization(
-        model, result, name, notebook, cdn_resources, layout, separate_labels
+        model=model,
+        result=result,
+        name=name,
+        layout=layout,
+        separate_labels=separate_labels,
     )
-    if show_editor:
-        vis.show_editor()
-    vis.show()
+    if show_editor:  # Manually generate the iframe.
+        CustomBox(vis)
+    else:
+        vis.show()
+
     return vis

@@ -5,7 +5,11 @@
       "borderWidth": 1,
       "color": {
         "background": "white",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "ellipse",
       "mass": 1,
@@ -20,7 +24,11 @@
       "borderWidth": 1,
       "color": {
         "background": "white",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "ellipse",
       "mass": 1,
@@ -33,7 +41,11 @@
       "borderWidth": 1,
       "color": {
         "background": "lightblue",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "box",
       "mass": 1,
@@ -46,7 +58,11 @@
       "borderWidth": 1,
       "color": {
         "background": "pink",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "box",
       "mass": 1,
@@ -81,5 +97,9 @@
   "saving": {
     "relative_path": true,
     "filename": "layouts/NAME.json"
-  }
+  },
+  "show_rewards": true,
+  "show_results": true,
+  "width": 800,
+  "height": 600
 }

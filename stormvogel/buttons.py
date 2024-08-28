@@ -10,10 +10,9 @@ class SaveButton:
     def __init__(self, layout) -> None:
         self.layout = layout
         # Save button
-        saveButton = Button(description="Save", button_style="success")
-        saveButton.on_click(self.save)
+        self.saveButton = Button(description="Save", button_style="success")
+        self.saveButton.on_click(self.save)
         self.saveOutput = Output()
-        display(saveButton, self.saveOutput)
 
     def save(self, b):
         with self.saveOutput:
@@ -30,10 +29,10 @@ class ReloadButton:
         self.layout = layout
         self.maybe_update = maybe_update
         # Apply button
-        applyButton = Button(description="Reload", button_style="info")
-        applyButton.on_click(self.apply)
+        self.applyButton = Button(description="Reload", button_style="info")
+        self.applyButton.on_click(self.apply)
         self.applyOutput = Output()
-        display(applyButton, self.applyOutput)
+        display(self.applyButton, self.applyOutput)
 
     def apply(self, b):
         with self.applyOutput:

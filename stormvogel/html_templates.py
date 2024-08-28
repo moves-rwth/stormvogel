@@ -1,6 +1,15 @@
 """Some constants used in visjs.py"""
 
-START_HTML = """
+
+def start_html(width, height):
+    sizes = f"""
+        width: {width}px;
+        height: {height}px;
+        border: 1px solid lightgray;
+"""
+
+    return (
+        """
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,11 +19,9 @@ START_HTML = """
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
-      #mynetwork {
-        width: 600px;
-        height: 400px;
-        border: 1px solid lightgray;
-      }
+      #mynetwork {"""
+        + sizes
+        + """}
     </style>
   </head>
   <body>
@@ -25,6 +32,8 @@ START_HTML = """
   </body>
 </html>
 """
+    )
+
 
 CONTAINER_JS = """
 var container = document.getElementById("mynetwork");

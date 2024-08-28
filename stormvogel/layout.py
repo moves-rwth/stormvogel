@@ -1,13 +1,14 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
 import copy
-from pyvis.network import Network
 import os
 import json
 from stormvogel.buttons import (
     ReloadButton,
     SaveButton,
 )
+from IPython.display import display, clear_output
+from ipywidgets import VBox
 from stormvogel.dict_editor import Editor
 from stormvogel.rdict import merge_dict, rget
 
@@ -67,30 +68,37 @@ class Layout:
                     "__use_macro": "__group_macro"
                 }
 
-    def show_editor(self, vis=None):
+    def show_editor(self, vis=None, display_=True, reload_function=None):
         """Display an interactive layout editor, according to the schema."""
         done_loading = False
 
         def try_update():
             """Try to update the visualization unless impossible (happens if show was not called yet),
             or the editor menu is not done loading yet."""
-            if hasattr(vis, "reload") and done_loading:
-                vis.reload()  # type: ignore
+            if hasattr(vis, "update") and done_loading:
+                vis.update()  # type: ignore
 
         def maybe_update():
             """Try to update if autoApply is enabled."""
             if rget(self.layout, ["autoApply"]):
                 try_update()
 
-        Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
-        SaveButton(self)
-        ReloadButton(self, try_update)
-        done_loading = True
+        def try_reload():
+            clear_output()
+            if reload_function is None:
+                if hasattr(vis, "reload") and done_loading:
+                    vis.reload()  # type: ignore
+            elif done_loading:
+                reload_function()
 
-    def set_nt_layout(self, nt: Network) -> None:
-        """Set the layout of the network passed as the arugment."""
-        options = "var options = " + str(self)
-        nt.set_options(options)
+        e = Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
+        s = SaveButton(self)
+        ReloadButton(self, try_reload)
+        box = VBox(children=[e.editor, s.saveButton])
+        if display_:
+            display(box)
+        done_loading = True
+        return box
 
     def save(self, path: str, path_relative: bool = True) -> None:
         """Save this layout as a json file.
