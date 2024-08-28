@@ -69,9 +69,8 @@ class Network:
             current += f', label: "{label}"'
         current += " },\n"
         self.edges_js += current
-        pass
 
-    def set_options(self, options: str):
+    def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""
         self.options_js = options
 
@@ -93,7 +92,6 @@ class Network:
         """
 
         html = ht.START_HTML.replace("__JAVASCRIPT__", js).replace("__SIZES__", sizes)
-
         return html
 
     def generate_iframe(self) -> str:
@@ -110,9 +108,8 @@ class Network:
           ></iframe>"""
 
     def show(self) -> None:
-        """Generate the iframe and show it using iPython HTML."""
+        """Display the network on the output that was specified at initialization, otherwise simply display it."""
         iframe = self.generate_iframe()
-        # A random display id should avoid collisions in most cases.
         with self.output:  # Display the iframe within the Output.
             ipd.display(ipd.HTML(iframe))
         if (
@@ -139,3 +136,8 @@ class Network:
             ipd.display(ipd.HTML(html))
         with self.debug_output:
             print("Called Network.update_options")
+
+    def clear(self) -> None:
+        """Clear the output."""
+        with self.output:
+            ipd.clear_output()

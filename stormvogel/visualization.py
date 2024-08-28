@@ -2,28 +2,24 @@
 
 import math
 from fractions import Fraction
-
-from stormvogel.visjs import Network
-
-from stormvogel.layout import DEFAULT, Layout
-from stormvogel.model import EmptyAction, Model, Number, State
-from stormvogel.rdict import rget
-
-from stormvogel import result
-
-from ipywidgets import HBox, HTML
-from IPython.display import display, clear_output
-
+import ipywidgets as widgets
+import IPython.display as ipd
 import random
 import string
 
+import stormvogel.model as svm
+import stormvogel.result as svr
+import stormvogel.layout as svl
+import stormvogel.visjs as visjs
+
 
 def und(x: str) -> str:
+    """Replace spaces by underscores."""
     return x.replace(" ", "_")
 
 
 class Visualization:
-    """Handles visualization of a Model using a pyvis Network."""
+    """Handles visualization of a Model using a Network from stormvogel.visjs."""
 
     ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
@@ -31,11 +27,13 @@ class Visualization:
 
     def __init__(
         self,
-        model: Model,
-        result: result.Result | None,
+        model: svm.Model,
         name: str | None = None,
-        layout: Layout = DEFAULT(),
+        result: svr.Result | None = None,
+        layout: svl.Layout = svl.DEFAULT(),
         separate_labels: list[str] = [],
+        output: widgets.Output | None = None,
+        debug_output: widgets.Output = widgets.Output(),
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -44,52 +42,134 @@ class Visualization:
         Args:
             model (Model): The stormvogel model to be displayed.
             name (str, optional): Internally used name. Will be randomly generated if left as None.
-            notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
+            result (Result, optional): Result corresponding to the model.
+            layout (Layout, optional): Layout used for the visualization.
+            separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
+            output (widgets.Output): An output widget within which the network should be displayed.
+                If left as None, the Network will display its own output.
+                If specified, display should be called on this output in order to see the result.
+            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
         """
+        self.model: svm.Model = model
         if name is None:
-            self.name = "".join(random.choices(string.ascii_letters, k=10))
-        self.model = model
-        # TODO self.result = result
-        self.layout = layout
-        self.result = result
-        self.name = name
+            self.name: str = "".join(random.choices(string.ascii_letters, k=10))
+        else:
+            self.name: str = name
+        self.result: svr.Result = result
+        self.layout: svl.Layout = layout
         self.separate_labels = list(map(und, separate_labels))
-        self.nt = Network(name=self.name)  # type: ignore
+        self.layout.set_groups(self.separate_labels)
+
+        if output is None:
+            self.output: widgets.Output = widgets.Output()
+            self.self_display = True
+        else:
+            self.output: widgets.Output = output
+        self.debug_output: widgets.Output = debug_output
+
+    def show(self) -> None:
+        """(Re-)load the Network and display if self.self_display is True."""
+        with self.output:
+            ipd.clear_output()
+        self.nt: visjs.Network = visjs.Network(
+            name=self.name,
+            width=self.layout.layout["width"],
+            height=self.layout.layout["height"],
+            output=self.output,
+            debug_output=self.debug_output,
+        )
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
-        self.reload()
+        self.nt.set_options(str(self.layout))
+        self.nt.show()
+        if self.self_display:
+            ipd.display(
+                self.output
+            )  # If we have self display enabled, also display the Output itself.
 
-    def __update_physics_enabled(self):
+    def update(self) -> None:
+        """Tries to update an existing visualization to apply layout changes WITHOUT reloading. If show was not called before, nothing happens."""
+        # self.layout.set_groups(self.separate_labels) # TODO is this needed?
+        self.nt.update_options(str(self.layout))
+
+    def __add_states(self) -> None:
+        """For each state in the model, add a node to the graph."""
+        for state in self.model.states.values():
+            if self.layout.layout["show_results"]:
+                res = self.__format_result(state)
+            else:
+                res = ""
+            if self.layout.layout["show_rewards"]:
+                rewards = self.__format_rewards(state)
+            else:
+                rewards = ""
+
+            group = "states"  # Default
+            if (
+                und(state.labels[0]) in self.separate_labels
+            ):  # Use a specific group if specified.
+                group = und(state.labels[0])
+
+            self.nt.add_node(
+                state.id,
+                label=",".join(state.labels) + rewards + res,
+                group=group,
+            )
+
+    def __add_transitions(self) -> None:
+        """For each transition in the model, add a transition in the graph.
+        Also handles creating nodes for actions and their respective transitions.
+        Note that an action may appear multiple times in the model with a different state as source."""
+        action_id = self.ACTION_ID_OFFSET
+        # scheduler = self.result.scheduler if self.result is not None else None
+        # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
+        for state_id, transition in self.model.transitions.items():
+            for action, branch in transition.transition.items():
+                if action == svm.EmptyAction:
+                    # Only draw probabilities
+                    for prob, target in branch.branch:
+                        self.nt.add_edge(
+                            state_id,
+                            target.id,
+                            label=self.__format_probability(prob),
+                        )
+                else:
+                    # Add the action's node
+                    self.nt.add_node(
+                        id=action_id,
+                        label=action.name,
+                        group="actions",
+                    )
+                    # Add transition from this state TO the action.
+                    self.nt.add_edge(state_id, action_id)  # type: ignore
+                    # Add transition FROM the action to the states in its branch.
+                    for prob, target in branch.branch:
+                        self.nt.add_edge(
+                            action_id,
+                            target.id,
+                            label=self.__format_probability(prob),
+                        )
+                    action_id += 1
+
+    def __update_physics_enabled(self) -> None:
         """Enable physics iff the model has less than 10000 states."""
         if "physics" not in self.layout.layout:
             self.layout.layout["physics"] = {}
         self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
 
-    def reload(self):
-        """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens."""
-        self.layout.set_groups(self.separate_labels)
-        self.nt.set_options(str(self.layout))
-        self.nt.width = self.layout.layout["width"]
-        self.nt.height = self.layout.layout["height"]
-        self.nt.reload()
+    def __format_probability(self, prob: svm.Number) -> str:
+        """Take a probability value and format it nicely using a fraction or rounding it.
+        Which one of these to pick is specified in the layout."""
+        if isinstance(prob, str) or math.isinf(prob):
+            return str(prob)
+        else:
+            if self.layout.layout["numbers"]["fractions"]:
+                return str(Fraction(prob).limit_denominator(1000))
+            else:
+                return str(round(float(prob), self.layout.layout["numbers"]["digits"]))
 
-    def update(self):
-        """Tries to update an existing visualization to apply layout changes WITHOUT reloading. If show was not called before, nothing happens."""
-        self.layout.set_groups(self.separate_labels)
-        self.nt.update_options(str(self.layout))
-
-    def show(self):
-        """Show or update the constructed graph as a html file."""
-        self.reload()
-        self.nt.show()
-        return self.nt.handle
-
-    def show_editor(self, display_: bool = True) -> None:
-        """Display an interactive layout editor. Use the update() method to apply changes."""
-        return self.layout.show_editor(self, display_=display_)  # type: ignore
-
-    def __format_rewards(self, s: State) -> str:
+    def __format_rewards(self, s: svm.State) -> str:
         """Create a string that contains the state-exit reward for this state. Starts with newline"""
         res = ""
         for reward_model in self.model.rewards:
@@ -101,150 +181,64 @@ class Visualization:
                 pass
         return res
 
-    def __add_states(self):
-        """For each state in the model, add a node to the graph."""
-        for state in self.model.states.values():
-            result_of_state = (
-                self.result.get_result_of_state(state)
-                if self.result is not None
-                else ""
-            )
-            formatted_result_of_state = (
-                "\n" + self.__format_probability(result_of_state)
-                if result_of_state is not None
-                else ""
-            )
-            res = (
-                formatted_result_of_state if self.layout.layout["show_results"] else ""
-            )
-            rewards = (
-                self.__format_rewards(state)
-                if self.layout.layout["show_rewards"]
-                else ""
-            )
-
-            group = "states"  # Use a specific group if specified.
-            if und(state.labels[0]) in self.separate_labels:
-                group = und(state.labels[0])
-
-            self.nt.add_node(
-                state.id,
-                label=",".join(state.labels) + rewards + res,
-                color=None,  # type: ignore
-                shape=None,  # type: ignore
-                group=group,
-            )
-
-    def __format_probability(self, prob: Number) -> str:
-        """Take a probability value and format it nicely using a fraction or rounding it.
-        Which one of these to pick is specified in the layout."""
-        if isinstance(prob, str) or math.isinf(prob):
-            return str(prob)
-        else:
-            if rget(self.layout.layout, ["numbers", "fractions"]):
-                return str(Fraction(prob).limit_denominator(1000))
-            else:
-                print(rget(self.layout.layout, ["numbers", "digits"]))
-                return str(
-                    round(float(prob), rget(self.layout.layout, ["numbers", "digits"]))
-                )
-
-    def __add_transitions(self):
-        """For each transition in the model, add a transition in the graph.
-        Also handles creating nodes for actions and their respective transitions.
-        Note that an action may appear multiple times in the model with a different state as source."""
-        action_id = self.ACTION_ID_OFFSET
-        scheduler = self.result.scheduler if self.result is not None else None
-        # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
-        for state_id, transition in self.model.transitions.items():
-            for action, branch in transition.transition.items():
-                if action == EmptyAction:
-                    # Only draw probabilities
-                    for prob, target in branch.branch:
-                        self.nt.add_edge(
-                            state_id,
-                            target.id,
-                            color=None,  # type: ignore
-                            label=self.__format_probability(prob),
-                        )
-                else:
-                    # Add the action's node
-                    self.nt.add_node(
-                        id=action_id,
-                        label=action.name,
-                        color=None
-                        if scheduler is not None
-                        and scheduler.get_choice_of_state(
-                            self.model.get_state_by_id(state_id)
-                        )
-                        == str(list(action.labels))
-                        else None,  # TODO set different color if scheduler chooses this action # type: ignore
-                        shape=None,  # type: ignore
-                        group="actions",
-                    )
-                    # Add transition from this state TO the action.
-                    self.nt.add_edge(state_id, action_id, color=None)  # type: ignore
-                    # Add transition FROM the action to the states in its branch.
-                    for prob, target in branch.branch:
-                        self.nt.add_edge(
-                            action_id,
-                            target.id,
-                            color=None,  # type: ignore
-                            label=self.__format_probability(prob),
-                        )
-                    action_id += 1
-
-
-class CustomBox:
-    def __init__(self, vis) -> None:
-        self.vis = vis
-        display(self.create_box())
-
-    def create_box(self) -> None:
-        iframe = self.vis.nt.generate_iframe()
-        editor = self.vis.layout.show_editor(
-            vis=self.vis, display_=False, reload_function=clear_output
+    def __format_result(self, s: svm.State) -> str:
+        if self.result is None:
+            return ""
+        result_of_state = self.result.get_result_of_state(s)
+        if result_of_state is None:
+            return ""
+        return (
+            "\n"
+            + self.layout.layout["resultSymbol"]
+            + " "
+            + self.__format_probability(result_of_state)
         )
-        return HBox(children=[HTML(iframe), editor])  # type: ignore
-
-    def reload(self) -> None:
-        print("hi")
-        clear_output(wait=True)
-        # display(self.create_box(), self.vis.nt.width, self.vis.nt.height)
 
 
 def show(
-    model: Model,
-    result: result.Result | None = None,
+    model: svm.Model,
+    result: svr.Result | None = None,
     name: str = "model",
-    layout: Layout = DEFAULT(),
+    layout: svl.Layout = svl.DEFAULT(),
     show_editor: bool = False,
     separate_labels: list[str] = [],
+    output: widgets.Output | None = None,
+    debug_output: widgets.Output = widgets.Output(),
 ) -> Visualization:
     """Create and show a visualization of a Model using a pyvis Network
 
     Args:
         model (Model): The stormvogel model to be displayed.
-        name (str, optional): The name of the resulting html file. Defaults to "model".
-        notebook (bool, optional): Leave to true if you are using in a notebook. Defaults to True.
-        cdn_resources (str): Related to the pyvis library. Use "remote", "inline" or "local".
-            Try changing this setting if you experience rendering issues. Defaults to "remote".
-        layout (Layout): Which layout should be used. Defaults to DEFAULT.
-        show_editor (bool): Show an interactive layout editor. Defaults to False.
+        name (str, optional): Internally used name. Will be randomly generated if left as None.
+        result (Result, optional): Result corresponding to the model.
+        layout (Layout, optional): Layout used for the visualization.
+        separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
+        output (widgets.Output): An output widget within which the network should be displayed.
+            If left as None, the Network will display its own output.
+            If specified, display should be called on this output in order to see the result.
+        debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
 
     Returns: Visualization object.
     """
 
-    vis = Visualization(
-        model=model,
-        result=result,
-        name=name,
-        layout=layout,
-        separate_labels=separate_labels,
-    )
-    if show_editor:  # Manually generate the iframe.
-        CustomBox(vis)
+    if show_editor:
+        with debug_output:
+            NotImplementedError()
+        if output is None:
+            # self_display = True
+            output = widgets.Output()
+        else:
+            # self_display = False  # type: ignore
+            # main_output = widgets.Output()  # type: ignore
+            # vis_output = widgets.Output()  # type: ignore
+            pass
     else:
+        vis = Visualization(
+            model=model,
+            result=result,
+            name=name,
+            layout=layout,
+            separate_labels=separate_labels,
+        )
         vis.show()
-
-    return vis
+    return vis  # type: ignore
