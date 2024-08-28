@@ -1,15 +1,7 @@
 """Some constants used in visjs.py"""
 
-
-def start_html(width, height):
-    sizes = f"""
-        width: {width}px;
-        height: {height}px;
-        border: 1px solid lightgray;
-"""
-
-    return (
-        """
+# An html template on which a Network is based.
+START_HTML = """
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -19,9 +11,9 @@ def start_html(width, height):
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
-      #mynetwork {"""
-        + sizes
-        + """}
+      #mynetwork {
+        __SIZES__
+      }
     </style>
   </head>
   <body>
@@ -32,10 +24,9 @@ def start_html(width, height):
   </body>
 </html>
 """
-    )
 
-
-CONTAINER_JS = """
+# Javascript code for finding the container and initializing the network
+NETWORK_JS = """
 var container = document.getElementById("mynetwork");
 var data = {
     nodes: nodes,
