@@ -3,11 +3,13 @@
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
-import stormvogel.displayable
+import stormvogel.displayables
 import stormvogel.html_templates
 
 
 class Network(stormvogel.displayable.Displayable):
+    EXTRA_PIXELS = 20  # To prevent the scroll bar around the Network.
+
     def __init__(
         self,
         name: str,
@@ -94,8 +96,8 @@ class Network(stormvogel.displayable.Displayable):
         return f"""
           <iframe
                 id="{self.name}"
-                width="{self.width}"
-                height="{self.height}"
+                width="{self.width + self.EXTRA_PIXELS}"
+                height="{self.height + self.EXTRA_PIXELS}"
                 frameborder="0"
                 srcdoc="{html.escape(self.generate_html())}"
                 border:none !important;
