@@ -62,6 +62,7 @@ class State:
                 self.labels.sort()
                 other.labels.sort()
                 return self.labels == other.labels
+                # TODO compare features
             return False
         return False
 

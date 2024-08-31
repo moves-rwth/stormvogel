@@ -13,7 +13,7 @@ def matrix_equals(
     model0: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
     model1: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
 ) -> bool:
-    # outputs true if the sparsematrices of the two sparsedtmcs are the same and false otherwise
+    """outputs true if the sparsematrices of the two sparsedtmcs are the same and false otherwise"""
 
     # TODO is there a better check for equality for matrices in storm(py)? otherwise one should perhaps be implemented
     return str(model0.transition_matrix) == str(model1.transition_matrix)
