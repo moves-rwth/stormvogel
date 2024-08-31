@@ -124,14 +124,19 @@ class Result:
 def convert_model_checking_result(
     model: stormvogel.model.Model,
     stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
-    | stormpy.core.ExplicitQualitativeCheckResult,
+    | stormpy.core.ExplicitQualitativeCheckResult
+    | stormpy.core.ExplicitParametricQuantitativeCheckResult,
     with_scheduler: bool = True,
 ) -> Result | None:
     """
     Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
     """
 
-    if type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult:
+    if (
+        type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult
+        or type(stormpy_result)
+        == stormpy.core.ExplicitParametricQuantitativeCheckResult
+    ):
         stormvogel_result = Result(model, stormpy_result.get_values())
     elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
         values = [stormpy_result.at(i) for i in range(0, len(model.states))]
