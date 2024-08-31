@@ -73,7 +73,6 @@
     }
   },
   "save_button": false,
-  "reload_button": false,
   "edges": {
     "arrows": "to",
     "font": {
@@ -98,7 +97,7 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json"
+    "filename": "layouts/NEW_BUTTON 2.json"
   },
   "show_rewards": true,
   "show_results": true,

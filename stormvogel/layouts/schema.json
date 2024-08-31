@@ -126,6 +126,20 @@
       "__widget": "Text"
     }
   },
+  "save_button": {
+    "__description": "Save",
+    "__widget": "Button",
+    "__kwargs": {
+      "button_style": "success"
+    }
+  },
+  "reload_button": {
+    "__description": "Reload",
+    "__widget": "Button",
+    "__kwargs": {
+      "button_style": "info"
+    }
+  },
   "show_rewards": {
     "__description": "Show rewards",
     "__widget": "Checkbox"

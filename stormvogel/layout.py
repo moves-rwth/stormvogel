@@ -1,16 +1,10 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+import stormvogel.rdict
+
 import copy
 import os
 import json
-from stormvogel.buttons import (
-    ReloadButton,
-    SaveButton,
-)
-from IPython.display import display, clear_output
-from ipywidgets import VBox
-from stormvogel.dict_editor import Editor
-from stormvogel.rdict import merge_dict, rget
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -44,7 +38,7 @@ class Layout:
                 parsed_str = f.read()
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
-            self.layout = merge_dict(default_dict, parsed_dict)
+            self.layout = stormvogel.rdict.merge_dict(default_dict, parsed_dict)
 
         # Load in schema for the dict_editor.
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
@@ -67,38 +61,6 @@ class Layout:
                 ] = {  # dict_editor already handles macros, so there is no need to do it manually here.
                     "__use_macro": "__group_macro"
                 }
-
-    def show_editor(self, vis=None, display_=True, reload_function=None):
-        """Display an interactive layout editor, according to the schema."""
-        done_loading = False
-
-        def try_update():
-            """Try to update the visualization unless impossible (happens if show was not called yet),
-            or the editor menu is not done loading yet."""
-            if hasattr(vis, "update") and done_loading:
-                vis.update()  # type: ignore
-
-        def maybe_update():
-            """Try to update if autoApply is enabled."""
-            if rget(self.layout, ["autoApply"]):
-                try_update()
-
-        def try_reload():
-            clear_output()
-            if reload_function is None:
-                if hasattr(vis, "reload") and done_loading:
-                    vis.reload()  # type: ignore
-            elif done_loading:
-                reload_function()
-
-        e = Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
-        s = SaveButton(self)
-        ReloadButton(self, try_reload)
-        box = VBox(children=[e.editor, s.saveButton])
-        if display_:
-            display(box)
-        done_loading = True
-        return box
 
     def save(self, path: str, path_relative: bool = True) -> None:
         """Save this layout as a json file.

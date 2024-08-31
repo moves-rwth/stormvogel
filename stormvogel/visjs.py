@@ -3,17 +3,18 @@
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
+import stormvogel.displayable
+import stormvogel.html_templates
 
-import stormvogel.html_templates as ht
 
-
-class Network:
+class Network(stormvogel.displayable.Displayable):
     def __init__(
         self,
         name: str,
         width: int = 800,
         height: int = 600,
-        output: widgets.Output | None = None,
+        output: widgets.Output = widgets.Output(),
+        do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
@@ -23,23 +24,15 @@ class Network:
             width (int): Width of the network, in pixels.
             height (int): Height of the network, in pixels.
             output (widgets.Output): An output widget within which the network should be displayed.
-                If left as None, the Network will display its own output.
-                If specified, display should be called on this output in order to see the result.
+            do_display (bool): Set to true iff you want the Network to display. Defaults to True.
             debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you."""
-
+        super().__init__(output, do_display, debug_output)
         self.name: str = name
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
-        self.self_display: bool = False
-        if output is None:
-            self.output: widgets.Output = widgets.Output()
-            self.self_display = True
-        else:
-            self.output: widgets.Output = output
-        self.debug_output: widgets.Output = debug_output
 
     def add_node(
         self,
@@ -82,7 +75,7 @@ class Network:
         var edges = new vis.DataSet([{self.edges_js}]);
         var options = {self.options_js};
         """
-            + ht.NETWORK_JS
+            + stormvogel.html_templates.NETWORK_JS
         )
 
         sizes = f"""
@@ -91,7 +84,9 @@ class Network:
         border: 1px solid lightgray;
         """
 
-        html = ht.START_HTML.replace("__JAVASCRIPT__", js).replace("__SIZES__", sizes)
+        html = stormvogel.html_templates.START_HTML.replace(
+            "__JAVASCRIPT__", js
+        ).replace("__SIZES__", sizes)
         return html
 
     def generate_iframe(self) -> str:
@@ -112,10 +107,7 @@ class Network:
         iframe = self.generate_iframe()
         with self.output:  # Display the iframe within the Output.
             ipd.display(ipd.HTML(iframe))
-        if (
-            self.self_display
-        ):  # If we have self display enabled, also display the Output itself.
-            ipd.display(self.output)
+        self.maybe_display_output()
         with self.debug_output:
             print("Called Network.show")
 
