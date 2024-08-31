@@ -320,6 +320,48 @@ def stormpy_to_stormvogel(
 
         return model
 
+    def map_pomdp(sparsepomdp: stormpy.storage.SparsePomdp) -> stormvogel.model.Model:
+        """
+        Takes a pomdp stormpy representation as input and outputs a simple stormvogel representation
+        """
+
+        # we create the model (it seems names are not stored in sparsedtmcs)
+        model = stormvogel.model.new_pomdp(name=None)
+
+        # we add the states
+        add_states(model, sparsepomdp)
+
+        # we add the transitions
+        matrix = sparsepomdp.transition_matrix
+        for index, state in enumerate(sparsepomdp.states):
+            row_group_start = matrix.get_row_group_start(index)
+            row_group_end = matrix.get_row_group_end(index)
+
+            # within a row group we add for each action the transitions
+            transition = dict()
+            for i in range(row_group_start, row_group_end):
+                row = matrix.get_row(i)
+
+                # TODO assign the correct action name and not only an index
+                actionlabels = frozenset(
+                    sparsepomdp.choice_labeling.get_labels_of_choice(i)
+                    if sparsepomdp.has_choice_labeling()
+                    else str(i)
+                )
+                action = model.new_action_with_labels(str(i), actionlabels)
+                branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
+                transition[action] = stormvogel.model.Branch(branch)
+                transitions = stormvogel.model.Transition(transition)
+                model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add the reward models to the state action pairs
+        add_rewards(model, sparsepomdp)
+
+        # we add the set of observable states:
+        print(dir(sparsepomdp))
+
+        return model
+
     # we check the type to handle the sparse model correctly
     if sparsemodel.model_type.name == "DTMC":
         return map_dtmc(sparsemodel)
@@ -327,6 +369,8 @@ def stormpy_to_stormvogel(
         return map_mdp(sparsemodel)
     elif sparsemodel.model_type.name == "CTMC":
         return map_ctmc(sparsemodel)
+    elif sparsemodel.model_type.name == "POMDP":
+        return map_pomdp(sparsemodel)
     else:
         print("This type of model is not yet supported for this action")
         return

@@ -17,8 +17,9 @@ class ModelType(Enum):
     DTMC = 1
     MDP = 2
     CTMC = 3
+    POMDP = 4
     # not implemented yet
-    MA = 4
+    MA = 5
 
 
 @dataclass()
@@ -62,7 +63,6 @@ class State:
                 self.labels.sort()
                 other.labels.sort()
                 return self.labels == other.labels
-                # TODO compare features
             return False
         return False
 
@@ -234,6 +234,8 @@ class Model:
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     rates: dict[int, Number] | None
+    # In pomdps we have a set of observable states
+    observable = set[State]
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -487,3 +489,8 @@ def new_mdp(name: str | None = None):
 def new_ctmc(name: str | None = None):
     """Creates a CTMC."""
     return Model(name, ModelType.CTMC)
+
+
+def new_pomdp(name: str | None = None):
+    """Creates a POMDP."""
+    return Model(name, ModelType.POMDP)
