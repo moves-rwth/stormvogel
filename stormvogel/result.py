@@ -123,13 +123,23 @@ class Result:
 
 def convert_model_checking_result(
     model: stormvogel.model.Model,
-    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult,
+    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
+    | stormpy.core.ExplicitQualitativeCheckResult,
     with_scheduler: bool = True,
-) -> Result:
+) -> Result | None:
     """
     Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
     """
-    stormvogel_result = Result(model, stormpy_result.get_values())
+
+    if type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult:
+        stormvogel_result = Result(model, stormpy_result.get_values())
+    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
+        values = [stormpy_result.at(i) for i in range(0, len(model.states))]
+        stormvogel_result = Result(model, values)
+    else:
+        print("Unsupported result type")
+        return
+
     if stormpy_result.has_scheduler and with_scheduler:
         stormvogel_result.add_scheduler(stormpy_result.scheduler)
 
