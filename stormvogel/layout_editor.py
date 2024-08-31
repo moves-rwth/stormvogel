@@ -23,9 +23,9 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.layout: stormvogel.layout.Layout = layout
 
     def try_update(self):
-        if self.layout.layout["save_button"]:
+        if self.layout.layout["saving"]["save_button"]:
             # Save iff the save button was pressed.
-            self.layout.layout["save_button"] = False
+            self.layout.layout["saving"]["save_button"] = False
             self.layout.save(
                 self.layout.layout["saving"]["filename"],
                 path_relative=self.layout.layout["saving"]["relative_path"],

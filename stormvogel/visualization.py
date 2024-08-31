@@ -68,8 +68,8 @@ class Visualization(stormvogel.displayable.Displayable):
             ipd.clear_output()
         self.nt = stormvogel.visjs.Network(
             name=self.name,
-            width=self.layout.layout["width"],
-            height=self.layout.layout["height"],
+            width=self.layout.layout["misc"]["width"],
+            height=self.layout.layout["misc"]["height"],
             output=self.output,
             debug_output=self.debug_output,
             do_display=False,
@@ -92,11 +92,11 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         for state in self.model.states.values():
-            if self.layout.layout["show_results"]:
+            if self.layout.layout["results_and_rewards"]["show_results"]:
                 res = self.__format_result(state)
             else:
                 res = ""
-            if self.layout.layout["show_rewards"]:
+            if self.layout.layout["results_and_rewards"]["show_rewards"]:
                 rewards = self.__format_rewards(state)
             else:
                 rewards = ""
@@ -154,7 +154,7 @@ class Visualization(stormvogel.displayable.Displayable):
         """Enable physics iff the model has less than 10000 states."""
         if "physics" not in self.layout.layout:
             self.layout.layout["physics"] = {}
-        self.layout.layout["physics"]["enabled"] = len(self.model.states) < 10000
+        self.layout.layout["misc"]["enable_physics"] = len(self.model.states) < 10000
 
     def __format_probability(self, prob: stormvogel.model.Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
@@ -187,7 +187,7 @@ class Visualization(stormvogel.displayable.Displayable):
             return ""
         return (
             "\n"
-            + self.layout.layout["resultSymbol"]
+            + self.layout.layout["results_and_rewards"]["resultSymbol"]
             + " "
             + self.__format_probability(result_of_state)
         )

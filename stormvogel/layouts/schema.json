@@ -53,10 +53,6 @@
       }
     }
   },
-  "autoApply": {
-    "__description": "Auto apply changes",
-    "__widget": "Checkbox"
-  },
   "groups": {
     "states": {
       "__use_macro": "__group_macro"
@@ -65,7 +61,11 @@
       "__use_macro": "__group_macro"
     },
     "scheduled_actions": {
-      "__use_macro": "__group_macro"
+      "__use_macro": "__group_macro",
+      "schedColor": {
+        "__description": "Scheduled edge color",
+        "__widget": "Checkbox"
+      }
     }
   },
   "edges": {
@@ -99,24 +99,46 @@
       "__widget": "IntSlider"
     }
   },
-  "physics": {
+  "results_and_rewards": {
     "__collapse": true,
-    "__html": "<p>Always disabled if over 10000 states.</p>",
-    "enabled": {
-      "__description": "enabled",
+    "show_results": {
+      "__description": "Show results",
+      "__widget": "Checkbox"
+    },
+    "resultSymbol": {
+      "__description": "Result symbol",
+      "__widget": "Text"
+    },
+    "show_rewards": {
+      "__description": "Show rewards",
       "__widget": "Checkbox"
     }
   },
-  "resultSymbol": {
-    "__description": "Result symbol",
-    "__widget": "Text"
-  },
-  "schedColor": {
-    "__description": "Scheduled edge color",
-    "__widget": "Checkbox"
+  "misc": {
+    "__collapse": true,
+    "enable_physics": {
+      "__description": "enable physics",
+      "__widget": "Checkbox"
+    },
+    "width": {
+      "__description": "Width",
+      "__widget": "IntSlider",
+      "__kwargs": {
+        "min": 0,
+        "max": 2000
+      }
+    },
+    "height": {
+      "__description": "Height",
+      "__widget": "IntSlider",
+      "__kwargs": {
+        "min": 0,
+        "max": 2000
+      }
+    }
   },
   "saving": {
-    "__html": "<h4>Save / apply changes</h4>",
+    "__collapse": true,
     "relative_path": {
       "__description": "Relative path",
       "__widget": "Checkbox"
@@ -124,13 +146,13 @@
     "filename": {
       "__description": "File name",
       "__widget": "Text"
-    }
-  },
-  "save_button": {
-    "__description": "Save",
-    "__widget": "Button",
-    "__kwargs": {
-      "button_style": "success"
+    },
+    "save_button": {
+      "__description": "Save",
+      "__widget": "Button",
+      "__kwargs": {
+        "button_style": "success"
+      }
     }
   },
   "reload_button": {
@@ -138,30 +160,6 @@
     "__widget": "Button",
     "__kwargs": {
       "button_style": "info"
-    }
-  },
-  "show_rewards": {
-    "__description": "Show rewards",
-    "__widget": "Checkbox"
-  },
-  "show_results": {
-    "__description": "Show results",
-    "__widget": "Checkbox"
-  },
-  "width": {
-    "__description": "Width",
-    "__widget": "IntSlider",
-    "__kwargs": {
-      "min": 0,
-      "max": 2000
-    }
-  },
-  "height": {
-    "__description": "Height",
-    "__widget": "IntSlider",
-    "__kwargs": {
-      "min": 0,
-      "max": 2000
     }
   }
 }
