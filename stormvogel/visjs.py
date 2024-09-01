@@ -3,8 +3,10 @@
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
-import stormvogel.displayables
+import stormvogel.displayable
 import stormvogel.html_templates
+import stormvogel.local_server
+import random
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -18,6 +20,7 @@ class Network(stormvogel.displayable.Displayable):
         output: widgets.Output = widgets.Output(),
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
+        server_port: int = -1,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -27,7 +30,9 @@ class Network(stormvogel.displayable.Displayable):
             height (int): Height of the network, in pixels.
             output (widgets.Output): An output widget within which the network should be displayed.
             do_display (bool): Set to true iff you want the Network to display. Defaults to True.
-            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you."""
+            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
+            server_port (int): Used for internal communication.
+                Never create two networks with the same server port. If left to default, it will be randomly generated."""
         super().__init__(output, do_display, debug_output)
         self.name: str = name
         self.width: int = width
@@ -35,6 +40,17 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
+        if server_port == -1:
+            server_port = random.randrange(8000, 9000)
+        self.messenger: stormvogel.local_server.JSMessenger = (
+            stormvogel.local_server.JSMessenger(server_port=server_port)
+        )
+
+    def get_positions(self):
+        """Get the current positions of the nodes on the canvas."""
+        return self.messenger.request(
+            f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+        )
 
     def add_node(
         self,
