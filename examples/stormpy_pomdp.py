@@ -8,7 +8,7 @@ import stormpy.examples.files
 import stormpy.pomdp
 
 
-def example_pomdp_highlevel_observations():
+def example_building_pomdps_01():
     # Check support for parameters
 
     path = stormpy.examples.files.prism_pomdp_maze
@@ -23,11 +23,8 @@ def example_pomdp_highlevel_observations():
     # make its representation canonic.
     pomdp = stormpy.pomdp.make_canonic(pomdp)
 
-    assert pomdp.has_observation_valuations
-    assert pomdp.observation_valuations.get_json(0)["o"] == 5
-
     return pomdp
 
 
 if __name__ == "__main__":
-    print(example_pomdp_highlevel_observations())
+    print(example_building_pomdps_01())

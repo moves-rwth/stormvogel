@@ -8,6 +8,10 @@ import stormpy.examples
 class Scheduler:
     """
     Scheduler object specifiec what action to take in each state
+
+    Args:
+        model: stormvogel representation of the model associated with the scheduler
+        taken_actions: for each state an action to take in that state
     """
 
     model: stormvogel.model.Model

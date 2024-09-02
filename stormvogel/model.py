@@ -234,8 +234,8 @@ class Model:
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     rates: dict[int, Number] | None
-    # In pomdps we have a set of observable states
-    observable = set[State]
+    # In pomdps we have a list of observations (hashed by state id)
+    observations: dict[int, int]
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -243,6 +243,7 @@ class Model:
         self.transitions = {}
         self.states = {}
         self.rewards = []
+        self.observations = dict()
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
@@ -261,7 +262,7 @@ class Model:
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.MA)
+        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
@@ -472,6 +473,7 @@ class Model:
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
+                and self.observations == other.observations
             )
         return False
 

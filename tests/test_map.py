@@ -5,6 +5,7 @@ import stormvogel.model
 import examples.stormpy_dtmc
 import examples.die
 import examples.stormpy_ctmc
+import examples.stormpy_pomdp
 import examples.nuclear_fusion_ctmc
 import stormpy
 
@@ -94,3 +95,16 @@ def test_stormpy_to_stormvogel_and_back_ctmc():
     # print(new_stormpy_ctmc)
 
     assert matrix_equals(stormpy_ctmc, new_stormpy_ctmc)
+
+
+def test_stormpy_to_stormvogel_and_back_pomdp():
+    # we create a stormpy representation of an example pomdp
+    stormpy_pomdp = examples.stormpy_pomdp.example_building_pomdps_01()
+    # print(stormpy_pomdp)
+    stormvogel_pomdp = stormvogel.map.stormpy_to_stormvogel(stormpy_pomdp)
+    # print(stormvogel_pomdp)
+    assert stormvogel_pomdp is not None
+    new_stormpy_pomdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_pomdp)
+    # print(new_stormpy_pomdp)
+
+    assert matrix_equals(stormpy_pomdp, new_stormpy_pomdp)

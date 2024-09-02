@@ -172,6 +172,47 @@ def stormvogel_to_stormpy(
 
         return ctmc
 
+    def map_pomdp(model: stormvogel.model.Model) -> stormpy.storage.SparsePomdp:
+        """
+        Takes a simple representation of an pomdp as input and outputs an pomdp how it is represented in stormpy
+        """
+
+        # we determine the number of choices and the labels
+        count = 0
+        labels = set()
+        for transition in model.transitions.items():
+            for action in transition[1].transition.items():
+                count += 1
+                if not action[0] == stormvogel.model.EmptyAction:
+                    for label in action[0].labels:
+                        labels.add(label)
+
+        # we add the labels to the choice labeling object
+        choice_labeling = stormpy.storage.ChoiceLabeling(count)
+        for label in labels:
+            choice_labeling.add_label(str(label))
+
+        # then we create the matrix and simultanuously add the correct labels to the choices
+        matrix = build_matrix(model, choice_labeling=choice_labeling)
+
+        # then we add the state labels
+        state_labeling = add_labels(model)
+
+        # then we add the rewards
+        reward_models = add_rewards(model)
+
+        # then we build the mdp
+        components = stormpy.SparseModelComponents(
+            transition_matrix=matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models,
+        )
+        components.observability_classes = list(model.observations.values())
+        components.choice_labeling = choice_labeling
+        pomdp = stormpy.storage.SparsePomdp(components)
+
+        return pomdp
+
     # we check the type to handle the model correctly
     if model.get_type() == stormvogel.model.ModelType.DTMC:
         return map_dtmc(model)
@@ -179,6 +220,8 @@ def stormvogel_to_stormpy(
         return map_mdp(model)
     elif model.get_type() == stormvogel.model.ModelType.CTMC:
         return map_ctmc(model)
+    elif model.get_type() == stormvogel.model.ModelType.POMDP:
+        return map_pomdp(model)
     else:
         print("This type of model is not yet supported for this action")
         return None
@@ -357,8 +400,9 @@ def stormpy_to_stormvogel(
         # we add the reward models to the state action pairs
         add_rewards(model, sparsepomdp)
 
-        # we add the set of observable states:
-        print(dir(sparsepomdp))
+        # we add the observations:
+        for state in model.states.values():
+            model.observations[state.id] = sparsepomdp.get_observation(state.id)
 
         return model
 
