@@ -8,6 +8,7 @@ def stormvogel_to_stormpy(
     stormpy.storage.SparseDtmc
     | stormpy.storage.SparseMdp
     | stormpy.storage.SparseCtmc
+    | stormpy.storage.SparsePomdp
     | None
 ):
     def build_matrix(
@@ -230,7 +231,8 @@ def stormvogel_to_stormpy(
 def stormpy_to_stormvogel(
     sparsemodel: stormpy.storage.SparseDtmc
     | stormpy.storage.SparseMdp
-    | stormpy.storage.SparseCtmc,
+    | stormpy.storage.SparseCtmc
+    | stormpy.storage.SparsePomdp,
 ) -> stormvogel.model.Model | None:
     def add_states(
         model: stormvogel.model.Model,
