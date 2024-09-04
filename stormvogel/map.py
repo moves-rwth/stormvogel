@@ -404,7 +404,7 @@ def stormpy_to_stormvogel(
 
         # we add the observations:
         for state in model.states.values():
-            model.observations[state.id] = sparsepomdp.get_observation(state.id)
+            state.set_observation(sparsepomdp.get_observation(state.id))
 
         return model
 

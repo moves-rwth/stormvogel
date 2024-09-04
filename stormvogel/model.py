@@ -31,6 +31,7 @@ class State:
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
+        observation: the observation of this state in case the model is a pomdp
     """
 
     # name: str | None
@@ -38,6 +39,7 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
+    observation: int | None
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
@@ -45,6 +47,11 @@ class State:
         self.id = id
         self.model = model
         # TODO how to handle state names?
+
+    def set_observation(self, observation: int):
+        """sets the observation for this state"""
+        self.observation = observation
+        self.model.add_observation(self, observation)
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -243,7 +250,7 @@ class Model:
         self.transitions = {}
         self.states = {}
         self.rewards = []
-        self.observations = dict()
+        self.observations = {}
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
@@ -275,6 +282,10 @@ class Model:
         while i in self.states:
             i += 1
         return i
+
+    def add_observation(self, s: State, observation: int):
+        """sets an observation for a state"""
+        self.observations[s.id] = observation
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
