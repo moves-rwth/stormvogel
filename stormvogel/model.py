@@ -17,8 +17,9 @@ class ModelType(Enum):
     DTMC = 1
     MDP = 2
     CTMC = 3
+    POMDP = 4
     # not implemented yet
-    MA = 4
+    MA = 5
 
 
 @dataclass()
@@ -30,6 +31,7 @@ class State:
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
+        observation: the observation of this state in case the model is a pomdp
     """
 
     # name: str | None
@@ -37,6 +39,7 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
+    observation: int | None
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
@@ -44,6 +47,11 @@ class State:
         self.id = id
         self.model = model
         # TODO how to handle state names?
+
+    def set_observation(self, observation: int):
+        """sets the observation for this state"""
+        self.observation = observation
+        self.model.add_observation(self, observation)
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -62,7 +70,6 @@ class State:
                 self.labels.sort()
                 other.labels.sort()
                 return self.labels == other.labels
-                # TODO compare features
             return False
         return False
 
@@ -234,6 +241,8 @@ class Model:
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     rates: dict[int, Number] | None
+    # In pomdps we have a list of observations (hashed by state id)
+    observations: dict[int, int]
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -241,6 +250,7 @@ class Model:
         self.transitions = {}
         self.states = {}
         self.rewards = []
+        self.observations = {}
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
@@ -259,7 +269,7 @@ class Model:
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.MA)
+        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
@@ -272,6 +282,10 @@ class Model:
         while i in self.states:
             i += 1
         return i
+
+    def add_observation(self, s: State, observation: int):
+        """sets an observation for a state"""
+        self.observations[s.id] = observation
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
@@ -470,6 +484,7 @@ class Model:
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
+                and self.observations == other.observations
             )
         return False
 
@@ -487,3 +502,8 @@ def new_mdp(name: str | None = None):
 def new_ctmc(name: str | None = None):
     """Creates a CTMC."""
     return Model(name, ModelType.CTMC)
+
+
+def new_pomdp(name: str | None = None):
+    """Creates a POMDP."""
+    return Model(name, ModelType.POMDP)
