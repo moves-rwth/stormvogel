@@ -1,11 +1,22 @@
 """Communication from Javascript/HTML to IPython/Jupyter lab using a local server and requests.
-Initialization by user is not recommended. It should happen automatically when creating a visjs.Network."""
+Initialization by user is not recommended. It should happen automatically when creating a visjs.Network.
+
+Remember that THE PORT STORED IN GLOBAL VARIABLE server_port NEEDS TO BE OPEN (AND IN SOME CASES FORWARDED) FOR IT TO WORK."""
 
 import http.server
 import threading
 import urllib
 import IPython.display as ipd
 from time import sleep
+
+"""Change this to use a different port, BEFORE LOADING A NETWORK!!!"""
+server_port = 8080
+
+
+def set_port(port: int):
+    global server_port
+    server_port = port
+
 
 result = ""
 received_result = False
@@ -91,18 +102,18 @@ class CommunicationServer:
         print("Server stopped.")
 
 
-server: CommunicationServer | None = (
-    None  # Global variable holding the server used for this notebook. None if not initialized.
-)
+"""Global variable holding the server used for this notebook. None if not initialized."""
+server: CommunicationServer | None = None
 
 
-def initialize_server(server_port: int) -> CommunicationServer:
+def initialize_server() -> CommunicationServer:
     """If server is None, then create a new server and store it in global variable server.
+    Use the port stored in global variable server_port.
 
     Args:
         server_port (int)
     """
-    global server
+    global server, server_port
     if server is None:
         server = CommunicationServer(server_port=server_port)
     return server
