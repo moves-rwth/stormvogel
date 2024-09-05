@@ -11,7 +11,6 @@ import json
 
 class Network(stormvogel.displayable.Displayable):
     EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
-    DEFAULT_SERVER_PORT: int = 8080
 
     def __init__(
         self,
@@ -21,7 +20,6 @@ class Network(stormvogel.displayable.Displayable):
         output: widgets.Output = widgets.Output(),
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
-        server_port: int | None = None,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -31,9 +29,7 @@ class Network(stormvogel.displayable.Displayable):
             height (int): Height of the network, in pixels.
             output (widgets.Output): An output widget within which the network should be displayed.
             do_display (bool): Set to true iff you want the Network to display. Defaults to True.
-            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
-            server_port (int): Used for internal communication.
-                Never create two networks with the same server port. If left to default, it will be randomly generated."""
+            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you."""
         super().__init__(output, do_display, debug_output)
         self.name: str = name
         self.width: int = width
@@ -41,11 +37,8 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
-        self.server_port: int = (
-            self.DEFAULT_SERVER_PORT if server_port is None else server_port
-        )
         self.server: stormvogel.communication_server.CommunicationServer = (
-            stormvogel.communication_server.initialize_server(self.server_port)
+            stormvogel.communication_server.initialize_server()
         )
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
