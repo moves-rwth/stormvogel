@@ -240,7 +240,7 @@ class Model:
     actions: dict[str, Action] | None
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
-    rates: dict[int, Number] | None
+    exit_rates: dict[int, Number] | None
     # In pomdps we have a list of observations (hashed by state id)
     observations: dict[int, int]
 
@@ -260,9 +260,9 @@ class Model:
 
         # Initialize rates if those are supported by the model type
         if self.supports_rates():
-            self.rates = {}
+            self.exit_rates = {}
         else:
-            self.rates = None
+            self.exit_rates = None
 
         # Add the initial state
         self.new_state(["init"])
@@ -273,7 +273,7 @@ class Model:
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
-        return self.type == ModelType.CTMC
+        return self.type in (ModelType.CTMC, ModelType.MA)
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -430,15 +430,15 @@ class Model:
 
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
-        if not self.supports_rates() or self.rates is None:
+        if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot get a rate of a deterministic-time model.")
-        return self.rates[state.id]
+        return self.exit_rates[state.id]
 
     def set_rate(self, state: State, rate: Number):
         """Sets the rate of a state."""
-        if not self.supports_rates() or self.rates is None:
+        if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
-        self.rates[state.id] = rate
+        self.exit_rates[state.id] = rate
 
     def get_type(self):
         """Gets the type of this model"""
@@ -484,6 +484,7 @@ class Model:
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
+                and self.exit_rates == other.exit_rates
                 and self.observations == other.observations
             )
         return False
@@ -507,3 +508,8 @@ def new_ctmc(name: str | None = None):
 def new_pomdp(name: str | None = None):
     """Creates a POMDP."""
     return Model(name, ModelType.POMDP)
+
+
+def new_ma(name: str | None = None):
+    """Creates a MA."""
+    return Model(name, ModelType.MA)
