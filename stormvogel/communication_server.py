@@ -1,4 +1,5 @@
-"""Communication from Javascript/HTML to IPython/Jupyter lab using a local server and requests."""
+"""Communication from Javascript/HTML to IPython/Jupyter lab using a local server and requests.
+Initialization by user is not recommended. It should happen automatically when creating a visjs.Network."""
 
 import http.server
 import threading
@@ -10,7 +11,8 @@ result = ""
 received_result = False
 
 
-class JSMessenger:
+# TODO, add identifiers, queues etc. and use logging which can be easily disabled.
+class CommunicationServer:
     def __init__(self, server_port: int = 8080) -> None:
         """Run a web server in the background to receive Javascript communications.
         Warning! We don't currently account for race conditions etc.
@@ -23,7 +25,7 @@ class JSMessenger:
         """
         self.server_port: int = server_port
 
-        class LocalServer(http.server.BaseHTTPRequestHandler):
+        class InnerServer(http.server.BaseHTTPRequestHandler):
             def do_GET(self):
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
@@ -48,13 +50,13 @@ class JSMessenger:
                 print(urllib.parse.unquote(self.path[1:]))
 
         self.web_server: http.server.HTTPServer = http.server.HTTPServer(
-            ("localhost", self.server_port), LocalServer
+            ("localhost", self.server_port), InnerServer
         )
         thr = threading.Thread(target=self.__run_server)
         thr.start()
 
     def request(self, js: str):
-        """Return the result of a single line of Javascript. Waits for at most one second, then fails."""
+        """Return the result of a single line of Javascript. Waits for at most one second, then throws TimeoutError."""
         global result, received_result
         received_result = False
         # Request the info
@@ -72,7 +74,9 @@ class JSMessenger:
 
         if not received_result:
             received_result = False
-            return "FAILURE"
+            raise TimeoutError(
+                f"CommunicationServer.request did not receive result in time for request:\n{js}"
+            )
         else:
             received_result = False
             return result
@@ -85,3 +89,20 @@ class JSMessenger:
             pass
         self.web_server.server_close()
         print("Server stopped.")
+
+
+server: CommunicationServer | None = (
+    None  # Global variable holding the server used for this notebook. None if not initialized.
+)
+
+
+def initialize_server(server_port: int) -> CommunicationServer:
+    """If server is None, then create a new server and store it in global variable server.
+
+    Args:
+        server_port (int)
+    """
+    global server
+    if server is None:
+        server = CommunicationServer(server_port=server_port)
+    return server

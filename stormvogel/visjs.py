@@ -5,12 +5,13 @@ import ipywidgets as widgets
 import html
 import stormvogel.displayable
 import stormvogel.html_templates
-import stormvogel.local_server
-import random
+import stormvogel.communication_server
+import json
 
 
 class Network(stormvogel.displayable.Displayable):
-    EXTRA_PIXELS = 20  # To prevent the scroll bar around the Network.
+    EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
+    DEFAULT_SERVER_PORT: int = 8080
 
     def __init__(
         self,
@@ -20,7 +21,7 @@ class Network(stormvogel.displayable.Displayable):
         output: widgets.Output = widgets.Output(),
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
-        server_port: int = -1,
+        server_port: int | None = None,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -40,17 +41,23 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
-        if server_port == -1:
-            server_port = random.randrange(8000, 9000)
-        self.messenger: stormvogel.local_server.JSMessenger = (
-            stormvogel.local_server.JSMessenger(server_port=server_port)
+        self.server_port: int = (
+            self.DEFAULT_SERVER_PORT if server_port is None else server_port
         )
+        self.server: stormvogel.communication_server.CommunicationServer = (
+            stormvogel.communication_server.initialize_server(self.server_port)
+        )
+        # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
-    def get_positions(self):
-        """Get the current positions of the nodes on the canvas."""
-        return self.messenger.request(
-            f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+    def get_positions(self) -> dict | None:
+        """Get the current positions of the nodes on the canvas. Raises TimeoutError if unsuccesful.
+        Example result: {0: {"x": 5, "y": 10}}"""
+        positions: dict = json.loads(
+            self.server.request(
+                f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+            )
         )
+        return {int(k): v for (k, v) in positions.items()}
 
     def add_node(
         self,
