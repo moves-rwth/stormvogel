@@ -243,6 +243,8 @@ class Model:
     exit_rates: dict[int, Number] | None
     # In pomdps we have a list of observations (hashed by state id)
     observations: dict[int, int]
+    # In ma's we keep track of markovian states
+    markovian_states = list[int] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -263,6 +265,12 @@ class Model:
             self.exit_rates = {}
         else:
             self.exit_rates = None
+
+        # Initialize markovian states if applicable (in the case of MA's)
+        if self.get_type() == ModelType.MA:
+            self.markovian_states = []
+        else:
+            self.markovian_states = None
 
         # Add the initial state
         self.new_state(["init"])
@@ -486,6 +494,7 @@ class Model:
                 and self.rewards == other.rewards
                 and self.exit_rates == other.exit_rates
                 and self.observations == other.observations
+                and self.markovian_states == other.markovian_states
             )
         return False
 
