@@ -244,17 +244,21 @@ def stormvogel_to_stormpy(
         reward_models = add_rewards(model)
 
         # we create the list of markovian states
-        markovian_states = model.markovian_states
-        markovian_states = stormpy.storage.BitVector(
-            len(markovian_states) + 1, markovian_states
-        )
+        markovian_states_list = model.markovian_states
+        if isinstance(markovian_states_list, list):
+            markovian_states_bitvector = stormpy.storage.BitVector(
+                len(markovian_states_list) + 1,
+                markovian_states_list,
+            )
+        else:
+            markovian_states_bitvector = stormpy.storage.BitVector(0)
 
         # then we build the mdp
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
             reward_models=reward_models,
-            markovian_states=markovian_states,
+            markovian_states=markovian_states_bitvector,
         )
         if not model.exit_rates == {} and model.exit_rates is not None:
             components.exit_rates = list(model.exit_rates.values())

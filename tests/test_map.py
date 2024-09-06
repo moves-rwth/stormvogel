@@ -126,26 +126,26 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 
 """
 def test_stormvogel_to_stormpy_and_back_ma():
-    # we create a stormpy representation of an example pomdp
-    stormvogel_pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
-    # print(stormvogel_pomdp)
-    stormpy_pomdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_pomdp)
-    # print(stormpy_pomdp)
-    new_stormvogel_pomdp = stormvogel.map.stormpy_to_stormvogel(stormpy_pomdp)
-    # print(new_stormvogel_pomdp)
+    # we create a stormpy representation of an example ma
+    stormvogel_ma = examples.monty_hall_ma.create_monty_hall_ma()
+    # print(stormvogel_ma)
+    stormpy_ma = stormvogel.map.stormvogel_to_stormpy(stormvogel_ma)
+    # print(stormpy_ma)
+    new_stormvogel_ma = stormvogel.map.stormpy_to_stormvogel(stormpy_ma)
+    # print(new_stormvogel_ma)
 
-    assert new_stormvogel_pomdp == stormvogel_pomdp
+    assert new_stormvogel_ma == stormvogel_ma
 """
 
 
 def test_stormpy_to_stormvogel_and_back_ma():
     # we create a stormpy representation of an example ma
     stormpy_ma = examples.stormpy_ma.example_building_mas_01()
-    print(stormpy_ma)
+    # print(stormpy_ma)
     stormvogel_ma = stormvogel.map.stormpy_to_stormvogel(stormpy_ma)
-    print(stormvogel_ma)
+    # print(stormvogel_ma)
     assert stormvogel_ma is not None
     new_stormpy_ma = stormvogel.map.stormvogel_to_stormpy(stormvogel_ma)
-    print(new_stormpy_ma)
+    # print(new_stormpy_ma)
 
     assert matrix_equals(stormpy_ma, new_stormpy_ma)
