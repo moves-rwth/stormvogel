@@ -9,6 +9,7 @@ import examples.stormpy_pomdp
 import examples.nuclear_fusion_ctmc
 import examples.monty_hall_pomdp
 import examples.stormpy_ma
+import examples.simple_ma
 import stormpy
 
 
@@ -124,10 +125,9 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
     assert matrix_equals(stormpy_pomdp, new_stormpy_pomdp)
 
 
-"""
 def test_stormvogel_to_stormpy_and_back_ma():
     # we create a stormpy representation of an example ma
-    stormvogel_ma = examples.monty_hall_ma.create_monty_hall_ma()
+    stormvogel_ma = examples.simple_ma.create_simple_ma()
     # print(stormvogel_ma)
     stormpy_ma = stormvogel.map.stormvogel_to_stormpy(stormvogel_ma)
     # print(stormpy_ma)
@@ -135,7 +135,6 @@ def test_stormvogel_to_stormpy_and_back_ma():
     # print(new_stormvogel_ma)
 
     assert new_stormvogel_ma == stormvogel_ma
-"""
 
 
 def test_stormpy_to_stormvogel_and_back_ma():

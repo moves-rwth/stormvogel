@@ -262,6 +262,8 @@ def stormvogel_to_stormpy(
         )
         if not model.exit_rates == {} and model.exit_rates is not None:
             components.exit_rates = list(model.exit_rates.values())
+        else:
+            components.exit_rates = []
         components.observability_classes = list(model.observations.values())
         components.choice_labeling = choice_labeling
         ma = stormpy.storage.SparseMA(components)
