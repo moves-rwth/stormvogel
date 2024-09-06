@@ -46,12 +46,16 @@ class State:
         self.features = features
         self.id = id
         self.model = model
+
+        if not self.model.get_type() == ModelType.POMDP:
+            self.observation = None
         # TODO how to handle state names?
 
     def set_observation(self, observation: int):
         """sets the observation for this state"""
-        self.observation = observation
-        self.model.add_observation(self, observation)
+        if self.model.get_type() == ModelType.POMDP:
+            self.observation = observation
+            self.model.add_observation(self, observation)
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -242,7 +246,7 @@ class Model:
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     exit_rates: dict[int, Number] | None
     # In pomdps we have a list of observations (hashed by state id)
-    observations: dict[int, int]
+    observations: dict[int, int] | None
     # In ma's we keep track of markovian states
     markovian_states = list[int] | None
 
@@ -252,7 +256,6 @@ class Model:
         self.transitions = {}
         self.states = {}
         self.rewards = []
-        self.observations = {}
 
         # Initialize actions if those are supported by the model type
         if self.supports_actions():
@@ -265,6 +268,12 @@ class Model:
             self.exit_rates = {}
         else:
             self.exit_rates = None
+
+        # Initialize observations if those are supported by the model type (pomdps)
+        if self.get_type() == ModelType.POMDP:
+            self.observations = {}
+        else:
+            self.observations = None
 
         # Initialize markovian states if applicable (in the case of MA's)
         if self.get_type() == ModelType.MA:
@@ -293,7 +302,10 @@ class Model:
 
     def add_observation(self, s: State, observation: int):
         """sets an observation for a state"""
-        self.observations[s.id] = observation
+        if self.get_type() == ModelType.POMDP and self.observations is not None:
+            self.observations[s.id] = observation
+        else:
+            print("This model is not a pomdp")
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
@@ -482,6 +494,10 @@ class Model:
         res += ["", "Transitions:"] + [
             f"{transition}" for (_id, transition) in self.transitions.items()
         ]
+
+        # TODO extend for other types of models
+        # if self.type == ModelType.CTMC:
+        #    res += []
 
         return "\n".join(res)
 

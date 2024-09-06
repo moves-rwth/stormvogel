@@ -14,13 +14,13 @@ def create_simple_ma():
                 ma.action(f"{i}"),
                 ma.new_state(),
             )
-            for i in range(2)
+            for i in range(5)
         ]
     )
 
-    ma.markovian_states = [0]
-
-    ma.exit_rates = {0: 0, 1: 0, 2: 0}
+    # We add the rates and markovian states
+    ma.markovian_states = [0, 3, 4]
+    ma.exit_rates = {i: 0 for i in range(6)}
 
     return ma
 

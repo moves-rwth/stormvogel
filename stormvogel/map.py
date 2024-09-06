@@ -208,7 +208,9 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
-        components.observability_classes = list(model.observations.values())
+        components.observability_classes = (
+            list(model.observations.values()) if model.observations is not None else []
+        )
         components.choice_labeling = choice_labeling
         pomdp = stormpy.storage.SparsePomdp(components)
 
@@ -247,7 +249,7 @@ def stormvogel_to_stormpy(
         markovian_states_list = model.markovian_states
         if isinstance(markovian_states_list, list):
             markovian_states_bitvector = stormpy.storage.BitVector(
-                len(markovian_states_list) + 1,
+                max(markovian_states_list) + 1,
                 markovian_states_list,
             )
         else:
@@ -264,7 +266,6 @@ def stormvogel_to_stormpy(
             components.exit_rates = list(model.exit_rates.values())
         else:
             components.exit_rates = []
-        components.observability_classes = list(model.observations.values())
         components.choice_labeling = choice_labeling
         ma = stormpy.storage.SparseMA(components)
 
