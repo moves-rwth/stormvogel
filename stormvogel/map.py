@@ -159,15 +159,15 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # then we build the dtmc and we add the exit rates if necessary
+        # then we build the ctmc and we add the exit rates if necessary
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
             reward_models=reward_models,
             rate_transitions=True,
         )
-        if not model.rates == {} and model.rates is not None:
-            components.exit_rates = list(model.rates.values())
+        if not model.exit_rates == {} and model.exit_rates is not None:
+            components.exit_rates = list(model.exit_rates.values())
 
         ctmc = stormpy.storage.SparseCtmc(components)
 
@@ -202,17 +202,74 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # then we build the mdp
+        # then we build the pomdp
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
-        components.observability_classes = list(model.observations.values())
+        components.observability_classes = (
+            list(model.observations.values()) if model.observations is not None else []
+        )
         components.choice_labeling = choice_labeling
         pomdp = stormpy.storage.SparsePomdp(components)
 
         return pomdp
+
+    def map_ma(model: stormvogel.model.Model) -> stormpy.storage.SparseMA:
+        """
+        Takes a simple representation of an ma as input and outputs an ma how it is represented in stormpy
+        """
+
+        # we determine the number of choices and the labels
+        count = 0
+        labels = set()
+        for transition in model.transitions.items():
+            for action in transition[1].transition.items():
+                count += 1
+                if not action[0] == stormvogel.model.EmptyAction:
+                    for label in action[0].labels:
+                        labels.add(label)
+
+        # we add the labels to the choice labeling object
+        choice_labeling = stormpy.storage.ChoiceLabeling(count)
+        for label in labels:
+            choice_labeling.add_label(str(label))
+
+        # then we create the matrix and simultanuously add the correct labels to the choices
+        matrix = build_matrix(model, choice_labeling=choice_labeling)
+
+        # then we add the state labels
+        state_labeling = add_labels(model)
+
+        # then we add the rewards
+        reward_models = add_rewards(model)
+
+        # we create the list of markovian states
+        markovian_states_list = model.markovian_states
+        if isinstance(markovian_states_list, list):
+            markovian_states_bitvector = stormpy.storage.BitVector(
+                max(markovian_states_list) + 1,
+                markovian_states_list,
+            )
+        else:
+            markovian_states_bitvector = stormpy.storage.BitVector(0)
+
+        # then we build the ma
+        components = stormpy.SparseModelComponents(
+            transition_matrix=matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models,
+            markovian_states=markovian_states_bitvector,
+        )
+        if not model.exit_rates == {} and model.exit_rates is not None:
+            components.exit_rates = list(model.exit_rates.values())
+        else:
+            components.exit_rates = []
+        components.choice_labeling = choice_labeling
+        ma = stormpy.storage.SparseMA(components)
+
+        return ma
 
     # we check the type to handle the model correctly
     if model.get_type() == stormvogel.model.ModelType.DTMC:
@@ -223,6 +280,8 @@ def stormvogel_to_stormpy(
         return map_ctmc(model)
     elif model.get_type() == stormvogel.model.ModelType.POMDP:
         return map_pomdp(model)
+    elif model.get_type() == stormvogel.model.ModelType.MA:
+        return map_ma(model)
     else:
         print("This type of model is not yet supported for this action")
         return None
@@ -232,7 +291,8 @@ def stormpy_to_stormvogel(
     sparsemodel: stormpy.storage.SparseDtmc
     | stormpy.storage.SparseMdp
     | stormpy.storage.SparseCtmc
-    | stormpy.storage.SparsePomdp,
+    | stormpy.storage.SparsePomdp
+    | stormpy.storage.SparseMA,
 ) -> stormvogel.model.Model | None:
     def add_states(
         model: stormvogel.model.Model,
@@ -338,7 +398,7 @@ def stormpy_to_stormvogel(
         Takes a ctmc stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsedtmcs)
+        # we create the model (it seems names are not stored in sparsectmcs)
         model = stormvogel.model.new_ctmc(name=None)
 
         # we add the states
@@ -361,7 +421,7 @@ def stormpy_to_stormvogel(
 
         # we set the correct exit rates
         for state in model.states.items():
-            model.set_rate(state[1], sparsectmc.exit_rates[0])
+            model.set_rate(state[1], sparsectmc.exit_rates[state[1].id])
 
         return model
 
@@ -370,7 +430,7 @@ def stormpy_to_stormvogel(
         Takes a pomdp stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsedtmcs)
+        # we create the model (it seems names are not stored in sparsepomdps)
         model = stormvogel.model.new_pomdp(name=None)
 
         # we add the states
@@ -408,6 +468,53 @@ def stormpy_to_stormvogel(
 
         return model
 
+    def map_ma(sparsema: stormpy.storage.SparseMA) -> stormvogel.model.Model:
+        """
+        Takes a ma stormpy representation as input and outputs a simple stormvogel representation
+        """
+
+        # we create the model (it seems names are not stored in sparsemas)
+        model = stormvogel.model.new_ma(name=None)
+
+        # we add the states
+        add_states(model, sparsema)
+
+        # we add the transitions
+        matrix = sparsema.transition_matrix
+        for index, state in enumerate(sparsema.states):
+            row_group_start = matrix.get_row_group_start(index)
+            row_group_end = matrix.get_row_group_end(index)
+
+            # within a row group we add for each action the transitions
+            transition = dict()
+            for i in range(row_group_start, row_group_end):
+                row = matrix.get_row(i)
+
+                # TODO assign the correct action name and not only an index
+                actionlabels = frozenset(
+                    sparsema.choice_labeling.get_labels_of_choice(i)
+                    if sparsema.has_choice_labeling()
+                    else str(i)
+                )
+                action = model.new_action_with_labels(str(i), actionlabels)
+                branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
+                transition[action] = stormvogel.model.Branch(branch)
+                transitions = stormvogel.model.Transition(transition)
+                model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add the reward models to the state action pairs
+        add_rewards(model, sparsema)
+
+        # we set the correct exit rates
+        for state in model.states.items():
+            model.set_rate(state[1], sparsema.exit_rates[state[1].id])
+
+        # we set the markovian states
+        for state_id in list(sparsema.markovian_states):
+            model.add_markovian_state(model.get_state_by_id(state_id))
+
+        return model
+
     # we check the type to handle the sparse model correctly
     if sparsemodel.model_type.name == "DTMC":
         return map_dtmc(sparsemodel)
@@ -417,6 +524,8 @@ def stormpy_to_stormvogel(
         return map_ctmc(sparsemodel)
     elif sparsemodel.model_type.name == "POMDP":
         return map_pomdp(sparsemodel)
+    elif sparsemodel.model_type.name == "MA":
+        return map_ma(sparsemodel)
     else:
         print("This type of model is not yet supported for this action")
         return

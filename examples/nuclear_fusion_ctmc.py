@@ -17,7 +17,7 @@ def create_nuclear_fusion_ctmc():
     # supernova
     ctmc.get_state_by_id(3).set_transitions([(12, ctmc.new_state("Supernova"))])
 
-    # we add the rates which are equal to whats in the transitions as the probabilities are all 1
+    # we add the rates which are equal to whats in the transitions since the probabilities are all 1
     rates = [3, 2, 7, 12, 0]
     for i in range(5):
         ctmc.set_rate(ctmc.get_state_by_id(i), rates[i])
