@@ -159,7 +159,7 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # then we build the dtmc and we add the exit rates if necessary
+        # then we build the ctmc and we add the exit rates if necessary
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
@@ -202,7 +202,7 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # then we build the mdp
+        # then we build the pomdp
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
@@ -255,7 +255,7 @@ def stormvogel_to_stormpy(
         else:
             markovian_states_bitvector = stormpy.storage.BitVector(0)
 
-        # then we build the mdp
+        # then we build the ma
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
@@ -398,7 +398,7 @@ def stormpy_to_stormvogel(
         Takes a ctmc stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsedtmcs)
+        # we create the model (it seems names are not stored in sparsectmcs)
         model = stormvogel.model.new_ctmc(name=None)
 
         # we add the states
@@ -430,7 +430,7 @@ def stormpy_to_stormvogel(
         Takes a pomdp stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsedtmcs)
+        # we create the model (it seems names are not stored in sparsepomdps)
         model = stormvogel.model.new_pomdp(name=None)
 
         # we add the states
@@ -473,7 +473,7 @@ def stormpy_to_stormvogel(
         Takes a ma stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsedtmcs)
+        # we create the model (it seems names are not stored in sparsemas)
         model = stormvogel.model.new_ma(name=None)
 
         # we add the states
@@ -510,7 +510,8 @@ def stormpy_to_stormvogel(
             model.set_rate(state[1], sparsema.exit_rates[state[1].id])
 
         # we set the markovian states
-        model.markovian_states = list(sparsema.markovian_states)
+        for state_id in list(sparsema.markovian_states):
+            model.add_markovian_state(model.get_state_by_id(state_id))
 
         return model
 

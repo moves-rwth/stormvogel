@@ -234,6 +234,8 @@ class Model:
         rewards: The rewardsmodels of this model.
         rates: The rates of the model, if this model supports rates.
         transitions: The transitions of this model.
+        observations: The observations of the states of this model (in case of pomdps).
+        markovian_states: list of markovian states in the case of a ma.
     """
 
     name: str | None
@@ -248,7 +250,7 @@ class Model:
     # In pomdps we have a list of observations (hashed by state id)
     observations: dict[int, int] | None
     # In ma's we keep track of markovian states
-    markovian_states = list[int] | None
+    markovian_states: list[int] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -292,6 +294,10 @@ class Model:
         """Returns whether this model supports rates."""
         return self.type in (ModelType.CTMC, ModelType.MA)
 
+    def supports_observations(self):
+        """Returns whether this model supports observations."""
+        return self.type == ModelType.POMDP
+
     def __free_state_id(self):
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
@@ -302,10 +308,24 @@ class Model:
 
     def add_observation(self, s: State, observation: int):
         """sets an observation for a state"""
-        if self.get_type() == ModelType.POMDP and self.observations is not None:
+        if self.supports_observations() and self.observations is not None:
             self.observations[s.id] = observation
         else:
             print("This model is not a pomdp")
+
+    def get_observation(self, state: State) -> int:
+        """Gets the observation of a state."""
+        if self.supports_observations and self.observations is not None:
+            return self.observations[state.id]
+        else:
+            raise RuntimeError("Only POMDP models support observations")
+
+    def add_markovian_state(self, markovian_state: State):
+        """Adds a state to the markovian states."""
+        if self.get_type() == ModelType.MA and self.markovian_states is not None:
+            self.markovian_states.append(markovian_state.id)
+        else:
+            print("This model is not a MA")
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
