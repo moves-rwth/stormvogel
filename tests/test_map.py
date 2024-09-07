@@ -137,7 +137,6 @@ def test_stormvogel_to_stormpy_and_back_ma():
     assert new_stormvogel_ma == stormvogel_ma
 
 
-"""
 def test_stormpy_to_stormvogel_and_back_ma():
     # we create a stormpy representation of an example ma
     stormpy_ma = examples.stormpy_ma.example_building_mas_01()
@@ -149,4 +148,3 @@ def test_stormpy_to_stormvogel_and_back_ma():
     # print(new_stormpy_ma)
 
     assert matrix_equals(stormpy_ma, new_stormpy_ma)
-"""
