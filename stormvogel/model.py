@@ -202,11 +202,11 @@ class RewardModel:
 
     Args:
         name: Name of the reward model.
-        rewards: The rewards, the keys are the state's ids.
+        rewards: The rewards, the keys are the state's ids (or state action pair ids).
     """
 
     name: str
-    # Hashed by the id of the state (=number in the matrix)
+    # Hashed by the id of the state or state action pair (=number in the matrix)
     rewards: dict[int, Number]
 
     def get(self, state: State) -> Number:
