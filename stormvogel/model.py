@@ -51,6 +51,11 @@ class State:
             self.observation = None
         # TODO how to handle state names?
 
+    def add_label(self, label: str):
+        """adds a new label to the state"""
+        if label not in self.labels:
+            self.labels.append(label)
+
     def set_observation(self, observation: int):
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:

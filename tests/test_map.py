@@ -64,9 +64,7 @@ def sparse_equal(
                 ) == m1.reward_models[key].get_state_action_reward(i):
                     reward_models_equal = False
 
-    return (
-        matrices_equal and types_equal and states_equal and reward_models_equal
-    )  # and state_labels_equal and model0.reward_models == model1.reward_models
+    return matrices_equal and types_equal and states_equal and reward_models_equal
 
 
 def test_stormpy_to_stormvogel_and_back_dtmc():
@@ -133,7 +131,6 @@ def test_stormvogel_to_stormpy_and_back_ctmc():
     assert new_stormvogel_ctmc == stormvogel_ctmc
 
 
-"""
 def test_stormpy_to_stormvogel_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
     stormpy_ctmc = examples.stormpy_ctmc.example_building_ctmcs_01()
@@ -145,7 +142,6 @@ def test_stormpy_to_stormvogel_and_back_ctmc():
     # print(new_stormpy_ctmc)
 
     assert sparse_equal(stormpy_ctmc, new_stormpy_ctmc)
-"""
 
 
 def test_stormvogel_to_stormpy_and_back_pomdp():
