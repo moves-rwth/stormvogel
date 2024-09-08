@@ -71,7 +71,7 @@ class State:
         """Add transitions from this state."""
         self.model.add_transitions(self, transitions)
 
-    def available_actions(self) -> list["Action"] | None:
+    def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
         if self.model.supports_actions():
             action_list = []
@@ -80,6 +80,7 @@ class State:
             return action_list
         else:
             print("The model this state belongs to does not support actions")
+            return []
 
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"

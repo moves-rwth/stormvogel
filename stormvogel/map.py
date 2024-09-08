@@ -113,11 +113,11 @@ def stormvogel_to_stormpy(
         # we determine the number of choices and the labels
         count = 0
         labels = set()
-        for transition in model.transitions.items():
-            for action in transition[1].transition.items():
+        for state in model.states.values():
+            for action in state.available_actions():
                 count += 1
-                if not action[0] == stormvogel.model.EmptyAction:
-                    for label in action[0].labels:
+                if not action == stormvogel.model.EmptyAction:
+                    for label in action.labels:
                         labels.add(label)
 
         # we add the labels to the choice labeling object
@@ -181,11 +181,11 @@ def stormvogel_to_stormpy(
         # we determine the number of choices and the labels
         count = 0
         labels = set()
-        for transition in model.transitions.items():
-            for action in transition[1].transition.items():
+        for state in model.states.values():
+            for action in state.available_actions():
                 count += 1
-                if not action[0] == stormvogel.model.EmptyAction:
-                    for label in action[0].labels:
+                if not action == stormvogel.model.EmptyAction:
+                    for label in action.labels:
                         labels.add(label)
 
         # we add the labels to the choice labeling object
@@ -224,11 +224,11 @@ def stormvogel_to_stormpy(
         # we determine the number of choices and the labels
         count = 0
         labels = set()
-        for transition in model.transitions.items():
-            for action in transition[1].transition.items():
+        for state in model.states.values():
+            for action in state.available_actions():
                 count += 1
-                if not action[0] == stormvogel.model.EmptyAction:
-                    for label in action[0].labels:
+                if not action == stormvogel.model.EmptyAction:
+                    for label in action.labels:
                         labels.add(label)
 
         # we add the labels to the choice labeling object
@@ -378,12 +378,12 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                # TODO assign the correct action name and not only an index
                 actionlabels = frozenset(
                     sparsemdp.choice_labeling.get_labels_of_choice(i)
                     if sparsemdp.has_choice_labeling()
                     else str(i)
                 )
+                # TODO assign the correct action name and not only an index
                 action = model.new_action_with_labels(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
@@ -449,12 +449,12 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                # TODO assign the correct action name and not only an index
                 actionlabels = frozenset(
                     sparsepomdp.choice_labeling.get_labels_of_choice(i)
                     if sparsepomdp.has_choice_labeling()
                     else str(i)
                 )
+                # TODO assign the correct action name and not only an index
                 action = model.new_action_with_labels(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
@@ -492,12 +492,12 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                # TODO assign the correct action name and not only an index
                 actionlabels = frozenset(
                     sparsema.choice_labeling.get_labels_of_choice(i)
                     if sparsema.has_choice_labeling()
                     else str(i)
                 )
+                # TODO assign the correct action name and not only an index
                 action = model.new_action_with_labels(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)

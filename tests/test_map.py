@@ -136,10 +136,6 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
     stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
-
-    # state = stormvogel_mdp.get_state_by_id(1)
-    # print(state.available_actions())
-
     # print(stormvogel_mdp)
     stormpy_mdp = stormvogel.map.stormvogel_to_stormpy(stormvogel_mdp)
     # print(stormpy_mdp)
