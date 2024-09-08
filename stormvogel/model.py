@@ -18,8 +18,8 @@ class ModelType(Enum):
     MDP = 2
     CTMC = 3
     POMDP = 4
-    # not implemented yet
     MA = 5
+    # not implemented yet
 
 
 @dataclass()
@@ -49,6 +49,7 @@ class State:
 
         if not self.model.get_type() == ModelType.POMDP:
             self.observation = None
+
         # TODO how to handle state names?
 
     def add_label(self, label: str):
@@ -70,6 +71,17 @@ class State:
         """Add transitions from this state."""
         self.model.add_transitions(self, transitions)
 
+    def available_actions(self) -> list["Action"]:
+        """returns the list of all available actions in this state"""
+        if self.model.supports_actions():
+            action_list = []
+            for action in self.model.transitions[self.id].transition.keys():
+                action_list.append(action)
+            return action_list
+        else:
+            print("The model this state belongs to does not support actions")
+            return []
+
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"
 
@@ -86,8 +98,6 @@ class State:
         if not isinstance(other, State):
             return NotImplemented
         return str(self.id) < str(other.id)
-
-    # TODO get available actions function?
 
 
 @dataclass(frozen=True, order=True)

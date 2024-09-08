@@ -103,6 +103,7 @@ def test_stormpy_to_stormvogel_and_back_dtmc():
     # print(new_stormpy_dtmc.transition_matrix)
 
     # TODO also compare other parts than the matrix (e.g. state labels)
+
     assert sparse_equal(stormpy_dtmc, new_stormpy_dtmc)
 
 
