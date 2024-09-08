@@ -64,7 +64,32 @@ def sparse_equal(
                 ) == m1.reward_models[key].get_state_action_reward(i):
                     reward_models_equal = False
 
-    return matrices_equal and types_equal and states_equal and reward_models_equal
+    # check if exit rates are equal (in case of ctmcs):
+    exit_rates_equal = (
+        not m0.model_type == stormpy.ModelType.CTMC or m0.exit_rates == m1.exit_rates
+    )
+
+    # check if observations are equal (in case of pomdps):
+    observations_equal = (
+        not m0.model_type == stormpy.ModelType.POMDP
+        or m0.observations == m1.observations
+    )
+
+    # check if markovian states are equal (in case of mas):
+    markovian_states_equal = (
+        not m0.model_type == stormpy.ModelType.MA
+        or m0.markovian_states == m1.markovian_states
+    )
+
+    return (
+        matrices_equal
+        and types_equal
+        and states_equal
+        and reward_models_equal
+        and exit_rates_equal
+        and observations_equal
+        and markovian_states_equal
+    )
 
 
 def test_stormpy_to_stormvogel_and_back_dtmc():
