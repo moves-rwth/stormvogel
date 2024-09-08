@@ -302,7 +302,9 @@ def stormpy_to_stormvogel(
         helper function to add the states from the sparsemodel to the model
         """
         for state in sparsemodel.states:
-            # the initial state is automatically added so we don't add it
+            if state.id == 0:
+                for label in state.labels:
+                    model.get_state_by_id(0).add_label(label)
             if state.id > 0:
                 model.new_state(labels=list(state.labels))
 
