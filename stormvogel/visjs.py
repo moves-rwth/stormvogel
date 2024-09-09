@@ -7,6 +7,9 @@ import stormvogel.displayable
 import stormvogel.html_templates
 import stormvogel.communication_server
 import json
+import random
+import string
+import logging
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -14,7 +17,7 @@ class Network(stormvogel.displayable.Displayable):
 
     def __init__(
         self,
-        name: str,
+        name: str | None = None,
         width: int = 800,
         height: int = 600,
         output: widgets.Output = widgets.Output(),
@@ -24,14 +27,17 @@ class Network(stormvogel.displayable.Displayable):
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
         Args:
-            name (str): Used to name the iframe. You should never create two networks with the same name, they might clash.
+            name (str): Used to name the iframe. ONLY SPECIFY IF YOU KNOW WHAT YOU ARE DOING. You should never create two networks with the same name, they might clash.
             width (int): Width of the network, in pixels.
             height (int): Height of the network, in pixels.
             output (widgets.Output): An output widget within which the network should be displayed.
             do_display (bool): Set to true iff you want the Network to display. Defaults to True.
             debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you."""
         super().__init__(output, do_display, debug_output)
-        self.name: str = name
+        if name is None:
+            self.name: str = "".join(random.choices(string.ascii_letters, k=10))
+        else:
+            self.name: str = name
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""
@@ -42,21 +48,33 @@ class Network(stormvogel.displayable.Displayable):
         )
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
-    def get_positions(self) -> dict | None:
-        """Get the current positions of the nodes on the canvas. Raises TimeoutError if unsuccesful.
+    def get_positions(self) -> dict:
+        """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
         Example result: {0: {"x": 5, "y": 10}}"""
-        positions: dict = json.loads(
-            self.server.request(
-                f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+        if self.server is None:
+            with self.debug_output:
+                logging.warn(
+                    "Server not initialized. Could not retrieve position data."
+                )
+            return {}
+        try:
+            positions: dict = json.loads(
+                self.server.request(
+                    f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+                )
             )
-        )
-        return {int(k): v for (k, v) in positions.items()}
+            return {int(k): v for (k, v) in positions.items()}
+        except TimeoutError:
+            with self.debug_output:
+                logging.warn("Timed out. Could not retrieve position data.")
+            return {}
 
     def add_node(
         self,
         id: int,
         label: str | None = None,
         group: str | None = None,
+        position_dict: dict | None = None,
     ) -> None:
         """Add a node. Only use before calling show."""
 
@@ -65,6 +83,8 @@ class Network(stormvogel.displayable.Displayable):
             current += f", label: `{label}`"
         if group is not None:
             current += f', group: "{group}"'
+        if position_dict is not None and id in position_dict:
+            current += f', x: {position_dict[id]["x"]}, y: {position_dict[id]["x"]}'
         current += " },\n"
         self.nodes_js += current
 
@@ -124,6 +144,7 @@ class Network(stormvogel.displayable.Displayable):
         """Display the network on the output that was specified at initialization, otherwise simply display it."""
         iframe = self.generate_iframe()
         with self.output:  # Display the iframe within the Output.
+            ipd.clear_output()
             ipd.display(ipd.HTML(iframe))
         self.maybe_display_output()
         with self.debug_output:

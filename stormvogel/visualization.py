@@ -18,6 +18,11 @@ def und(x: str) -> str:
     return x.replace(" ", "_")
 
 
+def random_word(k: int) -> str:
+    """Random word of lenght k"""
+    return "".join(random.choices(string.ascii_letters, k=k))
+
+
 class Visualization(stormvogel.displayable.Displayable):
     """Handles visualization of a Model using a Network from stormvogel.visjs."""
 
@@ -51,11 +56,11 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
         """
         super().__init__(output, do_display, debug_output)
-        self.model: stormvogel.model.Model = model
         if name is None:
-            self.name: str = "".join(random.choices(string.ascii_letters, k=10))
+            self.name: str = random_word(10)
         else:
-            self.name: str = name
+            self.name: str = name + random_word(10)
+        self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result = result
         self.layout: stormvogel.layout.Layout = layout
         self.separate_labels = list(map(und, separate_labels))
@@ -111,6 +116,7 @@ class Visualization(stormvogel.displayable.Displayable):
                 state.id,
                 label=",".join(state.labels) + rewards + res,
                 group=group,
+                position_dict=self.layout.layout["positions"],
             )
 
     def __add_transitions(self) -> None:
@@ -138,6 +144,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         id=action_id,
                         label=action.name,
                         group="actions",
+                        position_dict=self.layout.layout["positions"],
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore
@@ -191,3 +198,7 @@ class Visualization(stormvogel.displayable.Displayable):
             + " "
             + self.__format_probability(result_of_state)
         )
+
+    def get_positions(self):
+        """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously)."""
+        return self.nt.get_positions() if self.nt is not None else {}

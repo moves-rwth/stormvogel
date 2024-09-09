@@ -7,8 +7,10 @@ import stormvogel.visualization
 
 import IPython.display as ipd
 import ipywidgets as widgets
+import logging
 
 
+# TODO FIX self.vis.update() being called a million times.
 class LayoutEditor(stormvogel.displayable.Displayable):
     def __init__(
         self,
@@ -19,13 +21,22 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
         super().__init__(output, do_display, debug_output)
-        self.vis: object | None = visualization
+        self.vis: stormvogel.visualization.Visualization | None = visualization
         self.layout: stormvogel.layout.Layout = layout
 
     def try_update(self):
         if self.layout.layout["saving"]["save_button"]:
             # Save iff the save button was pressed.
             self.layout.layout["saving"]["save_button"] = False
+            # Also save the node positions.
+            with self.debug_output:
+                logging.debug(f"Status of vis {self.vis}")
+            if self.vis is not None:
+                with self.debug_output:
+                    positions = self.vis.get_positions()
+                    logging.debug(positions)
+                self.layout.layout["positions"] = positions
+
             self.layout.save(
                 self.layout.layout["saving"]["filename"],
                 path_relative=self.layout.layout["saving"]["relative_path"],

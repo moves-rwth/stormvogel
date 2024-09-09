@@ -1,5 +1,4 @@
 {
-  "autoApply": true,
   "__fake_macros": {
     "__group_macro": {
       "borderWidth": 1,
@@ -21,7 +20,7 @@
   },
   "groups": {
     "states": {
-      "borderWidth": 50,
+      "borderWidth": 1,
       "color": {
         "background": "white",
         "border": "black",
@@ -69,7 +68,8 @@
       "font": {
         "color": "black",
         "size": 14
-      }
+      },
+      "schedColor": false
     },
     "init": {
       "borderWidth": 1,
@@ -89,6 +89,7 @@
       }
     }
   },
+  "reload_button": false,
   "edges": {
     "arrows": "to",
     "font": {
@@ -103,20 +104,57 @@
     "fractions": true,
     "digits": 5
   },
-  "resultSymbol": "\u2606",
-  "schedColor": true,
-  "physics": {
-    "enabled": true
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
   },
   "layout": {
     "randomSeed": 5
   },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600
+  },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json"
+    "filename": "layouts/NAME.json",
+    "save_button": false
   },
-  "show_rewards": true,
-  "show_results": true,
-  "width": 800,
-  "height": 600
+  "positions": {
+    "0": {
+      "x": 5,
+      "y": -186
+    },
+    "1": {
+      "x": 98,
+      "y": 11
+    },
+    "2": {
+      "x": -120,
+      "y": -7
+    },
+    "3": {
+      "x": 0,
+      "y": 99
+    },
+    "4": {
+      "x": -24,
+      "y": 37
+    },
+    "5": {
+      "x": -62,
+      "y": 182
+    },
+    "10000000000": {
+      "x": 119,
+      "y": -118
+    },
+    "10000000001": {
+      "x": -122,
+      "y": -141
+    }
+  },
+  "physics": {}
 }
