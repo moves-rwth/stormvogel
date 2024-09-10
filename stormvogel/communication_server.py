@@ -15,6 +15,8 @@ import ipywidgets as widgets
 
 server_warning: bool = True
 request_warning: bool = True
+enable_server: bool = True
+"""Disable if you don't want to use an internal communication server. Some features might break."""
 
 localhost_address: str = "127.0.0.1"
 
@@ -47,7 +49,6 @@ class CommunicationServer:
             server_port (int, optional): Defaults to 8080.
         """
         self.server_port: int = server_port
-        global server_running
 
         class InnerServer(http.server.BaseHTTPRequestHandler):
             def do_GET(self):
@@ -100,6 +101,9 @@ class CommunicationServer:
         Also waits for server to boot up if it is not finished yet.
         Should be thread safe. (I hope).
         WHEN SENDING JAVASCRIPT, DO NOT FORGET EXTRA QUOTES AROUND STRINGS."""
+        if not enable_server:
+            raise TimeoutError("There is no server running.")
+
         global awaiting, server_running
         while not server_running:  # Wait for server to start.
             sleep(0.2)
@@ -158,6 +162,8 @@ def initialize_server() -> CommunicationServer | None:
     Use the port stored in global variable server_port.
     """
     global server, server_port, server_running
+    if not enable_server:
+        return None
     try:
         if server is None:
             server = CommunicationServer(server_port=server_port)
@@ -171,7 +177,8 @@ def initialize_server() -> CommunicationServer | None:
 Stormvogel is still usable without this, but a few visualization features might not be available. Set stormvogel.communication_server.request_warning to False to ignore this message.
 1) Is the port {localhost_address}:{server_port} (from the machine where jupyterlab runs) available?
 If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {server_port}:{localhost_address}{server_port} YOUR_SSH_CONFIG_NAME'.
-2) You might also want to consider changing stormvogel.communications_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+2) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel.
 Please contact the stormvogel developpers if you keep running into issues.""")
         return server
     except OSError:
@@ -183,5 +190,6 @@ This might be solved as such:
 1) If you already had a stormvogel notebook with a Network or Visualization or show.show in it in this lab session, change the kernel of the current notebook to be the SAME KERNEL (Top right, use kernel for preferred session and look for the name of the PREVIOUS notebook).
 You can also simply restart all kernels but it might break again.
 2) Port {server_port} might already be used by another process. Try changing stormvogel.communication_server.server_port and running again.
-3) You might also want to consider changing stormvogel.communications_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel.
 Please contact the stormvogel developpers if you keep running into issues.""")

@@ -119,7 +119,7 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/nopos.json",
     "save_button": false,
     "load_button": false
   },
