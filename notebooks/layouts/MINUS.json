@@ -119,9 +119,43 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/ONE.json",
-    "save_button": false
+    "filename": "layouts/MINUS.json",
+    "save_button": false,
+    "load_button": false
   },
-  "positions": {},
-  "physics": {}
+  "positions": {
+    "0": {
+      "x": -1221,
+      "y": -285
+    },
+    "1": {
+      "x": -1131,
+      "y": 18
+    },
+    "2": {
+      "x": -946,
+      "y": 34
+    },
+    "3": {
+      "x": -1177,
+      "y": 154
+    },
+    "4": {
+      "x": -1024,
+      "y": 229
+    },
+    "5": {
+      "x": -1003,
+      "y": 125
+    },
+    "10000000000": {
+      "x": -1083,
+      "y": -59
+    },
+    "10000000001": {
+      "x": -1151,
+      "y": -163
+    }
+  },
+  "physics": false
 }

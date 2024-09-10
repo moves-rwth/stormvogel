@@ -4,6 +4,7 @@ import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
 import stormvogel.visjs
+import stormvogel.displayable
 
 import math
 import fractions
@@ -11,6 +12,7 @@ import ipywidgets as widgets
 import IPython.display as ipd
 import random
 import string
+import logging
 
 
 def und(x: str) -> str:
@@ -69,6 +71,8 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
+        with self.debug_output:
+            logging.info("Called Visualization.show()")
         with self.output:
             ipd.clear_output()
         self.nt = stormvogel.visjs.Network(
@@ -79,12 +83,18 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output=self.debug_output,
             do_display=False,
         )
+        with self.debug_output:
+            logging.info("Init network")
         self.layout.set_groups(self.separate_labels)
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
         self.nt.set_options(str(self.layout))
+        with self.debug_output:
+            logging.info("Set options")
         self.nt.show()
+        with self.debug_output:
+            logging.info("nt show")
         self.maybe_display_output()
 
     def update(self) -> None:

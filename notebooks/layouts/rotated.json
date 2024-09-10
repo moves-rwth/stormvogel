@@ -1,5 +1,4 @@
 {
-  "autoApply": true,
   "__fake_macros": {
     "__group_macro": {
       "borderWidth": 1,
@@ -69,7 +68,8 @@
       "font": {
         "color": "black",
         "size": 14
-      }
+      },
+      "schedColor": false
     },
     "init": {
       "borderWidth": 1,
@@ -89,6 +89,7 @@
       }
     }
   },
+  "reload_button": false,
   "edges": {
     "arrows": "to",
     "font": {
@@ -103,20 +104,58 @@
     "fractions": true,
     "digits": 5
   },
-  "resultSymbol": "\u2606",
-  "schedColor": true,
-  "physics": {
-    "enabled": true
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
   },
   "layout": {
     "randomSeed": 5
   },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600
+  },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME r46.json"
+    "filename": "layouts/rotated.json",
+    "save_button": false,
+    "load_button": false
   },
-  "show_rewards": true,
-  "show_results": true,
-  "width": 800,
-  "height": 600
+  "positions": {
+    "0": {
+      "x": 129,
+      "y": 160
+    },
+    "1": {
+      "x": -70,
+      "y": 78
+    },
+    "2": {
+      "x": 65,
+      "y": -44
+    },
+    "3": {
+      "x": -92,
+      "y": -20
+    },
+    "4": {
+      "x": -31,
+      "y": -76
+    },
+    "5": {
+      "x": -141,
+      "y": -135
+    },
+    "10000000000": {
+      "x": 2,
+      "y": 187
+    },
+    "10000000001": {
+      "x": 167,
+      "y": 35
+    }
+  },
+  "physics": true
 }

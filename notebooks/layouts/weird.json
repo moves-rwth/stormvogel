@@ -1,5 +1,4 @@
 {
-  "autoApply": true,
   "__fake_macros": {
     "__group_macro": {
       "borderWidth": 1,
@@ -69,7 +68,8 @@
       "font": {
         "color": "black",
         "size": 14
-      }
+      },
+      "schedColor": false
     },
     "init": {
       "borderWidth": 1,
@@ -89,6 +89,7 @@
       }
     }
   },
+  "reload_button": false,
   "edges": {
     "arrows": "to",
     "font": {
@@ -103,20 +104,58 @@
     "fractions": true,
     "digits": 5
   },
-  "resultSymbol": "\u2606",
-  "schedColor": true,
-  "physics": {
-    "enabled": true
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
   },
   "layout": {
     "randomSeed": 5
   },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600
+  },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME r4.json"
+    "filename": "layouts/weird.json",
+    "save_button": false,
+    "load_button": false
   },
-  "show_rewards": true,
-  "show_results": true,
-  "width": 800,
-  "height": 600
+  "positions": {
+    "0": {
+      "x": -197,
+      "y": -24
+    },
+    "1": {
+      "x": 12,
+      "y": -92
+    },
+    "2": {
+      "x": -28,
+      "y": 129
+    },
+    "3": {
+      "x": 82,
+      "y": 53
+    },
+    "4": {
+      "x": 28,
+      "y": 11
+    },
+    "5": {
+      "x": 177,
+      "y": 16
+    },
+    "10000000000": {
+      "x": -113,
+      "y": -131
+    },
+    "10000000001": {
+      "x": -163,
+      "y": 103
+    }
+  },
+  "physics": true
 }

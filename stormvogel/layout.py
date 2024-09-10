@@ -25,10 +25,12 @@ class Layout:
         """
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json")) as f:
             default_str = f.read()
-        default_dict = json.loads(default_str)
+        self.default_dict: dict = json.loads(default_str)
+        self.load(path, path_relative)
 
+    def load(self, path: str | None = None, path_relative: bool = True):
         if path is None:
-            self.layout = default_dict
+            self.layout: dict = self.default_dict
         else:
             if path_relative:
                 complete_path = os.path.join(os.getcwd(), path)
@@ -38,7 +40,9 @@ class Layout:
                 parsed_str = f.read()
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
-            self.layout = stormvogel.rdict.merge_dict(default_dict, parsed_dict)
+            self.layout: dict = stormvogel.rdict.merge_dict(
+                self.default_dict, parsed_dict
+            )
 
         # Load in schema for the dict_editor.
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:

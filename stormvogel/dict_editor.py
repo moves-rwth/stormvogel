@@ -89,6 +89,7 @@ class DictEditor(stormvogel.displayable.Displayable):
 
     def show(self):
         with self.output:
+            ipd.clear_output()
             ipd.display(self.recurse_create(self.schema, []))
         self.maybe_display_output()
 

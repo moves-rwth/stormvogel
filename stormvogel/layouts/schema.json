@@ -153,6 +153,13 @@
       "__kwargs": {
         "button_style": "success"
       }
+    },
+    "load_button": {
+      "__description": "Load",
+      "__widget": "Button",
+      "__kwargs": {
+        "button_style": "warning"
+      }
     }
   },
   "reload_button": {

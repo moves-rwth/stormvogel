@@ -11,10 +11,12 @@ import urllib
 import IPython.display as ipd
 import logging
 from time import sleep
+import ipywidgets as widgets
 
 server_warning: bool = True
 request_warning: bool = True
 
+localhost_address: str = "127.0.0.1"
 
 server_port: int = 8080
 """Change this to use a different port, BEFORE LOADING A NETWORK!!!"""
@@ -30,6 +32,7 @@ def set_port(port: int):
 awaiting: dict = {}
 mutex: threading.Lock = threading.Lock()
 server_running: bool = False
+spam: widgets.Output = widgets.Output()
 
 AWAITING = "AWAITING"
 
@@ -41,8 +44,6 @@ class CommunicationServer:
         JSMessenger might behave unexpectedly if multiple requests are going on at the same time.
 
         Args:
-            on_get (Callable[[str]]): Function to call when a message is received.
-            host_name (str, optional): Defaults to "localhost".
             server_port (int, optional): Defaults to 8080.
         """
         self.server_port: int = server_port
@@ -63,7 +64,8 @@ class CommunicationServer:
                 self.wfile.write(bytes("<body>", "utf-8"))
                 self.wfile.write(
                     bytes(
-                        "<p>Javascript and IPython communications channel.</p>", "utf-8"
+                        "<p>Stormvogel's Javascript and IPython communications channel.</p>",
+                        "utf-8",
                     )
                 )
                 self.wfile.write(bytes("</body></html>", "utf-8"))
@@ -72,10 +74,14 @@ class CommunicationServer:
                     identifier, message = urllib.parse.unquote(self.path)[1:].split(
                         "/MESSAGE/"
                     )
-                    global awaiting
-                    with mutex:
-                        if identifier in awaiting:
-                            awaiting[identifier] = message
+                    global awaiting, spam
+                    awaiting[identifier] = message
+                    logging.info(f"Stored message {identifier}")
+                    logging.info(awaiting[identifier])
+                    # There was a weird bug where sometimes a request simply wouldn't work if triggered from a button.
+                    # These two lines seem to fix it don't ask me why, and also don't remove them.
+                    with spam:
+                        ipd.display(awaiting)
                 except ValueError:
                     logging.warning("Could not split message!")
 
@@ -84,7 +90,7 @@ class CommunicationServer:
                 pass
 
         self.web_server: http.server.HTTPServer = http.server.HTTPServer(
-            ("localhost", self.server_port), InnerServer
+            (localhost_address, self.server_port), InnerServer
         )
         thr = threading.Thread(target=self.run_server)
         thr.start()
@@ -108,20 +114,16 @@ class CommunicationServer:
         awaiting[identifier] = AWAITING
         logging.info(f"Request sent for: {identifier}")
         # Wait until result is received.
-        max_tries = 10
+        max_tries = 50
         while max_tries > 0 and awaiting[identifier] == AWAITING:
             sleep(0.2)
             max_tries -= 1
             logging.debug(f"Waiting for request result: {identifier}")
+            logging.debug(f"Current awaiting[identifier]: {awaiting[identifier]}")
+            # ipd.display(ipd.HTML(html))
         # Handle case of failure
 
         result = awaiting[identifier]
-        # Remove this request from the list, we no longer wait for it.
-        try:
-            with mutex:
-                awaiting.pop(identifier)
-        except KeyError:
-            pass
 
         if result == AWAITING:
             raise TimeoutError(
@@ -129,6 +131,7 @@ class CommunicationServer:
             )
         else:
             logging.info(f"Succesfully received result of request: {identifier}")
+            awaiting = {}
             return result
 
     def run_server(self):
@@ -138,7 +141,7 @@ class CommunicationServer:
         global server_running, server_warning
         try:
             logging.info(
-                f"CommunicationsServer started http://localhost:{self.server_port}"
+                f"CommunicationsServer started http://{localhost_address}:{self.server_port}"
             )
             server_running = True
             self.web_server.serve_forever()
@@ -158,14 +161,27 @@ def initialize_server() -> CommunicationServer | None:
     try:
         if server is None:
             server = CommunicationServer(server_port=server_port)
+            logging.info("Succesfully initialized server.")
+            try:
+                server.request("'test message'")
+                logging.info("Succesfully received test message.")
+            except TimeoutError:
+                if request_warning:
+                    print(f"""Stormvogel succesfully started the internal communication server, but could not receive the result of a test request.
+Stormvogel is still usable without this, but a few visualization features might not be available. Set stormvogel.communication_server.request_warning to False to ignore this message.
+1) Is the port {localhost_address}:{server_port} (from the machine where jupyterlab runs) available?
+If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {server_port}:{localhost_address}{server_port} YOUR_SSH_CONFIG_NAME'.
+2) You might also want to consider changing stormvogel.communications_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+Please contact the stormvogel developpers if you keep running into issues.""")
         return server
     except OSError:
-        logging.error("Server port taken.")
+        logging.warning("Server port taken.")
         if server_warning:
-            print(f"""Stormvogel could not run an internal server to communicate between local processes on localhost:{server_port}.
-Stormvogel is still usable without this, but a few visualization features might not be available. set stormvogel.communication_server.server_warning to False to ignore this message.
+            print(f"""Stormvogel could not run an internal server to communicate between local processes on {localhost_address}:{server_port}.
+Stormvogel is still usable without this, but a few visualization features might not be available. Set stormvogel.communication_server.server_warning to False to ignore this message.
 This might be solved as such:
 1) If you already had a stormvogel notebook with a Network or Visualization or show.show in it in this lab session, change the kernel of the current notebook to be the SAME KERNEL (Top right, use kernel for preferred session and look for the name of the PREVIOUS notebook).
 You can also simply restart all kernels but it might break again.
 2) Port {server_port} might already be used by another process. Try changing stormvogel.communication_server.server_port and running again.
+3) You might also want to consider changing stormvogel.communications_server.localhost_address to the IPv6 loopback address if you are using IPv6.
 Please contact the stormvogel developpers if you keep running into issues.""")

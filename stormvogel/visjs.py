@@ -11,6 +11,8 @@ import random
 import string
 import logging
 
+spam: widgets.Output = widgets.Output()
+
 
 class Network(stormvogel.displayable.Displayable):
     EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
@@ -50,10 +52,10 @@ class Network(stormvogel.displayable.Displayable):
 
     def get_positions(self) -> dict:
         """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
-        Example result: {0: {"x": 5, "y": 10}}"""
+        Example result: {"0": {"x": 5, "y": 10}}"""
         if self.server is None:
             with self.debug_output:
-                logging.warn(
+                logging.warning(
                     "Server not initialized. Could not retrieve position data."
                 )
             return {}
@@ -63,10 +65,10 @@ class Network(stormvogel.displayable.Displayable):
                     f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
                 )
             )
-            return {int(k): v for (k, v) in positions.items()}
+            return positions
         except TimeoutError:
             with self.debug_output:
-                logging.warn("Timed out. Could not retrieve position data.")
+                logging.warning("Timed out. Could not retrieve position data.")
             return {}
 
     def add_node(
@@ -77,14 +79,15 @@ class Network(stormvogel.displayable.Displayable):
         position_dict: dict | None = None,
     ) -> None:
         """Add a node. Only use before calling show."""
-
         current = "{ id: " + str(id)
         if label is not None:
             current += f", label: `{label}`"
         if group is not None:
             current += f', group: "{group}"'
-        if position_dict is not None and id in position_dict:
-            current += f', x: {position_dict[id]["x"]}, y: {position_dict[id]["x"]}'
+        if position_dict is not None and str(id) in position_dict:
+            current += (
+                f', x: {position_dict[str(id)]["x"]}, y: {position_dict[str(id)]["y"]}'
+            )
         current += " },\n"
         self.nodes_js += current
 
@@ -163,7 +166,7 @@ class Network(stormvogel.displayable.Displayable):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
         html = f"""<script>document.getElementById('{self.name}').contentWindow.network.setOptions({options});</script>"""
-        with self.output:
+        with spam:
             ipd.display(ipd.HTML(html))
         with self.debug_output:
             print("Called Network.update_options")
