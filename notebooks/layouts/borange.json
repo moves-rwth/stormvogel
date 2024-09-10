@@ -22,8 +22,8 @@
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
-        "border": "black",
+        "background": "#ffa348",
+        "border": "#9141ac",
         "highlight": {
           "background": "white",
           "border": "red"
@@ -70,6 +70,23 @@
         "size": 14
       },
       "schedColor": false
+    },
+    "init": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#613583",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
     }
   },
   "reload_button": false,
@@ -80,7 +97,7 @@
       "size": 14
     },
     "color": {
-      "color": "black"
+      "color": "#000000"
     }
   },
   "numbers": {
@@ -99,11 +116,11 @@
     "enable_physics": true,
     "width": 800,
     "height": 600,
-    "explore": false
+    "explore": true
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/borange.json",
     "save_button": false,
     "load_button": false
   },

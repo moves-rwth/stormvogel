@@ -26,10 +26,38 @@ START_HTML = """
 """
 
 # Javascript code for finding the container and initializing the network
-NETWORK_JS = """
+NETWORK_JS = """//js
 var container = document.getElementById("mynetwork");
 var data = {
     nodes: nodes,
     edges: edges,
 };
-var network = new vis.Network(container, data, options);"""
+var network = new vis.Network(container, data, options);
+function makeAllNodesInvisible() {
+    ids = nodes.getIds();
+    for (let i = 0; i < ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node["hidden"] = true;
+        nodes.update(node);
+    }
+};
+function makeNeighborsVisible(myNode) {
+    var ids = network.getConnectedNodes(myNode, 'to');
+    for (let i = 0; i < ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node["hidden"] = false;
+        nodes.update(node);
+    }
+};
+function makeNodeVisible(nodeId) {
+    var node = nodes.get(nodeId);
+    node["hidden"] = false;
+    nodes.update(node);
+};
+network.on( 'click', function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
+"""

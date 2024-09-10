@@ -45,10 +45,31 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
+        self.new_nodes_hidden: bool = False
         self.server: stormvogel.communication_server.CommunicationServer = (
             stormvogel.communication_server.initialize_server()
         )
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
+
+    def enable_exploration_mode(self, initial_node_id: int):
+        """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
+        self.new_nodes_hidden = True
+        self.initial_node_id = initial_node_id
+
+    def update_exploration_mode(self, initial_node_id: int):
+        # Make all nodes invisible.
+        ipd.display(
+            ipd.Javascript(
+                f"document.getElementById('{self.name}').contentWindow.makeAllNodesInvisible()"
+            )
+        )
+        # Make the initial state visible.
+        ipd.display(
+            ipd.Javascript(
+                f"document.getElementById('{self.name}').contentWindow.makeNodeVisible({initial_node_id})"
+            )
+        )
+        # All future nodes to be added will be hidden as well.
 
     def get_positions(self) -> dict:
         """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
@@ -88,6 +109,8 @@ class Network(stormvogel.displayable.Displayable):
             current += (
                 f', x: {position_dict[str(id)]["x"]}, y: {position_dict[str(id)]["y"]}'
             )
+        if self.new_nodes_hidden and id != self.initial_node_id:
+            current += ", hidden: true"
         current += " },\n"
         self.nodes_js += current
 
@@ -165,9 +188,9 @@ class Network(stormvogel.displayable.Displayable):
     def update_options(self, options: str):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
-        html = f"""<script>document.getElementById('{self.name}').contentWindow.network.setOptions({options});</script>"""
-        with spam:
-            ipd.display(ipd.HTML(html))
+        js = f"""document.getElementById('{self.name}').contentWindow.network.setOptions({options});"""
+        with self.debug_output:
+            ipd.display(ipd.Javascript(js))
         with self.debug_output:
             print("Called Network.update_options")
 

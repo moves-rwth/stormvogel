@@ -83,18 +83,14 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output=self.debug_output,
             do_display=False,
         )
-        with self.debug_output:
-            logging.info("Init network")
+        if self.layout.layout["misc"]["explore"]:
+            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
         self.layout.set_groups(self.separate_labels)
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
         self.nt.set_options(str(self.layout))
-        with self.debug_output:
-            logging.info("Set options")
         self.nt.show()
-        with self.debug_output:
-            logging.info("nt show")
         self.maybe_display_output()
 
     def update(self) -> None:
