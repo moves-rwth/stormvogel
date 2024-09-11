@@ -79,7 +79,7 @@ class Network(stormvogel.displayable.Displayable):
                 logging.warning(
                     "Server not initialized. Could not retrieve position data."
                 )
-            return {}
+            raise TimeoutError("Server not initialized.")
         try:
             positions: dict = json.loads(
                 self.server.request(
@@ -90,7 +90,7 @@ class Network(stormvogel.displayable.Displayable):
         except TimeoutError:
             with self.debug_output:
                 logging.warning("Timed out. Could not retrieve position data.")
-            return {}
+            raise TimeoutError("Timed out. Could not retrieve position data.")
 
     def add_node(
         self,

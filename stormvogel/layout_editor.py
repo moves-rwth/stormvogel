@@ -1,5 +1,6 @@
 """Layout editor."""
 
+import stormvogel.communication_server
 import stormvogel.dict_editor
 import stormvogel.displayable
 import stormvogel.layout
@@ -37,6 +38,17 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.layout.layout["width"] = self.layout.layout["misc"]["width"]
         self.layout.layout["height"] = self.layout.layout["misc"]["height"]
 
+    def __failed_positions_save(self):
+        return f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}.json
+Sorry for the inconvenience. Here are some possible fixes.
+1) Restart the kernel and re-run.
+2) Is the port {stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} (from the machine where jupyterlab runs) available?
+If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {stormvogel.communication_server.server_port}:{stormvogel.communication_server.localhost_address}{stormvogel.communication_server.server_port} YOUR_SSH_CONFIG_NAME'.
+3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run.
+This will speed up stormvogel and ignore this message, but it means that you cannot store positions in layout files.
+Please contact the stormvogel developpers if you keep running into issues."""
+
     def process_save_button(self):
         if self.layout.layout["saving"]["save_button"]:
             # Save iff the save button was pressed.
@@ -46,9 +58,25 @@ class LayoutEditor(stormvogel.displayable.Displayable):
                 logging.debug(f"Status of vis {self.vis}")
             if self.vis is not None:
                 with self.debug_output:
-                    positions = self.vis.get_positions()
-                    logging.debug(positions)
-                self.layout.layout["positions"] = positions
+                    if not stormvogel.communication_server.enable_server:
+                        logging.info(
+                            "Did not save node positions because the server is disabled."
+                        )
+                        with self.output:
+                            print(
+                                f"Did not save the node positions of this graph in {self.layout.layout['saving']['filename']}.json because the server is disabled."
+                            )
+                    else:
+                        try:
+                            positions = self.vis.get_positions()
+                            logging.debug(positions)
+                            self.layout.layout["positions"] = positions
+                        except TimeoutError:
+                            logging.warning(
+                                "Failed to save node positions in layout file."
+                            )
+                            with self.output:
+                                print(self.__failed_positions_save())
 
             self.layout.save(
                 self.layout.layout["saving"]["filename"],
@@ -59,13 +87,20 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         if self.layout.layout["saving"]["load_button"]:
             # Load iff the load button was pressed.
             self.layout.layout["saving"]["load_button"] = False
-            self.layout.load(
-                self.layout.layout["saving"]["filename"],
-                path_relative=self.layout.layout["saving"]["relative_path"],
-            )
-            self.show()  # TODO replace this with simply setting the button values so that the entire menu doesn't have to reload (looks weird).
-            if self.vis is not None:
-                self.vis.show()
+            try:
+                self.layout.load(
+                    self.layout.layout["saving"]["filename"],
+                    path_relative=self.layout.layout["saving"]["relative_path"],
+                )
+                self.show()  # TODO replace this with simply setting the button values so that the entire menu doesn't have to reload (looks weird).
+                if self.vis is not None:
+                    self.vis.show()
+            except OSError:
+                logging.warning("Loaded file does not exist.")
+                with self.output:
+                    print(
+                        f"Loaded file does not exist. {self.layout.layout['saving']['filename']}"
+                    )
 
     def process_reload_button(self):
         if self.layout.layout["reload_button"] and self.vis is not None:
@@ -77,18 +112,13 @@ class LayoutEditor(stormvogel.displayable.Displayable):
 
     def try_update(self):
         """Process the updates from the layout editor where required."""
-        with self.debug_output:
-            logging.error("try_update called")
         self.copy_settings()
-
         if not self.loaded:
             return
         self.process_save_button()
         self.process_load_button()
         self.process_reload_button()
         if self.vis is not None:
-            with self.debug_output:
-                logging.error("vis update called")
             self.vis.update()
 
     def try_show(self):
