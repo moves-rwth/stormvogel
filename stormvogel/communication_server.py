@@ -179,10 +179,8 @@ def __server_warning_message():
 Stormvogel is still usable without this, but you will not be able to save node positions in a layout json file.
 This might be solved as such:
 1) Restart the kernel and re-run.
-2) If you already had a stormvogel notebook with a Network or Visualization or show.show in it in this lab session, change the kernel of the current notebook to be the SAME KERNEL (Top right, use kernel for preferred session and look for the name of the PREVIOUS notebook).
-You can also simply restart all kernels but it might break again.
-3) Port {server_port} might already be used by another process. Try changing stormvogel.communication_server.server_port and running again.
-4) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
+2) Port {server_port} might already be used by another process, or even another jupyter lab kernel. Try changing stormvogel.communication_server.server_port and running again.
+3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
 If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel and ignore this message.
 Please contact the stormvogel developpers if you keep running into issues."""
 
