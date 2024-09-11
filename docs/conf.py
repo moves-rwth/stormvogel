@@ -6,6 +6,8 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+from pathlib import Path
+
 project = "stormvogel"
 copyright = "2024, stormvogel team"
 author = "stormvogel team"
@@ -15,7 +17,11 @@ author = "stormvogel team"
 
 extensions = [
     "nbsphinx",
+    "autoapi.extension",
+    "sphinx.ext.autosummary",
 ]
+autoapi_dirs = [Path("../stormvogel")]
+autosummary_generate = True
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

@@ -17,8 +17,9 @@ class ModelType(Enum):
     DTMC = 1
     MDP = 2
     CTMC = 3
+    POMDP = 4
+    MA = 5
     # not implemented yet
-    MA = 4
 
 
 @dataclass()
@@ -30,6 +31,7 @@ class State:
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
+        observation: the observation of this state in case the model is a pomdp
     """
 
     # name: str | None
@@ -37,13 +39,29 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
+    observation: int | None
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
         self.features = features
         self.id = id
         self.model = model
+
+        if not self.model.get_type() == ModelType.POMDP:
+            self.observation = None
+
         # TODO how to handle state names?
+
+    def add_label(self, label: str):
+        """adds a new label to the state"""
+        if label not in self.labels:
+            self.labels.append(label)
+
+    def set_observation(self, observation: int):
+        """sets the observation for this state"""
+        if self.model.get_type() == ModelType.POMDP:
+            self.observation = observation
+            self.model.add_observation(self, observation)
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -52,6 +70,17 @@ class State:
     def add_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Add transitions from this state."""
         self.model.add_transitions(self, transitions)
+
+    def available_actions(self) -> list["Action"]:
+        """returns the list of all available actions in this state"""
+        if self.model.supports_actions():
+            action_list = []
+            for action in self.model.transitions[self.id].transition.keys():
+                action_list.append(action)
+            return action_list
+        else:
+            print("The model this state belongs to does not support actions")
+            return []
 
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -69,8 +98,6 @@ class State:
         if not isinstance(other, State):
             return NotImplemented
         return str(self.id) < str(other.id)
-
-    # TODO get available actions function?
 
 
 @dataclass(frozen=True, order=True)
@@ -190,11 +217,11 @@ class RewardModel:
 
     Args:
         name: Name of the reward model.
-        rewards: The rewards, the keys are the state's ids.
+        rewards: The rewards, the keys are the state's ids (or state action pair ids).
     """
 
     name: str
-    # Hashed by the id of the state (=number in the matrix)
+    # Hashed by the id of the state or state action pair (=number in the matrix)
     rewards: dict[int, Number]
 
     def get(self, state: State) -> Number:
@@ -222,6 +249,8 @@ class Model:
         rewards: The rewardsmodels of this model.
         rates: The rates of the model, if this model supports rates.
         transitions: The transitions of this model.
+        observations: The observations of the states of this model (in case of pomdps).
+        markovian_states: list of markovian states in the case of a ma.
     """
 
     name: str | None
@@ -232,7 +261,11 @@ class Model:
     actions: dict[str, Action] | None
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
-    rates: dict[int, Number] | None
+    exit_rates: dict[int, Number] | None
+    # In pomdps we have a list of observations (hashed by state id)
+    observations: dict[int, int] | None
+    # In ma's we keep track of markovian states
+    markovian_states: list[int] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -249,20 +282,36 @@ class Model:
 
         # Initialize rates if those are supported by the model type
         if self.supports_rates():
-            self.rates = {}
+            self.exit_rates = {}
         else:
-            self.rates = None
+            self.exit_rates = None
+
+        # Initialize observations if those are supported by the model type (pomdps)
+        if self.get_type() == ModelType.POMDP:
+            self.observations = {}
+        else:
+            self.observations = None
+
+        # Initialize markovian states if applicable (in the case of MA's)
+        if self.get_type() == ModelType.MA:
+            self.markovian_states = []
+        else:
+            self.markovian_states = None
 
         # Add the initial state
         self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.MA)
+        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
-        return self.type == ModelType.CTMC
+        return self.type in (ModelType.CTMC, ModelType.MA)
+
+    def supports_observations(self):
+        """Returns whether this model supports observations."""
+        return self.type == ModelType.POMDP
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -271,6 +320,27 @@ class Model:
         while i in self.states:
             i += 1
         return i
+
+    def add_observation(self, s: State, observation: int):
+        """sets an observation for a state"""
+        if self.supports_observations() and self.observations is not None:
+            self.observations[s.id] = observation
+        else:
+            print("This model is not a pomdp")
+
+    def get_observation(self, state: State) -> int:
+        """Gets the observation of a state."""
+        if self.supports_observations and self.observations is not None:
+            return self.observations[state.id]
+        else:
+            raise RuntimeError("Only POMDP models support observations")
+
+    def add_markovian_state(self, markovian_state: State):
+        """Adds a state to the markovian states."""
+        if self.get_type() == ModelType.MA and self.markovian_states is not None:
+            self.markovian_states.append(markovian_state.id)
+        else:
+            print("This model is not a MA")
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
@@ -415,15 +485,15 @@ class Model:
 
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
-        if not self.supports_rates() or self.rates is None:
+        if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot get a rate of a deterministic-time model.")
-        return self.rates[state.id]
+        return self.exit_rates[state.id]
 
     def set_rate(self, state: State, rate: Number):
         """Sets the rate of a state."""
-        if not self.supports_rates() or self.rates is None:
+        if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
-        self.rates[state.id] = rate
+        self.exit_rates[state.id] = rate
 
     def get_type(self):
         """Gets the type of this model"""
@@ -460,6 +530,10 @@ class Model:
             f"{transition}" for (_id, transition) in self.transitions.items()
         ]
 
+        # TODO extend for other types of models
+        # if self.type == ModelType.CTMC:
+        #    res += []
+
         return "\n".join(res)
 
     def __eq__(self, other):
@@ -469,6 +543,9 @@ class Model:
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
+                and self.exit_rates == other.exit_rates
+                and self.observations == other.observations
+                and self.markovian_states == other.markovian_states
             )
         return False
 
@@ -486,3 +563,13 @@ def new_mdp(name: str | None = None):
 def new_ctmc(name: str | None = None):
     """Creates a CTMC."""
     return Model(name, ModelType.CTMC)
+
+
+def new_pomdp(name: str | None = None):
+    """Creates a POMDP."""
+    return Model(name, ModelType.POMDP)
+
+
+def new_ma(name: str | None = None):
+    """Creates a MA."""
+    return Model(name, ModelType.MA)

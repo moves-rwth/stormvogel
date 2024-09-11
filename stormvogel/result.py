@@ -8,6 +8,10 @@ import stormpy.examples
 class Scheduler:
     """
     Scheduler object specifiec what action to take in each state
+
+    Args:
+        model: stormvogel representation of the model associated with the scheduler
+        taken_actions: for each state an action to take in that state
     """
 
     model: stormvogel.model.Model
@@ -123,13 +127,28 @@ class Result:
 
 def convert_model_checking_result(
     model: stormvogel.model.Model,
-    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult,
+    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
+    | stormpy.core.ExplicitQualitativeCheckResult
+    | stormpy.core.ExplicitParametricQuantitativeCheckResult,
     with_scheduler: bool = True,
-) -> Result:
+) -> Result | None:
     """
     Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
     """
-    stormvogel_result = Result(model, stormpy_result.get_values())
+
+    if (
+        type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult
+        or type(stormpy_result)
+        == stormpy.core.ExplicitParametricQuantitativeCheckResult
+    ):
+        stormvogel_result = Result(model, stormpy_result.get_values())
+    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
+        values = [stormpy_result.at(i) for i in range(0, len(model.states))]
+        stormvogel_result = Result(model, values)
+    else:
+        print("Unsupported result type")
+        return
+
     if stormpy_result.has_scheduler and with_scheduler:
         stormvogel_result.add_scheduler(stormpy_result.scheduler)
 
