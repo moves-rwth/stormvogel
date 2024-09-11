@@ -22,7 +22,7 @@
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "#ed333b",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -93,11 +93,11 @@
   "edges": {
     "arrows": "to",
     "font": {
-      "color": "black",
+      "color": "#63452c",
       "size": 14
     },
     "color": {
-      "color": "black"
+      "color": "#9141ac"
     }
   },
   "numbers": {
@@ -120,44 +120,11 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/hospos.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {
-    "0": {
-      "x": 5,
-      "y": -186
-    },
-    "1": {
-      "x": 98,
-      "y": 11
-    },
-    "2": {
-      "x": -120,
-      "y": -7
-    },
-    "3": {
-      "x": 0,
-      "y": 99
-    },
-    "4": {
-      "x": -24,
-      "y": 37
-    },
-    "5": {
-      "x": -62,
-      "y": 182
-    },
-    "10000000000": {
-      "x": 119,
-      "y": -118
-    },
-    "10000000001": {
-      "x": -122,
-      "y": -141
-    }
-  },
+  "positions": {},
   "width": 800,
   "height": 600,
   "physics": true

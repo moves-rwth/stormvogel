@@ -208,13 +208,11 @@ def initialize_server() -> CommunicationServer | None:
             try:
                 server.request("'test message'")
                 logging.info("Succesfully received test message.")
-                with output:
-                    ipd.clear_output()
             except TimeoutError:
                 if enable_server:
                     print(__request_warning_message())
-                with output:
-                    ipd.clear_output()
+        with output:
+            ipd.clear_output()
         return server
     except OSError:
         logging.warning("Server port likely taken.")

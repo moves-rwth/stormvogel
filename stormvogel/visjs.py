@@ -174,7 +174,7 @@ class Network(stormvogel.displayable.Displayable):
             ipd.display(ipd.HTML(iframe))
         self.maybe_display_output()
         with self.debug_output:
-            print("Called Network.show")
+            logging.info("Called Network.show")
 
     def reload(self) -> None:
         """Tries to reload an existing visualization (so it uses a modified layout). If show was not called before, nothing happens."""
@@ -183,7 +183,7 @@ class Network(stormvogel.displayable.Displayable):
             ipd.clear_output()
             ipd.display(ipd.HTML(iframe))
         with self.debug_output:
-            print("Called Network.reload")
+            logging.info("Called Network.reload")
 
     def update_options(self, options: str):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
@@ -191,8 +191,9 @@ class Network(stormvogel.displayable.Displayable):
         js = f"""document.getElementById('{self.name}').contentWindow.network.setOptions({options});"""
         with self.debug_output:
             ipd.display(ipd.Javascript(js))
+            logging.info("The previous javascript error is no problem in most cases.")
         with self.debug_output:
-            print("Called Network.update_options")
+            logging.info("Called Network.update_options")
 
     def clear(self) -> None:
         """Clear the output."""
