@@ -7,13 +7,22 @@ Welcome to stormvogel's documentation!
 ======================================
 Last update: |today|
 
-These are our current files:
+Package documentation:
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   stormvogel
+
+Notebook examples:
 
 .. toctree::
    :maxdepth: 2
    :glob:
 
-   **
+   getting_started/*
 
 
 Search for a specific page:
