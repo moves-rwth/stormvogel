@@ -1,15 +1,10 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+import stormvogel.rdict
+
 import copy
-from pyvis.network import Network
 import os
 import json
-from stormvogel.buttons import (
-    ApplyButton,
-    SaveButton,
-)
-from stormvogel.dict_editor import Editor
-from stormvogel.rdict import merge_dict, rget
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,10 +25,12 @@ class Layout:
         """
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json")) as f:
             default_str = f.read()
-        default_dict = json.loads(default_str)
+        self.default_dict: dict = json.loads(default_str)
+        self.load(path, path_relative)
 
+    def load(self, path: str | None = None, path_relative: bool = True):
         if path is None:
-            self.layout = default_dict
+            self.layout: dict = self.default_dict
         else:
             if path_relative:
                 complete_path = os.path.join(os.getcwd(), path)
@@ -43,7 +40,9 @@ class Layout:
                 parsed_str = f.read()
             parsed_dict = json.loads(parsed_str)
             # Combine the parsed dict with default to fill missing keys as default values.
-            self.layout = merge_dict(default_dict, parsed_dict)
+            self.layout: dict = stormvogel.rdict.merge_dict(
+                self.default_dict, parsed_dict
+            )
 
         # Load in schema for the dict_editor.
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
@@ -53,8 +52,7 @@ class Layout:
     def set_groups(self, groups: list[str]):
         """Add the specified groups to the layout and schema.
         They will use the specified __group_macro.
-        Note that the changes to schema won't be saved to schema.json.
-        Remove groups that aren't used."""
+        Note that the changes to schema won't be saved to schema.json."""
         for g in groups:
             if g not in self.layout["groups"]:
                 layout_group_macro = copy.deepcopy(
@@ -67,36 +65,6 @@ class Layout:
                 ] = {  # dict_editor already handles macros, so there is no need to do it manually here.
                     "__use_macro": "__group_macro"
                 }
-
-        # Remove unused groups, so that the Misc values can be used.
-        # for existing_group in self.layout["groups"].keys():
-        #     if existing_group not in groups + ["states", "actions"]:
-        #         self.layout["groups"].pop(existing_group)
-
-    def show_editor(self, vis=None):
-        """Display an interactive layout editor, according to the schema."""
-        done_loading = False
-
-        def try_update():
-            """Try to update the visualization unless impossible (happens if show was not called yet),
-            or the editor menu is not done loading yet."""
-            if hasattr(vis, "update") and done_loading:
-                vis.update()  # type: ignore
-
-        def maybe_update():
-            """Try to update if autoApply is enabled."""
-            if rget(self.layout, ["autoApply"]):
-                try_update()
-
-        Editor(schema=self.schema, update_dict=self.layout, on_update=maybe_update)
-        SaveButton(self)
-        ApplyButton(self, try_update)
-        done_loading = True
-
-    def set_nt_layout(self, nt: Network) -> None:
-        """Set the layout of the network passed as the arugment."""
-        options = "var options = " + str(self)
-        nt.set_options(options)
 
     def save(self, path: str, path_relative: bool = True) -> None:
         """Save this layout as a json file.

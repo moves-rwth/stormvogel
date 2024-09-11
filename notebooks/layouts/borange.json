@@ -1,11 +1,14 @@
 {
-  "autoApply": true,
   "__fake_macros": {
     "__group_macro": {
       "borderWidth": 1,
       "color": {
         "background": "white",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "ellipse",
       "mass": 1,
@@ -19,8 +22,12 @@
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
-        "border": "black"
+        "background": "#ffa348",
+        "border": "#9141ac",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "ellipse",
       "mass": 1,
@@ -33,7 +40,11 @@
       "borderWidth": 1,
       "color": {
         "background": "lightblue",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "box",
       "mass": 1,
@@ -46,33 +57,29 @@
       "borderWidth": 1,
       "color": {
         "background": "pink",
-        "border": "black"
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "box",
       "mass": 1,
       "font": {
         "color": "black",
         "size": 14
-      }
+      },
+      "schedColor": false
     },
     "init": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
-        "border": "black"
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "didn't_study": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black"
+        "background": "#613583",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
       "shape": "ellipse",
       "mass": 1,
@@ -82,26 +89,43 @@
       }
     }
   },
+  "reload_button": false,
   "edges": {
+    "arrows": "to",
     "font": {
       "color": "black",
       "size": 14
     },
-    "color": "black"
+    "color": {
+      "color": "#000000"
+    }
   },
   "numbers": {
     "fractions": true,
     "digits": 5
   },
-  "resultSymbol": "\u2606",
-  "physics": {
-    "enabled": true
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
   },
   "layout": {
     "randomSeed": 5
   },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600,
+    "explore": true
+  },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/physics.json"
-  }
+    "filename": "layouts/borange.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {},
+  "width": 800,
+  "height": 600,
+  "physics": true
 }

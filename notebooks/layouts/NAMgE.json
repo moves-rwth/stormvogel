@@ -70,6 +70,23 @@
         "size": 14
       },
       "schedColor": false
+    },
+    "init": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
     }
   },
   "reload_button": false,
@@ -103,7 +120,7 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/NAMgE.json",
     "save_button": false,
     "load_button": false
   },

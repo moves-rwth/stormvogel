@@ -70,6 +70,23 @@
         "size": 14
       },
       "schedColor": false
+    },
+    "init": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
     }
   },
   "reload_button": false,
@@ -103,11 +120,44 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/ud.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {},
+  "positions": {
+    "0": {
+      "x": 11,
+      "y": 205
+    },
+    "1": {
+      "x": -110,
+      "y": 29
+    },
+    "2": {
+      "x": 69,
+      "y": 0
+    },
+    "3": {
+      "x": -75,
+      "y": -66
+    },
+    "4": {
+      "x": 5,
+      "y": -81
+    },
+    "5": {
+      "x": -56,
+      "y": -188
+    },
+    "10000000000": {
+      "x": -113,
+      "y": 162
+    },
+    "10000000001": {
+      "x": 112,
+      "y": 121
+    }
+  },
   "width": 800,
   "height": 600,
   "physics": true

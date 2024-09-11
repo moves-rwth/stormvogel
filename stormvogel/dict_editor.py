@@ -1,22 +1,12 @@
-"""Generate editor menu from a schema dict."""
+"""Generate an interactive editor from a specified schema using ipywidgets."""
 
+import stormvogel.displayable
+import stormvogel.rdict
+
+import ipywidgets as widgets
+import IPython.display as ipd
 from typing import Any, Callable
-from IPython.display import display
-from ipywidgets import (
-    interactive,
-    IntSlider,
-    ColorPicker,
-    Checkbox,
-    Text,
-    Dropdown,
-    Accordion,
-    VBox,
-    HTML,
-    Widget,
-)
 import copy
-
-from stormvogel.rdict import rget, rset
 
 
 class WidgetWrapper:
@@ -24,11 +14,11 @@ class WidgetWrapper:
     Changing the value of the widget will change the value specified in path in the update_dict."""
 
     convert_dict = {
-        "IntSlider": IntSlider,
-        "ColorPicker": ColorPicker,
-        "Checkbox": Checkbox,
-        "Text": Text,
-        "Dropdown": Dropdown,
+        "IntSlider": widgets.IntSlider,
+        "ColorPicker": widgets.ColorPicker,
+        "Checkbox": widgets.Checkbox,
+        "Text": widgets.Text,
+        "Dropdown": widgets.Dropdown,
     }
 
     def __init__(
@@ -51,24 +41,37 @@ class WidgetWrapper:
             update_dict (dict): The dict that should be updated.
             on_update (Callable): A function that is called whenever a value is updated.
         """
-        w = self.convert_dict[widget]
-        self.update_dict = update_dict
-        self.path = path
-        self.on_update = on_update
-        self.widget = interactive(
-            self.on_edit, x=w(value=initial_value, description=description, **kwargs)
-        )
+        self.update_dict: dict = update_dict
+        self.path: list[str] = path
+        self.on_update: Callable = on_update
+        if widget == "Button":
+            self.widget = widgets.Button(description=description, **kwargs)
+            self.widget.on_click(self.on_edit)
+        else:
+            w = self.convert_dict[widget]
+            self.widget = widgets.interactive(
+                self.on_edit,
+                x=w(value=initial_value, description=description, **kwargs),
+            )
 
     def on_edit(self, x: Any) -> None:
         """Called when a user changes something in the widget."""
-        rset(self.update_dict, self.path, x)
+        stormvogel.rdict.rset(self.update_dict, self.path, x)
         self.on_update()
 
 
-class Editor:
+class DictEditor(stormvogel.displayable.Displayable):
     """Create an interactive json editor from a schema using ipy widgets."""
 
-    def __init__(self, schema: dict, update_dict: dict, on_update) -> None:
+    def __init__(
+        self,
+        schema: dict,
+        update_dict: dict,
+        on_update: Callable,
+        output: widgets.Output = widgets.Output(),
+        do_display: bool = True,
+        debug_output: widgets.Output = widgets.Output(),
+    ) -> None:
         """Create an interactive json editor from a schema using ipy widgets.
 
         Args:
@@ -78,24 +81,30 @@ class Editor:
             update_dict (dict): The dict that will be updated.
             on_update (_type_): Function that is called whenever the dict is updated.
         """
-        self.on_update = on_update
-        self.update_dict = update_dict
-        self.macros = {}
-        result = self.recurse_create(schema, [])
-        display(result)
+        super().__init__(output, do_display, debug_output)
+        self.on_update: Callable = on_update
+        self.update_dict: dict = update_dict
+        self.macros: dict = {}
+        self.schema: dict = schema
 
-    def recurse_create(self, sub_schema: dict, path: list) -> Widget:
+    def show(self):
+        with self.output:
+            ipd.clear_output()
+            ipd.display(self.recurse_create(self.schema, []))
+        self.maybe_display_output()
+
+    def recurse_create(self, sub_schema: dict, path: list) -> widgets.Widget:
         acc_items = []
         for k, v in sub_schema.items():
             new_path = copy.deepcopy(path)
             new_path.append(k)
             if k == "__html":
-                acc_items.append(HTML(v))
+                acc_items.append(widgets.HTML(v))
             if k == "__macros":
                 self.macros = v
             elif isinstance(v, dict):
                 if "__html" in v and "__widget" in v:
-                    acc_items.append(HTML(v["__html"]))
+                    acc_items.append(widgets.HTML(v["__html"]))
                 if "__use_macro" in v:
                     macro_value = self.macros[v["__use_macro"]]
                     acc_items.append(self.recurse_create(macro_value, new_path))
@@ -106,7 +115,9 @@ class Editor:
                         w = WidgetWrapper(
                             description=v["__description"],
                             widget=v["__widget"],
-                            initial_value=rget(self.update_dict, new_path),
+                            initial_value=stormvogel.rdict.rget(
+                                self.update_dict, new_path
+                            ),
                             path=new_path,
                             update_dict=self.update_dict,
                             on_update=self.on_update,
@@ -116,7 +127,9 @@ class Editor:
                         w = WidgetWrapper(
                             description=v["__description"],
                             widget=v["__widget"],
-                            initial_value=rget(self.update_dict, new_path),
+                            initial_value=stormvogel.rdict.rget(
+                                self.update_dict, new_path
+                            ),
                             path=new_path,
                             update_dict=self.update_dict,
                             on_update=self.on_update,
@@ -125,7 +138,9 @@ class Editor:
                 else:  # v is not a widget or macro, then call recursively.
                     acc_items.append(self.recurse_create(v, new_path))
         if "__collapse" in sub_schema and sub_schema["__collapse"]:
-            acc = Accordion(children=[VBox(children=acc_items)], titles=[path[-1]])
+            acc = widgets.Accordion(
+                children=[widgets.VBox(children=acc_items)], titles=[path[-1]]
+            )
         else:
-            acc = VBox(children=acc_items)
+            acc = widgets.VBox(children=acc_items)
         return acc
