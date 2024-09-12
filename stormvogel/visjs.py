@@ -189,8 +189,8 @@ class Network(stormvogel.displayable.Displayable):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
         js = f"""document.getElementById('{self.name}').contentWindow.network.setOptions({options});"""
+        ipd.display(ipd.Javascript(js))
         with self.debug_output:
-            ipd.display(ipd.Javascript(js))
             logging.info("The previous javascript error is no problem in most cases.")
         with self.debug_output:
             logging.info("Called Network.update_options")

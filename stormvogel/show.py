@@ -31,9 +31,9 @@ def show(
     Returns: Visualization object.
     """
     if not show_editor or not stormvogel.communication_server.enable_server:
-        stormvogel.communication_server.__internal_enable_server = False
+        stormvogel.communication_server.internal_enable_server = False
     else:
-        stormvogel.communication_server.__internal_enable_server = True
+        stormvogel.communication_server.internal_enable_server = True
 
     do_display = not show_editor
     vis = stormvogel.visualization.Visualization(

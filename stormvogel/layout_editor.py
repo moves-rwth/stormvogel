@@ -57,11 +57,12 @@ Please contact the stormvogel developpers if you keep running into issues."""
             with self.debug_output:
                 logging.debug(f"Status of vis {self.vis}")
             if self.vis is not None:
-                with self.debug_output:
-                    if not stormvogel.communication_server.__internal_enable_server:
-                        logging.info(
-                            "Did not save node positions because the server is disabled."
-                        )
+                with self.output:
+                    if not stormvogel.communication_server.internal_enable_server:
+                        with self.debug_output:
+                            logging.info(
+                                "Did not save node positions because the server is disabled."
+                            )
                         with self.output:
                             print(
                                 f"Did not save the node positions of this graph in {self.layout.layout['saving']['filename']}.json because the server is disabled."
@@ -69,12 +70,14 @@ Please contact the stormvogel developpers if you keep running into issues."""
                     else:
                         try:
                             positions = self.vis.get_positions()
-                            logging.debug(positions)
+                            with self.debug_output:
+                                logging.debug(positions)
                             self.layout.layout["positions"] = positions
                         except TimeoutError:
-                            logging.warning(
-                                "Failed to save node positions in layout file."
-                            )
+                            with self.debug_output:
+                                logging.warning(
+                                    "Failed to save node positions in layout file."
+                                )
                             with self.output:
                                 print(self.__failed_positions_save())
 
