@@ -12,6 +12,7 @@ import IPython.display as ipd
 import logging
 from time import sleep
 import ipywidgets as widgets
+import socket
 
 enable_server: bool = True
 """Disable if you don't want to use an internal communication server. Some features might break."""
@@ -191,9 +192,9 @@ Please contact the stormvogel developpers if you keep running into issues."""
 
 
 def is_port_free(port: int) -> bool:
-    """Return true iff the specified port is free on localhost_address."""
-    import socket
-
+    """Return true iff the specified port is free on localhost_address.
+    Thanks to StackOverflow user Rugnar
+    https://stackoverflow.com/questions/2470971/fast-way-to-test-if-a-port-is-in-use-using-python"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex((localhost_address, port)) != 0
 
