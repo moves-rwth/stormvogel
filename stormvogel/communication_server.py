@@ -18,16 +18,13 @@ enable_server: bool = True
 
 localhost_address: str = "127.0.0.1"
 
-server_port: int = 8080
-"""Change this to use a different port, BEFORE LOADING A NETWORK!!!"""
+min_port = 8889
+max_port = 8905
+port_range = range(min_port, max_port)
+"""The range of ports that stromvogel uses. They should all be forwarded if you're on an http tunnel."""
 
-
-def set_port(port: int):
-    """Call before creating any Network (or Visualization, or calling show.show()) to change the port.
-    If you have already done one of these things, restart the kernel or call initialize_server with reset=True."""
-    global server_port
-    server_port = port
-
+server_port: int = 8888
+"""Global variable storing the port that is being used by this process. Changes when initialize_server is called."""
 
 awaiting: dict = {}
 mutex: threading.Lock = threading.Lock()
@@ -185,11 +182,34 @@ If you cannot get the server to work, set stormvogel.communication_server.enable
 Please contact the stormvogel developpers if you keep running into issues."""
 
 
+def __no_free_port_warning_message():
+    return f"""Stormvogel could not find a free port in the range [{min_port, max_port}) to host a local process.
+Stormvogel can still function without this, but you will not be able to save node positions in a layout json file.
+If you have a lot of notebooks open, it might help to restart jupyter lab or close some kernels from other notebooks.
+If the default range of ports does not work for you, feel free to edit stormvogel.communication_server.min_port and stormvogel.communication_server.max_port.
+Please contact the stormvogel developpers if you keep running into issues."""
+
+
+def is_port_free(port: int) -> bool:
+    """Return true iff the specified port is free on localhost_address."""
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex((localhost_address, port)) != 0
+
+
+def find_free_port() -> int:
+    for port_no in port_range:
+        if is_port_free(port_no):
+            return port_no
+    return -1
+
+
 def initialize_server() -> CommunicationServer | None:
     """If server is None, then create a new server and store it in global variable server.
     Use the port stored in global variable server_port.
     """
-    global server, server_port, server_running
+    global server, server_port
     if not enable_server:
         return None
 
@@ -201,20 +221,25 @@ def initialize_server() -> CommunicationServer | None:
     ipd.display(output)
     try:
         if server is None:
+            server_port = find_free_port()
+            if server_port == -1:
+                logging.warning("Could not find free port.")
+                print(__no_free_port_warning_message())
+                with output:
+                    ipd.clear_output()
+                return None
             server = CommunicationServer(server_port=server_port)
             logging.info("Succesfully initialized server.")
             try:
                 server.request("'test message'")
                 logging.info("Succesfully received test message.")
             except TimeoutError:
-                if enable_server:
-                    print(__request_warning_message())
+                print(__request_warning_message())
         with output:
             ipd.clear_output()
         return server
     except OSError:
         logging.warning("Server port likely taken.")
-        if enable_server:
-            print(__server_warning_message())
+        print(__server_warning_message())
         with output:
             ipd.clear_output()
