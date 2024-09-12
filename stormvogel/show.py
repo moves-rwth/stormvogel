@@ -4,6 +4,7 @@ import stormvogel.model
 import stormvogel.layout
 import stormvogel.visualization
 import stormvogel.layout_editor
+import stormvogel.communication_server
 
 import ipywidgets as widgets
 import IPython.display as ipd
@@ -29,6 +30,10 @@ def show(
 
     Returns: Visualization object.
     """
+    if not show_editor or not stormvogel.communication_server.enable_server:
+        stormvogel.communication_server.__internal_enable_server = False
+    else:
+        stormvogel.communication_server.__internal_enable_server = True
 
     do_display = not show_editor
     vis = stormvogel.visualization.Visualization(

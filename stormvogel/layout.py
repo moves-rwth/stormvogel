@@ -90,3 +90,9 @@ def DEFAULT():
     return Layout(
         os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json"), path_relative=False
     )
+
+
+def EXPLORE():
+    return Layout(
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/explore.json"), path_relative=False
+    )

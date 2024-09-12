@@ -17,6 +17,9 @@ import socket
 enable_server: bool = True
 """Disable if you don't want to use an internal communication server. Some features might break."""
 
+__internal_enable_server: bool = enable_server
+
+
 localhost_address: str = "127.0.0.1"
 
 min_port = 8889
@@ -102,7 +105,7 @@ class CommunicationServer:
         Also waits for server to boot up if it is not finished yet.
         Should be thread safe. (I hope).
         WHEN SENDING JAVASCRIPT, DO NOT FORGET EXTRA QUOTES AROUND STRINGS."""
-        if not enable_server:
+        if not __internal_enable_server:
             raise TimeoutError("There is no server running.")
 
         global awaiting, server_running
@@ -211,7 +214,7 @@ def initialize_server() -> CommunicationServer | None:
     Use the port stored in global variable server_port.
     """
     global server, server_port
-    if not enable_server:
+    if not __internal_enable_server:
         return None
 
     output = widgets.Output()

@@ -114,7 +114,7 @@ class Visualization(stormvogel.displayable.Displayable):
 
             group = "states"  # Default
             if (
-                und(state.labels[0]) in self.separate_labels
+                len(state.labels) > 0 and und(state.labels[0]) in self.separate_labels
             ):  # Use a specific group if specified.
                 group = und(state.labels[0])
 
