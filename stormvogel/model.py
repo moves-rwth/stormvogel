@@ -322,6 +322,20 @@ class Model:
             i += 1
         return i
 
+    def add_self_loops(self):
+        """adds self loops to all states that do not have an outgoing transition"""
+        for state in self.states.items():
+            if self.transitions.get(state[0]) is None:
+                self.set_transitions(state[1], [(1, state[1])])
+
+    def all_states_outgoing_transition(self) -> bool:
+        """checks if all states have an outgoing transition"""
+        all_states_outgoing_transition = True
+        for state in self.states.items():
+            if self.transitions.get(state[0]) is None:
+                all_states_outgoing_transition = False
+        return all_states_outgoing_transition
+
     def add_observation(self, s: State, observation: int):
         """sets an observation for a state"""
         if self.supports_observations() and self.observations is not None:
@@ -419,9 +433,6 @@ class Model:
             state = State([], features or {}, state_id, self)
 
         self.states[state_id] = state
-
-        # Create a self-loop at this state
-        state.set_transitions([(1, state)])
 
         return state
 

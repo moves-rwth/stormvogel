@@ -63,6 +63,9 @@ def create_monty_hall_mdp():
             ]
         )
 
+    # we add self loops to all states with no outgoing transitions
+    mdp.add_self_loops()
+
     return mdp
 
 
