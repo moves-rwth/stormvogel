@@ -64,6 +64,9 @@ def create_monty_hall_pomdp():
             ]
         )
 
+    # we add self loops to all states with no outgoing transition
+    pomdp.add_self_loops()
+
     # we add the observations TODO: let it make sense
     pomdp.observations = {state.id: 0 for state in pomdp.states.values()}
 

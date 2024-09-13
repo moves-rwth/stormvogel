@@ -22,6 +22,9 @@ def create_nuclear_fusion_ctmc():
     for i in range(5):
         ctmc.set_rate(ctmc.get_state_by_id(i), rates[i])
 
+    # we add self loops to all states with no outgoing transition
+    ctmc.add_self_loops()
+
     return ctmc
 
 

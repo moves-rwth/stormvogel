@@ -426,9 +426,6 @@ class Model:
 
         self.states[state_id] = state
 
-        # Create a self-loop at this state
-        state.set_transitions([(1, state)])
-
         return state
 
     def get_states_with(self, label: str) -> list[State]:

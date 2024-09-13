@@ -351,6 +351,9 @@ def stormpy_to_stormvogel(
             )
             model.set_transitions(model.get_state_by_id(state.id), transitions)
 
+        # we add self loops to all states with no outgoing transition
+        model.add_self_loops()
+
         # we add the reward models to the states
         add_rewards(model, sparsedtmc)
 
@@ -390,6 +393,9 @@ def stormpy_to_stormvogel(
                 transitions = stormvogel.model.Transition(transition)
                 model.set_transitions(model.get_state_by_id(state.id), transitions)
 
+        # we add self loops to all states with no outgoing transition
+        model.add_self_loops()
+
         # we add the reward models to the state action pairs
         add_rewards(model, sparsemdp)
 
@@ -417,6 +423,9 @@ def stormpy_to_stormvogel(
                 transitionshorthand
             )
             model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add self loops to all states with no outgoing transition
+        model.add_self_loops()
 
         # we add the reward models to the states
         add_rewards(model, sparsectmc)
@@ -461,6 +470,9 @@ def stormpy_to_stormvogel(
                 transitions = stormvogel.model.Transition(transition)
                 model.set_transitions(model.get_state_by_id(state.id), transitions)
 
+        # we add self loops to all states with no outgoing transition
+        model.add_self_loops()
+
         # we add the reward models to the state action pairs
         add_rewards(model, sparsepomdp)
 
@@ -503,6 +515,9 @@ def stormpy_to_stormvogel(
                 transition[action] = stormvogel.model.Branch(branch)
                 transitions = stormvogel.model.Transition(transition)
                 model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add self loops to all states with no outgoing transition
+        model.add_self_loops()
 
         # we add the reward models to the state action pairs
         add_rewards(model, sparsema)

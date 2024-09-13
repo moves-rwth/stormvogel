@@ -22,6 +22,9 @@ def create_simple_ma():
     ma.markovian_states = [0, 3, 4]
     ma.exit_rates = {i: 0 for i in range(6)}
 
+    # we add self loops to all states with no outgoing transition
+    ma.add_self_loops()
+
     return ma
 
 
