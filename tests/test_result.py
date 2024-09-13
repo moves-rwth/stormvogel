@@ -12,7 +12,7 @@ def test_convert_model_checker_results_dtmc():
     model = stormpy.build_model(prism_program, properties)
     result = stormpy.model_checking(model, properties[0])
 
-    stormvogel_model = stormvogel.map.stormpy_to_stormvogel(model)
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
     assert stormvogel_model is not None
     stormvogel_result = stormvogel.result.convert_model_checking_result(
         stormvogel_model, result
@@ -44,7 +44,7 @@ def test_convert_model_checker_results_dtmc_qualitative():
     model = stormpy.build_model(prism_program, properties)
     result = stormpy.model_checking(model, properties[0])
 
-    stormvogel_model = stormvogel.map.stormpy_to_stormvogel(model)
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
     assert stormvogel_model is not None
     stormvogel_result = stormvogel.result.convert_model_checking_result(
         stormvogel_model, result
@@ -78,7 +78,7 @@ def test_convert_model_checker_results_mdp():
     model = stormpy.build_model(prism_program, properties)
     result = stormpy.model_checking(model, properties[0], extract_scheduler=True)
 
-    stormvogel_model = stormvogel.map.stormpy_to_stormvogel(model)
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
     assert stormvogel_model is not None
     stormvogel_result = stormvogel.result.convert_model_checking_result(
         stormvogel_model, result
@@ -650,7 +650,7 @@ def test_convert_model_checker_results_mdp_qualitative():
     model = stormpy.build_model(prism_program, properties)
     result = stormpy.model_checking(model, properties[0], extract_scheduler=True)
 
-    stormvogel_model = stormvogel.map.stormpy_to_stormvogel(model)
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
     assert stormvogel_model is not None
     stormvogel_result = stormvogel.result.convert_model_checking_result(
         stormvogel_model, result

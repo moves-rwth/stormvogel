@@ -60,8 +60,9 @@ class State:
     def set_observation(self, observation: int):
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:
-            self.observation = observation
             self.model.add_observation(self, observation)
+        else:
+            print("The model this state belongs to is not a pomdp")
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -325,6 +326,7 @@ class Model:
         """sets an observation for a state"""
         if self.supports_observations() and self.observations is not None:
             self.observations[s.id] = observation
+            self.states[s.id].observation = observation
         else:
             print("This model is not a pomdp")
 
@@ -359,7 +361,7 @@ class Model:
         for choice, branch in transitions.transition.items():
             self.transitions[s.id].transition[choice] = branch
 
-    def new_action(self, name: str) -> Action:
+    def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
         """Creates a new action and returns it."""
         if not self.supports_actions():
             raise RuntimeError(
@@ -370,22 +372,10 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        action = Action(name, frozenset())
-        self.actions[name] = action
-        return action
-
-    def new_action_with_labels(self, name: str, labels: frozenset[str]) -> Action:
-        """Creates a new action with labels and returns it."""
-        if not self.supports_actions():
-            raise RuntimeError(
-                "Called new_action on a model that does not support actions"
-            )
-        assert self.actions is not None
-        if name in self.actions:
-            raise RuntimeError(
-                f"Tried to add action {name} but that action already exists"
-            )
-        action = Action(name, labels)
+        if labels:
+            action = Action(name, labels)
+        else:
+            action = Action(name, frozenset())
         self.actions[name] = action
         return action
 
