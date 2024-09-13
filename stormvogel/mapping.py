@@ -384,7 +384,7 @@ def stormpy_to_stormvogel(
                     else str(i)
                 )
                 # TODO assign the correct action name and not only an index
-                action = model.new_action_with_labels(str(i), actionlabels)
+                action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
                 transitions = stormvogel.model.Transition(transition)
@@ -455,7 +455,7 @@ def stormpy_to_stormvogel(
                     else str(i)
                 )
                 # TODO assign the correct action name and not only an index
-                action = model.new_action_with_labels(str(i), actionlabels)
+                action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
                 transitions = stormvogel.model.Transition(transition)
@@ -498,7 +498,7 @@ def stormpy_to_stormvogel(
                     else str(i)
                 )
                 # TODO assign the correct action name and not only an index
-                action = model.new_action_with_labels(str(i), actionlabels)
+                action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
                 transitions = stormvogel.model.Transition(transition)

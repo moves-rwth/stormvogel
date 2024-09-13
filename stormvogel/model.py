@@ -359,7 +359,7 @@ class Model:
         for choice, branch in transitions.transition.items():
             self.transitions[s.id].transition[choice] = branch
 
-    def new_action(self, name: str) -> Action:
+    def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
         """Creates a new action and returns it."""
         if not self.supports_actions():
             raise RuntimeError(
@@ -370,22 +370,10 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        action = Action(name, frozenset())
-        self.actions[name] = action
-        return action
-
-    def new_action_with_labels(self, name: str, labels: frozenset[str]) -> Action:
-        """Creates a new action with labels and returns it."""
-        if not self.supports_actions():
-            raise RuntimeError(
-                "Called new_action on a model that does not support actions"
-            )
-        assert self.actions is not None
-        if name in self.actions:
-            raise RuntimeError(
-                f"Tried to add action {name} but that action already exists"
-            )
-        action = Action(name, labels)
+        if labels:
+            action = Action(name, labels)
+        else:
+            action = Action(name, frozenset())
         self.actions[name] = action
         return action
 
