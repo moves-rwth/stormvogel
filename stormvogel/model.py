@@ -322,6 +322,12 @@ class Model:
             i += 1
         return i
 
+    def add_self_loops(self):
+        """adds self loops to all states that do not have an outgoing transition"""
+        for state in self.states.items():
+            if self.transitions.get(state[0]) is None:
+                self.set_transitions(state[1], [(1, state[1])])
+
     def add_observation(self, s: State, observation: int):
         """sets an observation for a state"""
         if self.supports_observations() and self.observations is not None:
