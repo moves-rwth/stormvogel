@@ -328,6 +328,14 @@ class Model:
             if self.transitions.get(state[0]) is None:
                 self.set_transitions(state[1], [(1, state[1])])
 
+    def all_states_outgoing_transition(self) -> bool:
+        """checks if all states have an outgoing transition"""
+        all_states_outgoing_transition = True
+        for state in self.states.items():
+            if self.transitions.get(state[0]) is None:
+                all_states_outgoing_transition = False
+        return all_states_outgoing_transition
+
     def add_observation(self, s: State, observation: int):
         """sets an observation for a state"""
         if self.supports_observations() and self.observations is not None:

@@ -12,7 +12,7 @@ def create_die_dtmc():
         [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
     )
 
-    # we add self loops to all states with no outgoing transition
+    # we add self loops to all states with no outgoing transitions
     dtmc.add_self_loops()
 
     return dtmc
