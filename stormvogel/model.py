@@ -60,8 +60,9 @@ class State:
     def set_observation(self, observation: int):
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:
-            self.observation = observation
             self.model.add_observation(self, observation)
+        else:
+            print("The model this state belongs to is not a pomdp")
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -325,6 +326,7 @@ class Model:
         """sets an observation for a state"""
         if self.supports_observations() and self.observations is not None:
             self.observations[s.id] = observation
+            self.states[s.id].observation = observation
         else:
             print("This model is not a pomdp")
 
