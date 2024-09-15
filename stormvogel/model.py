@@ -39,7 +39,7 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
-    observation: int | None
+    observation: "Observation | None"
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
@@ -57,7 +57,7 @@ class State:
         if label not in self.labels:
             self.labels.append(label)
 
-    def set_observation(self, observation: int):
+    def set_observation(self, observation: "Observation"):
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:
             self.model.add_observation(self, observation)
@@ -239,6 +239,23 @@ class RewardModel:
 
 
 @dataclass
+class Observation:
+    """Represents an observation of a state (for pomdps)
+
+    Args:
+        obseration: the observation as an integer
+    """
+
+    observation: int
+
+    def get_observation(self) -> int:
+        """returns the observation"""
+        return self.observation
+
+    # What else should be here?
+
+
+@dataclass
 class Model:
     """Represents a model.
 
@@ -264,7 +281,7 @@ class Model:
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     exit_rates: dict[int, Number] | None
     # In pomdps we have a list of observations (hashed by state id)
-    observations: dict[int, int] | None
+    observations: dict[int, Observation] | None
     # In ma's we keep track of markovian states
     markovian_states: list[int] | None
 
@@ -336,15 +353,16 @@ class Model:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
 
-    def add_observation(self, s: State, observation: int):
+    def add_observation(self, s: State, observation: Observation):
         """sets an observation for a state"""
-        if self.supports_observations() and self.observations is not None:
-            self.observations[s.id] = observation
-            self.states[s.id].observation = observation
-        else:
-            print("This model is not a pomdp")
+        if isinstance(observation, Observation):
+            if self.supports_observations() and self.observations is not None:
+                self.observations[s.id] = observation
+                self.states[s.id].observation = observation
+            else:
+                raise RuntimeError("Only POMDP models support observations")
 
-    def get_observation(self, state: State) -> int:
+    def get_observation(self, state: State) -> Observation:
         """Gets the observation of a state."""
         if self.supports_observations and self.observations is not None:
             return self.observations[state.id]
