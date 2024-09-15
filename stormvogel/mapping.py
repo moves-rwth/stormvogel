@@ -286,9 +286,11 @@ def stormvogel_to_stormpy(
         elif model.get_type() == stormvogel.model.ModelType.MA:
             return map_ma(model)
         else:
-            print("This type of model is not yet supported for this action")
+            raise RuntimeError(
+                "This type of model is not yet supported for this action"
+            )
     else:
-        print(
+        raise RuntimeError(
             "This model has states with no outgoing transitions.\nUse the add_self_loops() function to add self loops to all states with no outgoing transition."
         )
 
@@ -553,8 +555,7 @@ def stormpy_to_stormvogel(
     elif sparsemodel.model_type.name == "MA":
         return map_ma(sparsemodel)
     else:
-        print("This type of model is not yet supported for this action")
-        return
+        raise RuntimeError("This type of model is not yet supported for this action")
 
 
 if __name__ == "__main__":

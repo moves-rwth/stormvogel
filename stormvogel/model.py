@@ -62,7 +62,7 @@ class State:
         if self.model.get_type() == ModelType.POMDP:
             self.model.add_observation(self, observation)
         else:
-            print("The model this state belongs to is not a pomdp")
+            raise RuntimeError("The model this state belongs to is not a pomdp")
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -80,8 +80,9 @@ class State:
                 action_list.append(action)
             return action_list
         else:
-            print("The model this state belongs to does not support actions")
-            return []
+            raise RuntimeError(
+                "The model this state belongs to does not support actions"
+            )
 
     def __str__(self):
         return f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -374,7 +375,7 @@ class Model:
         if self.get_type() == ModelType.MA and self.markovian_states is not None:
             self.markovian_states.append(markovian_state.id)
         else:
-            print("This model is not a MA")
+            raise RuntimeError("This model is not a MA")
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
