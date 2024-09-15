@@ -284,7 +284,7 @@ class Model:
     # In pomdps we have a list of observations (hashed by state id)
     observations: dict[int, Observation] | None
     # In ma's we keep track of markovian states
-    markovian_states: list[int] | None
+    markovian_states: list[State] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -373,7 +373,7 @@ class Model:
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
         if self.get_type() == ModelType.MA and self.markovian_states is not None:
-            self.markovian_states.append(markovian_state.id)
+            self.markovian_states.append(markovian_state)
         else:
             raise RuntimeError("This model is not a MA")
 

@@ -247,8 +247,9 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # we create the list of markovian states
-        markovian_states_list = model.markovian_states
+        # we create the list of markovian state ids
+        assert model.markovian_states is not None
+        markovian_states_list = [state.id for state in model.markovian_states]
         if isinstance(markovian_states_list, list):
             markovian_states_bitvector = stormpy.storage.BitVector(
                 max(markovian_states_list) + 1,
