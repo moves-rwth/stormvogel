@@ -15,7 +15,7 @@ def show(
     result: stormvogel.result.Result | None = None,
     name: str = "model",
     layout: stormvogel.layout.Layout | None = None,
-    show_editor: bool = False,
+    show_editor: bool = True,
     separate_labels: list[str] = [],
     debug_output: widgets.Output = widgets.Output(),
 ) -> stormvogel.visualization.Visualization:
