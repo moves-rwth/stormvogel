@@ -208,10 +208,11 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
-        components.observability_classes = (
-            list([obs.get_observation() for obs in model.observations.values()])
-            if model.observations is not None
-            else []
+        components.observability_classes = list(
+            [
+                state.get_observation("obs").get_observation()
+                for state in model.states.values()
+            ]
         )
         components.choice_labeling = choice_labeling
         pomdp = stormpy.storage.SparsePomdp(components)
@@ -487,10 +488,7 @@ def stormpy_to_stormvogel(
 
         # we add the observations:
         for state in model.states.values():
-            observation = stormvogel.model.Observation(
-                sparsepomdp.get_observation(state.id)
-            )
-            state.set_observation(observation)
+            state.new_observation("obs", sparsepomdp.get_observation(state.id))
 
         return model
 
