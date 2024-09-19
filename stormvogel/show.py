@@ -14,7 +14,7 @@ def show(
     model: stormvogel.model.Model,
     result: stormvogel.result.Result | None = None,
     name: str = "model",
-    layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+    layout: stormvogel.layout.Layout | None = None,
     show_editor: bool = False,
     separate_labels: list[str] = [],
     debug_output: widgets.Output = widgets.Output(),
@@ -30,6 +30,8 @@ def show(
 
     Returns: Visualization object.
     """
+    if layout is None:
+        layout = stormvogel.layout.DEFAULT()
     if not show_editor or not stormvogel.communication_server.enable_server:
         stormvogel.communication_server.internal_enable_server = False
     else:

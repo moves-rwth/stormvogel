@@ -16,7 +16,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self,
         layout: stormvogel.layout.Layout,
         visualization: stormvogel.visualization.Visualization | None = None,
-        output: widgets.Output = widgets.Output(),
+        output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:

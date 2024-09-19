@@ -68,7 +68,7 @@ class DictEditor(stormvogel.displayable.Displayable):
         schema: dict,
         update_dict: dict,
         on_update: Callable,
-        output: widgets.Output = widgets.Output(),
+        output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:

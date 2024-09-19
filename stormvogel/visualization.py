@@ -39,7 +39,7 @@ class Visualization(stormvogel.displayable.Displayable):
         result: stormvogel.result.Result | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         separate_labels: list[str] = [],
-        output: widgets.Output = widgets.Output(),
+        output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
@@ -66,7 +66,6 @@ class Visualization(stormvogel.displayable.Displayable):
         self.result: stormvogel.result.Result = result
         self.layout: stormvogel.layout.Layout = layout
         self.separate_labels = list(map(und, separate_labels))
-        self.output: widgets.Output = output
         self.nt: stormvogel.visjs.Network | None = None
 
     def show(self) -> None:

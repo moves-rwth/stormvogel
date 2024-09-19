@@ -129,7 +129,7 @@ class CommunicationServer:
             max_tries -= 1
             logging.debug(f"Waiting for request result: {identifier}")
             logging.debug(f"Current awaiting[identifier]: {awaiting[identifier]}")
-            # ipd.display(ipd.HTML(html))
+            ipd.display(ipd.HTML(html))
         # Handle case of failure
 
         result = awaiting[identifier]
@@ -170,7 +170,7 @@ def __request_warning_message():
 Stormvogel is still usable without this, but you will not be able to save node positions in a layout json file.
 1) Restart the kernel and re-run.
 2) Is the port {localhost_address}:{server_port} (from the machine where jupyterlab runs) available?
-If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {server_port}:{localhost_address}{server_port} YOUR_SSH_CONFIG_NAME'.
+If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {server_port}:{localhost_address}:{server_port} YOUR_SSH_CONFIG_NAME'.
 3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
 If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel and ignore this message.
 Please contact the stormvogel developpers if you keep running into issues."""

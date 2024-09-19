@@ -22,7 +22,7 @@ class Network(stormvogel.displayable.Displayable):
         name: str | None = None,
         width: int = 800,
         height: int = 600,
-        output: widgets.Output = widgets.Output(),
+        output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
@@ -189,7 +189,10 @@ class Network(stormvogel.displayable.Displayable):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
         js = f"""document.getElementById('{self.name}').contentWindow.network.setOptions({options});"""
-        ipd.display(ipd.Javascript(js))
+        with self.spam:
+            ipd.display(ipd.Javascript(js))
+        self.spam_side_effects()
+
         with self.debug_output:
             logging.info("The previous javascript error is no problem in most cases.")
         with self.debug_output:
