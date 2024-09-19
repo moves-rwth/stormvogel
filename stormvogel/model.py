@@ -44,6 +44,11 @@ class Observation:
         """returns name"""
         return self.name
 
+    def __eq__(self, other):
+        if isinstance(other, Observation):
+            return self.observation == other.observation
+        return False
+
 
 @dataclass()
 class State:
@@ -129,8 +134,8 @@ class State:
                 other.labels.sort()
                 if self.observations is not None and other.observations is not None:
                     observations_equal = (
-                        list(self.observations.values())[0].get_observation()
-                        == list(other.observations.values())[0].get_observation()
+                        list(self.observations.values())[0]
+                        == list(other.observations.values())[0]
                     )
                 else:
                     observations_equal = True
@@ -376,14 +381,6 @@ class Model:
             if self.transitions.get(state[0]) is None:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
-
-    def add_observation(self, s: State, observation: Observation):
-        """sets an observation for a state"""
-        if isinstance(observation, Observation):
-            if self.supports_observations():
-                self.states[s.id].observation = observation
-            else:
-                raise RuntimeError("Only POMDP models support observations")
 
     def get_observations(self, state: State, name: str) -> Observation:
         """Gets the observation by a given name and state."""
