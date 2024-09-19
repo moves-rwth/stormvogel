@@ -49,6 +49,9 @@ class Observation:
             return self.observation == other.observation
         return False
 
+    def __str__(self):
+        return f"Observation {self.name}: {self.observation}"
+
 
 @dataclass()
 class State:
@@ -125,7 +128,10 @@ class State:
             )
 
     def __str__(self):
-        return f"State {self.id} with labels {self.labels} and features {self.features}"
+        res = f"State {self.id} with labels {self.labels} and features {self.features}"
+        if self.model.supports_observations() and self.observations is not None:
+            res += f" and observation {list(self.observations.values())[0].get_observation()}"
+        return res
 
     def __eq__(self, other):
         if isinstance(other, State):
@@ -164,7 +170,7 @@ class Action:
     labels: frozenset[str]
 
     def __str__(self):
-        return f"Action {self.name}"
+        return f"Action {self.name} with labels {self.labels}"
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -569,9 +575,16 @@ class Model:
             f"{transition}" for (_id, transition) in self.transitions.items()
         ]
 
-        # TODO extend for other types of models
-        # if self.type == ModelType.CTMC:
-        #    res += []
+        if self.supports_rates() and self.exit_rates is not None:
+            res += ["", "Exit rates:"] + [f"{self.exit_rates}"]
+
+        if (
+            self.supports_actions()
+            and self.supports_rates()
+            and self.markovian_states is not None
+        ):
+            markovian_states = [state.id for state in self.markovian_states]
+            res += ["", "Markovian states:"] + [f"{markovian_states}"]
 
         return "\n".join(res)
 
