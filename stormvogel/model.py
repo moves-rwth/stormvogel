@@ -68,11 +68,7 @@ class State:
         self.features = features
         self.id = id
         self.model = model
-
-        if not self.model.get_type() == ModelType.POMDP:
-            self.observations = None
-        else:
-            self.observation = Observation(0)
+        self.observation = None
 
         # TODO how to handle state names?
 
@@ -83,7 +79,7 @@ class State:
 
     def new_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
-        if self.model.get_type() == ModelType.POMDP and self.observation is not None:
+        if self.model.get_type() == ModelType.POMDP:
             self.observation = Observation(observation)
             return self.observation
         else:
@@ -91,8 +87,13 @@ class State:
 
     def get_observation(self) -> Observation:
         """gets the observation"""
-        if self.model.supports_observations() and self.observation is not None:
-            return self.observation
+        if self.model.supports_observations():
+            if self.observation is not None:
+                return self.observation
+            else:
+                raise RuntimeError(
+                    "This state does not have an observation yet. Add one with the new_observation function."
+                )
         else:
             raise RuntimeError(
                 "The model this state belongs to does not support observations"
@@ -293,9 +294,8 @@ class Model:
         states: The states of the model. The keys are the state's ids.
         actions: The actions of the model, if this is a model that supports actions.
         rewards: The rewardsmodels of this model.
-        rates: The rates of the model, if this model supports rates.
+        exit_rates: The exit rates of the model, optional if this model supports rates.
         transitions: The transitions of this model.
-        observations: The observations of the states of this model (in case of pomdps).
         markovian_states: list of markovian states in the case of a ma.
     """
 
@@ -306,7 +306,7 @@ class Model:
     transitions: dict[int, Transition]
     actions: dict[str, Action] | None
     rewards: list[RewardModel]
-    # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
+    # In ctmcs we work with rate transitions but additionally we can optionally store exit rates (hashed by id of the state)
     exit_rates: dict[int, Number] | None
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
