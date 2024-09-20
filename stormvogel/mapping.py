@@ -28,7 +28,7 @@ def stormvogel_to_stormpy(
             row_groups=0,
         )
         row_index = 0
-        for transition in model.transitions.items():
+        for transition in sorted(model.transitions.items()):
             if row_grouping:
                 builder.new_row_group(row_index)
             for action in transition[1].transition.items():
