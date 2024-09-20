@@ -26,23 +26,14 @@ class Observation:
     """Represents an observation of a state (for pomdps)
 
     Args:
-        obseration: the observation as an integer
+        observation: the observation as an integer
     """
 
-    name: str
     observation: int
-
-    def set_observation(self, observation: int):
-        """sets the observation"""
-        self.observation = observation
 
     def get_observation(self) -> int:
         """returns the observation"""
         return self.observation
-
-    def get_name(self) -> str:
-        """returns name"""
-        return self.name
 
     def __eq__(self, other):
         if isinstance(other, Observation):
@@ -50,7 +41,7 @@ class Observation:
         return False
 
     def __str__(self):
-        return f"Observation {self.name}: {self.observation}"
+        return f"Observation: {self.observation}"
 
 
 @dataclass()
@@ -70,7 +61,7 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
-    observations: dict[str, Observation] | None
+    observation: Observation | None
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
@@ -81,7 +72,7 @@ class State:
         if not self.model.get_type() == ModelType.POMDP:
             self.observations = None
         else:
-            self.observations = {}
+            self.observation = Observation(0)
 
         # TODO how to handle state names?
 
@@ -90,18 +81,18 @@ class State:
         if label not in self.labels:
             self.labels.append(label)
 
-    def new_observation(self, name: str, observation: int) -> Observation:
+    def new_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
-        if self.model.get_type() == ModelType.POMDP and self.observations is not None:
-            self.observations[name] = Observation(name, observation)
-            return self.observations[name]
+        if self.model.get_type() == ModelType.POMDP and self.observation is not None:
+            self.observation = Observation(observation)
+            return self.observation
         else:
             raise RuntimeError("The model this state belongs to is not a pomdp")
 
-    def get_observation(self, name) -> Observation:
-        """gets the observation by name"""
-        if self.model.supports_observations() and self.observations is not None:
-            return self.observations[name]
+    def get_observation(self) -> Observation:
+        """gets the observation"""
+        if self.model.supports_observations() and self.observation is not None:
+            return self.observation
         else:
             raise RuntimeError(
                 "The model this state belongs to does not support observations"
@@ -129,8 +120,8 @@ class State:
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
-        if self.model.supports_observations() and self.observations is not None:
-            res += f" and observation {list(self.observations.values())[0].get_observation()}"
+        if self.model.supports_observations() and self.observation is not None:
+            res += f" and observation {self.observation.get_observation()}"
         return res
 
     def __eq__(self, other):
@@ -138,11 +129,11 @@ class State:
             if self.id == other.id:
                 self.labels.sort()
                 other.labels.sort()
-                if self.observations is not None and other.observations is not None:
-                    observations_equal = (
-                        list(self.observations.values())[0]
-                        == list(other.observations.values())[0]
-                    )
+                if self.model.supports_observations():
+                    if self.observation is not None and other.observation is not None:
+                        observations_equal = self.observation == other.observation
+                    else:
+                        observations_equal = True
                 else:
                     observations_equal = True
                 return self.labels == other.labels and observations_equal
@@ -388,10 +379,10 @@ class Model:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
 
-    def get_observations(self, state: State, name: str) -> Observation:
-        """Gets the observation by a given name and state."""
-        if self.supports_observations and state.observations is not None:
-            return self.states[state.id].get_observation(name)
+    def get_observation(self, state: State) -> Observation:
+        """Gets the observation for a given state."""
+        if self.supports_observations and state.observation is not None:
+            return self.states[state.id].get_observation()
         else:
             raise RuntimeError("Only POMDP models support observations")
 

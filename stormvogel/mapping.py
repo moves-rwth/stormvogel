@@ -210,7 +210,7 @@ def stormvogel_to_stormpy(
         )
         components.observability_classes = list(
             [
-                state.get_observation("obs").get_observation()
+                state.get_observation().get_observation()
                 for state in model.states.values()
             ]
         )
@@ -488,7 +488,7 @@ def stormpy_to_stormvogel(
 
         # we add the observations:
         for state in model.states.values():
-            state.new_observation("obs", sparsepomdp.get_observation(state.id))
+            state.new_observation(sparsepomdp.get_observation(state.id))
 
         return model
 
