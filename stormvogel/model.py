@@ -19,7 +19,29 @@ class ModelType(Enum):
     CTMC = 3
     POMDP = 4
     MA = 5
-    # not implemented yet
+
+
+@dataclass
+class Observation:
+    """Represents an observation of a state (for pomdps)
+
+    Args:
+        observation: the observation as an integer
+    """
+
+    observation: int
+
+    def get_observation(self) -> int:
+        """returns the observation"""
+        return self.observation
+
+    def __eq__(self, other):
+        if isinstance(other, Observation):
+            return self.observation == other.observation
+        return False
+
+    def __str__(self):
+        return f"Observation: {self.observation}"
 
 
 @dataclass()
@@ -39,7 +61,7 @@ class State:
     features: dict[str, int]
     id: int
     model: "Model"
-    observation: int | None
+    observation: Observation | None
 
     def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
         self.labels = labels
@@ -48,7 +70,9 @@ class State:
         self.model = model
 
         if not self.model.get_type() == ModelType.POMDP:
-            self.observation = None
+            self.observations = None
+        else:
+            self.observation = Observation(0)
 
         # TODO how to handle state names?
 
@@ -57,12 +81,22 @@ class State:
         if label not in self.labels:
             self.labels.append(label)
 
-    def set_observation(self, observation: int):
+    def new_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
-        if self.model.get_type() == ModelType.POMDP:
-            self.model.add_observation(self, observation)
+        if self.model.get_type() == ModelType.POMDP and self.observation is not None:
+            self.observation = Observation(observation)
+            return self.observation
         else:
-            print("The model this state belongs to is not a pomdp")
+            raise RuntimeError("The model this state belongs to is not a pomdp")
+
+    def get_observation(self) -> Observation:
+        """gets the observation"""
+        if self.model.supports_observations() and self.observation is not None:
+            return self.observation
+        else:
+            raise RuntimeError(
+                "The model this state belongs to does not support observations"
+            )
 
     def set_transitions(self, transitions: "Transition | TransitionShorthand"):
         """Set transitions from this state."""
@@ -80,18 +114,29 @@ class State:
                 action_list.append(action)
             return action_list
         else:
-            print("The model this state belongs to does not support actions")
-            return []
+            raise RuntimeError(
+                "The model this state belongs to does not support actions"
+            )
 
     def __str__(self):
-        return f"State {self.id} with labels {self.labels} and features {self.features}"
+        res = f"State {self.id} with labels {self.labels} and features {self.features}"
+        if self.model.supports_observations() and self.observation is not None:
+            res += f" and observation {self.observation.get_observation()}"
+        return res
 
     def __eq__(self, other):
         if isinstance(other, State):
             if self.id == other.id:
                 self.labels.sort()
                 other.labels.sort()
-                return self.labels == other.labels
+                if self.model.supports_observations():
+                    if self.observation is not None and other.observation is not None:
+                        observations_equal = self.observation == other.observation
+                    else:
+                        observations_equal = True
+                else:
+                    observations_equal = True
+                return self.labels == other.labels and observations_equal
             return False
         return False
 
@@ -116,7 +161,7 @@ class Action:
     labels: frozenset[str]
 
     def __str__(self):
-        return f"Action {self.name}"
+        return f"Action {self.name} with labels {self.labels}"
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -263,10 +308,8 @@ class Model:
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates
     exit_rates: dict[int, Number] | None
-    # In pomdps we have a list of observations (hashed by state id)
-    observations: dict[int, int] | None
     # In ma's we keep track of markovian states
-    markovian_states: list[int] | None
+    markovian_states: list[State] | None
 
     def __init__(self, name: str | None, model_type: ModelType):
         self.name = name
@@ -336,27 +379,19 @@ class Model:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
 
-    def add_observation(self, s: State, observation: int):
-        """sets an observation for a state"""
-        if self.supports_observations() and self.observations is not None:
-            self.observations[s.id] = observation
-            self.states[s.id].observation = observation
-        else:
-            print("This model is not a pomdp")
-
-    def get_observation(self, state: State) -> int:
-        """Gets the observation of a state."""
-        if self.supports_observations and self.observations is not None:
-            return self.observations[state.id]
+    def get_observation(self, state: State) -> Observation:
+        """Gets the observation for a given state."""
+        if self.supports_observations and state.observation is not None:
+            return self.states[state.id].get_observation()
         else:
             raise RuntimeError("Only POMDP models support observations")
 
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
         if self.get_type() == ModelType.MA and self.markovian_states is not None:
-            self.markovian_states.append(markovian_state.id)
+            self.markovian_states.append(markovian_state)
         else:
-            print("This model is not a MA")
+            raise RuntimeError("This model is not a MA")
 
     def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Set the transition from a state."""
@@ -531,9 +566,16 @@ class Model:
             f"{transition}" for (_id, transition) in self.transitions.items()
         ]
 
-        # TODO extend for other types of models
-        # if self.type == ModelType.CTMC:
-        #    res += []
+        if self.supports_rates() and self.exit_rates is not None:
+            res += ["", "Exit rates:"] + [f"{self.exit_rates}"]
+
+        if (
+            self.supports_actions()
+            and self.supports_rates()
+            and self.markovian_states is not None
+        ):
+            markovian_states = [state.id for state in self.markovian_states]
+            res += ["", "Markovian states:"] + [f"{markovian_states}"]
 
         return "\n".join(res)
 
@@ -545,7 +587,6 @@ class Model:
                 and self.transitions == other.transitions
                 and self.rewards == other.rewards
                 and self.exit_rates == other.exit_rates
-                and self.observations == other.observations
                 and self.markovian_states == other.markovian_states
             )
         return False

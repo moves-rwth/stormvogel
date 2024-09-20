@@ -19,7 +19,11 @@ def create_simple_ma():
     )
 
     # We add the rates and markovian states
-    ma.markovian_states = [0, 3, 4]
+    ma.markovian_states = [
+        ma.get_state_by_id(0),
+        ma.get_state_by_id(3),
+        ma.get_state_by_id(4),
+    ]
     ma.exit_rates = {i: 0 for i in range(6)}
 
     # we add self loops to all states with no outgoing transitions

@@ -68,7 +68,9 @@ def create_monty_hall_pomdp():
     pomdp.add_self_loops()
 
     # we add the observations TODO: let it make sense
-    pomdp.observations = {state.id: 0 for state in pomdp.states.values()}
+    pomdp.observations = {
+        state.id: state.new_observation(0) for state in pomdp.states.values()
+    }
 
     return pomdp
 

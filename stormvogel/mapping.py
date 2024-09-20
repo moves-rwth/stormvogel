@@ -208,8 +208,11 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
-        components.observability_classes = (
-            list(model.observations.values()) if model.observations is not None else []
+        components.observability_classes = list(
+            [
+                state.get_observation().get_observation()
+                for state in model.states.values()
+            ]
         )
         components.choice_labeling = choice_labeling
         pomdp = stormpy.storage.SparsePomdp(components)
@@ -245,8 +248,9 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
-        # we create the list of markovian states
-        markovian_states_list = model.markovian_states
+        # we create the list of markovian state ids
+        assert model.markovian_states is not None
+        markovian_states_list = [state.id for state in model.markovian_states]
         if isinstance(markovian_states_list, list):
             markovian_states_bitvector = stormpy.storage.BitVector(
                 max(markovian_states_list) + 1,
@@ -284,9 +288,11 @@ def stormvogel_to_stormpy(
         elif model.get_type() == stormvogel.model.ModelType.MA:
             return map_ma(model)
         else:
-            print("This type of model is not yet supported for this action")
+            raise RuntimeError(
+                "This type of model is not yet supported for this action"
+            )
     else:
-        print(
+        raise RuntimeError(
             "This model has states with no outgoing transitions.\nUse the add_self_loops() function to add self loops to all states with no outgoing transition."
         )
 
@@ -482,7 +488,7 @@ def stormpy_to_stormvogel(
 
         # we add the observations:
         for state in model.states.values():
-            state.set_observation(sparsepomdp.get_observation(state.id))
+            state.new_observation(sparsepomdp.get_observation(state.id))
 
         return model
 
@@ -548,8 +554,7 @@ def stormpy_to_stormvogel(
     elif sparsemodel.model_type.name == "MA":
         return map_ma(sparsemodel)
     else:
-        print("This type of model is not yet supported for this action")
-        return
+        raise RuntimeError("This type of model is not yet supported for this action")
 
 
 if __name__ == "__main__":
