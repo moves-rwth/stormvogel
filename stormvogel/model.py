@@ -68,11 +68,7 @@ class State:
         self.features = features
         self.id = id
         self.model = model
-
-        if not self.model.get_type() == ModelType.POMDP:
-            self.observations = None
-        else:
-            self.observation = Observation(0)
+        self.observation = None
 
         # TODO how to handle state names?
 
@@ -83,7 +79,7 @@ class State:
 
     def new_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
-        if self.model.get_type() == ModelType.POMDP and self.observation is not None:
+        if self.model.get_type() == ModelType.POMDP:
             self.observation = Observation(observation)
             return self.observation
         else:
@@ -91,8 +87,13 @@ class State:
 
     def get_observation(self) -> Observation:
         """gets the observation"""
-        if self.model.supports_observations() and self.observation is not None:
-            return self.observation
+        if self.model.supports_observations():
+            if self.observation is not None:
+                return self.observation
+            else:
+                raise RuntimeError(
+                    "This state does not have an observation yet. Add one with the new_observation function."
+                )
         else:
             raise RuntimeError(
                 "The model this state belongs to does not support observations"

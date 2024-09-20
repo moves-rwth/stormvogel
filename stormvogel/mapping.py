@@ -208,12 +208,16 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
-        components.observability_classes = list(
-            [
-                state.get_observation().get_observation()
-                for state in model.states.values()
-            ]
-        )
+        observations = []
+        for state in model.states.values():
+            if state.get_observation() is not None:
+                observations.append(state.get_observation().get_observation())
+            else:
+                raise RuntimeError(
+                    f"State {state.id} does not have an observation. Please assign an observation to each state."
+                )
+
+        components.observability_classes = observations
         components.choice_labeling = choice_labeling
         pomdp = stormpy.storage.SparsePomdp(components)
 
