@@ -379,13 +379,6 @@ class Model:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
 
-    def get_observation(self, state: State) -> Observation:
-        """Gets the observation for a given state."""
-        if self.supports_observations and state.observation is not None:
-            return self.states[state.id].get_observation()
-        else:
-            raise RuntimeError("Only POMDP models support observations")
-
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
         if self.get_type() == ModelType.MA and self.markovian_states is not None:
@@ -427,6 +420,40 @@ class Model:
             action = Action(name, frozenset())
         self.actions[name] = action
         return action
+
+    def delete_state(self, state: State):
+        """properly deletes a state and reasignes ids"""
+        if state in self.states.values():
+            self.states.pop(state.id)
+            self.states = {
+                new_id: value
+                for new_id, (old_id, value) in enumerate(self.states.items())
+            }
+            for other_state in self.states.values():
+                if other_state.id > state.id:
+                    other_state.id -= 1
+
+            self.transitions.pop(state.id)
+            self.transitions = {
+                new_id: value
+                for new_id, (old_id, value) in enumerate(self.transitions.items())
+            }
+            for transition in self.transitions.values():
+                for branch in transition.transition.values():
+                    for pair in branch.branch:
+                        if pair[1].id == state.id:
+                            branch.branch.remove(pair)
+
+            if self.supports_rates and self.exit_rates is not None:
+                self.exit_rates.pop(state.id)
+                self.exit_rates = {
+                    new_id: value
+                    for new_id, (old_id, value) in enumerate(self.exit_rates.items())
+                }
+
+            if self.get_type() == ModelType.MA and self.markovian_states is not None:
+                if state in self.markovian_states:
+                    self.markovian_states.remove(state)
 
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
@@ -518,6 +545,13 @@ class Model:
         reward_model = RewardModel(name, {})
         self.rewards.append(reward_model)
         return reward_model
+
+    def get_observation(self, state: State) -> Observation:
+        """Gets the observation for a given state."""
+        if self.supports_observations and state.observation is not None:
+            return self.states[state.id].get_observation()
+        else:
+            raise RuntimeError("Only POMDP models support observations")
 
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
