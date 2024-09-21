@@ -1,5 +1,8 @@
 """Contains the code responsible for model visualization."""
 
+# Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
+# If you remove a with output: statement, everything might just break, be prepared.
+
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -42,6 +45,7 @@ class Visualization(stormvogel.displayable.Displayable):
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
+        do_init_server: bool = True,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -65,8 +69,22 @@ class Visualization(stormvogel.displayable.Displayable):
         self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result = result
         self.layout: stormvogel.layout.Layout = layout
-        self.separate_labels = list(map(und, separate_labels))
-        self.nt: stormvogel.visjs.Network | None = None
+        self.separate_labels: set[str] = set(map(und, separate_labels)).union(
+            self.layout.layout["groups"].keys()
+        )
+        self.do_init_server: bool = do_init_server
+        self.__create_nt()
+
+    def __create_nt(self) -> None:
+        self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
+            name=self.name,
+            width=self.layout.layout["misc"]["width"],
+            height=self.layout.layout["misc"]["height"],
+            output=self.output,
+            debug_output=self.debug_output,
+            do_display=False,
+            do_init_server=self.do_init_server,
+        )
 
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
@@ -74,14 +92,7 @@ class Visualization(stormvogel.displayable.Displayable):
             logging.info("Called Visualization.show()")
         with self.output:
             ipd.clear_output()
-        self.nt = stormvogel.visjs.Network(
-            name=self.name,
-            width=self.layout.layout["misc"]["width"],
-            height=self.layout.layout["misc"]["height"],
-            output=self.output,
-            debug_output=self.debug_output,
-            do_display=False,
-        )
+        self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
             self.nt.enable_exploration_mode(self.model.get_initial_state().id)
         self.layout.set_groups(self.separate_labels)
@@ -89,7 +100,8 @@ class Visualization(stormvogel.displayable.Displayable):
         self.__add_transitions()
         self.__update_physics_enabled()
         self.nt.set_options(str(self.layout))
-        self.nt.show()
+        if self.nt is not None:
+            self.nt.show()
         self.maybe_display_output()
 
     def update(self) -> None:
@@ -131,7 +143,7 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         action_id = self.ACTION_ID_OFFSET
-        # scheduler = self.result.scheduler if self.result is not None else None
+        scheduler = self.result.scheduler if self.result is not None else None
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -144,11 +156,19 @@ class Visualization(stormvogel.displayable.Displayable):
                             label=self.__format_probability(prob),
                         )
                 else:
+                    # Put the action in the group scheduled_actions if appropriate.
+                    group = "actions"
+                    if scheduler is not None:
+                        choice = scheduler.get_choice_of_state(
+                            state=self.model.get_state_by_id(state_id)
+                        )
+                        if choice == action:
+                            group = "scheduled_actions"
                     # Add the action's node
                     self.nt.add_node(
                         id=action_id,
                         label=action.name,
-                        group="actions",
+                        group=group,
                         position_dict=self.layout.layout["positions"],
                     )
                     # Add transition from this state TO the action.

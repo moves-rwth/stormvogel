@@ -17,9 +17,6 @@ import socket
 enable_server: bool = True
 """Disable if you don't want to use an internal communication server. Some features might break."""
 
-internal_enable_server: bool = enable_server
-
-
 localhost_address: str = "127.0.0.1"
 
 min_port = 8889
@@ -105,8 +102,8 @@ class CommunicationServer:
         Also waits for server to boot up if it is not finished yet.
         Should be thread safe. (I hope).
         WHEN SENDING JAVASCRIPT, DO NOT FORGET EXTRA QUOTES AROUND STRINGS."""
-        global internal_enable_server
-        if not internal_enable_server:
+        global server
+        if server is None:
             raise TimeoutError("There is no server running.")
 
         global awaiting, server_running
@@ -123,10 +120,10 @@ class CommunicationServer:
         awaiting[identifier] = AWAITING
         logging.info(f"Request sent for: {identifier}")
         # Wait until result is received.
-        max_tries = 50
-        while max_tries > 0 and awaiting[identifier] == AWAITING:
+        MAX_TRIES = 10
+        while MAX_TRIES > 0 and awaiting[identifier] == AWAITING:
             sleep(0.2)
-            max_tries -= 1
+            MAX_TRIES -= 1
             logging.debug(f"Waiting for request result: {identifier}")
             logging.debug(f"Current awaiting[identifier]: {awaiting[identifier]}")
             ipd.display(ipd.HTML(html))
@@ -214,8 +211,8 @@ def initialize_server() -> CommunicationServer | None:
     """If server is None, then create a new server and store it in global variable server.
     Use the port stored in global variable server_port.
     """
-    global server, server_port, internal_enable_server
-    if not internal_enable_server:
+    global server, server_port, enable_server
+    if not enable_server:
         return None
 
     output = widgets.Output()

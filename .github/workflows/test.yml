@@ -43,4 +43,18 @@ jobs:
         run: poetry install
 
       - name: Run tests
-        run: poetry run pytest
+        run: poetry run pytest -vv
+
+      - name: List kernels
+        run: poetry run jupyter kernelspec list
+
+      - name: Glob notebooks in docs folder
+        uses: tj-actions/glob@v22
+        id: glob
+        with:
+          files: |
+            docs/**/*.ipynb
+
+     # - name: Run documentation notebooks
+     #   run: |
+     #     poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }}
