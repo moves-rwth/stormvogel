@@ -422,8 +422,9 @@ class Model:
         return action
 
     def delete_state(self, state: State):
-        """properly deletes a state and reasignes ids"""
+        """properly deletes a state and reasigns ids"""
         if state in self.states.values():
+            # We remove the state and reasign ids
             self.states.pop(state.id)
             self.states = {
                 new_id: value
@@ -433,6 +434,7 @@ class Model:
                 if other_state.id > state.id:
                     other_state.id -= 1
 
+            # we remove the state from the transitions and reasign the ids
             self.transitions.pop(state.id)
             self.transitions = {
                 new_id: value
@@ -444,6 +446,7 @@ class Model:
                         if pair[1].id == state.id:
                             branch.branch.remove(pair)
 
+            # we remove the exit rates from the state when applicable
             if self.supports_rates and self.exit_rates is not None:
                 self.exit_rates.pop(state.id)
                 self.exit_rates = {
@@ -451,6 +454,7 @@ class Model:
                     for new_id, (old_id, value) in enumerate(self.exit_rates.items())
                 }
 
+            # we remove the state from the markovian state list when applicable
             if self.get_type() == ModelType.MA and self.markovian_states is not None:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
