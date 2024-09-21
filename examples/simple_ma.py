@@ -29,6 +29,9 @@ def create_simple_ma():
     # we add self loops to all states with no outgoing transitions
     ma.add_self_loops()
 
+    # we delete a state
+    ma.delete_state(ma.get_state_by_id(3))
+
     return ma
 
 
