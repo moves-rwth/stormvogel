@@ -13,10 +13,11 @@ def model_checking(
     This function just performs this procedure automatically.
     """
 
-    # TODO parse properties
+    # We can choose between provoding properties as a string or as a stormpy.Property object
+    if isinstance(prop, str):
+        prop = stormpy.parse_properties_without_context(prop)  # TODO make this work
 
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
-    # parsed_prop = stormpy.parse_properties_without_context(prop)
     stormpy_result = stormpy.model_checking(
         stormpy_model, prop, extract_scheduler=scheduler
     )
@@ -40,3 +41,6 @@ if __name__ == "__main__":
     assert stormvogel_model is not None
     stormvogel_results = model_checking(stormvogel_model, properties[0])
     print(stormvogel_results)
+
+    # stormvogel_results = model_checking(stormvogel_model, formula_str)
+    # print(stormvogel_results)
