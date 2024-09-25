@@ -53,24 +53,47 @@ class State:
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
-        observation: the observation of this state in case the model is a pomdp
+        observation: the observation of this state in case the model is a pomdp.
+        name: the name of this state.
     """
 
-    # name: str | None
     labels: list[str]
     features: dict[str, int]
     id: int
     model: "Model"
     observation: Observation | None
+    name: str
 
-    def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
+    def __init__(
+        self,
+        labels: list[str],
+        features: dict[str, int],
+        id: int,
+        model,
+        name: str | None = None,
+    ):
+        self.model = model
+
+        if id in self.model.states.keys():
+            raise RuntimeError(
+                "There is already a state with this id. Make sure the id is unique."
+            )
+
+        names = [state.name for state in self.model.states.values()]
+        if name in names:
+            raise RuntimeError(
+                "There is already a state with this name. Make sure the name is unique."
+            )
+
         self.labels = labels
         self.features = features
         self.id = id
-        self.model = model
         self.observation = None
 
-        # TODO how to handle state names?
+        if name is None:
+            self.name = str(id)
+        else:
+            self.name = name
 
     def add_label(self, label: str):
         """adds a new label to the state"""
@@ -516,6 +539,16 @@ class Model:
         if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
         return self.states[state_id]
+
+    def get_state_by_name(self, state_name) -> State | None:
+        """Get a state by its name."""
+        names = [state.name for state in self.states.values()]
+        if state_name not in names:
+            raise RuntimeError("Requested a non-existing state")
+
+        for state in self.states.values():
+            if state.name == state_name:
+                return state
 
     def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""

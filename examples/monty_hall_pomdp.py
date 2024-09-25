@@ -71,9 +71,6 @@ def create_monty_hall_pomdp():
     for state in pomdp.states.values():
         state.new_observation(0)
 
-    # delete a state:
-    # pomdp.delete_state(pomdp.get_state_by_id(1))
-
     return pomdp
 
 
