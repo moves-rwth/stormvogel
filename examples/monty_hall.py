@@ -12,7 +12,7 @@ def create_monty_hall_mdp():
     )
 
     # we choose a door in each case
-    for s in mdp.get_states_with("carchosen"):
+    for s in mdp.get_states_with_label("carchosen"):
         s.set_transitions(
             [
                 (
@@ -24,7 +24,7 @@ def create_monty_hall_mdp():
         )
 
     # the other goat is revealed
-    for s in mdp.get_states_with("open"):
+    for s in mdp.get_states_with_label("open"):
         car_pos = s.features["car_pos"]
         chosen_pos = s.features["chosen_pos"]
         other_pos = {0, 1, 2} - {car_pos, chosen_pos}
@@ -39,7 +39,7 @@ def create_monty_hall_mdp():
         )
 
     # we must choose whether we want to switch
-    for s in mdp.get_states_with("goatrevealed"):
+    for s in mdp.get_states_with_label("goatrevealed"):
         car_pos = s.features["car_pos"]
         chosen_pos = s.features["chosen_pos"]
         reveal_pos = s.features["reveal_pos"]
