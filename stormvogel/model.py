@@ -390,6 +390,27 @@ class Model:
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
 
+    """
+    def is_well_defined(self) -> bool:
+        #Checks if the model is well-defined.
+
+        # We check if all sums of outgoing transition probabilities for all states equal 1:
+        if self.model.get_type() == ModelType.DTMC:
+            for state in self.states.values():
+                sum_prob = 0
+                if state.get_outgoing_transitions() is not None:
+                    for transition in state.get_outgoing_transitions():
+                        if isinstance(transition[0], float):
+                            sum_prob += transition[0]
+                    if sum_prob != 1:
+                        print(
+                            "Not all states have their outgoing transition probabilities sum to 1"
+                        )
+                        return False
+
+        return True
+    """
+
     def __free_state_id(self):
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
@@ -461,7 +482,7 @@ class Model:
             self.states.pop(state.id)
             self.states = {
                 new_id: value
-                for new_id, (old_id, value) in enumerate(self.states.items())
+                for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
             }
             for other_state in self.states.values():
                 if other_state.id > state.id:
@@ -471,7 +492,9 @@ class Model:
             self.transitions.pop(state.id)
             self.transitions = {
                 new_id: value
-                for new_id, (old_id, value) in enumerate(self.transitions.items())
+                for new_id, (old_id, value) in enumerate(
+                    sorted(self.transitions.items())
+                )
             }
             for transition in self.transitions.values():
                 for branch in transition.transition.values():
@@ -484,7 +507,9 @@ class Model:
                 self.exit_rates.pop(state.id)
                 self.exit_rates = {
                     new_id: value
-                    for new_id, (old_id, value) in enumerate(self.exit_rates.items())
+                    for new_id, (old_id, value) in enumerate(
+                        sorted(self.exit_rates.items())
+                    )
                 }
 
             # we remove the state from the markovian state list when applicable
