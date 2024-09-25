@@ -142,6 +142,16 @@ class State:
                 "The model this state belongs to does not support actions"
             )
 
+    def get_outgoing_transitions(self) -> list[tuple[Number, "State"]] | None:
+        """gets the outgoing transitions (only works if the model does not support actions)"""
+        if not self.model.supports_actions():
+            branch = list(self.model.transitions[self.id].transition.values())[0]
+            return branch.branch
+        else:
+            raise RuntimeError(
+                "This method does not yet work for models that support actions"
+            )
+
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
         if self.model.supports_observations() and self.observation is not None:
@@ -445,9 +455,9 @@ class Model:
         return action
 
     def delete_state(self, state: State):
-        """properly deletes a state and reasigns ids"""
+        """properly deletes a state and reassigns ids"""
         if state in self.states.values():
-            # We remove the state and reasign ids
+            # We remove the state and reassign ids
             self.states.pop(state.id)
             self.states = {
                 new_id: value
@@ -457,7 +467,7 @@ class Model:
                 if other_state.id > state.id:
                     other_state.id -= 1
 
-            # we remove the state from the transitions and reasign the ids
+            # we remove the state from the transitions and reassign the ids
             self.transitions.pop(state.id)
             self.transitions = {
                 new_id: value
@@ -481,6 +491,21 @@ class Model:
             if self.get_type() == ModelType.MA and self.markovian_states is not None:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
+
+    def delete_transitions_between_states(self, state0: State, state1: State):
+        """
+        Deletes the transition(s) present between the two given states.
+        Only works on models that don't support actions.
+        """
+        if not self.supports_actions():
+            for branch in self.transitions[state0.id].transition.values():
+                for tuple in branch.branch:
+                    if tuple[1] == state1:
+                        branch.branch.remove(tuple)
+        else:
+            raise RuntimeError(
+                "This method only works for models that don't support actions."
+            )
 
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
@@ -525,7 +550,7 @@ class Model:
 
         return state
 
-    def get_states_with(self, label: str) -> list[State]:
+    def get_states_with_label(self, label: str) -> list[State]:
         """Get all states with a given label."""
         # TODO: slow, not sure if that will become a problem though
         collected_states = []
