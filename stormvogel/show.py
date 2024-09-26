@@ -5,6 +5,7 @@ import stormvogel.layout
 import stormvogel.visualization
 import stormvogel.layout_editor
 import stormvogel.communication_server
+import stormvogel.result
 
 import ipywidgets as widgets
 import IPython.display as ipd
@@ -23,6 +24,7 @@ def show(
 
     Args:
         model (Model): The stormvogel model to be displayed.
+        result (Result): A result associatied with the model.
         name (str, optional): Internally used name. Will be randomly generated if left as None.
         result (Result, optional): Result corresponding to the model.
         layout (Layout, optional): Layout used for the visualization.

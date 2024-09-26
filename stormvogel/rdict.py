@@ -12,10 +12,10 @@ def rget(d: dict, path: list) -> Any:
     )  # Throws KeyError if key not present.
 
 
-def rset(d: dict, path: list, value: Any) -> None:
+def rset(d: dict, path: list, value: Any) -> dict:
     """Recursively set dict value."""
     if len(path) == 0:
-        return
+        return d
 
     def __rset(d: dict, path: list, value: Any):
         first = path.pop(0)
@@ -25,6 +25,7 @@ def rset(d: dict, path: list, value: Any) -> None:
             __rset(d[first], path, value)
 
     __rset(d, copy.deepcopy(path), value)
+    return d
 
 
 def merge_dict(dict1: dict, dict2: dict) -> dict:

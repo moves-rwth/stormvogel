@@ -68,6 +68,18 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels = list(map(und, separate_labels))
         self.nt: stormvogel.visjs.Network | None = None
 
+    def prepare(self) -> None:
+        """Prepare to show the network. Don't call this method yourself, use show instead."""
+        if self.nt is None:
+            return
+        if self.layout.layout["misc"]["explore"]:
+            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
+        self.layout.set_groups(self.separate_labels)
+        self.__add_states()
+        self.__add_transitions()
+        self.__update_physics_enabled()
+        self.nt.set_options(str(self.layout))
+
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
         with self.debug_output:
@@ -82,14 +94,9 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output=self.debug_output,
             do_display=False,
         )
-        if self.layout.layout["misc"]["explore"]:
-            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
-        self.layout.set_groups(self.separate_labels)
-        self.__add_states()
-        self.__add_transitions()
-        self.__update_physics_enabled()
-        self.nt.set_options(str(self.layout))
-        self.nt.show()
+        self.prepare()
+        if self.nt is not None:
+            self.nt.show()
         self.maybe_display_output()
 
     def update(self) -> None:
@@ -131,7 +138,7 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         action_id = self.ACTION_ID_OFFSET
-        # scheduler = self.result.scheduler if self.result is not None else None
+        scheduler = self.result.scheduler if self.result is not None else None
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -144,11 +151,19 @@ class Visualization(stormvogel.displayable.Displayable):
                             label=self.__format_probability(prob),
                         )
                 else:
+                    # Put the action in the group scheduled_actions if appropriate.
+                    group = "actions"
+                    if scheduler is not None:
+                        choice = scheduler.get_choice_of_state(
+                            state=self.model.get_state_by_id(state_id)
+                        )
+                        if choice == action:
+                            group = "scheduled_actions"
                     # Add the action's node
                     self.nt.add_node(
                         id=action_id,
                         label=action.name,
-                        group="actions",
+                        group=group,
                         position_dict=self.layout.layout["positions"],
                     )
                     # Add transition from this state TO the action.
