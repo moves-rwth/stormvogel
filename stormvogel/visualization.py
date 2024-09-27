@@ -42,6 +42,7 @@ class Visualization(stormvogel.displayable.Displayable):
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
+        do_init_server: bool = True,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
 
@@ -67,18 +68,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.layout: stormvogel.layout.Layout = layout
         self.separate_labels = list(map(und, separate_labels))
         self.nt: stormvogel.visjs.Network | None = None
-
-    def prepare(self) -> None:
-        """Prepare to show the network. Don't call this method yourself, use show instead."""
-        if self.nt is None:
-            return
-        if self.layout.layout["misc"]["explore"]:
-            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
-        self.layout.set_groups(self.separate_labels)
-        self.__add_states()
-        self.__add_transitions()
-        self.__update_physics_enabled()
-        self.nt.set_options(str(self.layout))
+        self.do_init_server = do_init_server
 
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
@@ -93,8 +83,15 @@ class Visualization(stormvogel.displayable.Displayable):
             output=self.output,
             debug_output=self.debug_output,
             do_display=False,
+            do_init_server=self.do_init_server,
         )
-        self.prepare()
+        if self.layout.layout["misc"]["explore"]:
+            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
+        self.layout.set_groups(self.separate_labels)
+        self.__add_states()
+        self.__add_transitions()
+        self.__update_physics_enabled()
+        self.nt.set_options(str(self.layout))
         if self.nt is not None:
             self.nt.show()
         self.maybe_display_output()
