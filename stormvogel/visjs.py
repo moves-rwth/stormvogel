@@ -25,6 +25,7 @@ class Network(stormvogel.displayable.Displayable):
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
+        do_init_server: bool = True,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -46,9 +47,10 @@ class Network(stormvogel.displayable.Displayable):
         self.edges_js: str = ""
         self.options_js: str = "{}"
         self.new_nodes_hidden: bool = False
-        self.server: stormvogel.communication_server.CommunicationServer = (
-            stormvogel.communication_server.initialize_server()
-        )
+        if do_init_server:
+            self.server: stormvogel.communication_server.CommunicationServer = (
+                stormvogel.communication_server.initialize_server()
+            )
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
     def enable_exploration_mode(self, initial_node_id: int):

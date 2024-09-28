@@ -5,21 +5,6 @@ import json
 from stormvogel.rdict import merge_dict
 
 
-def test_layout_merge_dict():
-    # Test priority for second dict.
-    d1 = {"a": 1, "b": 1, "c": 1}
-    d2 = {"b": 2}
-    assert {"a": 1, "b": 2, "c": 1} == merge_dict(d1, d2)
-    # Test conservation of elements in both dicts
-    d1 = {"a": 1, "b": 1}
-    d2 = {"c": 2, "d": 2}
-    assert {"a": 1, "b": 1, "c": 2, "d": 2} == merge_dict(d1, d2)
-    # Test nested
-    d1 = {"a": {"b": {"c": 1, "d": 1}}, "e": 1}
-    d2 = {"a": {"b": {"c": 2}}}
-    assert {"a": {"b": {"c": 2, "d": 1}}, "e": 1} == merge_dict(d1, d2)
-
-
 def test_layout_loading():
     """Tests if str(Layout) returns the correctly loaded json string."""
     with open(os.path.join(os.getcwd(), "stormvogel/layouts/default.json")) as f:

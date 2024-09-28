@@ -5,6 +5,7 @@ import stormvogel.layout
 import stormvogel.visualization
 import stormvogel.layout_editor
 import stormvogel.communication_server
+import stormvogel.result
 
 import ipywidgets as widgets
 import IPython.display as ipd
@@ -23,6 +24,7 @@ def show(
 
     Args:
         model (Model): The stormvogel model to be displayed.
+        result (Result): A result associatied with the model.
         name (str, optional): Internally used name. Will be randomly generated if left as None.
         result (Result, optional): Result corresponding to the model.
         layout (Layout, optional): Layout used for the visualization.
@@ -32,10 +34,9 @@ def show(
     """
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
-    if not show_editor or not stormvogel.communication_server.enable_server:
-        stormvogel.communication_server.internal_enable_server = False
-    else:
-        stormvogel.communication_server.internal_enable_server = True
+    do_init_server = False
+    if show_editor or stormvogel.communication_server.enable_server:
+        do_init_server = True
 
     do_display = not show_editor
     vis = stormvogel.visualization.Visualization(
@@ -46,6 +47,7 @@ def show(
         separate_labels=separate_labels,
         do_display=do_display,
         debug_output=debug_output,
+        do_init_server=do_init_server,
     )
     vis.show()
 
