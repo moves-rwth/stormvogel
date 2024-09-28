@@ -141,17 +141,21 @@ class State:
             raise RuntimeError(
                 "The model this state belongs to does not support actions"
             )
+            return EmptyAction
 
-    def get_outgoing_transitions(self) -> list[tuple[Number, "State"]]:
-        """gets the outgoing transitions (only works if the model does not support actions)"""
-        if not self.model.supports_actions():
-            branch = list(self.model.transitions[self.id].transition.values())[0]
-            return branch.branch
+    def get_outgoing_transitions(
+        self, action: "Action | None" = None
+    ) -> list[tuple[Number, "State"]]:
+        """gets the outgoing transitions"""
+        if action and self.model.supports_actions():
+            branch = self.model.transitions[self.id].transition[action]
         else:
-            raise RuntimeError(
-                "This method does not yet work for models that support actions"
-            )
-            return []
+            branch = self.model.transitions[self.id].transition[EmptyAction]
+            if action:
+                print(
+                    "This model does not support actions, so you don't need to provide one"
+                )
+        return branch.branch
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -295,7 +299,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
 @dataclass
 class RewardModel:
     """Represents a state-exit reward model.
-
+    dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
     Args:
         name: Name of the reward model.
         rewards: The rewards, the keys are the state's ids (or state action pair ids).
@@ -402,9 +406,16 @@ class Model:
                         sum_prob += transition[0]
                 if sum_prob != 1:
                     return False
+        elif self.get_type() in (ModelType.POMDP, ModelType.MDP):
+            for state in self.states.values():
+                sum_prob = 0
+                for action in state.available_actions():
+                    for transition in state.get_outgoing_transitions(action):
+                        if isinstance(transition[0], float):
+                            sum_prob += transition[0]
+                    if sum_prob != 1:
+                        return False
         elif self.get_type() in (
-            ModelType.POMDP,
-            ModelType.MDP,
             ModelType.CTMC,
             ModelType.MA,
         ):
@@ -432,10 +443,30 @@ class Model:
                 self.transitions[state.id].transition[
                     EmptyAction
                 ].branch = new_transitions
+        elif self.get_type() in (ModelType.POMDP, ModelType.MDP):
+            for state in self.states.values():
+                sum_prob = 0
+                for action in state.available_actions():
+                    for tuple in state.get_outgoing_transitions(action):
+                        if isinstance(tuple[0], float) or isinstance(
+                            tuple[0], Fraction
+                        ):
+                            sum_prob += tuple[0]
 
+                    new_transitions = []
+                    for tuple in state.get_outgoing_transitions(action):
+                        if isinstance(tuple[0], float) or isinstance(
+                            tuple[0], Fraction
+                        ):
+                            normalized_transition = (
+                                tuple[0] / sum_prob,
+                                tuple[1],
+                            )
+                            new_transitions.append(normalized_transition)
+                    self.transitions[state.id].transition[
+                        action
+                    ].branch = new_transitions
         elif self.get_type() in (
-            ModelType.POMDP,
-            ModelType.MDP,
             ModelType.CTMC,
             ModelType.MA,
         ):
