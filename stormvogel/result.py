@@ -58,15 +58,16 @@ class Result:
     scheduler: Scheduler | None
 
     def __init__(
-        self, model: stormvogel.model.Model, values: list[stormvogel.model.Number]
+        self,
+        model: stormvogel.model.Model,
+        values: list[stormvogel.model.Number],
+        scheduler: Scheduler | None = None,
     ):
         self.model = model
-
+        self.scheduler = scheduler
         self.values = {}
         for index, val in enumerate(values):
             self.values[index] = val
-
-        self.scheduler = None
 
     def add_scheduler(self, stormpy_scheduler: stormpy.storage.Scheduler):
         """adds a scheduler to the result"""
