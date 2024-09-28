@@ -142,7 +142,7 @@ class State:
                 "The model this state belongs to does not support actions"
             )
 
-    def get_outgoing_transitions(self) -> list[tuple[Number, "State"]] | None:
+    def get_outgoing_transitions(self) -> list[tuple[Number, "State"]]:
         """gets the outgoing transitions (only works if the model does not support actions)"""
         if not self.model.supports_actions():
             branch = list(self.model.transitions[self.id].transition.values())[0]
@@ -151,6 +151,7 @@ class State:
             raise RuntimeError(
                 "This method does not yet work for models that support actions"
             )
+            return []
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -390,25 +391,51 @@ class Model:
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
 
-    """
     def is_well_defined(self) -> bool:
-        #Checks if the model is well-defined.
+        """Checks if all sums of outgoing transition probabilities for all states equal 1"""
 
-        # We check if all sums of outgoing transition probabilities for all states equal 1:
-        if self.model.get_type() == ModelType.DTMC:
+        if self.get_type() == ModelType.DTMC:
             for state in self.states.values():
                 sum_prob = 0
-                if state.get_outgoing_transitions() is not None:
-                    for transition in state.get_outgoing_transitions():
-                        if isinstance(transition[0], float):
-                            sum_prob += transition[0]
-                    if sum_prob != 1:
-                        print(
-                            "Not all states have their outgoing transition probabilities sum to 1"
-                        )
-                        return False
+                for transition in state.get_outgoing_transitions():
+                    if isinstance(transition[0], float):
+                        sum_prob += transition[0]
+                if sum_prob != 1:
+                    return False
+        elif self.get_type() in (
+            ModelType.POMDP,
+            ModelType.MDP,
+            ModelType.CTMC,
+            ModelType.MA,
+        ):
+            print("Not implemented")
 
         return True
+
+    """
+    def normalize(self):
+        #Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)
+        if self.get_type() == ModelType.DTMC:
+            for state in self.states.values():
+                sum_prob = 0
+                for transition in state.get_outgoing_transitions():
+                    if isinstance(transition[0], float):
+                        sum_prob += transition[0]
+                if sum_prob != 1:
+                    for transition in state.get_outgoing_transitions():
+                        if isinstance(transition[0], float):
+                            normalized_transition = (
+                                transition[0] / sum_prob,
+                                transition[1],
+                            )
+
+        elif self.get_type() in (
+            ModelType.POMDP,
+            ModelType.MDP,
+            ModelType.CTMC,
+            ModelType.MA,
+        ):
+            print("Not implemented")
     """
 
     def __free_state_id(self):
@@ -430,6 +457,7 @@ class Model:
         all_states_outgoing_transition = True
         for state in self.states.items():
             if self.transitions.get(state[0]) is None:
+                print(state[0])
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
 
@@ -475,27 +503,34 @@ class Model:
         self.actions[name] = action
         return action
 
-    def delete_state(self, state: State):
-        """properly deletes a state and reassigns ids"""
+    def delete_state(
+        self, state: State, normalize: bool = False, reassign_ids: bool = False
+    ):
+        """properly deletes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # We remove the state and reassign ids
             self.states.pop(state.id)
-            self.states = {
-                new_id: value
-                for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
-            }
-            for other_state in self.states.values():
-                if other_state.id > state.id:
-                    other_state.id -= 1
+            if reassign_ids:
+                self.states = {
+                    new_id: value
+                    for new_id, (old_id, value) in enumerate(
+                        sorted(self.states.items())
+                    )
+                }
+                # for other_state in self.states.values():
+                #    if other_state.id > state.id:
+                #        other_state.id -= 1
 
             # we remove the state from the transitions and reassign the ids
             self.transitions.pop(state.id)
-            self.transitions = {
-                new_id: value
-                for new_id, (old_id, value) in enumerate(
-                    sorted(self.transitions.items())
-                )
-            }
+
+            if reassign_ids:
+                self.transitions = {
+                    new_id: value
+                    for new_id, (old_id, value) in enumerate(
+                        sorted(self.transitions.items())
+                    )
+                }
             for transition in self.transitions.values():
                 for branch in transition.transition.values():
                     for pair in branch.branch:
@@ -505,17 +540,21 @@ class Model:
             # we remove the exit rates from the state when applicable
             if self.supports_rates and self.exit_rates is not None:
                 self.exit_rates.pop(state.id)
-                self.exit_rates = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.exit_rates.items())
-                    )
-                }
+                if reassign_ids:
+                    self.exit_rates = {
+                        new_id: value
+                        for new_id, (old_id, value) in enumerate(
+                            sorted(self.exit_rates.items())
+                        )
+                    }
 
             # we remove the state from the markovian state list when applicable
             if self.get_type() == ModelType.MA and self.markovian_states is not None:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
+
+            if normalize:
+                self.normalize()
 
     def delete_transitions_between_states(self, state0: State, state1: State):
         """
@@ -702,6 +741,7 @@ class Model:
 
     def __eq__(self, other):
         if isinstance(other, Model):
+            # print(self.states.keys(), other.states.keys())
             return (
                 self.type == other.type
                 and self.states == other.states
