@@ -19,10 +19,6 @@ def stormvogel_to_stormpy(
         Takes a model and creates a stormpy sparsematrix that represents the same transitions
         """
 
-        stormpy_id = {}
-        for index, stormvogel_id in enumerate(model.states.keys()):
-            stormpy_id[stormvogel_id] = index
-
         row_grouping = model.supports_actions()
         builder = stormpy.SparseMatrixBuilder(
             rows=0,
@@ -39,7 +35,9 @@ def stormvogel_to_stormpy(
             for action in transition[1].transition.items():
                 for tuple in action[1].branch:
                     builder.add_next_value(
-                        row=row_index, column=stormpy_id[tuple[1].id], value=tuple[0]
+                        row=row_index,
+                        column=model.stormpy_id[tuple[1].id],
+                        value=tuple[0],
                     )
 
                 # if there is an action then add the label to the choice
@@ -61,13 +59,6 @@ def stormvogel_to_stormpy(
 
         state_labeling = stormpy.storage.StateLabeling(len(list(model.states.keys())))
 
-        # we make a mapping between stormvogel and stormpy ids in case they arent in order.
-        stormpy_id = {}
-        for index, stormvogel_id in enumerate(model.states.keys()):
-            stormpy_id[stormvogel_id] = index
-
-        print(stormpy_id)
-
         # we first add all the different labels
         for label in model.get_labels():
             state_labeling.add_label(label)
@@ -75,7 +66,7 @@ def stormvogel_to_stormpy(
         # then we assign the labels to the correct states
         for state in model.states.items():
             for label in state[1].labels:
-                state_labeling.add_label_to_state(label, stormpy_id[state[0]])
+                state_labeling.add_label_to_state(label, model.stormpy_id[state[0]])
 
         return state_labeling
 
@@ -101,12 +92,8 @@ def stormvogel_to_stormpy(
         # we first build the SparseMatrix
         matrix = build_matrix(model, None)
 
-        print(matrix.nr_rows)
-
         # then we add the state labels
         state_labeling = add_labels(model)
-
-        print(state_labeling)
 
         # then we add the rewards
         reward_models = add_rewards(model)
@@ -296,6 +283,12 @@ def stormvogel_to_stormpy(
         return ma
 
     if model.all_states_outgoing_transition():
+        # we make a mapping between stormvogel and stormpy ids in case they arent in order.
+        stormpy_id = {}
+        for index, stormvogel_id in enumerate(model.states.keys()):
+            stormpy_id[stormvogel_id] = index
+        model.stormpy_id = stormpy_id
+
         # we check the type to handle the model correctly
         if model.get_type() == stormvogel.model.ModelType.DTMC:
             return map_dtmc(model)
