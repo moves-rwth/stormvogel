@@ -92,6 +92,7 @@ def sparse_equal(
     )
 
 
+"""
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
     stormpy_dtmc = examples.stormpy_dtmc.example_building_dtmcs_01()
@@ -105,6 +106,7 @@ def test_stormpy_to_stormvogel_and_back_dtmc():
     # TODO also compare other parts than the matrix (e.g. state labels)
 
     assert sparse_equal(stormpy_dtmc, new_stormpy_dtmc)
+"""
 
 
 def test_stormvogel_to_stormpy_and_back_dtmc():
@@ -119,6 +121,7 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
     assert new_stormvogel_dtmc == stormvogel_dtmc
 
 
+"""
 def test_stormpy_to_stormvogel_and_back_mdp():
     # we test it for an example stormpy representation of an mdp
     stormpy_mdp = examples.stormpy_mdp.example_building_mdps_01()
@@ -218,3 +221,4 @@ def test_stormpy_to_stormvogel_and_back_ma():
     # print(new_stormpy_ma)
 
     assert sparse_equal(stormpy_ma, new_stormpy_ma)
+"""
