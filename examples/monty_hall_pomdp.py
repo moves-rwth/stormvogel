@@ -71,6 +71,7 @@ def create_monty_hall_pomdp():
     for state in pomdp.states.values():
         state.set_observation(0)
 
+    # test if the normalize function works
     pomdp.normalize()
 
     return pomdp

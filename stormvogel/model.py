@@ -411,6 +411,7 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
+            # TODO make it work for these models
             raise RuntimeError("Not implemented")
 
         return True
@@ -422,15 +423,19 @@ class Model:
                 for action in state.available_actions():
                     sum_prob = 0
                     for tuple in state.get_outgoing_transitions(action):
-                        if isinstance(tuple[0], float) or isinstance(
-                            tuple[0], Fraction
+                        if (
+                            isinstance(tuple[0], float)
+                            or isinstance(tuple[0], Fraction)
+                            or isinstance(tuple[0], int)
                         ):
                             sum_prob += tuple[0]
 
                     new_transitions = []
                     for tuple in state.get_outgoing_transitions(action):
-                        if isinstance(tuple[0], float) or isinstance(
-                            tuple[0], Fraction
+                        if (
+                            isinstance(tuple[0], float)
+                            or isinstance(tuple[0], Fraction)
+                            or isinstance(tuple[0], int)
                         ):
                             normalized_transition = (
                                 tuple[0] / sum_prob,
@@ -444,6 +449,7 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
+            # TODO make it work for these models
             raise RuntimeError("Not implemented")
 
     def __free_state_id(self):
@@ -537,6 +543,7 @@ class Model:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
 
+            # we reassign the ids if specified to do so
             if reassign_ids:
                 self.states = {
                     new_id: value
@@ -562,6 +569,7 @@ class Model:
                         )
                     }
 
+            # we normalize the model if specified to do so
             if normalize:
                 self.normalize()
 
