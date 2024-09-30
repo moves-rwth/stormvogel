@@ -7,7 +7,7 @@ from typing import cast
 
 Parameter = str
 
-Number = float | Parameter | Fraction
+Number = float | Parameter | Fraction | int
 
 
 class ModelType(Enum):
@@ -100,7 +100,7 @@ class State:
         if label not in self.labels:
             self.labels.append(label)
 
-    def new_observation(self, observation: int) -> Observation:
+    def set_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:
             self.observation = Observation(observation)
@@ -138,10 +138,7 @@ class State:
                 action_list.append(action)
             return action_list
         else:
-            raise RuntimeError(
-                "The model this state belongs to does not support actions"
-            )
-            return EmptyAction
+            return [EmptyAction]
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
@@ -149,12 +146,11 @@ class State:
         """gets the outgoing transitions"""
         if action and self.model.supports_actions():
             branch = self.model.transitions[self.id].transition[action]
+        elif self.model.supports_actions() and not action:
+            raise RuntimeError("You need to provide a specific action")
         else:
             branch = self.model.transitions[self.id].transition[EmptyAction]
-            if action:
-                print(
-                    "This model does not support actions, so you don't need to provide one"
-                )
+
         return branch.branch
 
     def __str__(self):
@@ -398,20 +394,16 @@ class Model:
     def is_well_defined(self) -> bool:
         """Checks if all sums of outgoing transition probabilities for all states equal 1"""
 
-        if self.get_type() == ModelType.DTMC:
+        if self.get_type() in (ModelType.DTMC, ModelType.MDP, ModelType.POMDP):
             for state in self.states.values():
-                sum_prob = 0
-                for transition in state.get_outgoing_transitions():
-                    if isinstance(transition[0], float):
-                        sum_prob += transition[0]
-                if sum_prob != 1:
-                    return False
-        elif self.get_type() in (ModelType.POMDP, ModelType.MDP):
-            for state in self.states.values():
-                sum_prob = 0
                 for action in state.available_actions():
+                    sum_prob = 0
                     for transition in state.get_outgoing_transitions(action):
-                        if isinstance(transition[0], float):
+                        if (
+                            isinstance(transition[0], float)
+                            or isinstance(transition[0], Fraction)
+                            or isinstance(transition[0], int)
+                        ):
                             sum_prob += transition[0]
                     if sum_prob != 1:
                         return False
@@ -419,34 +411,16 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
-            print("Not implemented")
+            raise RuntimeError("Not implemented")
 
         return True
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
-        if self.get_type() == ModelType.DTMC:
+        if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
             for state in self.states.values():
-                sum_prob = 0
-                for tuple in state.get_outgoing_transitions():
-                    if isinstance(tuple[0], float) or isinstance(tuple[0], Fraction):
-                        sum_prob += tuple[0]
-
-                new_transitions = []
-                for tuple in state.get_outgoing_transitions():
-                    if isinstance(tuple[0], float) or isinstance(tuple[0], Fraction):
-                        normalized_transition = (
-                            tuple[0] / sum_prob,
-                            tuple[1],
-                        )
-                        new_transitions.append(normalized_transition)
-                self.transitions[state.id].transition[
-                    EmptyAction
-                ].branch = new_transitions
-        elif self.get_type() in (ModelType.POMDP, ModelType.MDP):
-            for state in self.states.values():
-                sum_prob = 0
                 for action in state.available_actions():
+                    sum_prob = 0
                     for tuple in state.get_outgoing_transitions(action):
                         if isinstance(tuple[0], float) or isinstance(
                             tuple[0], Fraction
@@ -470,7 +444,7 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
-            print("Not implemented")
+            raise RuntimeError("Not implemented")
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
