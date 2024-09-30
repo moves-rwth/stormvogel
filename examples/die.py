@@ -16,7 +16,7 @@ def create_die_dtmc():
     dtmc.add_self_loops()
 
     # test if state deletion works
-    dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
+    # dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
 
     return dtmc
 

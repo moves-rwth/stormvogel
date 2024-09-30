@@ -57,7 +57,7 @@ def stormvogel_to_stormpy(
         Takes a model creates a state labelling object that determines which states get which labels in the stormpy representation
         """
 
-        state_labeling = stormpy.storage.StateLabeling(len(list(model.states.keys())))
+        state_labeling = stormpy.storage.StateLabeling(len(model.states))
 
         # we first add all the different labels
         for label in model.get_labels():
