@@ -58,7 +58,7 @@ Please contact the stormvogel developpers if you keep running into issues."""
                 logging.debug(f"Status of vis {self.vis}")
             if self.vis is not None:
                 with self.output:
-                    if not stormvogel.communication_server.internal_enable_server:
+                    if stormvogel.communication_server.server is None:
                         with self.debug_output:
                             logging.info(
                                 "Did not save node positions because the server is disabled."
