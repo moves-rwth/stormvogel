@@ -30,7 +30,7 @@ def create_simple_ma():
     ma.add_self_loops()
 
     # we delete a state
-    ma.delete_state(ma.get_state_by_id(3), True, True)
+    ma.delete_state(ma.get_state_by_id(3), False, True)
 
     return ma
 

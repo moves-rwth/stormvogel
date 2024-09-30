@@ -283,7 +283,7 @@ def stormvogel_to_stormpy(
         return ma
 
     if model.all_states_outgoing_transition():
-        # we make a mapping between stormvogel and stormpy ids in case they arent in order.
+        # we make a mapping between stormvogel and stormpy ids in case they are out of order.
         stormpy_id = {}
         for index, stormvogel_id in enumerate(model.states.keys()):
             stormpy_id[stormvogel_id] = index
@@ -501,7 +501,7 @@ def stormpy_to_stormvogel(
 
         # we add the observations:
         for state in model.states.values():
-            state.new_observation(sparsepomdp.get_observation(state.id))
+            state.set_observation(sparsepomdp.get_observation(state.id))
 
         return model
 
