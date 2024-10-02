@@ -49,7 +49,7 @@ class Layout:
             schema_str = f.read()
         self.schema = json.loads(schema_str)
 
-    def set_groups(self, groups: list[str]):
+    def set_groups(self, groups: set[str]):
         """Add the specified groups to the layout and schema.
         They will use the specified __group_macro.
         Note that the changes to schema won't be saved to schema.json."""
@@ -67,13 +67,15 @@ class Layout:
                 }
 
     def save(self, path: str, path_relative: bool = True) -> None:
-        """Save this layout as a json file.
+        """Save this layout as a json file. Raises runtime error if a filename does not end in json, and OSError if file not found.
 
         Args:
             path (str): Path to your layout file.
             path_relative (bool, optional): If set to true, then stormvogel will create a custom layout
                 file relative to the current working directory. Defaults to True.
         """
+        if path[-5:] != ".json":
+            raise RuntimeError("File name should end in .json")
         if path_relative:
             complete_path = os.path.join(os.getcwd(), path)
         else:

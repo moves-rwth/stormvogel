@@ -66,9 +66,11 @@ class Visualization(stormvogel.displayable.Displayable):
         self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result = result
         self.layout: stormvogel.layout.Layout = layout
-        self.separate_labels = list(map(und, separate_labels))
+        self.separate_labels: set[str] = set(map(und, separate_labels)).union(
+            self.layout.layout["groups"].keys()
+        )
         self.nt: stormvogel.visjs.Network | None = None
-        self.do_init_server = do_init_server
+        self.do_init_server: bool = do_init_server
 
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
