@@ -410,6 +410,17 @@ class Model:
         for choice, branch in transitions.transition.items():
             self.transitions[s.id].transition[choice] = branch
 
+    def get_transitions(self, s: State) -> Transition:
+        """Get the transition at state s."""
+        return self.transitions[s.id]
+
+    def get_branch(self, s: State) -> Branch:
+        """Get the branch at state s. Only intended for emtpy transitions, otherwise a RuntimeError is thrown."""
+        transition = self.transitions[s.id].transition
+        if EmptyAction not in transition:
+            raise RuntimeError("Called get_branch on a non-empty transition.")
+        return transition[EmptyAction]
+
     def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
         """Creates a new action and returns it."""
         if not self.supports_actions():
@@ -509,6 +520,9 @@ class Model:
             if model.name == name:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def get_states(self) -> dict[int, State]:
+        return self.states
 
     def add_rewards(self, name: str) -> RewardModel:
         """Creates a reward model with the specified name and adds returns it."""

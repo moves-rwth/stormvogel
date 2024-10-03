@@ -1,0 +1,202 @@
+{
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "groups": {
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#f5c211",
+        "border": "#c64600",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
+    },
+    "dead...": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#c0bfbc",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "hunt_>:D": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#2ec27e",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "desparate_hunt!": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ff7800",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14
+    },
+    "color": {
+      "color": "black"
+    }
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 590,
+    "height": 406,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/lion.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": -218,
+      "y": 28
+    },
+    "1": {
+      "x": -28,
+      "y": 57
+    },
+    "2": {
+      "x": -79,
+      "y": -14
+    },
+    "3": {
+      "x": -86,
+      "y": -156
+    },
+    "4": {
+      "x": 147,
+      "y": -37
+    },
+    "5": {
+      "x": -386,
+      "y": 109
+    },
+    "6": {
+      "x": 24,
+      "y": -96
+    },
+    "7": {
+      "x": 81,
+      "y": 69
+    },
+    "8": {
+      "x": 126,
+      "y": 205
+    }
+  },
+  "width": 590,
+  "height": 406,
+  "physics": true
+}
