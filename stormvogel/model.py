@@ -792,3 +792,8 @@ def new_pomdp(name: str | None = None):
 def new_ma(name: str | None = None):
     """Creates a MA."""
     return Model(name, ModelType.MA)
+
+
+def new_model(modeltype: ModelType, name: str | None = None):
+    """More general model creation function"""
+    return Model(name, modeltype)
