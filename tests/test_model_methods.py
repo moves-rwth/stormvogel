@@ -1,5 +1,6 @@
 import stormvogel.model
 import examples.monty_hall
+import examples.nuclear_fusion_ctmc
 import pytest
 from typing import cast
 
@@ -99,11 +100,45 @@ def test_is_well_defined():
     assert dtmc.is_well_defined()
 
 
-"""
 def test_normalize():
+    dtmc0 = stormvogel.model.new_dtmc()
+    state = dtmc0.new_state()
+    dtmc0.set_transitions(
+        dtmc0.get_initial_state(),
+        [(1 / 4, state), (1 / 2, state)],
+    )
+    dtmc0.add_self_loops()
+    dtmc0.normalize()
+
+    dtmc1 = stormvogel.model.new_dtmc()
+    state = dtmc1.new_state()
+    dtmc1.set_transitions(
+        dtmc1.get_initial_state(),
+        [(1 / 3, state), (2 / 3, state)],
+    )
+    dtmc1.add_self_loops()
+
+    assert dtmc0 == dtmc1
 
 
 def test_delete_state():
+    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    ctmc.delete_state(ctmc.get_state_by_id(3), True)
 
+    new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
+    new_ctmc.get_state_by_id(0).set_transitions([(3, new_ctmc.new_state("helium"))])
+    new_ctmc.get_state_by_id(1).set_transitions([(2, new_ctmc.new_state("carbon"))])
+
+    new_ctmc.new_state("Supernova")
+
+    rates = [3, 2, 7, 0]
+    for i in range(4):
+        new_ctmc.set_rate(new_ctmc.get_state_by_id(i), rates[i])
+    new_ctmc.add_self_loops()
+
+    assert ctmc == new_ctmc
+
+
+"""
 def test_delete_transitions_between_states()
 """
