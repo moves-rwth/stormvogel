@@ -121,9 +121,9 @@ def test_normalize():
     assert dtmc0 == dtmc1
 
 
-def test_delete_state():
+def test_remove_state():
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    ctmc.delete_state(ctmc.get_state_by_id(3), True)
+    ctmc.remove_state(ctmc.get_state_by_id(3), True)
 
     new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
     new_ctmc.get_state_by_id(0).set_transitions([(3, new_ctmc.new_state("helium"))])
@@ -139,6 +139,23 @@ def test_delete_state():
     assert ctmc == new_ctmc
 
 
-"""
-def test_delete_transitions_between_states()
-"""
+def test_remove_transitions_between_states():
+    # we check for an instance where it is not well defined
+    dtmc = stormvogel.model.new_dtmc()
+    state = dtmc.new_state()
+    dtmc.set_transitions(
+        dtmc.get_initial_state(),
+        [(1, state)],
+    )
+    dtmc.set_transitions(state, [(1, dtmc.get_initial_state())])
+    dtmc.remove_transitions_between_states(state, dtmc.get_initial_state())
+
+    new_dtmc = stormvogel.model.new_dtmc()
+    state = new_dtmc.new_state()
+    new_dtmc.set_transitions(
+        dtmc.get_initial_state(),
+        [(1, state)],
+    )
+    new_dtmc.add_self_loops()
+
+    assert dtmc == new_dtmc
