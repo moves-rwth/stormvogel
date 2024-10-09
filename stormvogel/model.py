@@ -419,6 +419,7 @@ class Model:
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
         if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+            self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
@@ -449,8 +450,8 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
-            # TODO make it work for these models
-            raise RuntimeError("Not implemented")
+            # TODO: As of now, for the CTMCs and MAs we only add self loops
+            self.add_self_loops()
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -462,9 +463,9 @@ class Model:
 
     def add_self_loops(self):
         """adds self loops to all states that do not have an outgoing transition"""
-        for state in self.states.items():
-            if self.transitions.get(state[0]) is None:
-                self.set_transitions(state[1], [(float(1), state[1])])
+        for id, state in self.states.items():
+            if self.transitions.get(id) is None:
+                self.set_transitions(state, [(float(1), state)])
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
@@ -516,19 +517,30 @@ class Model:
         self.actions[name] = action
         return action
 
-    def delete_state(
-        self, state: State, normalize: bool = False, reassign_ids: bool = False
-    ):
-        """properly deletes a state, it can optionally normalize the model and reassign ids automatically"""
+    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # we remove the state from the transitions
+            # first we remove transitions that go into the state
+            remove_actions_index = []
             for index, transition in self.transitions.items():
                 for action in transition.transition.items():
-                    for tuple in action[1].branch:
+                    for index_tuple, tuple in enumerate(action[1].branch):
                         if tuple[1].id == state.id:
-                            self.transitions[index].transition[action[0]].branch.remove(
-                                tuple
+                            self.transitions[index].transition[action[0]].branch.pop(
+                                index_tuple
                             )
+
+                    # if we have empty objects we need to remove those as well
+                    if self.transitions[index].transition[action[0]].branch == []:
+                        remove_actions_index.append((action[0], index))
+            # here we remove those empty objects
+            for action, index in remove_actions_index:
+                self.transitions[index].transition.pop(action)
+                if self.transitions[index].transition == {}:
+                    self.transitions.pop(index)
+
+            # we remove transitions that come out of the state
             self.transitions.pop(state.id)
 
             # We remove the state
@@ -543,8 +555,10 @@ class Model:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
 
-            # we reassign the ids if specified to do so
-            if reassign_ids:
+            # we normalize the model if specified to do so
+            if normalize_and_reassign_ids:
+                self.normalize()
+
                 self.states = {
                     new_id: value
                     for new_id, (old_id, value) in enumerate(
@@ -569,20 +583,25 @@ class Model:
                         )
                     }
 
-            # we normalize the model if specified to do so
-            if normalize:
-                self.normalize()
-
-    def delete_transitions_between_states(self, state0: State, state1: State):
+    def remove_transitions_between_states(
+        self, state0: State, state1: State, normalize: bool = True
+    ):
         """
-        Deletes the transition(s) present between the two given states.
+        Remove the transition(s) that start in state0 and go to state1.
         Only works on models that don't support actions.
         """
         if not self.supports_actions():
-            for branch in self.transitions[state0.id].transition.values():
-                for tuple in branch.branch:
-                    if tuple[1] == state1:
-                        branch.branch.remove(tuple)
+            for tuple in self.transitions[state0.id].transition[EmptyAction].branch:
+                if tuple[1] == state1:
+                    self.transitions[state0.id].transition[EmptyAction].branch.remove(
+                        tuple
+                    )
+            # if we have empty objects we need to remove those as well
+            if self.transitions[state0.id].transition[EmptyAction].branch == []:
+                self.transitions.pop(state0.id)
+
+            if normalize:
+                self.normalize()
         else:
             raise RuntimeError(
                 "This method only works for models that don't support actions."
