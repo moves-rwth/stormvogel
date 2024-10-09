@@ -11,43 +11,55 @@ import random
 
 
 def simulate(
-    model: stormvogel.model.Model, steps: int = 1, runs: int = 1
+    model: stormvogel.model.Model,
+    steps: int = 1,
+    runs: int = 1,
+    scheduler: stormvogel.result.Scheduler | None = None,
 ) -> stormvogel.model.Model | None:
     """
     Simulates the model a given number of steps for a given number of runs.
     Returns the partial model discovered by the simulator
     """
 
+    def get_range_index(stateid: int):
+        """Helper function to convert the chosen action in a state by a scheduler to a range index."""
+        assert scheduler is not None
+        action = scheduler.get_choice_of_state(model.get_state_by_id(state))
+        available_actions = model.states[stateid].available_actions()
+
+        assert action is not None
+        return available_actions.index(action)
+
     if not model.supports_rates():
         # we initialize the simulator
         stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
         simulator = stormpy.simulator.create_simulator(stormpy_model)
-        partial_model = stormvogel.model.new_model(model.get_type())
         assert simulator is not None
 
         # we keep track of all discovered states over all runs and add them to the partial model
+        partial_model = stormvogel.model.new_model(model.get_type())
         if not partial_model.supports_actions():
-            discovered_states = set()
             for i in range(runs):
                 simulator.restart()
                 for j in range(steps):
                     state, reward, labels = simulator.step()
-                    if state not in discovered_states:
+                    if state not in partial_model.states.keys():
                         partial_model.new_state(list(labels))
-                        discovered_states.add(state)
                     if simulator.is_done():
                         break
         else:
-            discovered_states = set()
             for i in range(runs):
-                simulator.restart()
+                state, reward, labels = simulator.restart()
                 for j in range(steps):
                     actions = simulator.available_actions()
-                    select_action = random.randint(0, len(actions) - 1)
+                    select_action = (
+                        random.randint(0, len(actions) - 1)
+                        if not scheduler
+                        else get_range_index(state)
+                    )
                     state, reward, labels = simulator.step(actions[select_action])
-                    if state not in discovered_states:
+                    if state not in partial_model.states.keys():
                         partial_model.new_state(list(labels))
-                        discovered_states.add(state)
                     if simulator.is_done():
                         break
     else:
@@ -57,10 +69,17 @@ def simulate(
 
 
 if __name__ == "__main__":
-    # dtmc = examples.die.create_die_dtmc()
-    # partial_model = simulate(dtmc, 1, 10)
+    dtmc = examples.die.create_die_dtmc()
+    partial_model = simulate(dtmc, 1, 10)
+
+    print(partial_model)
 
     mdp = examples.monty_hall.create_monty_hall_mdp()
-    partial_model = simulate(mdp, 100, 100)
+    taken_actions = {}
+    for id, state in mdp.states.items():
+        taken_actions[id] = state.available_actions()[0]
+    scheduler = stormvogel.result.Scheduler(mdp, taken_actions)
+
+    partial_model = simulate(mdp, 3, 1, scheduler)
 
     print(partial_model)
