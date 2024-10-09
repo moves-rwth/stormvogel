@@ -19,12 +19,13 @@ def simulate(
     """
 
     if not model.supports_rates():
+        # we initialize the simulator
         stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
         simulator = stormpy.simulator.create_simulator(stormpy_model)
         partial_model = stormvogel.model.new_model(model.get_type())
-
         assert simulator is not None
 
+        # we keep track of all discovered states over all runs and add them to the partial model
         if not partial_model.supports_actions():
             discovered_states = set()
             for i in range(runs):
@@ -36,19 +37,17 @@ def simulate(
                         discovered_states.add(state)
                     if simulator.is_done():
                         break
-        elif partial_model.supports_actions():
+        else:
             discovered_states = set()
-            # discovered_actions = set()
             for i in range(runs):
                 simulator.restart()
                 for j in range(steps):
                     actions = simulator.available_actions()
                     select_action = random.randint(0, len(actions) - 1)
-                    # discovered_actions.add(select_action)
                     state, reward, labels = simulator.step(actions[select_action])
                     if state not in discovered_states:
                         partial_model.new_state(list(labels))
-                    discovered_states.add(state)
+                        discovered_states.add(state)
                     if simulator.is_done():
                         break
     else:
