@@ -7,14 +7,65 @@ import stormpy.examples.files
 import stormpy.examples
 import examples.die
 import examples.monty_hall
+import examples.monty_hall_pomdp
 import random
+
+
+class Path:
+    """
+    Path object that represents a path created by a simulator on a certain model.
+
+    Args:
+        path: The path itself is a dictionary where we either store for each step a state or a state action pair.
+        model: The model the path traverses
+
+    """
+
+    path: (
+        dict[int, tuple[int, stormvogel.model.State]]
+        | dict[int, stormvogel.model.State]
+    )
+    model: stormvogel.model.Model
+
+    def __init__(
+        self,
+        path: dict[int, tuple[int, stormvogel.model.State]]
+        | dict[int, stormvogel.model.State],
+        model: stormvogel.model.Model,
+    ):
+        if model.supports_rates():
+            raise NotImplementedError
+        self.path = path
+        self.model = model
+
+    def get_state_in_step(self, step: int) -> stormvogel.model.State | None:
+        """returns the state discovered in the given step in the path"""
+        if not self.model.supports_actions():
+            state = self.path[step]
+            assert isinstance(state, stormvogel.model.State)
+            return state
+
+    def __str__(self) -> str:
+        path = ""
+        if self.model.supports_actions():
+            for t in self.path.values():
+                assert (
+                    isinstance(t, tuple)
+                    and isinstance(t[0], int)
+                    and isinstance(t[1], stormvogel.model.State)
+                )
+                path += f" --act={t[0]}--> {t[1].id}"
+        else:
+            for state in self.path.values():
+                path += f" --> {state.id}"
+        return path
 
 
 def simulate_path(
     model: stormvogel.model.Model,
     steps: int = 1,
     scheduler: stormvogel.result.Scheduler | None = None,
-) -> str | None:
+) -> Path:
     """
     Simulates the model a given number of steps.
     Returns the resulting path of the simulator.
@@ -35,32 +86,36 @@ def simulate_path(
         simulator = stormpy.simulator.create_simulator(stormpy_model)
         assert simulator is not None
 
-        path = f"{0}"
+        # we start adding states or state action pairs to the path
         if not model.supports_actions():
+            path = {0: model.get_initial_state()}
             simulator.restart()
-            for j in range(steps):
+            for i in range(steps):
                 state, reward, labels = simulator.step()
-                path += f" --> {state}"
+                path[i + 1] = model.states[state]
                 if simulator.is_done():
                     break
         else:
+            path = {0: (0, model.get_initial_state())}
             state, reward, labels = simulator.restart()
-            for j in range(steps):
+            for i in range(steps):
                 actions = simulator.available_actions()
                 select_action = (
                     random.randint(0, len(actions) - 1)
                     if not scheduler
                     else get_range_index(state)
                 )
-                path += f" --act={actions[select_action]}--> "
+                new_action = actions[select_action]
                 state, reward, labels = simulator.step(actions[select_action])
-                path += f"{state}"
+                path[i + 1] = (new_action, model.states[state])
                 if simulator.is_done():
                     break
     else:
         raise NotImplementedError
 
-    return path
+    path_object = Path(path, model)
+
+    return path_object
 
 
 def simulate(
@@ -132,6 +187,7 @@ def simulate(
 
 
 if __name__ == "__main__":
+    """
     # we first test it with a dtmc
     dtmc = examples.die.create_die_dtmc()
     # rewardmodel = dtmc.add_rewards("rewardmodel")
@@ -142,6 +198,8 @@ if __name__ == "__main__":
     print(partial_model)
     path = simulate_path(dtmc, 5)
     print(path)
+
+    """
 
     # then we test it with an mdp
     mdp = examples.monty_hall.create_monty_hall_mdp()
@@ -156,6 +214,24 @@ if __name__ == "__main__":
 
     partial_model = simulate(mdp, 10, 10, scheduler)
     path = simulate_path(mdp, 5)
+    # print(partial_model)
+    # print(partial_model.actions)
+    print(path)
+    """
+    # then we test it with a pomdp
+    pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
+    # rewardmodel = pomdp.add_rewards("rewardmodel")
+    # for i in range(67):
+    #    rewardmodel.rewards[i] = 5
+
+    taken_actions = {}
+    for id, state in pomdp.states.items():
+        taken_actions[id] = state.available_actions()[0]
+    scheduler = stormvogel.result.Scheduler(pomdp, taken_actions)
+
+    partial_model = simulate(pomdp, 10, 10, scheduler)
+    path = simulate_path(pomdp, 5)
     print(partial_model)
     # print(partial_model.actions)
     print(path)
+    """
