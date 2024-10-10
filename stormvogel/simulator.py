@@ -18,18 +18,17 @@ class Path:
     Args:
         path: The path itself is a dictionary where we either store for each step a state or a state action pair.
         model: The model the path traverses
-
     """
 
     path: (
-        dict[int, tuple[int, stormvogel.model.State]]
+        dict[int, tuple[stormvogel.model.Action, stormvogel.model.State]]
         | dict[int, stormvogel.model.State]
     )
     model: stormvogel.model.Model
 
     def __init__(
         self,
-        path: dict[int, tuple[int, stormvogel.model.State]]
+        path: dict[int, tuple[stormvogel.model.Action, stormvogel.model.State]]
         | dict[int, stormvogel.model.State],
         model: stormvogel.model.Model,
     ):
@@ -44,20 +43,50 @@ class Path:
             state = self.path[step]
             assert isinstance(state, stormvogel.model.State)
             return state
+        if self.supports_actions():
+            t = self.path[step]
+            assert (
+                isinstance(t, tuple)
+                and isinstance(t[0], stormvogel.model.Action)
+                and isinstance(t[1], stormvogel.model.State)
+            )
+            state = t[1]
+            assert isinstance(state, stormvogel.model.State)
+            return state
+
+    def get_action_in_step(self, step: int) -> stormvogel.model.Action | None:
+        """returns the action discovered in the given step in the path"""
+        if self.model.supports_actions():
+            t = self.path[step]
+            assert (
+                isinstance(t, tuple)
+                and isinstance(t[0], stormvogel.model.Action)
+                and isinstance(t[1], stormvogel.model.State)
+            )
+            action = t[0]
+            return action
+
+    def get_step(
+        self, step: int
+    ) -> (
+        tuple[stormvogel.model.Action, stormvogel.model.State] | stormvogel.model.State
+    ):
+        """returns the state or state action pair discovered in the given step"""
+        return self.path[step]
 
     def __str__(self) -> str:
-        path = ""
+        path = "initial state"
         if self.model.supports_actions():
             for t in self.path.values():
                 assert (
                     isinstance(t, tuple)
-                    and isinstance(t[0], int)
+                    and isinstance(t[0], stormvogel.model.Action)
                     and isinstance(t[1], stormvogel.model.State)
                 )
-                path += f" --act={t[0]}--> {t[1].id}"
+                path += f" --action: {t[0].name}--> state: {t[1].id}"
         else:
             for state in self.path.values():
-                path += f" --> {state.id}"
+                path += f" --> state: {state.id}"
         return path
 
 
@@ -88,7 +117,7 @@ def simulate_path(
 
         # we start adding states or state action pairs to the path
         if not model.supports_actions():
-            path = {0: model.get_initial_state()}
+            path = {}
             simulator.restart()
             for i in range(steps):
                 state, reward, labels = simulator.step()
@@ -96,7 +125,7 @@ def simulate_path(
                 if simulator.is_done():
                     break
         else:
-            path = {0: (0, model.get_initial_state())}
+            path = {}
             state, reward, labels = simulator.restart()
             for i in range(steps):
                 actions = simulator.available_actions()
@@ -106,8 +135,9 @@ def simulate_path(
                     else get_range_index(state)
                 )
                 new_action = actions[select_action]
+                stormvogel_action = model.states[state].available_actions()[new_action]
                 state, reward, labels = simulator.step(actions[select_action])
-                path[i + 1] = (new_action, model.states[state])
+                path[i + 1] = (stormvogel_action, model.states[state])
                 if simulator.is_done():
                     break
     else:
@@ -173,7 +203,9 @@ def simulate(
                         model.states[state].available_actions()[select_action]
                         not in partial_model.actions.values()
                     ):
-                        partial_model.new_action(str(i) + str(j))
+                        partial_model.new_action(
+                            model.states[state].available_actions()[select_action].name
+                        )
                     state, reward, labels = simulator.step(actions[select_action])
                     if state not in partial_model.states.keys():
                         partial_model.new_state(list(labels))
@@ -214,9 +246,10 @@ if __name__ == "__main__":
 
     partial_model = simulate(mdp, 10, 10, scheduler)
     path = simulate_path(mdp, 5)
-    # print(partial_model)
-    # print(partial_model.actions)
-    print(path)
+    print(partial_model)
+    assert partial_model is not None
+    print(partial_model.actions)
+    # print(path)
     """
     # then we test it with a pomdp
     pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
