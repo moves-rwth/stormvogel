@@ -171,33 +171,48 @@ def simulate(
     if not model.supports_rates():
         # we initialize the simulator
         stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+        assert stormpy_model is not None
         simulator = stormpy.simulator.create_simulator(stormpy_model)
         assert simulator is not None
 
         # we keep track of all discovered states over all runs and add them to the partial model
         # we also add the discovered rewards and actions to the partial model if present
         partial_model = stormvogel.model.new_model(model.get_type())
-        reward_model = partial_model.add_rewards("rewards")
+
+        # we currently only support one reward model for partial models
+        assert len(model.rewards) in [0, 1]
+        if model.rewards:
+            reward_model = partial_model.add_rewards(model.rewards[0].name)
+        else:
+            reward_model = None
+
         if not partial_model.supports_actions():
             for i in range(runs):
                 simulator.restart()
                 for j in range(steps):
                     state, reward, labels = simulator.step()
+
+                    # we add to the partial model what we discovered (if new)
                     if state not in partial_model.states.keys():
                         partial_model.new_state(list(labels))
-                        reward_model.rewards[state] = reward
+                    if reward_model:
+                        reward_model.set(model.get_state_by_id(state), reward)
+
                     if simulator.is_done():
                         break
         else:
             for i in range(runs):
                 state, reward, labels = simulator.restart()
                 for j in range(steps):
+                    # we first choose an action
                     actions = simulator.available_actions()
                     select_action = (
                         random.randint(0, len(actions) - 1)
                         if not scheduler
                         else get_range_index(state)
                     )
+
+                    # we add the action to the partial model
                     assert partial_model.actions is not None
                     if (
                         model.states[state].available_actions()[select_action]
@@ -206,10 +221,20 @@ def simulate(
                         partial_model.new_action(
                             model.states[state].available_actions()[select_action].name
                         )
-                    state, reward, labels = simulator.step(actions[select_action])
+
+                    # we add the other discoveries to the partial model
+                    discovery = simulator.step(actions[select_action])
+                    reward = discovery[1]
+                    if reward_model:
+                        row_group = stormpy_model.transition_matrix.get_row_group_start(
+                            state
+                        )
+                        state_action_pair = row_group + select_action
+                        reward_model.set_action_state(state_action_pair, reward)
+                    state, labels = discovery[0], discovery[2]
                     if state not in partial_model.states.keys():
                         partial_model.new_state(list(labels))
-                        reward_model.rewards[state] = reward
+
                     if simulator.is_done():
                         break
     else:
@@ -222,33 +247,36 @@ if __name__ == "__main__":
     """
     # we first test it with a dtmc
     dtmc = examples.die.create_die_dtmc()
-    # rewardmodel = dtmc.add_rewards("rewardmodel")
-    # for stateid in dtmc.states.keys():
-    #    rewardmodel.rewards[stateid] = 5
+    rewardmodel = dtmc.add_rewards("rewardmodel")
+    for stateid in dtmc.states.keys():
+        rewardmodel.rewards[stateid] = 5
 
     partial_model = simulate(dtmc, 1, 10)
     print(partial_model)
+    print(partial_model.rewards[0])
     path = simulate_path(dtmc, 5)
-    print(path)
+    #print(path)
 
     """
 
     # then we test it with an mdp
     mdp = examples.monty_hall.create_monty_hall_mdp()
-    # rewardmodel = mdp.add_rewards("rewardmodel")
-    # for i in range(67):
-    #    rewardmodel.rewards[i] = 5
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    for i in range(67):
+        rewardmodel.rewards[i] = i
 
     taken_actions = {}
     for id, state in mdp.states.items():
         taken_actions[id] = state.available_actions()[0]
     scheduler = stormvogel.result.Scheduler(mdp, taken_actions)
 
-    partial_model = simulate(mdp, 10, 10, scheduler)
+    partial_model = simulate(mdp, 10, 1, scheduler)
     path = simulate_path(mdp, 5)
     print(partial_model)
     assert partial_model is not None
-    print(partial_model.actions)
+    # print(partial_model.actions)
+    print(partial_model.rewards[0])
+    print(mdp.rewards)
     # print(path)
     """
     # then we test it with a pomdp
