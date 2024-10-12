@@ -2,7 +2,6 @@
 
 import IPython.display as ipd
 import ipywidgets as widgets
-import html
 import stormvogel.displayable
 import stormvogel.html_templates
 import stormvogel.communication_server
@@ -155,25 +154,30 @@ class Network(stormvogel.displayable.Displayable):
         ).replace("__SIZES__", sizes)
         return html
 
-    def generate_iframe(self) -> str:
+    def generate_iframe(self) -> ipd.IFrame:
         """Generate an iframe for the network, using the html."""
-        return f"""
-          <iframe
-                id="{self.name}"
-                width="{self.width + self.EXTRA_PIXELS}"
-                height="{self.height + self.EXTRA_PIXELS}"
-                frameborder="0"
-                srcdoc="{html.escape(self.generate_html())}"
-                border:none !important;
-                allowfullscreen webkitallowfullscreen mozallowfullscreen
-          ></iframe>"""
+        return ipd.IFrame(
+            src="lol.html",
+            width=self.width + self.EXTRA_PIXELS,
+            height=self.height + self.EXTRA_PIXELS,
+        )
+        # return f"""
+        #   <iframe
+        #         id="{self.name}"
+        #         width="{self.width + self.EXTRA_PIXELS}"
+        #         height="{self.height + self.EXTRA_PIXELS}"
+        #         frameborder="0"
+        #         srcdoc="{html.escape(self.generate_html())}"
+        #         border:none !important;
+        #         allowfullscreen webkitallowfullscreen mozallowfullscreen
+        #   ></iframe>"""
 
     def show(self) -> None:
         """Display the network on the output that was specified at initialization, otherwise simply display it."""
         iframe = self.generate_iframe()
         with self.output:  # Display the iframe within the Output.
             ipd.clear_output()
-            ipd.display(ipd.HTML(iframe))
+            ipd.display(iframe)
         self.maybe_display_output()
         with self.debug_output:
             logging.info("Called Network.show")
@@ -183,7 +187,7 @@ class Network(stormvogel.displayable.Displayable):
         iframe = self.generate_iframe()
         with self.output:
             ipd.clear_output()
-            ipd.display(ipd.HTML(iframe))
+            ipd.display(iframe)
         with self.debug_output:
             logging.info("Called Network.reload")
 
