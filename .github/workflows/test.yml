@@ -45,6 +45,9 @@ jobs:
       - name: Run tests
         run: poetry run pytest -vv
 
+      - name: List kernels
+        run: poetry run jupyter kernelspec list
+
       - name: Glob notebooks in docs folder
         uses: tj-actions/glob@v22
         id: glob
