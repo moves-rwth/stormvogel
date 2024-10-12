@@ -4,6 +4,8 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: [main]
+  pull_request:
+    types: [opened, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -58,15 +60,9 @@ jobs:
           files: |
             docs/**/*.ipynb
 
-<<<<<<< HEAD
-      - name: Run documentation notebooks
-        run: |
-          poetry run jupyter nbconvert --execute --ExecutePreprocessor.kernel_name=python3 --to notebook --inplace ${{ steps.glob.outputs.paths }}
-=======
      # - name: Run documentation notebooks
      #   run: |
      #     poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }}
->>>>>>> main
 
       - name: Generate docs
         working-directory: docs/
