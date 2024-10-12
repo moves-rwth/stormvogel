@@ -7,7 +7,7 @@ from typing import cast
 
 Parameter = str
 
-Number = float | Parameter | Fraction
+Number = float | Parameter | Fraction | int
 
 
 class ModelType(Enum):
@@ -53,31 +53,54 @@ class State:
         features: The features of this state. Corresponds to Storm features.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
-        observation: the observation of this state in case the model is a pomdp
+        observation: the observation of this state in case the model is a pomdp.
+        name: the name of this state.
     """
 
-    # name: str | None
     labels: list[str]
     features: dict[str, int]
     id: int
     model: "Model"
     observation: Observation | None
+    name: str
 
-    def __init__(self, labels: list[str], features: dict[str, int], id: int, model):
+    def __init__(
+        self,
+        labels: list[str],
+        features: dict[str, int],
+        id: int,
+        model,
+        name: str | None = None,
+    ):
+        self.model = model
+
+        if id in self.model.states.keys():
+            raise RuntimeError(
+                "There is already a state with this id. Make sure the id is unique."
+            )
+
+        names = [state.name for state in self.model.states.values()]
+        if name in names:
+            raise RuntimeError(
+                "There is already a state with this name. Make sure the name is unique."
+            )
+
         self.labels = labels
         self.features = features
         self.id = id
-        self.model = model
         self.observation = None
 
-        # TODO how to handle state names?
+        if name is None:
+            self.name = str(id)
+        else:
+            self.name = name
 
     def add_label(self, label: str):
         """adds a new label to the state"""
         if label not in self.labels:
             self.labels.append(label)
 
-    def new_observation(self, observation: int) -> Observation:
+    def set_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
         if self.model.get_type() == ModelType.POMDP:
             self.observation = Observation(observation)
@@ -115,9 +138,20 @@ class State:
                 action_list.append(action)
             return action_list
         else:
-            raise RuntimeError(
-                "The model this state belongs to does not support actions"
-            )
+            return [EmptyAction]
+
+    def get_outgoing_transitions(
+        self, action: "Action | None" = None
+    ) -> list[tuple[Number, "State"]]:
+        """gets the outgoing transitions"""
+        if action and self.model.supports_actions():
+            branch = self.model.transitions[self.id].transition[action]
+        elif self.model.supports_actions() and not action:
+            raise RuntimeError("You need to provide a specific action")
+        else:
+            branch = self.model.transitions[self.id].transition[EmptyAction]
+
+        return branch.branch
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -261,7 +295,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
 @dataclass
 class RewardModel:
     """Represents a state-exit reward model.
-
+    dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
     Args:
         name: Name of the reward model.
         rewards: The rewards, the keys are the state's ids (or state action pair ids).
@@ -357,6 +391,68 @@ class Model:
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
 
+    def is_well_defined(self) -> bool:
+        """Checks if all sums of outgoing transition probabilities for all states equal 1"""
+
+        if self.get_type() in (ModelType.DTMC, ModelType.MDP, ModelType.POMDP):
+            for state in self.states.values():
+                for action in state.available_actions():
+                    sum_prob = 0
+                    for transition in state.get_outgoing_transitions(action):
+                        if (
+                            isinstance(transition[0], float)
+                            or isinstance(transition[0], Fraction)
+                            or isinstance(transition[0], int)
+                        ):
+                            sum_prob += transition[0]
+                    if sum_prob != 1:
+                        return False
+        elif self.get_type() in (
+            ModelType.CTMC,
+            ModelType.MA,
+        ):
+            # TODO make it work for these models
+            raise RuntimeError("Not implemented")
+
+        return True
+
+    def normalize(self):
+        """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
+        if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+            self.add_self_loops()
+            for state in self.states.values():
+                for action in state.available_actions():
+                    sum_prob = 0
+                    for tuple in state.get_outgoing_transitions(action):
+                        if (
+                            isinstance(tuple[0], float)
+                            or isinstance(tuple[0], Fraction)
+                            or isinstance(tuple[0], int)
+                        ):
+                            sum_prob += tuple[0]
+
+                    new_transitions = []
+                    for tuple in state.get_outgoing_transitions(action):
+                        if (
+                            isinstance(tuple[0], float)
+                            or isinstance(tuple[0], Fraction)
+                            or isinstance(tuple[0], int)
+                        ):
+                            normalized_transition = (
+                                tuple[0] / sum_prob,
+                                tuple[1],
+                            )
+                            new_transitions.append(normalized_transition)
+                    self.transitions[state.id].transition[
+                        action
+                    ].branch = new_transitions
+        elif self.get_type() in (
+            ModelType.CTMC,
+            ModelType.MA,
+        ):
+            # TODO: As of now, for the CTMCs and MAs we only add self loops
+            self.add_self_loops()
+
     def __free_state_id(self):
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
@@ -367,9 +463,9 @@ class Model:
 
     def add_self_loops(self):
         """adds self loops to all states that do not have an outgoing transition"""
-        for state in self.states.items():
-            if self.transitions.get(state[0]) is None:
-                self.set_transitions(state[1], [(1, state[1])])
+        for id, state in self.states.items():
+            if self.transitions.get(id) is None:
+                self.set_transitions(state, [(float(1), state)])
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
@@ -378,13 +474,6 @@ class Model:
             if self.transitions.get(state[0]) is None:
                 all_states_outgoing_transition = False
         return all_states_outgoing_transition
-
-    def get_observation(self, state: State) -> Observation:
-        """Gets the observation for a given state."""
-        if self.supports_observations and state.observation is not None:
-            return self.states[state.id].get_observation()
-        else:
-            raise RuntimeError("Only POMDP models support observations")
 
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
@@ -439,6 +528,96 @@ class Model:
         self.actions[name] = action
         return action
 
+    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
+        if state in self.states.values():
+            # we remove the state from the transitions
+            # first we remove transitions that go into the state
+            remove_actions_index = []
+            for index, transition in self.transitions.items():
+                for action in transition.transition.items():
+                    for index_tuple, tuple in enumerate(action[1].branch):
+                        if tuple[1].id == state.id:
+                            self.transitions[index].transition[action[0]].branch.pop(
+                                index_tuple
+                            )
+
+                    # if we have empty objects we need to remove those as well
+                    if self.transitions[index].transition[action[0]].branch == []:
+                        remove_actions_index.append((action[0], index))
+            # here we remove those empty objects
+            for action, index in remove_actions_index:
+                self.transitions[index].transition.pop(action)
+                if self.transitions[index].transition == {}:
+                    self.transitions.pop(index)
+
+            # we remove transitions that come out of the state
+            self.transitions.pop(state.id)
+
+            # We remove the state
+            self.states.pop(state.id)
+
+            # we remove the exit rates from the state when applicable
+            if self.supports_rates and self.exit_rates is not None:
+                self.exit_rates.pop(state.id)
+
+            # we remove the state from the markovian state list when applicable
+            if self.get_type() == ModelType.MA and self.markovian_states is not None:
+                if state in self.markovian_states:
+                    self.markovian_states.remove(state)
+
+            # we normalize the model if specified to do so
+            if normalize_and_reassign_ids:
+                self.normalize()
+
+                self.states = {
+                    new_id: value
+                    for new_id, (old_id, value) in enumerate(
+                        sorted(self.states.items())
+                    )
+                }
+                for other_state in self.states.values():
+                    if other_state.id > state.id:
+                        other_state.id -= 1
+
+                self.transitions = {
+                    new_id: value
+                    for new_id, (old_id, value) in enumerate(
+                        sorted(self.transitions.items())
+                    )
+                }
+                if self.supports_rates and self.exit_rates is not None:
+                    self.exit_rates = {
+                        new_id: value
+                        for new_id, (old_id, value) in enumerate(
+                            sorted(self.exit_rates.items())
+                        )
+                    }
+
+    def remove_transitions_between_states(
+        self, state0: State, state1: State, normalize: bool = True
+    ):
+        """
+        Remove the transition(s) that start in state0 and go to state1.
+        Only works on models that don't support actions.
+        """
+        if not self.supports_actions():
+            for tuple in self.transitions[state0.id].transition[EmptyAction].branch:
+                if tuple[1] == state1:
+                    self.transitions[state0.id].transition[EmptyAction].branch.remove(
+                        tuple
+                    )
+            # if we have empty objects we need to remove those as well
+            if self.transitions[state0.id].transition[EmptyAction].branch == []:
+                self.transitions.pop(state0.id)
+
+            if normalize:
+                self.normalize()
+        else:
+            raise RuntimeError(
+                "This method only works for models that don't support actions."
+            )
+
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
         if not self.supports_actions():
@@ -482,7 +661,7 @@ class Model:
 
         return state
 
-    def get_states_with(self, label: str) -> list[State]:
+    def get_states_with_label(self, label: str) -> list[State]:
         """Get all states with a given label."""
         # TODO: slow, not sure if that will become a problem though
         collected_states = []
@@ -496,6 +675,16 @@ class Model:
         if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
         return self.states[state_id]
+
+    def get_state_by_name(self, state_name) -> State | None:
+        """Get a state by its name."""
+        names = [state.name for state in self.states.values()]
+        if state_name not in names:
+            raise RuntimeError("Requested a non-existing state")
+
+        for state in self.states.values():
+            if state.name == state_name:
+                return state
 
     def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
@@ -532,6 +721,13 @@ class Model:
         reward_model = RewardModel(name, {})
         self.rewards.append(reward_model)
         return reward_model
+
+    def get_observation(self, state: State) -> Observation:
+        """Gets the observation for a given state."""
+        if self.supports_observations and state.observation is not None:
+            return self.states[state.id].get_observation()
+        else:
+            raise RuntimeError("Only POMDP models support observations")
 
     def get_rate(self, state: State) -> Number:
         """Gets the rate of a state."""
