@@ -20,6 +20,9 @@ nbval = "^0.11.0"
 sphinx-autoapi = "^3.3.1"
 pytest-mock = "^3.14.0"
 matplotlib = "^3.9.2"
+anyio = "^4.6.0"
+nbmake = "^1.5.4"
+mock = "^5.1.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.2"
