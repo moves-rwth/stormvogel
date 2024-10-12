@@ -164,3 +164,84 @@ def test_remove_transitions_between_states():
     new_dtmc.add_self_loops()
 
     assert dtmc == new_dtmc
+
+
+def test_add_transitions():
+    dtmc = stormvogel.model.new_dtmc()
+    state = dtmc.new_state()
+    # A non-action model should throw an exception.
+    with pytest.raises(RuntimeError) as excinfo:
+        dtmc.add_transitions(
+            dtmc.get_initial_state(),
+            [(0.5, state)],
+        )
+    assert (
+        str(excinfo.value)
+        == "Models without actions do not support add_transitions. Use set_transitions instead."
+    )
+
+    # Empty transition case, act exactly like set_transitions.
+    mdp = stormvogel.model.new_mdp()
+    state = mdp.new_state()
+    mdp.add_transitions(
+        mdp.get_initial_state(),
+        [(0.5, state)],
+    )
+    mdp2 = stormvogel.model.new_mdp()
+    state2 = mdp2.new_state()
+    mdp2.set_transitions(
+        mdp2.get_initial_state(),
+        [(0.5, state2)],
+    )
+    assert mdp == mdp2
+
+    # Fail to add a real action to an empty action.
+    mdp3 = stormvogel.model.new_mdp()
+    state3 = mdp2.new_state()
+    mdp3.set_transitions(
+        mdp3.get_initial_state(),
+        [(0.5, state3)],
+    )
+    action3 = mdp3.new_action("action")
+    with pytest.raises(RuntimeError) as excinfo:
+        mdp3.add_transitions(mdp3.get_initial_state(), [(action3, state3)])
+    assert (
+        str(excinfo.value)
+        == "You cannot add a transition with an non-empty action to a transition which has an empty action. Use set_transition instead."
+    )
+    # And the other way round.
+    mdp3 = stormvogel.model.new_mdp()
+    state3 = mdp2.new_state()
+    action3 = mdp3.new_action("action")
+    mdp3.set_transitions(
+        mdp3.get_initial_state(),
+        [(action3, state3)],
+    )
+
+    with pytest.raises(RuntimeError) as excinfo:
+        mdp3.add_transitions(mdp3.get_initial_state(), [(0.5, state3)])
+    assert (
+        str(excinfo.value)
+        == "You cannot add a transition with an empty action to a transition which has no empty action. Use set_transition instead."
+    )
+
+    # Empty action case, add the branches together.
+    mdp5 = stormvogel.model.new_mdp()
+    state5 = mdp5.new_state()
+    mdp5.set_transitions(mdp5.get_initial_state(), [((0.4), state5)])
+    mdp5.add_transitions(mdp5.get_initial_state(), [(0.6, state5)])
+    assert mdp5.get_branch(mdp5.get_initial_state()).branch == [
+        ((0.4), state5),
+        (0.6, state5),
+    ]
+
+    # Non-empty action case, add the actions to the list.
+    mdp6 = stormvogel.model.new_mdp()
+    state6 = mdp6.new_state()
+    action6a = mdp6.new_action("a")
+    action6b = mdp6.new_action("b")
+    mdp6.set_transitions(mdp6.get_initial_state(), [(action6a, state6)])
+    mdp6.add_transitions(mdp6.get_initial_state(), [(action6b, state6)])
+    print(mdp6.get_transitions(mdp6.get_initial_state()).transition)
+    print([(action6a, state6), (action6b, state6)])
+    assert len(mdp6.get_transitions(mdp6.get_initial_state()).transition) == 2
