@@ -39,11 +39,11 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.layout.layout["height"] = self.layout.layout["misc"]["height"]
 
     def __failed_positions_save(self):
-        return f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}.json
+        return f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
 Sorry for the inconvenience. Here are some possible fixes.
 1) Restart the kernel and re-run.
 2) Is the port {stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} (from the machine where jupyterlab runs) available?
-If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {stormvogel.communication_server.server_port}:{stormvogel.communication_server.localhost_address}{stormvogel.communication_server.server_port} YOUR_SSH_CONFIG_NAME'.
+If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {stormvogel.communication_server.server_port}:{stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} YOUR_SSH_CONFIG_NAME'.
 3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
 If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run.
 This will speed up stormvogel and ignore this message, but it means that you cannot store positions in layout files.
@@ -61,11 +61,11 @@ Please contact the stormvogel developpers if you keep running into issues."""
                     if stormvogel.communication_server.server is None:
                         with self.debug_output:
                             logging.info(
-                                "Did not save node positions because the server is disabled."
+                                "Node positions won't be saved because the server is disabled."
                             )
                         with self.output:
                             print(
-                                f"Did not save the node positions of this graph in {self.layout.layout['saving']['filename']}.json because the server is disabled."
+                                "Node positions won't be saved because the server is disabled."
                             )
                     else:
                         try:
@@ -80,11 +80,19 @@ Please contact the stormvogel developpers if you keep running into issues."""
                                 )
                             with self.output:
                                 print(self.__failed_positions_save())
-
-            self.layout.save(
-                self.layout.layout["saving"]["filename"],
-                path_relative=self.layout.layout["saving"]["relative_path"],
-            )
+            try:
+                self.layout.save(
+                    self.layout.layout["saving"]["filename"],
+                    path_relative=self.layout.layout["saving"]["relative_path"],
+                )
+            except RuntimeError:
+                with self.output:
+                    print("Filename should end in .json")
+            except OSError:
+                with self.output:
+                    print(
+                        f'Bad or inaccessible path or filename: {self.layout.layout["saving"]["filename"]}'
+                    )
 
     def process_load_button(self):
         if self.layout.layout["saving"]["load_button"]:

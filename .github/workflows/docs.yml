@@ -1,7 +1,7 @@
 name: Docs
 
 on:
-  # Runs on pushes targeting the default branch
+  # Runs on pushes targeting the default branch and pull requests.
   push:
     branches: [main]
   pull_request:
