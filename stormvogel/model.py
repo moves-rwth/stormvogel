@@ -227,8 +227,10 @@ class Branch:
             return self.branch == other.branch
         return False
 
+    def __add__(self, other):
+        return Branch(self.branch + other.branch)
 
-@dataclass
+
 class Transition:
     """Represents a transition, which map actions to branches.
         Note that an EmptyAction may be used if we want a non-action transition.
@@ -239,6 +241,14 @@ class Transition:
     """
 
     transition: dict[Action, Branch]
+
+    def __init__(self, transition: dict[Action, Branch]):
+        # Input validation, see RuntimeError.
+        if len(transition) > 1 and EmptyAction in transition:
+            raise RuntimeError(
+                "It is impossible to create a transition that contains more than one action, and an emtpy action"
+            )
+        self.transition = transition
 
     def __str__(self):
         parts = []
@@ -257,6 +267,10 @@ class Transition:
             other_values.sort()
             return self_values == other_values
         return False
+
+    def has_empty_action(self) -> bool:
+        # Note that we don't have to deal with the corner case where there are both empty and non-empty transitions. This is dealt with at __init__.
+        return self.transition.keys() == {EmptyAction}
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -489,23 +503,56 @@ class Model:
         self.transitions[s.id] = transitions
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
-        """Add new transitions from a state."""
+        """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
         if not self.supports_actions():
             raise RuntimeError(
-                "In a model that does not support actions, you have to set transitions, not add them"
+                "Models without actions do not support add_transitions. Use set_transitions instead."
             )
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
-        for choice, branch in transitions.transition.items():
-            self.transitions[s.id].transition[choice] = branch
+        try:
+            existing_transitions = self.get_transitions(s)
+        except KeyError:
+            # Empty transitions case, act like set_transitions.
+            self.set_transitions(s, transitions)
+            return
 
-    def get_transitions(self, s: State) -> Transition:
-        """Get the transition at state s."""
-        return self.transitions[s.id]
+        # Adding a transition is only valid if they are both empty or both non-empty.
+        if (
+            not transitions.has_empty_action()
+            and existing_transitions.has_empty_action()
+        ):
+            raise RuntimeError(
+                "You cannot add a transition with an non-empty action to a transition which has an empty action. Use set_transition instead."
+            )
+        if (
+            transitions.has_empty_action()
+            and not existing_transitions.has_empty_action()
+        ):
+            raise RuntimeError(
+                "You cannot add a transition with an empty action to a transition which has no empty action. Use set_transition instead."
+            )
 
-    def get_branch(self, s: State) -> Branch:
+        # Empty action case, add the branches together.
+        if transitions.has_empty_action():
+            self.transitions[s.id].transition[EmptyAction] += transitions.transition[
+                EmptyAction
+            ]
+        else:
+            for choice, branch in transitions.transition.items():
+                self.transitions[s.id].transition[choice] = branch
+
+    def get_transitions(self, state_or_id: State | int) -> Transition:
+        """Get the transition at state s. Throws a KeyError if not present."""
+        if isinstance(state_or_id, State):
+            return self.transitions[state_or_id.id]
+        else:
+            return self.transitions[state_or_id]
+
+    def get_branch(self, state_or_id: State | int) -> Branch:
         """Get the branch at state s. Only intended for emtpy transitions, otherwise a RuntimeError is thrown."""
-        transition = self.transitions[s.id].transition
+        s_id = state_or_id if isinstance(state_or_id, int) else state_or_id.id
+        transition = self.transitions[s_id].transition
         if EmptyAction not in transition:
             raise RuntimeError("Called get_branch on a non-empty transition.")
         return transition[EmptyAction]
