@@ -1,0 +1,241 @@
+
+          <iframe
+                id="studyJItnPUbGyS"
+                width="820"
+                height="620"
+                frameborder="0"
+                srcdoc="
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;title&gt;Network&lt;/title&gt;
+    &lt;script
+      type=&quot;text/javascript&quot;
+      src=&quot;https://unpkg.com/vis-network/standalone/umd/vis-network.min.js&quot;
+    &gt;&lt;/script&gt;
+    &lt;style type=&quot;text/css&quot;&gt;
+      #mynetwork {
+
+        width: 800px;
+        height: 600px;
+        border: 1px solid lightgray;
+
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: 5, y: -186 },
+{ id: 1, label: `studied`, group: &quot;states&quot;, x: 98, y: 11 },
+{ id: 2, label: `didn&#x27;t study
+R: 15`, group: &quot;states&quot;, x: -120, y: -7 },
+{ id: 3, label: `pass test
+R: 100`, group: &quot;states&quot;, x: 0, y: 99 },
+{ id: 4, label: `fail test
+R: 0`, group: &quot;states&quot;, x: -24, y: 37 },
+{ id: 5, label: `end`, group: &quot;states&quot;, x: -62, y: 182 },
+{ id: 10000000000, label: `study`, group: &quot;actions&quot;, x: 119, y: -118 },
+{ id: 10000000001, label: `don&#x27;t study`, group: &quot;actions&quot;, x: -122, y: -141 },
+]);
+        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: &quot;1&quot; },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 2, label: &quot;1&quot; },
+{ from: 1, to: 3, label: &quot;9/10&quot; },
+{ from: 1, to: 4, label: &quot;1/10&quot; },
+{ from: 2, to: 3, label: &quot;2/5&quot; },
+{ from: 2, to: 4, label: &quot;3/5&quot; },
+{ from: 3, to: 5, label: &quot;1&quot; },
+{ from: 4, to: 5, label: &quot;1&quot; },
+]);
+        var options = {
+  &quot;__fake_macros&quot;: {
+    &quot;__group_macro&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    }
+  },
+  &quot;groups&quot;: {
+    &quot;states&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#8ff0a4&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#ffc0cb&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;scheduled_actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
+    }
+  },
+  &quot;reload_button&quot;: false,
+  &quot;edges&quot;: {
+    &quot;arrows&quot;: &quot;to&quot;,
+    &quot;font&quot;: {
+      &quot;color&quot;: &quot;black&quot;,
+      &quot;size&quot;: 14
+    },
+    &quot;color&quot;: {
+      &quot;color&quot;: &quot;black&quot;
+    }
+  },
+  &quot;numbers&quot;: {
+    &quot;fractions&quot;: true,
+    &quot;digits&quot;: 5
+  },
+  &quot;results_and_rewards&quot;: {
+    &quot;show_results&quot;: true,
+    &quot;resultSymbol&quot;: &quot;\u2606&quot;,
+    &quot;show_rewards&quot;: true
+  },
+  &quot;layout&quot;: {
+    &quot;randomSeed&quot;: 5
+  },
+  &quot;misc&quot;: {
+    &quot;enable_physics&quot;: true,
+    &quot;width&quot;: 800,
+    &quot;height&quot;: 600,
+    &quot;explore&quot;: false
+  },
+  &quot;saving&quot;: {
+    &quot;relative_path&quot;: true,
+    &quot;filename&quot;: &quot;pinkgreen.json&quot;,
+    &quot;save_button&quot;: false,
+    &quot;load_button&quot;: false
+  },
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: 5,
+      &quot;y&quot;: -186
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: 98,
+      &quot;y&quot;: 11
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: -120,
+      &quot;y&quot;: -7
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 99
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: -24,
+      &quot;y&quot;: 37
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: -62,
+      &quot;y&quot;: 182
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: 119,
+      &quot;y&quot;: -118
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: -122,
+      &quot;y&quot;: -141
+    }
+  },
+  &quot;width&quot;: 800,
+  &quot;height&quot;: 600,
+  &quot;physics&quot;: true
+};
+        //js
+var container = document.getElementById(&quot;mynetwork&quot;);
+var data = {
+    nodes: nodes,
+    edges: edges,
+};
+var network = new vis.Network(container, data, options);
+function makeAllNodesInvisible() {
+    ids = nodes.getIds();
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = true;
+        nodes.update(node);
+    }
+};
+function makeNeighborsVisible(myNode) {
+    var ids = network.getConnectedNodes(myNode, &#x27;to&#x27;);
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = false;
+        nodes.update(node);
+    }
+};
+function makeNodeVisible(nodeId) {
+    var node = nodes.get(nodeId);
+    node[&quot;hidden&quot;] = false;
+    nodes.update(node);
+};
+network.on( &#x27;click&#x27;, function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+"
+                border:none !important;
+                allowfullscreen webkitallowfullscreen mozallowfullscreen
+          ></iframe>

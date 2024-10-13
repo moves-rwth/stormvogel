@@ -1,5 +1,8 @@
 """Contains the code responsible for model visualization."""
 
+# Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
+# If you remove a with output: statement, everything might just break, be prepared.
+
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -69,16 +72,11 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
         )
-        self.nt: stormvogel.visjs.Network | None = None
         self.do_init_server: bool = do_init_server
+        self.__create_nt()
 
-    def show(self) -> None:
-        """(Re-)load the Network and display if self.do_display is True."""
-        with self.debug_output:
-            logging.info("Called Visualization.show()")
-        with self.output:
-            ipd.clear_output()
-        self.nt = stormvogel.visjs.Network(
+    def __create_nt(self) -> None:
+        self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
             name=self.name,
             width=self.layout.layout["misc"]["width"],
             height=self.layout.layout["misc"]["height"],
@@ -87,6 +85,14 @@ class Visualization(stormvogel.displayable.Displayable):
             do_display=False,
             do_init_server=self.do_init_server,
         )
+
+    def show(self) -> None:
+        """(Re-)load the Network and display if self.do_display is True."""
+        with self.debug_output:
+            logging.info("Called Visualization.show()")
+        with self.output:
+            ipd.clear_output()
+        self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
             self.nt.enable_exploration_mode(self.model.get_initial_state().id)
         self.layout.set_groups(self.separate_labels)
