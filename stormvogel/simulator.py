@@ -94,6 +94,7 @@ def simulate_path(
     model: stormvogel.model.Model,
     steps: int = 1,
     scheduler: stormvogel.result.Scheduler | None = None,
+    seed: int | None = None,
 ) -> Path:
     """
     Simulates the model a given number of steps.
@@ -111,7 +112,10 @@ def simulate_path(
 
     # we initialize the simulator
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
-    simulator = stormpy.simulator.create_simulator(stormpy_model)
+    if seed:
+        simulator = stormpy.simulator.create_simulator(stormpy_model, seed)
+    else:
+        simulator = stormpy.simulator.create_simulator(stormpy_model)
     assert simulator is not None
 
     # we start adding states or state action pairs to the path
@@ -156,6 +160,7 @@ def simulate(
     steps: int = 1,
     runs: int = 1,
     scheduler: stormvogel.result.Scheduler | None = None,
+    seed: int | None = None,
 ) -> stormvogel.model.Model | None:
     """
     Simulates the model a given number of steps for a given number of runs.
@@ -174,7 +179,10 @@ def simulate(
     # we initialize the simulator
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
     assert stormpy_model is not None
-    simulator = stormpy.simulator.create_simulator(stormpy_model)
+    if seed:
+        simulator = stormpy.simulator.create_simulator(stormpy_model, seed)
+    else:
+        simulator = stormpy.simulator.create_simulator(stormpy_model)
     assert simulator is not None
 
     # we keep track of all discovered states over all runs and add them to the partial model
@@ -185,9 +193,14 @@ def simulate(
     assert len(model.rewards) in [0, 1]
     if model.rewards:
         reward_model = partial_model.add_rewards(model.rewards[0].name)
+        reward_model.set(
+            partial_model.get_initial_state(),
+            model.rewards[0].get(model.get_initial_state()),
+        )
     else:
         reward_model = None
 
+    discovered_states = {0}
     if not partial_model.supports_actions():
         for i in range(runs):
             simulator.restart()
@@ -195,10 +208,11 @@ def simulate(
                 state, reward, labels = simulator.step()
 
                 # we add to the partial model what we discovered (if new)
-                if state not in partial_model.states.keys():
+                if state not in discovered_states:
+                    discovered_states.add(state)
                     partial_model.new_state(list(labels))
                 if reward_model:
-                    reward_model.set(model.get_state_by_id(state), reward)
+                    reward_model.set(model.get_state_by_id(state), reward[0])
 
                 if simulator.is_done():
                     break
@@ -233,9 +247,10 @@ def simulate(
                         state
                     )
                     state_action_pair = row_group + select_action
-                    reward_model.set_action_state(state_action_pair, reward)
+                    reward_model.set_action_state(state_action_pair, reward[0])
                 state, labels = discovery[0], discovery[2]
-                if state not in partial_model.states.keys():
+                if state not in discovered_states:
+                    discovered_states.add(state)
                     partial_model.new_state(list(labels))
 
                 if simulator.is_done():
