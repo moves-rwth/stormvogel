@@ -8,6 +8,8 @@ import stormpy.examples
 import examples.die
 import examples.monty_hall
 import examples.monty_hall_pomdp
+import examples.nuclear_fusion_ctmc
+import examples.simple_ma
 import random
 
 
@@ -32,8 +34,6 @@ class Path:
         | dict[int, stormvogel.model.State],
         model: stormvogel.model.Model,
     ):
-        if model.supports_rates():
-            raise NotImplementedError
         self.path = path
         self.model = model
 
@@ -83,7 +83,7 @@ class Path:
                     and isinstance(t[0], stormvogel.model.Action)
                     and isinstance(t[1], stormvogel.model.State)
                 )
-                path += f" --action: {t[0].name}--> state: {t[1].id}"
+                path += f" --(action: {t[0].name})--> state: {t[1].id}"
         else:
             for state in self.path.values():
                 path += f" --> state: {state.id}"
@@ -109,39 +109,42 @@ def simulate_path(
         assert action is not None
         return available_actions.index(action)
 
-    if not model.supports_rates():
-        # we initialize the simulator
-        stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
-        simulator = stormpy.simulator.create_simulator(stormpy_model)
-        assert simulator is not None
+    # we initialize the simulator
+    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+    simulator = stormpy.simulator.create_simulator(stormpy_model)
+    assert simulator is not None
 
-        # we start adding states or state action pairs to the path
-        if not model.supports_actions():
-            path = {}
-            simulator.restart()
-            for i in range(steps):
-                state, reward, labels = simulator.step()
-                path[i + 1] = model.states[state]
-                if simulator.is_done():
-                    break
-        else:
-            path = {}
-            state, reward, labels = simulator.restart()
-            for i in range(steps):
-                actions = simulator.available_actions()
-                select_action = (
-                    random.randint(0, len(actions) - 1)
-                    if not scheduler
-                    else get_range_index(state)
-                )
-                new_action = actions[select_action]
-                stormvogel_action = model.states[state].available_actions()[new_action]
-                state, reward, labels = simulator.step(actions[select_action])
-                path[i + 1] = (stormvogel_action, model.states[state])
-                if simulator.is_done():
-                    break
+    # we start adding states or state action pairs to the path
+    if not model.supports_actions():
+        path = {}
+        simulator.restart()
+        for i in range(steps):
+            # for each step we add a state to the path
+            state, reward, labels = simulator.step()
+            path[i + 1] = model.states[state]
+            if simulator.is_done():
+                break
     else:
-        raise NotImplementedError
+        if model.get_type() == stormvogel.model.ModelType.POMDP:
+            simulator.set_full_observability(True)
+        path = {}
+        state, reward, labels = simulator.restart()
+        for i in range(steps):
+            # we first choose an action (randomly or according to scheduler)
+            actions = simulator.available_actions()
+            select_action = (
+                random.randint(0, len(actions) - 1)
+                if not scheduler
+                else get_range_index(state)
+            )
+
+            # we add the state action pair to the path
+            stormvogel_action = stormvogel.model.EmptyAction
+            next_step = simulator.step(actions[select_action])
+            state, reward, labels = next_step
+            path[i + 1] = (stormvogel_action, model.states[state])
+            if simulator.is_done():
+                break
 
     path_object = Path(path, model)
 
@@ -168,83 +171,80 @@ def simulate(
         assert action is not None
         return available_actions.index(action)
 
-    if not model.supports_rates():
-        # we initialize the simulator
-        stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
-        assert stormpy_model is not None
-        simulator = stormpy.simulator.create_simulator(stormpy_model)
-        assert simulator is not None
+    # we initialize the simulator
+    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+    assert stormpy_model is not None
+    simulator = stormpy.simulator.create_simulator(stormpy_model)
+    assert simulator is not None
 
-        # we keep track of all discovered states over all runs and add them to the partial model
-        # we also add the discovered rewards and actions to the partial model if present
-        partial_model = stormvogel.model.new_model(model.get_type())
+    # we keep track of all discovered states over all runs and add them to the partial model
+    # we also add the discovered rewards and actions to the partial model if present
+    partial_model = stormvogel.model.new_model(model.get_type())
 
-        # we currently only support one reward model for partial models
-        assert len(model.rewards) in [0, 1]
-        if model.rewards:
-            reward_model = partial_model.add_rewards(model.rewards[0].name)
-        else:
-            reward_model = None
+    # we currently only support one reward model for partial models
+    assert len(model.rewards) in [0, 1]
+    if model.rewards:
+        reward_model = partial_model.add_rewards(model.rewards[0].name)
+    else:
+        reward_model = None
 
-        if not partial_model.supports_actions():
-            for i in range(runs):
-                simulator.restart()
-                for j in range(steps):
-                    state, reward, labels = simulator.step()
+    if not partial_model.supports_actions():
+        for i in range(runs):
+            simulator.restart()
+            for j in range(steps):
+                state, reward, labels = simulator.step()
 
-                    # we add to the partial model what we discovered (if new)
-                    if state not in partial_model.states.keys():
-                        partial_model.new_state(list(labels))
-                    if reward_model:
-                        reward_model.set(model.get_state_by_id(state), reward)
+                # we add to the partial model what we discovered (if new)
+                if state not in partial_model.states.keys():
+                    partial_model.new_state(list(labels))
+                if reward_model:
+                    reward_model.set(model.get_state_by_id(state), reward)
 
-                    if simulator.is_done():
-                        break
-        else:
-            for i in range(runs):
-                state, reward, labels = simulator.restart()
-                for j in range(steps):
-                    # we first choose an action
-                    actions = simulator.available_actions()
-                    select_action = (
-                        random.randint(0, len(actions) - 1)
-                        if not scheduler
-                        else get_range_index(state)
+                if simulator.is_done():
+                    break
+    else:
+        for i in range(runs):
+            state, reward, labels = simulator.restart()
+            for j in range(steps):
+                # we first choose an action
+
+                actions = simulator.available_actions()
+                select_action = (
+                    random.randint(0, len(actions) - 1)
+                    if not scheduler
+                    else get_range_index(state)
+                )
+
+                # we add the action to the partial model
+                assert partial_model.actions is not None
+                if (
+                    model.states[state].available_actions()[select_action]
+                    not in partial_model.actions.values()
+                ):
+                    partial_model.new_action(
+                        model.states[state].available_actions()[select_action].name
                     )
 
-                    # we add the action to the partial model
-                    assert partial_model.actions is not None
-                    if (
-                        model.states[state].available_actions()[select_action]
-                        not in partial_model.actions.values()
-                    ):
-                        partial_model.new_action(
-                            model.states[state].available_actions()[select_action].name
-                        )
+                # we add the other discoveries to the partial model
+                discovery = simulator.step(actions[select_action])
+                reward = discovery[1]
+                if reward_model:
+                    row_group = stormpy_model.transition_matrix.get_row_group_start(
+                        state
+                    )
+                    state_action_pair = row_group + select_action
+                    reward_model.set_action_state(state_action_pair, reward)
+                state, labels = discovery[0], discovery[2]
+                if state not in partial_model.states.keys():
+                    partial_model.new_state(list(labels))
 
-                    # we add the other discoveries to the partial model
-                    discovery = simulator.step(actions[select_action])
-                    reward = discovery[1]
-                    if reward_model:
-                        row_group = stormpy_model.transition_matrix.get_row_group_start(
-                            state
-                        )
-                        state_action_pair = row_group + select_action
-                        reward_model.set_action_state(state_action_pair, reward)
-                    state, labels = discovery[0], discovery[2]
-                    if state not in partial_model.states.keys():
-                        partial_model.new_state(list(labels))
-
-                    if simulator.is_done():
-                        break
-    else:
-        raise NotImplementedError
+                if simulator.is_done():
+                    break
 
     return partial_model
 
 
 if __name__ == "__main__":
-    """
     # we first test it with a dtmc
     dtmc = examples.die.create_die_dtmc()
     rewardmodel = dtmc.add_rewards("rewardmodel")
@@ -253,11 +253,8 @@ if __name__ == "__main__":
 
     partial_model = simulate(dtmc, 1, 10)
     print(partial_model)
-    print(partial_model.rewards[0])
     path = simulate_path(dtmc, 5)
-    #print(path)
-
-    """
+    print(path)
 
     # then we test it with an mdp
     mdp = examples.monty_hall.create_monty_hall_mdp()
@@ -274,16 +271,10 @@ if __name__ == "__main__":
     path = simulate_path(mdp, 5)
     print(partial_model)
     assert partial_model is not None
-    # print(partial_model.actions)
-    print(partial_model.rewards[0])
-    print(mdp.rewards)
-    # print(path)
-    """
+    print(path)
+
     # then we test it with a pomdp
     pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
-    # rewardmodel = pomdp.add_rewards("rewardmodel")
-    # for i in range(67):
-    #    rewardmodel.rewards[i] = 5
 
     taken_actions = {}
     for id, state in pomdp.states.items():
@@ -293,6 +284,27 @@ if __name__ == "__main__":
     partial_model = simulate(pomdp, 10, 10, scheduler)
     path = simulate_path(pomdp, 5)
     print(partial_model)
-    # print(partial_model.actions)
     print(path)
+
+    # then we test it with a ctmc
+    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    partial_model = simulate(ctmc, 10, 10)
+    path = simulate_path(ctmc, 5)
+    print(partial_model)
+    print(path)
+
+    # TODO Markov automatas
+
+    """
+    ma = examples.simple_ma.create_simple_ma()
+
+    taken_actions = {}
+    for id, state in ma.states.items():
+        taken_actions[id] = state.available_actions()[0]
+    scheduler = stormvogel.result.Scheduler(ma, taken_actions)
+
+    partial_model = simulate(ma, 10, 10, scheduler)
+    #path = simulate_path(ma, 5)
+    print(partial_model)
+    #print(path)
     """
