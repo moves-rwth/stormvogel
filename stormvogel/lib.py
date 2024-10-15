@@ -60,10 +60,9 @@ def display_value_iteration_result(
         labels (list[str]): the names of all the states.
     """
     fig, ax = plt.subplots(1, 1)
-    yticks = [s.labels[0] for s in labels] + [""]
     ax.set_xticks(range(len(res)))
     ax.set_yticks(range(len(res[0]) + 1))
-    ax.set_yticklabels(yticks)
+    ax.set_yticklabels(labels + [""])
 
     ax.imshow(invert_2d_list(res), cmap="hot", interpolation="nearest", aspect="equal")
     plt.xlabel("steps")
