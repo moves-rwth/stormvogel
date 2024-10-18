@@ -189,17 +189,18 @@ def simulate(
     # we also add the discovered rewards and actions to the partial model if present
     partial_model = stormvogel.model.new_model(model.get_type())
 
-    # we currently only support one reward model for partial models
-    assert len(model.rewards) in [0, 1]
+    # we add each rewardmodel to the partial model
     if model.rewards:
-        reward_model = partial_model.add_rewards(model.rewards[0].name)
-        reward_model.set(
-            partial_model.get_initial_state(),
-            model.rewards[0].get(model.get_initial_state()),
-        )
-    else:
-        reward_model = None
+        for index, reward in enumerate(model.rewards):
+            reward_model = partial_model.add_rewards(model.rewards[index].name)
 
+            # we already set the rewards for the initial state
+            reward_model.set(
+                partial_model.get_initial_state(),
+                model.rewards[index].get(model.get_initial_state()),
+            )
+
+    # now we start stepping through the model
     discovered_states = {0}
     if not partial_model.supports_actions():
         for i in range(runs):
@@ -211,8 +212,8 @@ def simulate(
                 if state not in discovered_states:
                     discovered_states.add(state)
                     partial_model.new_state(list(labels))
-                if reward_model:
-                    reward_model.set(model.get_state_by_id(state), reward[0])
+                for index, rewardmodel in enumerate(partial_model.rewards):
+                    rewardmodel.set(model.get_state_by_id(state), reward[index])
 
                 if simulator.is_done():
                     break
@@ -242,12 +243,12 @@ def simulate(
                 # we add the other discoveries to the partial model
                 discovery = simulator.step(actions[select_action])
                 reward = discovery[1]
-                if reward_model:
+                for index, rewardmodel in enumerate(partial_model.rewards):
                     row_group = stormpy_model.transition_matrix.get_row_group_start(
                         state
                     )
                     state_action_pair = row_group + select_action
-                    reward_model.set_action_state(state_action_pair, reward[0])
+                    rewardmodel.set_action_state(state_action_pair, reward[index])
                 state, labels = discovery[0], discovery[2]
                 if state not in discovered_states:
                     discovered_states.add(state)
@@ -260,22 +261,31 @@ def simulate(
 
 
 if __name__ == "__main__":
+    """
     # we first test it with a dtmc
     dtmc = examples.die.create_die_dtmc()
     rewardmodel = dtmc.add_rewards("rewardmodel")
     for stateid in dtmc.states.keys():
-        rewardmodel.rewards[stateid] = 5
+        rewardmodel.rewards[stateid] = 1
+
+    rewardmodel2 = dtmc.add_rewards("rewardmodel2")
+    for stateid in dtmc.states.keys():
+        rewardmodel2.rewards[stateid] = 2
 
     partial_model = simulate(dtmc, 1, 10)
     print(partial_model)
     path = simulate_path(dtmc, 5)
     print(path)
+    """
 
     # then we test it with an mdp
     mdp = examples.monty_hall.create_monty_hall_mdp()
     rewardmodel = mdp.add_rewards("rewardmodel")
     for i in range(67):
         rewardmodel.rewards[i] = i
+    rewardmodel2 = mdp.add_rewards("rewardmodel2")
+    for i in range(67):
+        rewardmodel2.rewards[i] = i
 
     taken_actions = {}
     for id, state in mdp.states.items():
@@ -287,7 +297,9 @@ if __name__ == "__main__":
     print(partial_model)
     assert partial_model is not None
     print(path)
+    print(partial_model.rewards)
 
+    """
     # then we test it with a pomdp
     pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
 
@@ -310,7 +322,7 @@ if __name__ == "__main__":
 
     # TODO Markov automatas
 
-    """
+
     ma = examples.simple_ma.create_simple_ma()
 
     taken_actions = {}
