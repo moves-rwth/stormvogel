@@ -765,6 +765,7 @@ class Model:
                 and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
+                # TODO: and self.actions ==  other.actions
             )
         return False
 

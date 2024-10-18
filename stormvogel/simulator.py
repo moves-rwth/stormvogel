@@ -129,10 +129,11 @@ def simulate_path(
             if simulator.is_done():
                 break
     else:
+        state = 0
         if model.get_type() == stormvogel.model.ModelType.POMDP:
             simulator.set_full_observability(True)
         path = {}
-        state, reward, labels = simulator.restart()
+        simulator.restart()
         for i in range(steps):
             # we first choose an action (randomly or according to scheduler)
             actions = simulator.available_actions()
@@ -143,7 +144,7 @@ def simulate_path(
             )
 
             # we add the state action pair to the path
-            stormvogel_action = stormvogel.model.EmptyAction
+            stormvogel_action = model.states[state].available_actions()[select_action]
             next_step = simulator.step(actions[select_action])
             state, reward, labels = next_step
             path[i + 1] = (stormvogel_action, model.states[state])
@@ -219,11 +220,12 @@ def simulate(
                 if simulator.is_done():
                     break
     else:
+        state = 0
         for i in range(runs):
-            state, reward, labels = simulator.restart()
+            # state, reward, labels = simulator.restart()
+            simulator.restart()
             for j in range(steps):
                 # we first choose an action
-
                 actions = simulator.available_actions()
                 select_action = (
                     random.randint(0, len(actions) - 1)
