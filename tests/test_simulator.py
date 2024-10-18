@@ -9,7 +9,13 @@ def test_simulate():
     dtmc = examples.die.create_die_dtmc()
     rewardmodel = dtmc.add_rewards("rewardmodel")
     for stateid in dtmc.states.keys():
-        rewardmodel.rewards[stateid] = 5
+        rewardmodel.rewards[stateid] = 3
+    rewardmodel2 = dtmc.add_rewards("rewardmodel2")
+    for stateid in dtmc.states.keys():
+        rewardmodel2.rewards[stateid] = 2
+    rewardmodel3 = dtmc.add_rewards("rewardmodel3")
+    for stateid in dtmc.states.keys():
+        rewardmodel3.rewards[stateid] = 1
     partial_model = stormvogel.simulator.simulate(dtmc, runs=5, steps=1, seed=1)
 
     # we make the partial model that should be created by the simulator
@@ -20,9 +26,13 @@ def test_simulate():
 
     rewardmodel = other_dtmc.add_rewards("rewardmodel")
     for stateid in other_dtmc.states.keys():
-        rewardmodel.rewards[stateid] = float(5)
-
-    # print(partial_model.rewards, other_dtmc.rewards)
+        rewardmodel.rewards[stateid] = float(3)
+    rewardmodel2 = other_dtmc.add_rewards("rewardmodel2")
+    for stateid in other_dtmc.states.keys():
+        rewardmodel2.rewards[stateid] = float(2)
+    rewardmodel3 = other_dtmc.add_rewards("rewardmodel3")
+    for stateid in other_dtmc.states.keys():
+        rewardmodel3.rewards[stateid] = float(1)
 
     assert partial_model == other_dtmc
 

@@ -207,13 +207,14 @@ def simulate(
             simulator.restart()
             for j in range(steps):
                 state, reward, labels = simulator.step()
+                reward.reverse()
 
                 # we add to the partial model what we discovered (if new)
                 if state not in discovered_states:
                     discovered_states.add(state)
-                    partial_model.new_state(list(labels))
-                for index, rewardmodel in enumerate(partial_model.rewards):
-                    rewardmodel.set(model.get_state_by_id(state), reward[index])
+                    new_state = partial_model.new_state(list(labels))
+                    for index, rewardmodel in enumerate(partial_model.rewards):
+                        rewardmodel.set(new_state, reward[index])
 
                 if simulator.is_done():
                     break

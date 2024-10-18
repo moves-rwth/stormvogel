@@ -292,7 +292,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     )
 
 
-@dataclass
+@dataclass(order=True)
 class RewardModel:
     """Represents a state-exit reward model.
     dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
@@ -762,7 +762,7 @@ class Model:
                 self.type == other.type
                 and self.states == other.states
                 and self.transitions == other.transitions
-                and self.rewards == other.rewards
+                and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
             )

@@ -110,6 +110,15 @@ def test_stormpy_to_stormvogel_and_back_dtmc():
 def test_stormvogel_to_stormpy_and_back_dtmc():
     # we test it for the die dtmc
     stormvogel_dtmc = examples.die.create_die_dtmc()
+
+    # we test if rewardmodels work:
+    rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
+    for stateid in stormvogel_dtmc.states.keys():
+        rewardmodel.rewards[stateid] = 1
+    rewardmodel2 = stormvogel_dtmc.add_rewards("rewardmodel2")
+    for stateid in stormvogel_dtmc.states.keys():
+        rewardmodel2.rewards[stateid] = 2
+
     # print(stormvogel_dtmc)
     stormpy_dtmc = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_dtmc)
     # print(stormpy_dtmc)
@@ -136,6 +145,15 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
     stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    # we additionally test if reward models work
+    rewardmodel = stormvogel_mdp.add_rewards("rewardmodel")
+    for i in range(67):
+        rewardmodel.rewards[i] = i
+    rewardmodel2 = stormvogel_mdp.add_rewards("rewardmodel2")
+    for i in range(67):
+        rewardmodel2.rewards[i] = i
+
     # print(stormvogel_mdp)
     stormpy_mdp = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_mdp)
     # print(stormpy_mdp)
