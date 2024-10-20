@@ -84,7 +84,7 @@ def test_simulate_path():
         ctmc,
     )
 
-    assert str(path) == str(other_path)
+    assert path == other_path
 
     # we make the monty hall pomdp and run simulate path with it
     pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
@@ -109,4 +109,4 @@ def test_simulate_path():
         pomdp,
     )
 
-    assert str(path) == str(other_path)
+    assert path == other_path
