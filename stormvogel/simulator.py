@@ -108,7 +108,14 @@ def simulate_path(
     seed: int | None = None,
 ) -> Path:
     """
-    Simulates the model a given number of steps and returns the path created by the process.
+    Simulates the model and returns the path created by the process.
+    Args:
+        model: The stormvogel model that the simulator should run on.
+        steps: The number of steps the simulator walks through the model.
+        scheduler: A stormvogel scheduler to determine what actions should be taken. Random if not provided.
+        seed: The seed for the function that determines for each state what the next state will be. Random seed if not provided.
+
+    Returns a path object.
     """
 
     def get_range_index(stateid: int):
@@ -172,8 +179,15 @@ def simulate(
     seed: int | None = None,
 ) -> stormvogel.model.Model | None:
     """
-    Simulates the model a given number of steps for a given number of runs.
-    Returns the partial model discovered by the simulator
+    Simulates the model.
+    Args:
+        model: The stormvogel model that the simulator should run on
+        steps: The number of steps the simulator walks through the model
+        runs: The number of times the model gets simulated.
+        scheduler: A stormvogel scheduler to determine what actions should be taken. Random if not provided.
+        seed: The seed for the function that determines for each state what the next state will be. Random seed if not provided.
+
+    Returns the partial model discovered by all the runs of the simulator together
     """
 
     def get_range_index(stateid: int):
