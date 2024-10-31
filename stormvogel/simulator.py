@@ -277,4 +277,7 @@ def simulate(
                 if simulator.is_done():
                     break
 
-    return partial_model
+    # TODO: refactor
+    states = list(partial_model.states.values())
+    sub_model = model.get_sub_model(states)
+    return sub_model

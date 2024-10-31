@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import cast
+import copy
 
 Parameter = str
 
@@ -390,6 +391,13 @@ class Model:
     def supports_observations(self):
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
+
+    def get_sub_model(self, states: list[State]) -> "Model":
+        sub_model = copy.deepcopy(self)
+        for state in states:
+            sub_model.delete_state(state, normalize=True, reassign_ids=True)
+
+        return sub_model
 
     def is_well_defined(self) -> bool:
         """Checks if all sums of outgoing transition probabilities for all states equal 1"""

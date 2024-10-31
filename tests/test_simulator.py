@@ -34,6 +34,8 @@ def test_simulate():
     for stateid in other_dtmc.states.keys():
         rewardmodel3.rewards[stateid] = float(1)
 
+    print(partial_model)
+
     assert partial_model == other_dtmc
 
     # we make a monty hall mdp and run the simulator with it
