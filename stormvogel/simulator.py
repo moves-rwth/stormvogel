@@ -5,11 +5,6 @@ import stormvogel.mapping
 import stormvogel.model
 import stormpy.examples.files
 import stormpy.examples
-import examples.die
-import examples.monty_hall
-import examples.monty_hall_pomdp
-import examples.nuclear_fusion_ctmc
-import examples.simple_ma
 import random
 
 
@@ -283,81 +278,3 @@ def simulate(
                     break
 
     return partial_model
-
-
-if __name__ == "__main__":
-    """
-    # we first test it with a dtmc
-    dtmc = examples.die.create_die_dtmc()
-    rewardmodel = dtmc.add_rewards("rewardmodel")
-    for stateid in dtmc.states.keys():
-        rewardmodel.rewards[stateid] = 1
-
-    rewardmodel2 = dtmc.add_rewards("rewardmodel2")
-    for stateid in dtmc.states.keys():
-        rewardmodel2.rewards[stateid] = 2
-
-    partial_model = simulate(dtmc, 1, 10)
-    print(partial_model)
-    path = simulate_path(dtmc, 5)
-    print(path)
-    """
-    """
-    # then we test it with an mdp
-    mdp = examples.monty_hall.create_monty_hall_mdp()
-    rewardmodel = mdp.add_rewards("rewardmodel")
-    for i in range(67):
-        rewardmodel.rewards[i] = i
-    rewardmodel2 = mdp.add_rewards("rewardmodel2")
-    for i in range(67):
-        rewardmodel2.rewards[i] = i
-
-    taken_actions = {}
-    for id, state in mdp.states.items():
-        taken_actions[id] = state.available_actions()[0]
-    scheduler = stormvogel.result.Scheduler(mdp, taken_actions)
-
-    partial_model = simulate(mdp, 10, 1, scheduler)
-    path = simulate_path(mdp, 5)
-    print(partial_model)
-    assert partial_model is not None
-    print(path)
-    print(partial_model.rewards)
-    """
-
-    # then we test it with a pomdp
-    pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
-
-    taken_actions = {}
-    for id, state in pomdp.states.items():
-        taken_actions[id] = state.available_actions()[0]
-    scheduler = stormvogel.result.Scheduler(pomdp, taken_actions)
-
-    partial_model = simulate(pomdp, 10, 10, scheduler)
-    path = simulate_path(pomdp, 5)
-    print(partial_model)
-    print(path)
-
-    """
-    # then we test it with a ctmc
-    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    partial_model = simulate(ctmc, 10, 10)
-    path = simulate_path(ctmc, 5)
-    print(partial_model)
-    print(path)
-
-    # TODO Markov automatas
-
-
-    ma = examples.simple_ma.create_simple_ma()
-
-    taken_actions = {}
-    for id, state in ma.states.items():
-        taken_actions[id] = state.available_actions()[0]
-    scheduler = stormvogel.result.Scheduler(ma, taken_actions)
-
-    partial_model = simulate(ma, 10, 10, scheduler)
-    #path = simulate_path(ma, 5)
-    print(partial_model)
-    #print(path)
-    """
