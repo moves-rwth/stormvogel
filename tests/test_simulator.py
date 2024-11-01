@@ -60,9 +60,13 @@ def test_simulate():
 
     # we make the partial model that should be created by the simulator
     other_mdp = stormvogel.model.new_mdp()
-    other_mdp.new_state(labels=["carchosen"])
-    other_mdp.new_state(labels=["open"])
-    other_mdp.new_state(labels=["goatrevealed"])
+    other_mdp.get_initial_state().set_transitions(
+        [(1 / 3, other_mdp.new_state("carchosen"))]
+    )
+    other_mdp.get_state_by_id(1).set_transitions([(1, other_mdp.new_state("open"))])
+    other_mdp.get_state_by_id(2).set_transitions(
+        [(1, other_mdp.new_state("goatrevealed"))]
+    )
 
     rewardmodel = other_mdp.add_rewards("rewardmodel")
     rewardmodel.rewards = {0: 0, 7: 7, 16: 16}

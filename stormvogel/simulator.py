@@ -254,7 +254,8 @@ def simulate(
                     break
     else:
         state = 0
-
+        last_state_partial = partial_model.get_initial_state()
+        last_state_id = 0
         for i in range(runs):
             simulator.restart()
             for j in range(steps):
@@ -268,15 +269,11 @@ def simulate(
 
                 # we add the action to the partial model
                 assert partial_model.actions is not None
-                if (
-                    model.states[state].available_actions()[select_action]
-                    not in partial_model.actions.values()
-                ):
-                    partial_model.new_action(
-                        model.states[state].available_actions()[select_action].name
-                    )
+                action = model.states[state].available_actions()[select_action]
+                if action not in partial_model.actions.values():
+                    partial_model.new_action(action.name)
 
-                # we add the other discoveries to the partial model
+                # we add the reward model to the partial model
                 discovery = simulator.step(actions[select_action])
                 reward = discovery[1]
                 for index, rewardmodel in enumerate(partial_model.rewards):
@@ -285,11 +282,24 @@ def simulate(
                     )
                     state_action_pair = row_group + select_action
                     rewardmodel.set_action_state(state_action_pair, reward[index])
+
+                # we add the state
                 state, labels = discovery[0], discovery[2]
                 if state not in discovered_states:
                     discovered_states.add(state)
-                    partial_model.new_state(list(labels))
 
+                    # we also add the transitions that we travelled through, so we need to keep track of the last state
+                    probability = 0
+                    transitions = model.get_transitions(last_state_id)
+                    for tuple in transitions.transition[action].branch:
+                        if tuple[1].id == state:
+                            probability += float(tuple[0])
+
+                    new_state = partial_model.new_state(list(labels))
+                    last_state_partial.add_transitions([(probability, new_state)])
+
+                    last_state_partial = new_state
+                    last_state_id = state
                 if simulator.is_done():
                     break
 
