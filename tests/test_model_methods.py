@@ -1,5 +1,6 @@
 import stormvogel.model
 import examples.monty_hall
+import examples.die
 import examples.nuclear_fusion_ctmc
 import pytest
 from typing import cast
@@ -170,15 +171,15 @@ def test_add_transitions():
     dtmc = stormvogel.model.new_dtmc()
     state = dtmc.new_state()
     # A non-action model should throw an exception.
-    with pytest.raises(RuntimeError) as excinfo:
-        dtmc.add_transitions(
-            dtmc.get_initial_state(),
-            [(0.5, state)],
-        )
-    assert (
-        str(excinfo.value)
-        == "Models without actions do not support add_transitions. Use set_transitions instead."
-    )
+    # with pytest.raises(RuntimeError) as excinfo:
+    #    dtmc.add_transitions(
+    #        dtmc.get_initial_state(),
+    #        [(0.5, state)],
+    #    )
+    # assert (
+    #    str(excinfo.value)
+    #    == "Models without actions do not support add_transitions. Use set_transitions instead."
+    # )
 
     # Empty transition case, act exactly like set_transitions.
     mdp = stormvogel.model.new_mdp()
@@ -242,6 +243,6 @@ def test_add_transitions():
     action6b = mdp6.new_action("b")
     mdp6.set_transitions(mdp6.get_initial_state(), [(action6a, state6)])
     mdp6.add_transitions(mdp6.get_initial_state(), [(action6b, state6)])
-    print(mdp6.get_transitions(mdp6.get_initial_state()).transition)
-    print([(action6a, state6), (action6b, state6)])
+    # print(mdp6.get_transitions(mdp6.get_initial_state()).transition)
+    # print([(action6a, state6), (action6b, state6)])
     assert len(mdp6.get_transitions(mdp6.get_initial_state()).transition) == 2

@@ -306,7 +306,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     )
 
 
-@dataclass
+@dataclass(order=True)
 class RewardModel:
     """Represents a state-exit reward model.
     dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
@@ -504,12 +504,10 @@ class Model:
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
         """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
-        if not self.supports_actions():
-            raise RuntimeError(
-                "Models without actions do not support add_transitions. Use set_transitions instead."
-            )
+
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
+
         try:
             existing_transitions = self.get_transitions(s)
         except KeyError:
@@ -517,30 +515,35 @@ class Model:
             self.set_transitions(s, transitions)
             return
 
-        # Adding a transition is only valid if they are both empty or both non-empty.
-        if (
-            not transitions.has_empty_action()
-            and existing_transitions.has_empty_action()
-        ):
-            raise RuntimeError(
-                "You cannot add a transition with an non-empty action to a transition which has an empty action. Use set_transition instead."
-            )
-        if (
-            transitions.has_empty_action()
-            and not existing_transitions.has_empty_action()
-        ):
-            raise RuntimeError(
-                "You cannot add a transition with an empty action to a transition which has no empty action. Use set_transition instead."
-            )
-
-        # Empty action case, add the branches together.
-        if transitions.has_empty_action():
-            self.transitions[s.id].transition[EmptyAction] += transitions.transition[
+        if not self.supports_actions():
+            self.transitions[s.id].transition[
                 EmptyAction
-            ]
+            ].branch += transitions.transition[EmptyAction].branch
         else:
-            for choice, branch in transitions.transition.items():
-                self.transitions[s.id].transition[choice] = branch
+            # Adding a transition is only valid if they are both empty or both non-empty.
+            if (
+                not transitions.has_empty_action()
+                and existing_transitions.has_empty_action()
+            ):
+                raise RuntimeError(
+                    "You cannot add a transition with an non-empty action to a transition which has an empty action. Use set_transition instead."
+                )
+            if (
+                transitions.has_empty_action()
+                and not existing_transitions.has_empty_action()
+            ):
+                raise RuntimeError(
+                    "You cannot add a transition with an empty action to a transition which has no empty action. Use set_transition instead."
+                )
+
+            # Empty action case, add the branches together.
+            if transitions.has_empty_action():
+                self.transitions[s.id].transition[EmptyAction] += (
+                    transitions.transition[EmptyAction]
+                )
+            else:
+                for choice, branch in transitions.transition.items():
+                    self.transitions[s.id].transition[choice] = branch
 
     def get_transitions(self, state_or_id: State | int) -> Transition:
         """Get the transition at state s. Throws a KeyError if not present."""
@@ -842,9 +845,10 @@ class Model:
                 self.type == other.type
                 and self.states == other.states
                 and self.transitions == other.transitions
-                and self.rewards == other.rewards
+                and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
+                # TODO: and self.actions ==  other.actions
             )
         return False
 
@@ -872,3 +876,8 @@ def new_pomdp(name: str | None = None):
 def new_ma(name: str | None = None):
     """Creates a MA."""
     return Model(name, ModelType.MA)
+
+
+def new_model(modeltype: ModelType, name: str | None = None):
+    """More general model creation function"""
+    return Model(name, modeltype)
