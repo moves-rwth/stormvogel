@@ -15,8 +15,8 @@ def create_die_dtmc():
     # we add self loops to all states with no outgoing transitions
     dtmc.add_self_loops()
 
-    # test if state deletion works
-    # dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
+    # test if state removal works
+    # dtmc.remove_state(dtmc.get_state_by_id(1), True, True)
 
     return dtmc
 

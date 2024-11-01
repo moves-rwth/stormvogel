@@ -120,10 +120,10 @@ class CommunicationServer:
         awaiting[identifier] = AWAITING
         logging.info(f"Request sent for: {identifier}")
         # Wait until result is received.
-        max_tries = 50
-        while max_tries > 0 and awaiting[identifier] == AWAITING:
+        MAX_TRIES = 10
+        while MAX_TRIES > 0 and awaiting[identifier] == AWAITING:
             sleep(0.2)
-            max_tries -= 1
+            MAX_TRIES -= 1
             logging.debug(f"Waiting for request result: {identifier}")
             logging.debug(f"Current awaiting[identifier]: {awaiting[identifier]}")
             ipd.display(ipd.HTML(html))

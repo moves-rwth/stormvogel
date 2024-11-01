@@ -173,7 +173,7 @@ class Network(stormvogel.displayable.Displayable):
         iframe = self.generate_iframe()
         with self.output:  # Display the iframe within the Output.
             ipd.clear_output()
-            ipd.display(ipd.HTML(iframe))
+            ipd.display(widgets.HTML(iframe))
         self.maybe_display_output()
         with self.debug_output:
             logging.info("Called Network.show")
@@ -183,7 +183,7 @@ class Network(stormvogel.displayable.Displayable):
         iframe = self.generate_iframe()
         with self.output:
             ipd.clear_output()
-            ipd.display(ipd.HTML(iframe))
+            ipd.display(widgets.HTML(iframe))
         with self.debug_output:
             logging.info("Called Network.reload")
 

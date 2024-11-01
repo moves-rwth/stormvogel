@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import cast
-import copy
 
 Parameter = str
 
@@ -228,8 +227,10 @@ class Branch:
             return self.branch == other.branch
         return False
 
+    def __add__(self, other):
+        return Branch(self.branch + other.branch)
 
-@dataclass
+
 class Transition:
     """Represents a transition, which map actions to branches.
         Note that an EmptyAction may be used if we want a non-action transition.
@@ -240,6 +241,14 @@ class Transition:
     """
 
     transition: dict[Action, Branch]
+
+    def __init__(self, transition: dict[Action, Branch]):
+        # Input validation, see RuntimeError.
+        if len(transition) > 1 and EmptyAction in transition:
+            raise RuntimeError(
+                "It is impossible to create a transition that contains more than one action, and an emtpy action"
+            )
+        self.transition = transition
 
     def __str__(self):
         parts = []
@@ -258,6 +267,10 @@ class Transition:
             other_values.sort()
             return self_values == other_values
         return False
+
+    def has_empty_action(self) -> bool:
+        # Note that we don't have to deal with the corner case where there are both empty and non-empty transitions. This is dealt with at __init__.
+        return self.transition.keys() == {EmptyAction}
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -392,13 +405,6 @@ class Model:
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
 
-    def get_sub_model(self, states: list[State]) -> "Model":
-        sub_model = copy.deepcopy(self)
-        for state in states:
-            sub_model.delete_state(state, normalize=True, reassign_ids=True)
-
-        return sub_model
-
     def is_well_defined(self) -> bool:
         """Checks if all sums of outgoing transition probabilities for all states equal 1"""
 
@@ -427,6 +433,7 @@ class Model:
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
         if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+            self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
@@ -457,8 +464,8 @@ class Model:
             ModelType.CTMC,
             ModelType.MA,
         ):
-            # TODO make it work for these models
-            raise RuntimeError("Not implemented")
+            # TODO: As of now, for the CTMCs and MAs we only add self loops
+            self.add_self_loops()
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
@@ -470,9 +477,9 @@ class Model:
 
     def add_self_loops(self):
         """adds self loops to all states that do not have an outgoing transition"""
-        for state in self.states.items():
-            if self.transitions.get(state[0]) is None:
-                self.set_transitions(state[1], [(float(1), state[1])])
+        for id, state in self.states.items():
+            if self.transitions.get(id) is None:
+                self.set_transitions(state, [(float(1), state)])
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
@@ -496,15 +503,62 @@ class Model:
         self.transitions[s.id] = transitions
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
-        """Add new transitions from a state."""
-        if not self.supports_actions():
-            raise RuntimeError(
-                "In a model that does not support actions, you have to set transitions, not add them"
-            )
+        """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
+
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
-        for choice, branch in transitions.transition.items():
-            self.transitions[s.id].transition[choice] = branch
+
+        try:
+            existing_transitions = self.get_transitions(s)
+        except KeyError:
+            # Empty transitions case, act like set_transitions.
+            self.set_transitions(s, transitions)
+            return
+
+        if not self.supports_actions():
+            self.transitions[s.id].transition[
+                EmptyAction
+            ].branch += transitions.transition[EmptyAction].branch
+        else:
+            # Adding a transition is only valid if they are both empty or both non-empty.
+            if (
+                not transitions.has_empty_action()
+                and existing_transitions.has_empty_action()
+            ):
+                raise RuntimeError(
+                    "You cannot add a transition with an non-empty action to a transition which has an empty action. Use set_transition instead."
+                )
+            if (
+                transitions.has_empty_action()
+                and not existing_transitions.has_empty_action()
+            ):
+                raise RuntimeError(
+                    "You cannot add a transition with an empty action to a transition which has no empty action. Use set_transition instead."
+                )
+
+            # Empty action case, add the branches together.
+            if transitions.has_empty_action():
+                self.transitions[s.id].transition[EmptyAction] += (
+                    transitions.transition[EmptyAction]
+                )
+            else:
+                for choice, branch in transitions.transition.items():
+                    self.transitions[s.id].transition[choice] = branch
+
+    def get_transitions(self, state_or_id: State | int) -> Transition:
+        """Get the transition at state s. Throws a KeyError if not present."""
+        if isinstance(state_or_id, State):
+            return self.transitions[state_or_id.id]
+        else:
+            return self.transitions[state_or_id]
+
+    def get_branch(self, state_or_id: State | int) -> Branch:
+        """Get the branch at state s. Only intended for emtpy transitions, otherwise a RuntimeError is thrown."""
+        s_id = state_or_id if isinstance(state_or_id, int) else state_or_id.id
+        transition = self.transitions[s_id].transition
+        if EmptyAction not in transition:
+            raise RuntimeError("Called get_branch on a non-empty transition.")
+        return transition[EmptyAction]
 
     def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
         """Creates a new action and returns it."""
@@ -524,19 +578,30 @@ class Model:
         self.actions[name] = action
         return action
 
-    def delete_state(
-        self, state: State, normalize: bool = False, reassign_ids: bool = False
-    ):
-        """properly deletes a state, it can optionally normalize the model and reassign ids automatically"""
+    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # we remove the state from the transitions
+            # first we remove transitions that go into the state
+            remove_actions_index = []
             for index, transition in self.transitions.items():
                 for action in transition.transition.items():
-                    for tuple in action[1].branch:
+                    for index_tuple, tuple in enumerate(action[1].branch):
                         if tuple[1].id == state.id:
-                            self.transitions[index].transition[action[0]].branch.remove(
-                                tuple
+                            self.transitions[index].transition[action[0]].branch.pop(
+                                index_tuple
                             )
+
+                    # if we have empty objects we need to remove those as well
+                    if self.transitions[index].transition[action[0]].branch == []:
+                        remove_actions_index.append((action[0], index))
+            # here we remove those empty objects
+            for action, index in remove_actions_index:
+                self.transitions[index].transition.pop(action)
+                if self.transitions[index].transition == {}:
+                    self.transitions.pop(index)
+
+            # we remove transitions that come out of the state
             self.transitions.pop(state.id)
 
             # We remove the state
@@ -551,8 +616,10 @@ class Model:
                 if state in self.markovian_states:
                     self.markovian_states.remove(state)
 
-            # we reassign the ids if specified to do so
-            if reassign_ids:
+            # we normalize the model if specified to do so
+            if normalize_and_reassign_ids:
+                self.normalize()
+
                 self.states = {
                     new_id: value
                     for new_id, (old_id, value) in enumerate(
@@ -577,20 +644,25 @@ class Model:
                         )
                     }
 
-            # we normalize the model if specified to do so
-            if normalize:
-                self.normalize()
-
-    def delete_transitions_between_states(self, state0: State, state1: State):
+    def remove_transitions_between_states(
+        self, state0: State, state1: State, normalize: bool = True
+    ):
         """
-        Deletes the transition(s) present between the two given states.
+        Remove the transition(s) that start in state0 and go to state1.
         Only works on models that don't support actions.
         """
         if not self.supports_actions():
-            for branch in self.transitions[state0.id].transition.values():
-                for tuple in branch.branch:
-                    if tuple[1] == state1:
-                        branch.branch.remove(tuple)
+            for tuple in self.transitions[state0.id].transition[EmptyAction].branch:
+                if tuple[1] == state1:
+                    self.transitions[state0.id].transition[EmptyAction].branch.remove(
+                        tuple
+                    )
+            # if we have empty objects we need to remove those as well
+            if self.transitions[state0.id].transition[EmptyAction].branch == []:
+                self.transitions.pop(state0.id)
+
+            if normalize:
+                self.normalize()
         else:
             raise RuntimeError(
                 "This method only works for models that don't support actions."
@@ -687,6 +759,9 @@ class Model:
             if model.name == name:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def get_states(self) -> dict[int, State]:
+        return self.states
 
     def add_rewards(self, name: str) -> RewardModel:
         """Creates a reward model with the specified name and adds returns it."""

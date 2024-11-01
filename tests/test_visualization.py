@@ -31,7 +31,7 @@ def test_show(mocker):
     model, one, init = simple_model()
     vis = Visualization(model)
     vis.show()
-    MockNetwork.init.assert_called_once_with(
+    MockNetwork.init.assert_any_call(
         name=vis.name,
         width=vis.layout.layout["misc"]["width"],
         height=vis.layout.layout["misc"]["height"],

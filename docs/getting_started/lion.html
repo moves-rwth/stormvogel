@@ -1,0 +1,298 @@
+
+          <iframe
+                id="lionqHgPxrJMSg"
+                width="610"
+                height="426"
+                frameborder="0"
+                srcdoc="
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;title&gt;Network&lt;/title&gt;
+    &lt;script
+      type=&quot;text/javascript&quot;
+      src=&quot;https://unpkg.com/vis-network/standalone/umd/vis-network.min.js&quot;
+    &gt;&lt;/script&gt;
+    &lt;style type=&quot;text/css&quot;&gt;
+      #mynetwork {
+
+        width: 590px;
+        height: 406px;
+        border: 1px solid lightgray;
+
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -218, y: 28 },
+{ id: 1, label: `full :D`, group: &quot;states&quot;, x: -28, y: 57 },
+{ id: 2, label: `satisfied :)`, group: &quot;states&quot;, x: -79, y: -14 },
+{ id: 3, label: `hungry :(`, group: &quot;states&quot;, x: -86, y: -156 },
+{ id: 4, label: `starving :((`, group: &quot;states&quot;, x: 147, y: -37 },
+{ id: 5, label: `rawr`, group: &quot;states&quot;, x: -386, y: 109 },
+{ id: 6, label: `hunt &gt;:D`, group: &quot;hunt_&gt;:D&quot;, x: 24, y: -96 },
+{ id: 7, label: `desparate hunt!`, group: &quot;desparate_hunt!&quot;, x: 81, y: 69 },
+{ id: 8, label: `dead...`, group: &quot;dead...&quot;, x: 126, y: 205 },
+]);
+        var edges = new vis.DataSet([{ from: 0, to: 2, label: &quot;1&quot; },
+{ from: 2, to: 3, label: &quot;1&quot; },
+{ from: 3, to: 6, label: &quot;1&quot; },
+{ from: 4, to: 7, label: &quot;1&quot; },
+{ from: 6, to: 1, label: &quot;1/2&quot; },
+{ from: 6, to: 4, label: &quot;3/10&quot; },
+{ from: 6, to: 2, label: &quot;1/5&quot; },
+{ from: 1, to: 2, label: &quot;1&quot; },
+{ from: 7, to: 1, label: &quot;1/5&quot; },
+{ from: 7, to: 4, label: &quot;3/10&quot; },
+{ from: 7, to: 8, label: &quot;1/10&quot; },
+{ from: 7, to: 2, label: &quot;2/5&quot; },
+{ from: 5, to: 5, label: &quot;1&quot; },
+{ from: 8, to: 8, label: &quot;1&quot; },
+]);
+        var options = {
+  &quot;__fake_macros&quot;: {
+    &quot;__group_macro&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    }
+  },
+  &quot;groups&quot;: {
+    &quot;states&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#f5c211&quot;,
+        &quot;border&quot;: &quot;#c64600&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;scheduled_actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
+    },
+    &quot;dead...&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#c0bfbc&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;hunt_&gt;:D&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#2ec27e&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;desparate_hunt!&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#ff7800&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    }
+  },
+  &quot;reload_button&quot;: false,
+  &quot;edges&quot;: {
+    &quot;arrows&quot;: &quot;to&quot;,
+    &quot;font&quot;: {
+      &quot;color&quot;: &quot;black&quot;,
+      &quot;size&quot;: 14
+    },
+    &quot;color&quot;: {
+      &quot;color&quot;: &quot;black&quot;
+    }
+  },
+  &quot;numbers&quot;: {
+    &quot;fractions&quot;: true,
+    &quot;digits&quot;: 5
+  },
+  &quot;results_and_rewards&quot;: {
+    &quot;show_results&quot;: true,
+    &quot;resultSymbol&quot;: &quot;\u2606&quot;,
+    &quot;show_rewards&quot;: true
+  },
+  &quot;layout&quot;: {
+    &quot;randomSeed&quot;: 5
+  },
+  &quot;misc&quot;: {
+    &quot;enable_physics&quot;: true,
+    &quot;width&quot;: 590,
+    &quot;height&quot;: 406,
+    &quot;explore&quot;: false
+  },
+  &quot;saving&quot;: {
+    &quot;relative_path&quot;: true,
+    &quot;filename&quot;: &quot;layouts/lion.json&quot;,
+    &quot;save_button&quot;: false,
+    &quot;load_button&quot;: false
+  },
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: -218,
+      &quot;y&quot;: 28
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: -28,
+      &quot;y&quot;: 57
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: -79,
+      &quot;y&quot;: -14
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: -86,
+      &quot;y&quot;: -156
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: 147,
+      &quot;y&quot;: -37
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: -386,
+      &quot;y&quot;: 109
+    },
+    &quot;6&quot;: {
+      &quot;x&quot;: 24,
+      &quot;y&quot;: -96
+    },
+    &quot;7&quot;: {
+      &quot;x&quot;: 81,
+      &quot;y&quot;: 69
+    },
+    &quot;8&quot;: {
+      &quot;x&quot;: 126,
+      &quot;y&quot;: 205
+    }
+  },
+  &quot;width&quot;: 590,
+  &quot;height&quot;: 406,
+  &quot;physics&quot;: true
+};
+        //js
+var container = document.getElementById(&quot;mynetwork&quot;);
+var data = {
+    nodes: nodes,
+    edges: edges,
+};
+var network = new vis.Network(container, data, options);
+function makeAllNodesInvisible() {
+    ids = nodes.getIds();
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = true;
+        nodes.update(node);
+    }
+};
+function makeNeighborsVisible(myNode) {
+    var ids = network.getConnectedNodes(myNode, &#x27;to&#x27;);
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = false;
+        nodes.update(node);
+    }
+};
+function makeNodeVisible(nodeId) {
+    var node = nodes.get(nodeId);
+    node[&quot;hidden&quot;] = false;
+    nodes.update(node);
+};
+network.on( &#x27;click&#x27;, function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+"
+                border:none !important;
+                allowfullscreen webkitallowfullscreen mozallowfullscreen
+          ></iframe>

@@ -20,9 +20,13 @@ def test_simulate():
 
     # we make the partial model that should be created by the simulator
     other_dtmc = stormvogel.model.new_dtmc()
-    other_dtmc.new_state(labels=["rolled5"])
-    other_dtmc.new_state(labels=["rolled0"])
-    other_dtmc.new_state(labels=["rolled1"])
+    other_dtmc.get_initial_state().set_transitions(
+        [
+            (1 / 6, other_dtmc.new_state("rolled5")),
+            (1 / 6, other_dtmc.new_state("rolled0")),
+            (1 / 6, other_dtmc.new_state("rolled1")),
+        ]
+    )
 
     rewardmodel = other_dtmc.add_rewards("rewardmodel")
     for stateid in other_dtmc.states.keys():
@@ -33,8 +37,6 @@ def test_simulate():
     rewardmodel3 = other_dtmc.add_rewards("rewardmodel3")
     for stateid in other_dtmc.states.keys():
         rewardmodel3.rewards[stateid] = float(1)
-
-    print(partial_model)
 
     assert partial_model == other_dtmc
 

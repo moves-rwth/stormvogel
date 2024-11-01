@@ -223,6 +223,7 @@ def simulate(
     if not partial_model.supports_actions():
         for i in range(runs):
             simulator.restart()
+            last_state = 0
             for j in range(steps):
                 state, reward, labels = simulator.step()
                 reward.reverse()
@@ -230,10 +231,25 @@ def simulate(
                 # we add to the partial model what we discovered (if new)
                 if state not in discovered_states:
                     discovered_states.add(state)
+
+                    # we also add the transitions that we travelled through, so we need to keep track of the last state
+                    probability = 0
+                    transitions = model.get_transitions(last_state)
+                    for tuple in transitions.transition[
+                        stormvogel.model.EmptyAction
+                    ].branch:
+                        if tuple[1].id == state:
+                            probability += float(tuple[0])
+
                     new_state = partial_model.new_state(list(labels))
+                    partial_model.get_state_by_id(last_state).add_transitions(
+                        [(probability, new_state)]
+                    )
+
                     for index, rewardmodel in enumerate(partial_model.rewards):
                         rewardmodel.set(new_state, reward[index])
 
+                    last_state = state
                 if simulator.is_done():
                     break
     else:
@@ -277,7 +293,4 @@ def simulate(
                 if simulator.is_done():
                     break
 
-    # TODO: refactor
-    states = list(partial_model.states.values())
-    sub_model = model.get_sub_model(states)
-    return sub_model
+    return partial_model
