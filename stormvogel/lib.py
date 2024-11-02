@@ -1,10 +1,51 @@
-from typing import Any
+"""Some example applications of the stormvogel API."""
+
+from functools import reduce
+from typing import Any, Iterable
 import stormvogel.model
 import matplotlib.pyplot as plt
 
-
 def naive_value_iteration(
-    model: stormvogel.model.Model, steps: int, starting_state: stormvogel.model.State
+    model: stormvogel.model.Model, epsilon: float, target_state: stormvogel.model.State
+) -> list[list[stormvogel.model.Number]]:
+    """Run naive value iteration. The result is a 2D list where result[n][m] is the probability to be in state m at step n.
+
+    Args:
+        model (stormvogel.model.Model): Target model.
+        steps (int): Amount of steps.
+        target_state (stormvogel.model.State): Target state of the model.
+
+    Returns:
+        list[list[float]]: The result is a 2D list where result[n][m] is the value of state m at iteration n.
+    """
+    if epsilon <= 0:
+        RuntimeError("The algorithm will not terminate if epsilon is zero.")
+
+    # Create a dynamic matrix (list of lists) to store the result.
+    values_matrix = [[0 for state in model.get_states()]]
+    values_matrix[0][target_state.id] = 1
+
+    terminate = False
+    while not terminate:
+        old_values = values_matrix[len(values_matrix) - 1]
+        new_values = [None for state in model.get_states()]
+        for sid, state in model.get_states().items():
+            transitions = model.get_transitions(state)
+            # Now we have to take a decision for an action.
+            actions = transitions.transition.keys()
+            action_values = {}
+            for action, branch in transitions.transition.items():
+                branch_value = sum([prob * old_values[state.id] for (prob, state) in branch.branch]) # type: ignore
+                action_values[action] = branch_value
+            # We take the action with the highest value.
+            highest_value = max(action_values.values())
+            new_values[sid] = highest_value
+        values_matrix.append(new_values) # type: ignore
+        terminate = sum([abs(x-y) for (x, y) in zip(new_values, old_values)]) < epsilon # type: ignore
+    return values_matrix # type: ignore
+
+def dtmc_evolution(
+    model: stormvogel.model.Model, steps: int
 ) -> list[list[float]]:
     """Run naive value iteration. The result is a 2D list where result[n][m] is the probability to be in state m at step n.
 
@@ -23,7 +64,7 @@ def naive_value_iteration(
 
     # Create a matrix and set the value for the starting state to 1 on the first step.
     matrix_steps_states = [[0.0 for s in model.states] for x in range(steps)]
-    matrix_steps_states[0][starting_state.id] = 1
+    matrix_steps_states[0][model.get_initial_state().id] = 1
 
     # Apply the updated values for each step.
     for current_step in range(steps - 1):
