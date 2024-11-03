@@ -359,7 +359,9 @@ class Model:
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
-    def __init__(self, name: str | None, model_type: ModelType):
+    def __init__(
+        self, name: str | None, model_type: ModelType, create_initial_state: bool = True
+    ):
         self.name = name
         self.type = model_type
         self.transitions = {}
@@ -391,7 +393,8 @@ class Model:
             self.markovian_states = None
 
         # Add the initial state
-        self.new_state(["init"])
+        if create_initial_state:
+            self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
@@ -853,31 +856,33 @@ class Model:
         return False
 
 
-def new_dtmc(name: str | None = None):
+def new_dtmc(name: str | None = None, create_initial_state: bool = True):
     """Creates a DTMC."""
-    return Model(name, ModelType.DTMC)
+    return Model(name, ModelType.DTMC, create_initial_state)
 
 
-def new_mdp(name: str | None = None):
+def new_mdp(name: str | None = None, create_initial_state: bool = True):
     """Creates an MDP."""
-    return Model(name, ModelType.MDP)
+    return Model(name, ModelType.MDP, create_initial_state)
 
 
-def new_ctmc(name: str | None = None):
+def new_ctmc(name: str | None = None, create_initial_state: bool = True):
     """Creates a CTMC."""
-    return Model(name, ModelType.CTMC)
+    return Model(name, ModelType.CTMC, create_initial_state)
 
 
-def new_pomdp(name: str | None = None):
+def new_pomdp(name: str | None = None, create_initial_state: bool = True):
     """Creates a POMDP."""
-    return Model(name, ModelType.POMDP)
+    return Model(name, ModelType.POMDP, create_initial_state)
 
 
-def new_ma(name: str | None = None):
+def new_ma(name: str | None = None, create_initial_state: bool = True):
     """Creates a MA."""
-    return Model(name, ModelType.MA)
+    return Model(name, ModelType.MA, create_initial_state)
 
 
-def new_model(modeltype: ModelType, name: str | None = None):
+def new_model(
+    modeltype: ModelType, name: str | None = None, create_initial_state: bool = True
+):
     """More general model creation function"""
-    return Model(name, modeltype)
+    return Model(name, modeltype, create_initial_state)
