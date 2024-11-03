@@ -581,7 +581,9 @@ class Model:
         self.actions[name] = action
         return action
 
-    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+    def remove_state(
+        self, state: State, normalize: bool = True, reassign_ids: bool = True
+    ):
         """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # we remove the state from the transitions
@@ -620,9 +622,11 @@ class Model:
                     self.markovian_states.remove(state)
 
             # we normalize the model if specified to do so
-            if normalize_and_reassign_ids:
+            if normalize:
                 self.normalize()
 
+            # we reassign the ids if specified to do so
+            if reassign_ids:
                 self.states = {
                     new_id: value
                     for new_id, (old_id, value) in enumerate(

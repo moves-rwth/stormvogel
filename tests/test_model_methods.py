@@ -127,7 +127,7 @@ def test_normalize():
 def test_remove_state():
     # we make a normal ctmc and remove a state
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    ctmc.remove_state(ctmc.get_state_by_id(3), True)
+    ctmc.remove_state(ctmc.get_state_by_id(3), True, True)
 
     # we make a ctmc with the state already missing
     new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
