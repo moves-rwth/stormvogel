@@ -324,6 +324,7 @@ def stormpy_to_stormvogel(
         """
         helper function to add the states from the sparsemodel to the model
         """
+        model.new_state()
         for state in sparsemodel.states:
             if state.id == 0:
                 for label in state.labels:
@@ -357,7 +358,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsedtmcs)
-        model = stormvogel.model.new_dtmc(name=None)
+        model = stormvogel.model.new_dtmc(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsedtmc)
@@ -388,7 +389,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model
-        model = stormvogel.model.new_mdp(name=None)
+        model = stormvogel.model.new_mdp(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsemdp)
@@ -430,7 +431,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsectmcs)
-        model = stormvogel.model.new_ctmc(name=None)
+        model = stormvogel.model.new_ctmc(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsectmc)
@@ -465,7 +466,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsepomdps)
-        model = stormvogel.model.new_pomdp(name=None)
+        model = stormvogel.model.new_pomdp(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsepomdp)
@@ -511,7 +512,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsemas)
-        model = stormvogel.model.new_ma(name=None)
+        model = stormvogel.model.new_ma(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsema)

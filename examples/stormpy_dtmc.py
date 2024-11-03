@@ -44,7 +44,7 @@ def example_building_dtmcs_01():
         state_labeling.add_label(label)
 
     # Set label of state 0
-    state_labeling.add_label_to_state("init", 0)
+    state_labeling.add_label_to_state("init", 1)
     # print(state_labeling.get_states("init"))
 
     # Set remaining labels
