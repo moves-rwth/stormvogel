@@ -581,6 +581,26 @@ class Model:
         self.actions[name] = action
         return action
 
+    def reassign_ids(self):
+        """reassigns the ids to be in order again"""
+        self.states = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
+        }
+
+        self.transitions = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.transitions.items()))
+        }
+
+        if self.supports_rates and self.exit_rates is not None:
+            self.exit_rates = {
+                new_id: value
+                for new_id, (old_id, value) in enumerate(
+                    sorted(self.exit_rates.items())
+                )
+            }
+
     def remove_state(
         self, state: State, normalize: bool = True, reassign_ids: bool = True
     ):
@@ -627,29 +647,10 @@ class Model:
 
             # we reassign the ids if specified to do so
             if reassign_ids:
-                self.states = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.states.items())
-                    )
-                }
+                self.reassign_ids()
                 for other_state in self.states.values():
                     if other_state.id > state.id:
                         other_state.id -= 1
-
-                self.transitions = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.transitions.items())
-                    )
-                }
-                if self.supports_rates and self.exit_rates is not None:
-                    self.exit_rates = {
-                        new_id: value
-                        for new_id, (old_id, value) in enumerate(
-                            sorted(self.exit_rates.items())
-                        )
-                    }
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
