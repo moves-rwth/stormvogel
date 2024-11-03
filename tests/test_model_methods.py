@@ -79,8 +79,8 @@ def test_transition_from_shorthand():
     )
 
 
-def test_is_well_defined():
-    # we check for an instance where it is not well defined
+def test_is_stochastic():
+    # we check for an instance where it is not stochastic
     dtmc = stormvogel.model.new_dtmc()
     state = dtmc.new_state()
     dtmc.set_transitions(
@@ -88,9 +88,9 @@ def test_is_well_defined():
         [(1 / 2, state)],
     )
 
-    assert not dtmc.is_well_defined()
+    assert not dtmc.is_stochastic()
 
-    # we check for an instance where it is well defined
+    # we check for an instance where it is stochastic
     dtmc.set_transitions(
         dtmc.get_initial_state(),
         [(1 / 2, state), (1 / 2, state)],
@@ -98,7 +98,7 @@ def test_is_well_defined():
 
     dtmc.add_self_loops()
 
-    assert dtmc.is_well_defined()
+    assert dtmc.is_stochastic()
 
 
 def test_normalize():
