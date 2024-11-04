@@ -142,16 +142,28 @@ class State:
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
-    ) -> list[tuple[Number, "State"]]:
+    ) -> list[tuple[Number, "State"]] | None:
         """gets the outgoing transitions"""
         if action and self.model.supports_actions():
-            branch = self.model.transitions[self.id].transition[action]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[action]
+                return branch.branch
         elif self.model.supports_actions() and not action:
             raise RuntimeError("You need to provide a specific action")
         else:
-            branch = self.model.transitions[self.id].transition[EmptyAction]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[EmptyAction]
+                return branch.branch
+        return None
 
-        return branch.branch
+    def has_outgoing_transition(self, action: "Action | None" = None) -> bool:
+        """returns if the state has a nonzero outgoing transition or not"""
+        transitions = self.get_outgoing_transitions(action)
+        if transitions is not None:
+            for transition in transitions:
+                if float(transition[0]) > 0:
+                    return True
+        return False
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -412,7 +424,9 @@ class Model:
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for transition in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
                         if (
                             isinstance(transition[0], float)
                             or isinstance(transition[0], Fraction)
@@ -423,27 +437,32 @@ class Model:
                         return False
         else:
             for state in self.states.values():
-                sum_rates = 0
-                for transition in state.get_outgoing_transitions():
-                    if (
-                        isinstance(transition[0], float)
-                        or isinstance(transition[0], Fraction)
-                        or isinstance(transition[0], int)
-                    ):
-                        sum_rates += transition[0]
-                if sum_rates != 0:
-                    return False
+                for action in state.available_actions():
+                    sum_rates = 0
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
+                        if (
+                            isinstance(transition[0], float)
+                            or isinstance(transition[0], Fraction)
+                            or isinstance(transition[0], int)
+                        ):
+                            sum_rates += transition[0]
+                    if sum_rates != 0:
+                        return False
 
         return True
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
-        if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+        if not self.supports_rates():
             self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for tuple in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -452,7 +471,7 @@ class Model:
                             sum_prob += tuple[0]
 
                     new_transitions = []
-                    for tuple in state.get_outgoing_transitions(action):
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -466,10 +485,7 @@ class Model:
                     self.transitions[state.id].transition[
                         action
                     ].branch = new_transitions
-        elif self.get_type() in (
-            ModelType.CTMC,
-            ModelType.MA,
-        ):
+        else:
             # TODO: As of now, for the CTMCs and MAs we only add self loops
             self.add_self_loops()
 
@@ -485,15 +501,16 @@ class Model:
         """adds self loops to all states that do not have an outgoing transition"""
         for id, state in self.states.items():
             if self.transitions.get(id) is None:
-                self.set_transitions(state, [(float(1), state)])
+                self.set_transitions(
+                    state, [(float(0) if self.supports_rates() else float(1), state)]
+                )
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
-        all_states_outgoing_transition = True
         for state in self.states.items():
             if self.transitions.get(state[0]) is None:
-                all_states_outgoing_transition = False
-        return all_states_outgoing_transition
+                return False
+        return True
 
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
@@ -585,7 +602,7 @@ class Model:
         return action
 
     def reassign_ids(self):
-        """reassigns the ids to be in order again"""
+        """reassigns the ids of states, transitions and rates to be in order again"""
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))

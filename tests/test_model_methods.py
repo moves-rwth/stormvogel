@@ -100,6 +100,14 @@ def test_is_stochastic():
 
     assert dtmc.is_stochastic()
 
+    # we check it for a continuous time model
+    ctmc = stormvogel.model.new_ctmc()
+    ctmc.set_transitions(ctmc.get_initial_state(), [(1, ctmc.new_state())])
+
+    ctmc.add_self_loops()
+
+    assert not ctmc.is_stochastic()
+
 
 def test_normalize():
     # we make a dtmc that has outgoing transitions with sum of probabilities != 0 and we normalize it

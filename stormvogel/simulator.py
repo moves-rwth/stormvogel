@@ -131,19 +131,21 @@ def simulate_path(
     assert simulator is not None
 
     # we start adding states or state action pairs to the path
+    state = 0
+    path = {}
+    simulator.restart()
     if not model.supports_actions():
-        path = {}
-        simulator.restart()
         for i in range(steps):
             # for each step we add a state to the path
-            state, reward, labels = simulator.step()
-            path[i + 1] = model.states[state]
-            if simulator.is_done():
+            if (
+                model.states[state].has_outgoing_transition()
+                and not simulator.is_done()
+            ):
+                state, reward, labels = simulator.step()
+                path[i + 1] = model.states[state]
+            else:
                 break
     else:
-        state = 0
-        path = {}
-        simulator.restart()
         for i in range(steps):
             # we first choose an action (randomly or according to scheduler)
             actions = simulator.available_actions()
@@ -155,10 +157,14 @@ def simulate_path(
 
             # we add the state action pair to the path
             stormvogel_action = model.states[state].available_actions()[select_action]
-            next_step = simulator.step(actions[select_action])
-            state, reward, labels = next_step
-            path[i + 1] = (stormvogel_action, model.states[state])
-            if simulator.is_done():
+
+            if (
+                model.states[state].has_outgoing_transition(stormvogel_action)
+                and not simulator.is_done()
+            ):
+                state, reward, labels = simulator.step(actions[select_action])
+                path[i + 1] = (stormvogel_action, model.states[state])
+            else:
                 break
 
     path_object = Path(path, model)
