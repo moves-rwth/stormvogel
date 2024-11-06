@@ -137,10 +137,7 @@ def simulate_path(
     if not model.supports_actions():
         for i in range(steps):
             # for each step we add a state to the path
-            if (
-                model.states[state].has_outgoing_transition()
-                and not simulator.is_done()
-            ):
+            if not model.states[state].is_absorbing() and not simulator.is_done():
                 state, reward, labels = simulator.step()
                 path[i + 1] = model.states[state]
             else:
@@ -159,7 +156,7 @@ def simulate_path(
             stormvogel_action = model.states[state].available_actions()[select_action]
 
             if (
-                model.states[state].has_outgoing_transition(stormvogel_action)
+                not model.states[state].is_absorbing(stormvogel_action)
                 and not simulator.is_done()
             ):
                 state, reward, labels = simulator.step(actions[select_action])

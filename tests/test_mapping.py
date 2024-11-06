@@ -92,7 +92,6 @@ def sparse_equal(
     )
 
 
-"""
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
     stormpy_dtmc = examples.stormpy_dtmc.example_building_dtmcs_01()
@@ -159,7 +158,6 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     # print(new_stormvogel_mdp)
 
     assert new_stormvogel_mdp == stormvogel_mdp
-"""
 
 
 def test_stormvogel_to_stormpy_and_back_ctmc():
@@ -174,7 +172,6 @@ def test_stormvogel_to_stormpy_and_back_ctmc():
     assert new_stormvogel_ctmc == stormvogel_ctmc
 
 
-"""
 def test_stormpy_to_stormvogel_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
     stormpy_ctmc = examples.stormpy_ctmc.example_building_ctmcs_01()
@@ -211,9 +208,8 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
     # print(new_stormpy_pomdp)
 
     assert sparse_equal(stormpy_pomdp, new_stormpy_pomdp)
-"""
 
-"""
+
 def test_stormvogel_to_stormpy_and_back_ma():
     # we create a stormpy representation of an example ma
     stormvogel_ma = examples.simple_ma.create_simple_ma()
@@ -237,4 +233,3 @@ def test_stormpy_to_stormvogel_and_back_ma():
     # print(new_stormpy_ma)
 
     assert sparse_equal(stormpy_ma, new_stormpy_ma)
-"""

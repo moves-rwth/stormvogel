@@ -156,14 +156,14 @@ class State:
                 return branch.branch
         return None
 
-    def has_outgoing_transition(self, action: "Action | None" = None) -> bool:
-        """returns if the state has a nonzero outgoing transition or not"""
+    def is_absorbing(self, action: "Action | None" = None) -> bool:
+        """returns if the state has a nonzero transition going to another state or not"""
         transitions = self.get_outgoing_transitions(action)
         if transitions is not None:
             for transition in transitions:
-                if float(transition[0]) > 0:
-                    return True
-        return False
+                if float(transition[0]) > 0 and transition[1] != self:
+                    return False
+        return True
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -630,20 +630,22 @@ class Model:
             # first we remove transitions that go into the state
             remove_actions_index = []
             for index, transition in self.transitions.items():
-                for action in transition.transition.items():
-                    for index_tuple, tuple in enumerate(action[1].branch):
+                for action, branch in transition.transition.items():
+                    for index_tuple, tuple in enumerate(branch.branch):
+                        # remove the tuple if it goes to the state
                         if tuple[1].id == state.id:
-                            self.transitions[index].transition[action[0]].branch.pop(
+                            self.transitions[index].transition[action].branch.pop(
                                 index_tuple
                             )
 
-                    # if we have empty objects we need to remove those as well
-                    if self.transitions[index].transition[action[0]].branch == []:
-                        remove_actions_index.append((action[0], index))
-            # here we remove those empty objects
+                    # if we have empty actions we need to remove those as well (later)
+                    if branch.branch == []:
+                        remove_actions_index.append((action, index))
+            # here we remove those empty actions (this needs to happen after the other for loops)
             for action, index in remove_actions_index:
                 self.transitions[index].transition.pop(action)
-                if self.transitions[index].transition == {}:
+                # if we have no actions at all anymore, delete the transition
+                if self.transitions[index].transition == {} and not index == state.id:
                     self.transitions.pop(index)
 
             # we remove transitions that come out of the state
