@@ -1,11 +1,6 @@
 name: Docs
 
-on:
-  # Runs on pushes targeting the default branch and pull requests.
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, reopened]
+on: [push]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -60,22 +55,25 @@ jobs:
           files: |
             docs/**/*.ipynb
 
-     # - name: Run documentation notebooks
-     #   run: |
-     #     poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }}
+      # - name: Run documentation notebooks
+      #   run: |
+      #    poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
 
       - name: Generate docs
         working-directory: docs/
         run: make html
 
       - name: Setup Pages
+        if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: "docs/_build/html/"
 
       - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4
