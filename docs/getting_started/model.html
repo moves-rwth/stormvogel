@@ -1,10 +1,6 @@
 
           <iframe
-<<<<<<< HEAD
-                id="dietcXbFyTOJQ"
-=======
-                id="dieIGTgHLKedG"
->>>>>>> main
+                id="modellPtmSPREUD"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -19,38 +15,28 @@
     &gt;&lt;/script&gt;
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
-        
+
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
-        
+
       }
     &lt;/style&gt;
   &lt;/head&gt;
   &lt;body&gt;
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
-        
+
         var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
-{ id: 1, label: `rolled1`, group: &quot;states&quot; },
-{ id: 2, label: `rolled2`, group: &quot;states&quot; },
-{ id: 3, label: `rolled3`, group: &quot;states&quot; },
-{ id: 4, label: `rolled4`, group: &quot;states&quot; },
-{ id: 5, label: `rolled5`, group: &quot;states&quot; },
-{ id: 6, label: `rolled6`, group: &quot;states&quot; },
+{ id: 1, label: `carchosen`, group: &quot;states&quot; },
+{ id: 2, label: `open`, group: &quot;states&quot; },
+{ id: 3, label: `goatrevealed`, group: &quot;states&quot; },
+{ id: 4, label: `done`, group: &quot;states&quot; },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/6&quot; },
-{ from: 0, to: 2, label: &quot;1/6&quot; },
-{ from: 0, to: 3, label: &quot;1/6&quot; },
-{ from: 0, to: 4, label: &quot;1/6&quot; },
-{ from: 0, to: 5, label: &quot;1/6&quot; },
-{ from: 0, to: 6, label: &quot;1/6&quot; },
-{ from: 1, to: 1, label: &quot;1&quot; },
-{ from: 2, to: 2, label: &quot;1&quot; },
-{ from: 3, to: 3, label: &quot;1&quot; },
-{ from: 4, to: 4, label: &quot;1&quot; },
-{ from: 5, to: 5, label: &quot;1&quot; },
-{ from: 6, to: 6, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/3&quot; },
+{ from: 1, to: 2, label: &quot;1&quot; },
+{ from: 2, to: 3, label: &quot;1&quot; },
+{ from: 3, to: 4, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {

@@ -79,8 +79,8 @@ class State:
                 "There is already a state with this id. Make sure the id is unique."
             )
 
-        names = [state.name for state in self.model.states.values()]
-        if name in names:
+        used_names = [state.name for state in self.model.states.values()]
+        if name in used_names:
             raise RuntimeError(
                 "There is already a state with this name. Make sure the name is unique."
             )
@@ -142,16 +142,28 @@ class State:
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
-    ) -> list[tuple[Number, "State"]]:
+    ) -> list[tuple[Number, "State"]] | None:
         """gets the outgoing transitions"""
         if action and self.model.supports_actions():
-            branch = self.model.transitions[self.id].transition[action]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[action]
+                return branch.branch
         elif self.model.supports_actions() and not action:
             raise RuntimeError("You need to provide a specific action")
         else:
-            branch = self.model.transitions[self.id].transition[EmptyAction]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[EmptyAction]
+                return branch.branch
+        return None
 
-        return branch.branch
+    def is_absorbing(self, action: "Action | None" = None) -> bool:
+        """returns if the state has a nonzero transition going to another state or not"""
+        transitions = self.get_outgoing_transitions(action)
+        if transitions is not None:
+            for transition in transitions:
+                if float(transition[0]) > 0 and transition[1] != self:
+                    return False
+        return True
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -162,8 +174,6 @@ class State:
     def __eq__(self, other):
         if isinstance(other, State):
             if self.id == other.id:
-                self.labels.sort()
-                other.labels.sort()
                 if self.model.supports_observations():
                     if self.observation is not None and other.observation is not None:
                         observations_equal = self.observation == other.observation
@@ -171,7 +181,9 @@ class State:
                         observations_equal = True
                 else:
                     observations_equal = True
-                return self.labels == other.labels and observations_equal
+                return (
+                    sorted(self.labels) == sorted(other.labels) and observations_equal
+                )
             return False
         return False
 
@@ -222,9 +234,7 @@ class Branch:
 
     def __eq__(self, other):
         if isinstance(other, Branch):
-            self.branch.sort()
-            other.branch.sort()
-            return self.branch == other.branch
+            return sorted(self.branch) == sorted(other.branch)
         return False
 
     def __add__(self, other):
@@ -261,11 +271,9 @@ class Transition:
 
     def __eq__(self, other):
         if isinstance(other, Transition):
-            self_values = list(self.transition.values())
-            other_values = list(other.transition.values())
-            self_values.sort()
-            other_values.sort()
-            return self_values == other_values
+            return sorted(list(self.transition.values())) == sorted(
+                list(other.transition.values())
+            )
         return False
 
     def has_empty_action(self) -> bool:
@@ -309,7 +317,6 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
 @dataclass(order=True)
 class RewardModel:
     """Represents a state-exit reward model.
-    dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
     Args:
         name: Name of the reward model.
         rewards: The rewards, the keys are the state's ids (or state action pair ids).
@@ -340,10 +347,10 @@ class Model:
         name: An optional name for this model.
         type: The model type.
         states: The states of the model. The keys are the state's ids.
+        transitions: The transitions of this model.
         actions: The actions of the model, if this is a model that supports actions.
         rewards: The rewardsmodels of this model.
         exit_rates: The exit rates of the model, optional if this model supports rates.
-        transitions: The transitions of this model.
         markovian_states: list of markovian states in the case of a ma.
     """
 
@@ -359,7 +366,9 @@ class Model:
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
-    def __init__(self, name: str | None, model_type: ModelType):
+    def __init__(
+        self, name: str | None, model_type: ModelType, create_initial_state: bool = True
+    ):
         self.name = name
         self.type = model_type
         self.transitions = {}
@@ -390,8 +399,9 @@ class Model:
         else:
             self.markovian_states = None
 
-        # Add the initial state
-        self.new_state(["init"])
+        # Add the initial state if specified to do so
+        if create_initial_state:
+            self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
@@ -405,14 +415,18 @@ class Model:
         """Returns whether this model supports observations."""
         return self.type == ModelType.POMDP
 
-    def is_well_defined(self) -> bool:
-        """Checks if all sums of outgoing transition probabilities for all states equal 1"""
+    def is_stochastic(self) -> bool:
+        """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
+        For continuous models: Checks if all sums of outgoing rates sum to 0
+        """
 
-        if self.get_type() in (ModelType.DTMC, ModelType.MDP, ModelType.POMDP):
+        if not self.supports_rates():
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for transition in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
                         if (
                             isinstance(transition[0], float)
                             or isinstance(transition[0], Fraction)
@@ -421,23 +435,34 @@ class Model:
                             sum_prob += transition[0]
                     if sum_prob != 1:
                         return False
-        elif self.get_type() in (
-            ModelType.CTMC,
-            ModelType.MA,
-        ):
-            # TODO make it work for these models
-            raise RuntimeError("Not implemented")
+        else:
+            for state in self.states.values():
+                for action in state.available_actions():
+                    sum_rates = 0
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
+                        if (
+                            isinstance(transition[0], float)
+                            or isinstance(transition[0], Fraction)
+                            or isinstance(transition[0], int)
+                        ):
+                            sum_rates += transition[0]
+                    if sum_rates != 0:
+                        return False
 
         return True
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
-        if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+        if not self.supports_rates():
             self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for tuple in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -446,7 +471,7 @@ class Model:
                             sum_prob += tuple[0]
 
                     new_transitions = []
-                    for tuple in state.get_outgoing_transitions(action):
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -460,11 +485,8 @@ class Model:
                     self.transitions[state.id].transition[
                         action
                     ].branch = new_transitions
-        elif self.get_type() in (
-            ModelType.CTMC,
-            ModelType.MA,
-        ):
-            # TODO: As of now, for the CTMCs and MAs we only add self loops
+        else:
+            # for ctmcs and mas we currently only add self loops
             self.add_self_loops()
 
     def __free_state_id(self):
@@ -479,15 +501,16 @@ class Model:
         """adds self loops to all states that do not have an outgoing transition"""
         for id, state in self.states.items():
             if self.transitions.get(id) is None:
-                self.set_transitions(state, [(float(1), state)])
+                self.set_transitions(
+                    state, [(float(0) if self.supports_rates() else float(1), state)]
+                )
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
-        all_states_outgoing_transition = True
         for state in self.states.items():
             if self.transitions.get(state[0]) is None:
-                all_states_outgoing_transition = False
-        return all_states_outgoing_transition
+                return False
+        return True
 
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
@@ -578,27 +601,51 @@ class Model:
         self.actions[name] = action
         return action
 
-    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+    def reassign_ids(self):
+        """reassigns the ids of states, transitions and rates to be in order again"""
+        self.states = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
+        }
+
+        self.transitions = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.transitions.items()))
+        }
+
+        if self.supports_rates and self.exit_rates is not None:
+            self.exit_rates = {
+                new_id: value
+                for new_id, (old_id, value) in enumerate(
+                    sorted(self.exit_rates.items())
+                )
+            }
+
+    def remove_state(
+        self, state: State, normalize: bool = True, reassign_ids: bool = True
+    ):
         """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # we remove the state from the transitions
             # first we remove transitions that go into the state
             remove_actions_index = []
             for index, transition in self.transitions.items():
-                for action in transition.transition.items():
-                    for index_tuple, tuple in enumerate(action[1].branch):
+                for action, branch in transition.transition.items():
+                    for index_tuple, tuple in enumerate(branch.branch):
+                        # remove the tuple if it goes to the state
                         if tuple[1].id == state.id:
-                            self.transitions[index].transition[action[0]].branch.pop(
+                            self.transitions[index].transition[action].branch.pop(
                                 index_tuple
                             )
 
-                    # if we have empty objects we need to remove those as well
-                    if self.transitions[index].transition[action[0]].branch == []:
-                        remove_actions_index.append((action[0], index))
-            # here we remove those empty objects
+                    # if we have empty actions we need to remove those as well (later)
+                    if branch.branch == []:
+                        remove_actions_index.append((action, index))
+            # here we remove those empty actions (this needs to happen after the other for loops)
             for action, index in remove_actions_index:
                 self.transitions[index].transition.pop(action)
-                if self.transitions[index].transition == {}:
+                # if we have no actions at all anymore, delete the transition
+                if self.transitions[index].transition == {} and not index == state.id:
                     self.transitions.pop(index)
 
             # we remove transitions that come out of the state
@@ -617,32 +664,15 @@ class Model:
                     self.markovian_states.remove(state)
 
             # we normalize the model if specified to do so
-            if normalize_and_reassign_ids:
+            if normalize:
                 self.normalize()
 
-                self.states = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.states.items())
-                    )
-                }
+            # we reassign the ids if specified to do so
+            if reassign_ids:
+                self.reassign_ids()
                 for other_state in self.states.values():
                     if other_state.id > state.id:
                         other_state.id -= 1
-
-                self.transitions = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.transitions.items())
-                    )
-                }
-                if self.supports_rates and self.exit_rates is not None:
-                    self.exit_rates = {
-                        new_id: value
-                        for new_id, (old_id, value) in enumerate(
-                            sorted(self.exit_rates.items())
-                        )
-                    }
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
@@ -853,31 +883,33 @@ class Model:
         return False
 
 
-def new_dtmc(name: str | None = None):
+def new_dtmc(name: str | None = None, create_initial_state: bool = True):
     """Creates a DTMC."""
-    return Model(name, ModelType.DTMC)
+    return Model(name, ModelType.DTMC, create_initial_state)
 
 
-def new_mdp(name: str | None = None):
+def new_mdp(name: str | None = None, create_initial_state: bool = True):
     """Creates an MDP."""
-    return Model(name, ModelType.MDP)
+    return Model(name, ModelType.MDP, create_initial_state)
 
 
-def new_ctmc(name: str | None = None):
+def new_ctmc(name: str | None = None, create_initial_state: bool = True):
     """Creates a CTMC."""
-    return Model(name, ModelType.CTMC)
+    return Model(name, ModelType.CTMC, create_initial_state)
 
 
-def new_pomdp(name: str | None = None):
+def new_pomdp(name: str | None = None, create_initial_state: bool = True):
     """Creates a POMDP."""
-    return Model(name, ModelType.POMDP)
+    return Model(name, ModelType.POMDP, create_initial_state)
 
 
-def new_ma(name: str | None = None):
+def new_ma(name: str | None = None, create_initial_state: bool = True):
     """Creates a MA."""
-    return Model(name, ModelType.MA)
+    return Model(name, ModelType.MA, create_initial_state)
 
 
-def new_model(modeltype: ModelType, name: str | None = None):
+def new_model(
+    modeltype: ModelType, name: str | None = None, create_initial_state: bool = True
+):
     """More general model creation function"""
-    return Model(name, modeltype)
+    return Model(name, modeltype, create_initial_state)
