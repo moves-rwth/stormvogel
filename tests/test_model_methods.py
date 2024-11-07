@@ -34,6 +34,22 @@ def test_get_outgoing_transitions():
     ]
 
 
+def test_is_absorbing():
+    # one example of a ctmc state that is absorbing and one that isn't
+    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    state0 = ctmc.get_state_by_id(4)
+    state1 = ctmc.get_state_by_id(3)
+    assert state0.is_absorbing()
+    assert not state1.is_absorbing()
+
+    # one example of a dtmc state that is absorbing and one that isn't
+    dtmc = examples.die.create_die_dtmc()
+    state0 = dtmc.get_initial_state()
+    state1 = dtmc.get_state_by_id(1)
+    assert state1.is_absorbing()
+    assert not state0.is_absorbing()
+
+
 def test_transition_from_shorthand():
     # First we test it for a model without actions
     dtmc = stormvogel.model.new_dtmc()
@@ -135,7 +151,7 @@ def test_normalize():
 def test_remove_state():
     # we make a normal ctmc and remove a state
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    ctmc.remove_state(ctmc.get_state_by_id(3), True, True)
+    ctmc.remove_state(ctmc.get_state_by_id(3))
 
     # we make a ctmc with the state already missing
     new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
@@ -173,7 +189,7 @@ def test_remove_state():
     mdp.set_transitions(mdp.get_initial_state(), transition)
 
     # we remove a state
-    mdp.remove_state(mdp.get_state_by_id(0), True)
+    mdp.remove_state(mdp.get_state_by_id(0))
 
     # we make the mdp with the state already missing
     new_mdp = stormvogel.model.new_mdp(create_initial_state=False)
