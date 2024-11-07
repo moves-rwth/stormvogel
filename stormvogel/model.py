@@ -486,7 +486,7 @@ class Model:
                         action
                     ].branch = new_transitions
         else:
-            # TODO: As of now, for the CTMCs and MAs we only add self loops
+            # for ctmcs and mas we currently only add self loops
             self.add_self_loops()
 
     def __free_state_id(self):

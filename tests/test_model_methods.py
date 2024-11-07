@@ -151,6 +151,38 @@ def test_remove_state():
 
     assert ctmc == new_ctmc
 
+    # we also test if it works for a model that has nontrivial actions:
+    mdp = stormvogel.model.new_mdp()
+    state1 = mdp.new_state()
+    state2 = mdp.new_state()
+    action0 = mdp.new_action("0")
+    action1 = mdp.new_action("1")
+    branch0 = stormvogel.model.Branch(
+        cast(
+            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            [(1 / 2, state1), (1 / 2, state2)],
+        )
+    )
+    branch1 = stormvogel.model.Branch(
+        cast(
+            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            [(1 / 4, state1), (3 / 4, state2)],
+        )
+    )
+    transition = stormvogel.model.Transition({action0: branch0, action1: branch1})
+    mdp.set_transitions(mdp.get_initial_state(), transition)
+
+    # we remove a state
+    mdp.remove_state(mdp.get_state_by_id(0), True)
+
+    # we make the mdp with the state already missing
+    new_mdp = stormvogel.model.new_mdp(create_initial_state=False)
+    new_mdp.new_state()
+    new_mdp.new_state()
+    new_mdp.add_self_loops()
+
+    assert mdp == new_mdp
+
 
 def test_remove_transitions_between_states():
     # we make a model and remove transitions between two states
