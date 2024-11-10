@@ -5,6 +5,7 @@ import stormvogel.mapping
 import stormvogel.model
 import stormpy.examples.files
 import stormpy.examples
+from typing import Callable
 import random
 
 
@@ -99,7 +100,9 @@ class Path:
 def simulate_path(
     model: stormvogel.model.Model,
     steps: int = 1,
-    scheduler: stormvogel.result.Scheduler | None = None,
+    scheduler: stormvogel.result.Scheduler
+    | Callable[[stormvogel.model.State], stormvogel.model.Action]
+    | None = None,
     seed: int | None = None,
 ) -> Path:
     """
@@ -108,6 +111,7 @@ def simulate_path(
         model: The stormvogel model that the simulator should run on.
         steps: The number of steps the simulator walks through the model.
         scheduler: A stormvogel scheduler to determine what actions should be taken. Random if not provided.
+                    (instead of a stormvogel scheduler, a function from states to actions can also be provided.)
         seed: The seed for the function that determines for each state what the next state will be. Random seed if not provided.
 
     Returns a path object.
@@ -116,7 +120,13 @@ def simulate_path(
     def get_range_index(stateid: int):
         """Helper function to convert the chosen action in a state by a scheduler to a range index."""
         assert scheduler is not None
-        action = scheduler.get_choice_of_state(model.get_state_by_id(state))
+        if isinstance(scheduler, stormvogel.result.Scheduler):
+            action = scheduler.get_choice_of_state(model.get_state_by_id(state))
+        elif callable(scheduler):
+            action = scheduler(model.get_state_by_id(state))
+        else:
+            raise TypeError("Must be of type Scheduler or a function")
+
         available_actions = model.states[stateid].available_actions()
 
         assert action is not None
@@ -173,7 +183,9 @@ def simulate(
     model: stormvogel.model.Model,
     steps: int = 1,
     runs: int = 1,
-    scheduler: stormvogel.result.Scheduler | None = None,
+    scheduler: stormvogel.result.Scheduler
+    | Callable[[stormvogel.model.State], stormvogel.model.Action]
+    | None = None,
     seed: int | None = None,
 ) -> stormvogel.model.Model | None:
     """
@@ -183,6 +195,7 @@ def simulate(
         steps: The number of steps the simulator walks through the model
         runs: The number of times the model gets simulated.
         scheduler: A stormvogel scheduler to determine what actions should be taken. Random if not provided.
+                    (instead of a stormvogel scheduler, a function from states to actions can also be provided.)
         seed: The seed for the function that determines for each state what the next state will be. Random seed if not provided.
 
     Returns the partial model discovered by all the runs of the simulator together
@@ -191,7 +204,13 @@ def simulate(
     def get_range_index(stateid: int):
         """Helper function to convert the chosen action in a state by a scheduler to a range index."""
         assert scheduler is not None
-        action = scheduler.get_choice_of_state(model.get_state_by_id(state))
+        if isinstance(scheduler, stormvogel.result.Scheduler):
+            action = scheduler.get_choice_of_state(model.get_state_by_id(state))
+        elif callable(scheduler):
+            action = scheduler(model.get_state_by_id(state))
+        else:
+            raise TypeError("Must be of type Scheduler or a function")
+
         available_actions = model.states[stateid].available_actions()
 
         assert action is not None

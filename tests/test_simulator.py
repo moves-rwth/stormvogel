@@ -39,7 +39,7 @@ def test_simulate():
         rewardmodel3.rewards[stateid] = float(1)
 
     assert partial_model == other_dtmc
-
+    ######################################################################################################################
     # we make a monty hall mdp and run the simulator with it
     mdp = examples.monty_hall.create_monty_hall_mdp()
     rewardmodel = mdp.add_rewards("rewardmodel")
@@ -74,6 +74,31 @@ def test_simulate():
     rewardmodel2.rewards = {0: 0, 7: 7, 16: 16}
 
     assert partial_model == other_mdp
+    ######################################################################################################################
+
+    # we test the simulator for an mdp with a lambda as Scheduler
+
+    def scheduler(state: stormvogel.model.State) -> stormvogel.model.Action:
+        actions = state.available_actions()
+        return actions[0]
+
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    partial_model = stormvogel.simulator.simulate(
+        mdp, runs=1, steps=3, seed=1, scheduler=scheduler
+    )
+
+    # we make the partial model that should be created by the simulator
+    other_mdp = stormvogel.model.new_mdp()
+    other_mdp.get_initial_state().set_transitions(
+        [(1 / 3, other_mdp.new_state("carchosen"))]
+    )
+    other_mdp.get_state_by_id(1).set_transitions([(1, other_mdp.new_state("open"))])
+    other_mdp.get_state_by_id(2).set_transitions(
+        [(1, other_mdp.new_state("goatrevealed"))]
+    )
+
+    assert partial_model == other_mdp
 
 
 def test_simulate_path():
@@ -93,7 +118,7 @@ def test_simulate_path():
     )
 
     assert path == other_path
-
+    ##############################################################################################
     # we make the monty hall pomdp and run simulate path with it
     pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
     taken_actions = {}
@@ -113,6 +138,30 @@ def test_simulate_path():
             2: (pomdp.actions["open2"], pomdp.get_state_by_id(12)),
             3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(23)),
             4: (pomdp.actions["switch"], pomdp.get_state_by_id(46)),
+        },
+        pomdp,
+    )
+
+    assert path == other_path
+
+    ##############################################################################################
+    # we test the monty hall pomdp with a lambda as scheduler
+    def scheduler(state: stormvogel.model.State) -> stormvogel.model.Action:
+        actions = state.available_actions()
+        return actions[0]
+
+    pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
+    path = stormvogel.simulator.simulate_path(
+        pomdp, steps=4, seed=1, scheduler=scheduler
+    )
+
+    # we make the path that the simulate path function should create
+    other_path = stormvogel.simulator.Path(
+        {
+            1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(3)),
+            2: (pomdp.actions["open0"], pomdp.get_state_by_id(10)),
+            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(21)),
+            4: (pomdp.actions["stay"], pomdp.get_state_by_id(41)),
         },
         pomdp,
     )
