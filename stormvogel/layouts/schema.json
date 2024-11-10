@@ -99,19 +99,31 @@
       "__widget": "IntSlider"
     }
   },
-  "results_and_rewards": {
+  "state_properties": {
     "__collapse": true,
     "show_results": {
       "__description": "Show results",
       "__widget": "Checkbox"
     },
-    "resultSymbol": {
-      "__description": "Result symbol",
+    "result_symbol": {
+      "__description": "Symbol",
       "__widget": "Text"
     },
     "show_rewards": {
       "__description": "Show rewards",
       "__widget": "Checkbox"
+    },
+    "reward_symbol": {
+      "__description": "Symbol",
+      "__widget": "Text"
+    },
+    "show_observations": {
+      "__description": "Show observations",
+      "__widget": "Checkbox"
+    },
+    "observation_symbol": {
+      "__description": "Symbol",
+      "__widget": "Text"
     }
   },
   "misc": {
