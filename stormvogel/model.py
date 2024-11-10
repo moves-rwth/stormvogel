@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import cast
+import copy
 
 Parameter = str
 
@@ -489,7 +490,22 @@ class Model:
             # for ctmcs and mas we currently only add self loops
             self.add_self_loops()
 
-    def __free_state_id(self):
+    def get_sub_model(self, states: list[State], normalize: bool = True) -> "Model":
+        """Returns a submodel of the model based on a collection of states.
+        The states in the collection are the states that stay in the model."""
+        sub_model = copy.deepcopy(self)
+        remove = []
+        for state in sub_model.states.values():
+            if state not in states:
+                remove.append(state)
+        for state in remove:
+            sub_model.remove_state(state)
+
+        if normalize:
+            sub_model.normalize()
+        return sub_model
+
+    def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
         i = 0
@@ -821,7 +837,7 @@ class Model:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
         self.exit_rates[state.id] = rate
 
-    def get_type(self):
+    def get_type(self) -> ModelType:
         """Gets the type of this model"""
         return self.type
 
@@ -869,7 +885,7 @@ class Model:
 
         return "\n".join(res)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, Model):
             return (
                 self.type == other.type
@@ -883,33 +899,33 @@ class Model:
         return False
 
 
-def new_dtmc(name: str | None = None, create_initial_state: bool = True):
+def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a DTMC."""
     return Model(name, ModelType.DTMC, create_initial_state)
 
 
-def new_mdp(name: str | None = None, create_initial_state: bool = True):
+def new_mdp(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates an MDP."""
     return Model(name, ModelType.MDP, create_initial_state)
 
 
-def new_ctmc(name: str | None = None, create_initial_state: bool = True):
+def new_ctmc(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a CTMC."""
     return Model(name, ModelType.CTMC, create_initial_state)
 
 
-def new_pomdp(name: str | None = None, create_initial_state: bool = True):
+def new_pomdp(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a POMDP."""
     return Model(name, ModelType.POMDP, create_initial_state)
 
 
-def new_ma(name: str | None = None, create_initial_state: bool = True):
+def new_ma(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a MA."""
     return Model(name, ModelType.MA, create_initial_state)
 
 
 def new_model(
     modeltype: ModelType, name: str | None = None, create_initial_state: bool = True
-):
+) -> Model:
     """More general model creation function"""
     return Model(name, modeltype, create_initial_state)

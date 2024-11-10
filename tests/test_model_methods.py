@@ -77,7 +77,7 @@ def test_transition_from_shorthand():
     # Then we test it for a model with actions
     mdp = stormvogel.model.new_mdp()
     state = mdp.new_state()
-    action = mdp.new_action("0", frozenset("action"))
+    action = mdp.new_action("0", frozenset({"action"}))
     transition_shorthand = [(action, state)]
     branch = stormvogel.model.Branch(
         cast(list[tuple[stormvogel.model.Number, stormvogel.model.State]], [(1, state)])
@@ -302,3 +302,20 @@ def test_add_transitions():
     # print(mdp6.get_transitions(mdp6.get_initial_state()).transition)
     # print([(action6a, state6), (action6b, state6)])
     assert len(mdp6.get_transitions(mdp6.get_initial_state()).transition) == 2
+
+
+def test_get_sub_model():
+    # we create the die dtmc and take a submodel
+    dtmc = examples.die.create_die_dtmc()
+    states = [dtmc.get_state_by_id(0), dtmc.get_state_by_id(1), dtmc.get_state_by_id(2)]
+    sub_model = dtmc.get_sub_model(states)
+
+    # we build what the submodel should look like
+    new_dtmc = stormvogel.model.new_dtmc("Die")
+    init = new_dtmc.get_initial_state()
+    init.set_transitions(
+        [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
+    )
+    new_dtmc.normalize()
+
+    assert sub_model == new_dtmc
