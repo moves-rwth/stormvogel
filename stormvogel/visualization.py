@@ -42,6 +42,7 @@ class Visualization(stormvogel.displayable.Displayable):
         result: stormvogel.result.Result | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         separate_labels: list[str] = [],
+        positions: dict[str, dict[str, int]] | None = None,
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
@@ -57,9 +58,12 @@ class Visualization(stormvogel.displayable.Displayable):
             result (Result, optional): Result corresponding to the model.
             layout (Layout, optional): Layout used for the visualization.
             separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
-            output (widgets.Output): An output widget within which the network should be displayed.
+            positions (dict[int, dict[str, int]] | None): A dictionary from state ids to positions.
+                Determines where states should be placed in the visualization. Overrides saved positions in a loaded layout.
+                Example: {1: {"x":5, "y":10}, 2: ....}
             do_display (bool): Set to true iff you want the Visualization to display. Defaults to True.
             debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
+            do_init_server (bool): Enable if you would like to start the server which is required for some visualization features. Defaults to True.
         """
         super().__init__(output, do_display, debug_output)
         if name is None:
@@ -72,6 +76,11 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
         )
+        self.positions: dict[str, dict[str, int]] | None
+        if positions is None:
+            self.positions = self.layout.layout["positions"]
+        else:
+            self.positions = positions
         self.do_init_server: bool = do_init_server
         self.__create_nt()
 
@@ -132,7 +141,7 @@ class Visualization(stormvogel.displayable.Displayable):
             group = (  # Use a non-default group if specified.
                 und(state.labels[0])
                 if (
-                    len(state.labels) > 0
+                    len(state.labels) > 0  # TODO generalize
                     and und(state.labels[0]) in self.separate_labels
                 )
                 else "states"
@@ -142,7 +151,7 @@ class Visualization(stormvogel.displayable.Displayable):
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
-                position_dict=self.layout.layout["positions"],
+                position_dict=self.positions,
             )
 
     def __add_transitions(self) -> None:
@@ -174,11 +183,17 @@ class Visualization(stormvogel.displayable.Displayable):
                         if choice == action:
                             group = "scheduled_actions"
                     # Add the action's node
+                    position_dict = (
+                        {str(action_id): self.positions[str(state_id)]}
+                        if self.positions is not None
+                        else None
+                    )
+
                     self.nt.add_node(
                         id=action_id,
                         label=action.name,
                         group=group,
-                        position_dict=self.layout.layout["positions"],
+                        position_dict=position_dict,
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore
