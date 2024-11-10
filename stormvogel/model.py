@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import cast
+import copy
 
 Parameter = str
 
@@ -488,6 +489,19 @@ class Model:
         else:
             # for ctmcs and mas we currently only add self loops
             self.add_self_loops()
+
+    def get_sub_model(self, states: list[State]) -> "Model":
+        """returns a submodel of the model based on a collection of states"""
+        sub_model = copy.deepcopy(self)
+        remove = []
+        for state in sub_model.states.values():
+            if state not in states:
+                remove.append(state)
+        for state in remove:
+            sub_model.remove_state(state)
+
+        sub_model.normalize()
+        return sub_model
 
     def __free_state_id(self):
         """Gets a free id in the states dict."""
