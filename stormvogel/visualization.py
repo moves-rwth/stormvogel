@@ -76,7 +76,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
         )
-        self.positions: dict[str, dict[str, int]] | None
+        self.positions: dict[str, dict[str, int]]
         if positions is None:
             self.positions = self.layout.layout["positions"]
         else:
@@ -183,17 +183,12 @@ class Visualization(stormvogel.displayable.Displayable):
                         if choice == action:
                             group = "scheduled_actions"
                     # Add the action's node
-                    position_dict = (
-                        {str(action_id): self.positions[str(state_id)]}
-                        if self.positions is not None
-                        else None
-                    )
 
                     self.nt.add_node(
                         id=action_id,
                         label=action.name,
                         group=group,
-                        position_dict=position_dict,
+                        position_dict=self.positions,
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore

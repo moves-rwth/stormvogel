@@ -91,9 +91,9 @@
     "show_results": true,
     "result_symbol": "\u2606",
     "show_rewards": true,
-    "rewards_symbol": "\u20ac",
+    "reward_symbol": "\u20ac",
     "show_observations": true,
-    "observations_symbol": "\u0298"
+    "observation_symbol": "\u0298"
   },
   "layout": {
     "randomSeed": 5
