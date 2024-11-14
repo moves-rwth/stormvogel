@@ -897,16 +897,13 @@ class Model:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Model):
-            # TODO compare action dicts
-            # if self.supports_actions():
-            #    actions_equal = sorted(self.actions.values()) == sorted(
-            #        other.actions.values()
-            #    )
-            # else:
-            #    actions_equal = True
-
-            # if not actions_equal:
-            #    print(self.actions,'\n', other.actions)
+            if self.supports_actions():
+                assert self.actions is not None and other.actions is not None
+                for action, other_action in zip(
+                    sorted(self.actions.values()), sorted(other.actions.values())
+                ):
+                    if not action == other_action:
+                        return False
             return (
                 self.type == other.type
                 and self.states == other.states
@@ -914,7 +911,6 @@ class Model:
                 and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
-                # and actions_equal
             )
         return False
 
