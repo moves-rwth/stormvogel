@@ -211,6 +211,11 @@ class Action:
     def __str__(self):
         return f"Action {self.name} with labels {self.labels}"
 
+    def __eq__(self, other):
+        if isinstance(other, Action):
+            return self.labels == other.labels
+        return False
+
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action("empty", frozenset())
@@ -270,16 +275,21 @@ class Transition:
                 parts.append(f"{action} => {branch}")
         return "; ".join(parts + [])
 
-    def __eq__(self, other):
-        if isinstance(other, Transition):
-            return sorted(list(self.transition.values())) == sorted(
-                list(other.transition.values())
-            )
-        return False
-
     def has_empty_action(self) -> bool:
         # Note that we don't have to deal with the corner case where there are both empty and non-empty transitions. This is dealt with at __init__.
         return self.transition.keys() == {EmptyAction}
+
+    def __eq__(self, other):
+        if isinstance(other, Transition):
+            if len(self.transition) != len(other.transition):
+                return False
+            for item, other_item in zip(
+                sorted(self.transition.items()), sorted(other.transition.items())
+            ):
+                if not (item[0] == other_item[0] and item[1] == other_item[1]):
+                    return False
+            return True
+        return False
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -542,7 +552,7 @@ class Model:
         self.transitions[s.id] = transitions
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
-        """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
+        """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
@@ -581,8 +591,11 @@ class Model:
                     transitions.transition[EmptyAction]
                 )
             else:
-                for choice, branch in transitions.transition.items():
-                    self.transitions[s.id].transition[choice] = branch
+                for action, branch in transitions.transition.items():
+                    assert self.actions is not None
+                    if action not in self.actions.values():
+                        self.actions[action.name] = action
+                    self.transitions[s.id].transition[action] = branch
 
     def get_transitions(self, state_or_id: State | int) -> Transition:
         """Get the transition at state s. Throws a KeyError if not present."""
@@ -610,10 +623,7 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        if labels:
-            action = Action(name, labels)
-        else:
-            action = Action(name, frozenset())
+        action = Action(name, labels if labels else frozenset())
         self.actions[name] = action
         return action
 
@@ -887,6 +897,16 @@ class Model:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Model):
+            # TODO compare action dicts
+            # if self.supports_actions():
+            #    actions_equal = sorted(self.actions.values()) == sorted(
+            #        other.actions.values()
+            #    )
+            # else:
+            #    actions_equal = True
+
+            # if not actions_equal:
+            #    print(self.actions,'\n', other.actions)
             return (
                 self.type == other.type
                 and self.states == other.states
@@ -894,7 +914,7 @@ class Model:
                 and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
-                # TODO: and self.actions ==  other.actions
+                # and actions_equal
             )
         return False
 
