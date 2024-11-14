@@ -135,9 +135,9 @@ def test_simulate_path():
     other_path = stormvogel.simulator.Path(
         {
             1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(3)),
-            2: (pomdp.actions["open2"], pomdp.get_state_by_id(12)),
-            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(23)),
-            4: (pomdp.actions["switch"], pomdp.get_state_by_id(46)),
+            2: (pomdp.actions["open0"], pomdp.get_state_by_id(10)),
+            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(21)),
+            4: (pomdp.actions["stay"], pomdp.get_state_by_id(41)),
         },
         pomdp,
     )
