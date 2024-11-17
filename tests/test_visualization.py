@@ -56,9 +56,9 @@ def test_rewards(mocker):
     model, one, init = simple_model()
     model.set_transitions(init, [(1, one)])
     model.add_rewards("LOL")
-    model.get_rewards("LOL").set(one, 37)
+    model.get_rewards("LOL").set_state_reward(one, 37)
     model.add_rewards("HIHI")
-    model.get_rewards("HIHI").set(one, 42)
+    model.get_rewards("HIHI").set_state_reward(one, 42)
     vis = Visualization(model=model)
     vis.show()
     MockNetwork.add_node.assert_any_call(
