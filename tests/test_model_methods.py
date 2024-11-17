@@ -16,6 +16,10 @@ def test_available_actions():
     ]
     assert mdp.get_state_by_id(1).available_actions() == action
 
+    # we also test it for a state with no available actions
+    mdp = stormvogel.model.new_mdp()
+    assert mdp.get_initial_state().available_actions()
+
 
 def test_get_outgoing_transitions():
     mdp = examples.monty_hall.create_monty_hall_mdp()
@@ -357,5 +361,19 @@ def test_set_state_action_reward():
 
     # we make a reward model manually:
     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {0: 5})
+
+    assert rewardmodel == other_rewardmodel
+
+    # we create an mdp:
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    # we add a reward model with only one reward
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    state = mdp.get_state_by_id(2)
+    action = state.available_actions()[1]
+    rewardmodel.set_state_action_reward(state, action, 3)
+
+    # we make a reward model manually:
+    other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {5: 3})
 
     assert rewardmodel == other_rewardmodel

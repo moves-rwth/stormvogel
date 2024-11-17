@@ -133,7 +133,7 @@ class State:
 
     def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
-        if self.model.supports_actions():
+        if self.model.supports_actions() and self.id in self.model.transitions.keys():
             action_list = []
             for action in self.model.transitions[self.id].transition.keys():
                 action_list.append(action)
@@ -360,7 +360,7 @@ class RewardModel:
                 assert id is not None
                 return self.rewards[id]
             else:
-                RuntimeError("This action is not a choice for this state")
+                RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
@@ -383,7 +383,7 @@ class RewardModel:
                 assert id is not None
                 self.rewards[id] = value
             else:
-                RuntimeError("This action is not a choice for this state")
+                RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
@@ -575,7 +575,7 @@ class Model:
         return sub_model
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
-        """we calculate the appropriate state_action_id for a given state and action"""
+        """we calculate the appropriate state action id for a given state and action"""
         id = 0
         for s in self.states.values():
             for a in s.available_actions():
