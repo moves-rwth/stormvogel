@@ -319,3 +319,27 @@ def test_get_sub_model():
     new_dtmc.normalize()
 
     assert sub_model == new_dtmc
+
+
+def test_get_state_action_id():
+    # we create an mdp:
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+    state = mdp.get_state_by_id(2)
+    action = state.available_actions()[1]
+
+    assert mdp.get_state_action_id(state, action) == 5
+
+
+def test_get_state_action_reward():
+    # we create an mdp:
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    # we add a reward model:
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    for i in range(67):
+        rewardmodel.rewards[i] = i
+
+    state = mdp.get_state_by_id(2)
+    action = state.available_actions()[1]
+
+    assert rewardmodel.get_state_action_reward(state, action) == 5

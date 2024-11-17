@@ -357,6 +357,7 @@ class RewardModel:
         if self.model.supports_actions():
             if action in state.available_actions():
                 id = self.model.get_state_action_id(state, action)
+                assert id is not None
                 return self.rewards[id]
             else:
                 RuntimeError("This action is not a choice for this state")
@@ -374,11 +375,12 @@ class RewardModel:
         else:
             self.rewards[state.id] = value
 
-    def set_action_state_reward(self, state: State, action: Action, value: Number):
+    def set_state_action_reward(self, state: State, action: Action, value: Number):
         """sets the reward at said state action pair (in case of models with actions)"""
         if self.model.supports_actions():
             if action in state.available_actions():
                 id = self.model.get_state_action_id(state, action)
+                assert id is not None
                 self.rewards[id] = value
             else:
                 RuntimeError("This action is not a choice for this state")
@@ -387,7 +389,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def set_action_state_reward_at_id(self, action_state: int, value: Number):
+    def set_state_action_reward_at_id(self, action_state: int, value: Number):
         """sets the reward at said state action pair for a given id (in the case of models with actions)"""
         if self.model.supports_actions():
             self.rewards[action_state] = value
@@ -396,7 +398,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         if not isinstance(other, RewardModel):
             return NotImplemented
         return self.name < other.name
@@ -572,17 +574,18 @@ class Model:
             sub_model.normalize()
         return sub_model
 
-    def get_state_action_id(self, state: State, action: Action) -> int:
+    def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state_action_id for a given state and action"""
         id = 0
         for s in self.states.values():
-            for a in state.available_actions():
+            for a in s.available_actions():
+                if (
+                    a.name == action.name
+                    and action in s.available_actions()
+                    and s == state
+                ):
+                    return id
                 id += 1
-                if a == action:
-                    break
-            if s == state:
-                break
-        return id
 
     def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""

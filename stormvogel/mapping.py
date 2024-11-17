@@ -348,7 +348,7 @@ def stormpy_to_stormvogel(
                 else rewards.state_rewards
             ):
                 if model.supports_actions():
-                    rewardmodel.set_action_state_reward_at_id(index, reward)
+                    rewardmodel.set_state_action_reward_at_id(index, reward)
                 else:
                     rewardmodel.set_state_reward(model.get_state_by_id(index), reward)
 

@@ -242,7 +242,7 @@ def simulate(
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
-                reward_model.set_action_state_reward_at_id(
+                reward_model.set_state_action_reward_at_id(
                     partial_model.get_initial_state().id,
                     model.rewards[index].get_state_reward(model.get_initial_state()),
                 )
@@ -316,7 +316,7 @@ def simulate(
                         state_id
                     )
                     state_action_pair = row_group + select_action
-                    rewardmodel.set_action_state_reward_at_id(
+                    rewardmodel.set_state_action_reward_at_id(
                         state_action_pair, reward[index]
                     )
 
