@@ -240,11 +240,17 @@ def simulate(
         for index, reward in enumerate(model.rewards):
             reward_model = partial_model.add_rewards(model.rewards[index].name)
 
-            # we already set the rewards for the initial state
-            reward_model.set(
-                partial_model.get_initial_state(),
-                model.rewards[index].get(model.get_initial_state()),
-            )
+            # we already set the rewards for the initial state/stateaction
+            if model.supports_actions():
+                reward_model.set_action_state_reward_at_id(
+                    partial_model.get_initial_state().id,
+                    model.rewards[index].get_state_reward(model.get_initial_state()),
+                )
+            else:
+                reward_model.set_state_reward(
+                    partial_model.get_initial_state(),
+                    model.rewards[index].get_state_reward(model.get_initial_state()),
+                )
 
     # now we start stepping through the model
     discovered_states = {0}
@@ -276,7 +282,7 @@ def simulate(
 
                     # we add the rewards
                     for index, rewardmodel in enumerate(partial_model.rewards):
-                        rewardmodel.set(new_state, reward[index])
+                        rewardmodel.set_state_reward(new_state, reward[index])
 
                     last_state_id = state_id
                 if simulator.is_done():
@@ -310,7 +316,9 @@ def simulate(
                         state_id
                     )
                     state_action_pair = row_group + select_action
-                    rewardmodel.set_action_state(state_action_pair, reward[index])
+                    rewardmodel.set_action_state_reward_at_id(
+                        state_action_pair, reward[index]
+                    )
 
                 # we add the state
                 state_id, labels = discovery[0], discovery[2]

@@ -325,7 +325,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     )
 
 
-@dataclass(order=True)
+@dataclass()
 class RewardModel:
     """Represents a state-exit reward model.
     Args:
@@ -334,20 +334,77 @@ class RewardModel:
     """
 
     name: str
+    model: "Model"
     # Hashed by the id of the state or state action pair (=number in the matrix)
     rewards: dict[int, Number]
 
-    def get(self, state: State) -> Number:
-        """Gets the reward at said state."""
+    def __init__(self, name: str, model: "Model", rewards: dict[int, Number]):
+        self.name = name
+        self.rewards = rewards
+        self.model = model
+
+        if self.model.supports_actions():
+            self.set_action_state = {}
+        else:
+            self.state_action_pair = None
+
+    def get_state_reward(self, state: State) -> Number:
+        """Gets the reward at said state or state action pair"""
         return self.rewards[state.id]
 
-    def set(self, state: State, value: Number):
-        """Sets the reward at said state."""
-        self.rewards[state.id] = value
+    def get_state_action_reward(self, state: State, action: Action) -> Number | None:
+        """Gets the reward at said state or state action pair"""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                id = self.model.get_state_action_id(state, action)
+                return self.rewards[id]
+            else:
+                RuntimeError("This action is not a choice for this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
 
-    def set_action_state(self, state_action_pair: int, value: Number):
-        """sets the reward at said state action pair"""
-        self.rewards[state_action_pair] = value
+    def set_state_reward(self, state: State, value: Number):
+        """Sets the reward at said state."""
+        if self.model.supports_actions():
+            RuntimeError(
+                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
+            )
+        else:
+            self.rewards[state.id] = value
+
+    def set_action_state_reward(self, state: State, action: Action, value: Number):
+        """sets the reward at said state action pair (in case of models with actions)"""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                id = self.model.get_state_action_id(state, action)
+                self.rewards[id] = value
+            else:
+                RuntimeError("This action is not a choice for this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def set_action_state_reward_at_id(self, action_state: int, value: Number):
+        """sets the reward at said state action pair for a given id (in the case of models with actions)"""
+        if self.model.supports_actions():
+            self.rewards[action_state] = value
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def __lt__(self, other):
+        if not isinstance(other, RewardModel):
+            return NotImplemented
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, RewardModel):
+            return self.name == other.name and self.rewards == other.rewards
+        return False
 
 
 @dataclass
@@ -416,15 +473,15 @@ class Model:
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
+        return self.get_type() in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
-        return self.type in (ModelType.CTMC, ModelType.MA)
+        return self.get_type() in (ModelType.CTMC, ModelType.MA)
 
     def supports_observations(self):
         """Returns whether this model supports observations."""
-        return self.type == ModelType.POMDP
+        return self.get_type() == ModelType.POMDP
 
     def is_stochastic(self) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
@@ -514,6 +571,18 @@ class Model:
         if normalize:
             sub_model.normalize()
         return sub_model
+
+    def get_state_action_id(self, state: State, action: Action) -> int:
+        """we calculate the appropriate state_action_id for a given state and action"""
+        id = 0
+        for s in self.states.values():
+            for a in state.available_actions():
+                id += 1
+                if a == action:
+                    break
+            if s == state:
+                break
+        return id
 
     def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""
@@ -824,7 +893,7 @@ class Model:
         for model in self.rewards:
             if model.name == name:
                 raise RuntimeError(f"Reward model {name} already present in model.")
-        reward_model = RewardModel(name, {})
+        reward_model = RewardModel(name, self, {})
         self.rewards.append(reward_model)
         return reward_model
 
