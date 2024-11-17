@@ -343,3 +343,19 @@ def test_get_state_action_reward():
     action = state.available_actions()[1]
 
     assert rewardmodel.get_state_action_reward(state, action) == 5
+
+
+def test_set_state_action_reward():
+    # we create an mdp:
+    mdp = stormvogel.model.new_mdp()
+    action = stormvogel.model.Action("0", frozenset())
+    mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
+
+    # we make a reward model using the set_state_action_reward method:
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
+
+    # we make a reward model manually:
+    other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {0: 5})
+
+    assert rewardmodel == other_rewardmodel
