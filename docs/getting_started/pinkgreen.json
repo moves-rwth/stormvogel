@@ -1,0 +1,147 @@
+{
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "groups": {
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#8ff0a4",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ffc0cb",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14
+    },
+    "color": {
+      "color": "black"
+    }
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": false,
+    "reward_symbol": "\u20ac",
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "pinkgreen.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": 12,
+      "y": -136
+    },
+    "1": {
+      "x": 96,
+      "y": -33
+    },
+    "2": {
+      "x": -90,
+      "y": -53
+    },
+    "3": {
+      "x": 13,
+      "y": 72
+    },
+    "4": {
+      "x": -19,
+      "y": 26
+    },
+    "5": {
+      "x": -47,
+      "y": 161
+    }
+  },
+  "width": 800,
+  "height": 600,
+  "physics": true,
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
+  }
+}

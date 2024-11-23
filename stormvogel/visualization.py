@@ -225,7 +225,7 @@ class Visualization(stormvogel.displayable.Displayable):
         res = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
         for reward_model in self.model.rewards:
             try:
-                res += f"\n{reward_model.name}: {reward_model.get_state_reward(s)}"
+                res += f" {reward_model.name}: {reward_model.get_state_reward(s)}"
             except (
                 KeyError
             ):  # If this reward model does not have a reward for this state.

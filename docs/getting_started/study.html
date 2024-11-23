@@ -1,6 +1,6 @@
 
           <iframe
-                id="studyfhiOLrpNPp"
+                id="studyUfXfviwmyR"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -15,34 +15,27 @@
     &gt;&lt;/script&gt;
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
-
+        
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
-
+        
       }
     &lt;/style&gt;
   &lt;/head&gt;
   &lt;body&gt;
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
-
+        
         var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: 5, y: -186 },
 { id: 1, label: `studied`, group: &quot;states&quot;, x: 98, y: 11 },
-{ id: 2, label: `didn&#x27;t study
-€	R: 15`, group: &quot;states&quot;, x: -120, y: -7 },
-{ id: 3, label: `pass test
-€	R: 100`, group: &quot;states&quot;, x: 0, y: 99 },
-{ id: 4, label: `fail test
-€	R: 0`, group: &quot;states&quot;, x: -24, y: 37 },
+{ id: 2, label: `didn&#x27;t study`, group: &quot;states&quot;, x: -120, y: -7 },
+{ id: 3, label: `pass test`, group: &quot;states&quot;, x: 0, y: 99 },
+{ id: 4, label: `fail test`, group: &quot;states&quot;, x: -24, y: 37 },
 { id: 5, label: `end`, group: &quot;states&quot;, x: -62, y: 182 },
-{ id: 10000000000, label: `study`, group: &quot;actions&quot;, x: 119, y: -118 },
-{ id: 10000000001, label: `don&#x27;t study`, group: &quot;actions&quot;, x: -122, y: -141 },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 1, label: &quot;1&quot; },
-{ from: 0, to: 10000000001 },
-{ from: 10000000001, to: 2, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1&quot; },
+{ from: 0, to: 2, label: &quot;1&quot; },
 { from: 1, to: 3, label: &quot;9/10&quot; },
 { from: 1, to: 4, label: &quot;1/10&quot; },
 { from: 2, to: 3, label: &quot;2/5&quot; },
@@ -143,9 +136,9 @@
     &quot;show_results&quot;: true,
     &quot;result_symbol&quot;: &quot;\u2606&quot;,
     &quot;show_rewards&quot;: true,
-    &quot;rewards_symbol&quot;: &quot;\u20ac&quot;,
+    &quot;reward_symbol&quot;: &quot;\u20ac&quot;,
     &quot;show_observations&quot;: true,
-    &quot;observations_symbol&quot;: &quot;\u0298&quot;
+    &quot;observation_symbol&quot;: &quot;\u0298&quot;
   },
   &quot;layout&quot;: {
     &quot;randomSeed&quot;: 5

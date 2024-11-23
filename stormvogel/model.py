@@ -213,7 +213,7 @@ class Action:
 
     def __eq__(self, other):
         if isinstance(other, Action):
-            return self.labels == other.labels
+            return self.name == other.name and self.labels == other.labels
         return False
 
 
@@ -397,6 +397,15 @@ class RewardModel:
             RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
             )
+
+    def set_unset_rewards(self, value: Number):
+        """Fills up rewards that were not set yet with the specified values"""
+        expected_length = 0
+        for s_id, state in self.model.states.items():
+            expected_length += len(state.available_actions())
+        for i in range(expected_length):
+            if not expected_length in self.rewards:
+                self.rewards[i] = value
 
     def __lt__(self, other) -> bool:
         if not isinstance(other, RewardModel):
@@ -684,7 +693,7 @@ class Model:
             raise RuntimeError("Called get_branch on a non-empty transition.")
         return transition[EmptyAction]
 
-    def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
+    def new_action(self, name: str, labels: frozenset[str] | str | None = None) -> Action:
         """Creates a new action and returns it."""
         if not self.supports_actions():
             raise RuntimeError(
