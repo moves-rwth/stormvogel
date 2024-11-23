@@ -133,7 +133,7 @@ class State:
 
     def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
-        if self.model.supports_actions():
+        if self.model.supports_actions() and self.id in self.model.transitions.keys():
             action_list = []
             for action in self.model.transitions[self.id].transition.keys():
                 action_list.append(action)
@@ -211,6 +211,11 @@ class Action:
     def __str__(self):
         return f"Action {self.name} with labels {self.labels}"
 
+    def __eq__(self, other):
+        if isinstance(other, Action):
+            return self.labels == other.labels
+        return False
+
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action("empty", frozenset())
@@ -270,16 +275,21 @@ class Transition:
                 parts.append(f"{action} => {branch}")
         return "; ".join(parts + [])
 
-    def __eq__(self, other):
-        if isinstance(other, Transition):
-            return sorted(list(self.transition.values())) == sorted(
-                list(other.transition.values())
-            )
-        return False
-
     def has_empty_action(self) -> bool:
         # Note that we don't have to deal with the corner case where there are both empty and non-empty transitions. This is dealt with at __init__.
         return self.transition.keys() == {EmptyAction}
+
+    def __eq__(self, other):
+        if isinstance(other, Transition):
+            if len(self.transition) != len(other.transition):
+                return False
+            for item, other_item in zip(
+                sorted(self.transition.items()), sorted(other.transition.items())
+            ):
+                if not (item[0] == other_item[0] and item[1] == other_item[1]):
+                    return False
+            return True
+        return False
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -315,7 +325,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     )
 
 
-@dataclass(order=True)
+@dataclass()
 class RewardModel:
     """Represents a state-exit reward model.
     Args:
@@ -324,20 +334,79 @@ class RewardModel:
     """
 
     name: str
+    model: "Model"
     # Hashed by the id of the state or state action pair (=number in the matrix)
     rewards: dict[int, Number]
 
-    def get(self, state: State) -> Number:
-        """Gets the reward at said state."""
+    def __init__(self, name: str, model: "Model", rewards: dict[int, Number]):
+        self.name = name
+        self.rewards = rewards
+        self.model = model
+
+        if self.model.supports_actions():
+            self.set_action_state = {}
+        else:
+            self.state_action_pair = None
+
+    def get_state_reward(self, state: State) -> Number:
+        """Gets the reward at said state or state action pair"""
         return self.rewards[state.id]
 
-    def set(self, state: State, value: Number):
-        """Sets the reward at said state."""
-        self.rewards[state.id] = value
+    def get_state_action_reward(self, state: State, action: Action) -> Number | None:
+        """Gets the reward at said state or state action pair"""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                id = self.model.get_state_action_id(state, action)
+                assert id is not None
+                return self.rewards[id]
+            else:
+                RuntimeError("This action is not available in this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
 
-    def set_action_state(self, state_action_pair: int, value: Number):
-        """sets the reward at said state action pair"""
-        self.rewards[state_action_pair] = value
+    def set_state_reward(self, state: State, value: Number):
+        """Sets the reward at said state."""
+        if self.model.supports_actions():
+            RuntimeError(
+                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
+            )
+        else:
+            self.rewards[state.id] = value
+
+    def set_state_action_reward(self, state: State, action: Action, value: Number):
+        """sets the reward at said state action pair (in case of models with actions)"""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                id = self.model.get_state_action_id(state, action)
+                assert id is not None
+                self.rewards[id] = value
+            else:
+                RuntimeError("This action is not available in this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def set_state_action_reward_at_id(self, action_state: int, value: Number):
+        """sets the reward at said state action pair for a given id (in the case of models with actions)"""
+        if self.model.supports_actions():
+            self.rewards[action_state] = value
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, RewardModel):
+            return NotImplemented
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, RewardModel):
+            return self.name == other.name and self.rewards == other.rewards
+        return False
 
 
 @dataclass
@@ -406,15 +475,15 @@ class Model:
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
+        return self.get_type() in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
-        return self.type in (ModelType.CTMC, ModelType.MA)
+        return self.get_type() in (ModelType.CTMC, ModelType.MA)
 
     def supports_observations(self):
         """Returns whether this model supports observations."""
-        return self.type == ModelType.POMDP
+        return self.get_type() == ModelType.POMDP
 
     def is_stochastic(self) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
@@ -505,6 +574,19 @@ class Model:
             sub_model.normalize()
         return sub_model
 
+    def get_state_action_id(self, state: State, action: Action) -> int | None:
+        """we calculate the appropriate state action id for a given state and action"""
+        id = 0
+        for s in self.states.values():
+            for a in s.available_actions():
+                if (
+                    a.name == action.name
+                    and action in s.available_actions()
+                    and s == state
+                ):
+                    return id
+                id += 1
+
     def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
@@ -542,7 +624,7 @@ class Model:
         self.transitions[s.id] = transitions
 
     def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
-        """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
+        """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
@@ -581,8 +663,11 @@ class Model:
                     transitions.transition[EmptyAction]
                 )
             else:
-                for choice, branch in transitions.transition.items():
-                    self.transitions[s.id].transition[choice] = branch
+                for action, branch in transitions.transition.items():
+                    assert self.actions is not None
+                    if action not in self.actions.values():
+                        self.actions[action.name] = action
+                    self.transitions[s.id].transition[action] = branch
 
     def get_transitions(self, state_or_id: State | int) -> Transition:
         """Get the transition at state s. Throws a KeyError if not present."""
@@ -610,10 +695,7 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        if labels:
-            action = Action(name, labels)
-        else:
-            action = Action(name, frozenset())
+        action = Action(name, labels if labels else frozenset())
         self.actions[name] = action
         return action
 
@@ -814,7 +896,7 @@ class Model:
         for model in self.rewards:
             if model.name == name:
                 raise RuntimeError(f"Reward model {name} already present in model.")
-        reward_model = RewardModel(name, {})
+        reward_model = RewardModel(name, self, {})
         self.rewards.append(reward_model)
         return reward_model
 
@@ -887,6 +969,13 @@ class Model:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Model):
+            if self.supports_actions():
+                assert self.actions is not None and other.actions is not None
+                for action, other_action in zip(
+                    sorted(self.actions.values()), sorted(other.actions.values())
+                ):
+                    if not action == other_action:
+                        return False
             return (
                 self.type == other.type
                 and self.states == other.states
@@ -894,7 +983,6 @@ class Model:
                 and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
-                # TODO: and self.actions ==  other.actions
             )
         return False
 
