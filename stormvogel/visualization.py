@@ -165,7 +165,7 @@ class Visualization(stormvogel.displayable.Displayable):
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
-                if action == stormvogel.model.EmptyAction:
+                if action.strict_eq(stormvogel.model.EmptyAction):
                     # Only draw probabilities
                     for prob, target in branch.branch:
                         self.nt.add_edge(

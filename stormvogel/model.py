@@ -215,6 +215,12 @@ class Action:
         if isinstance(other, Action):
             return self.labels == other.labels
         return False
+    
+    def strict_eq(self, other):
+        """Also requires the names to be equal."""
+        if isinstance(other, Action):
+            return self.name == other.name and self.labels == other.labels
+        return False
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
