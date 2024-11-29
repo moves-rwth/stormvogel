@@ -699,7 +699,7 @@ class Model:
             raise RuntimeError("Called get_branch on a non-empty transition.")
         return transition[EmptyAction]
 
-    def new_action(self, name: str, labels: frozenset[str] | str | None = None) -> Action:
+    def new_action(self, name: str, labels: frozenset[str] | None = None) -> Action:
         """Creates a new action and returns it."""
         if not self.supports_actions():
             raise RuntimeError(
