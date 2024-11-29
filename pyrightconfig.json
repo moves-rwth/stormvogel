@@ -4,6 +4,7 @@
   "reportAttributeAccessIssue": false,
   "reportMissingImports": false,
   "ignore": [
-    "**/.vscode/**"
+    "**/.vscode/**",
+    "**.ipynb"
   ]
 }
