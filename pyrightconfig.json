@@ -2,5 +2,8 @@
   "venvPath": ".",
   "venv": ".venv",
   "reportAttributeAccessIssue": false,
-  "reportMissingImports": false
+  "reportMissingImports": false,
+  "ignore": [
+    "**/.vscode/**"
+  ]
 }

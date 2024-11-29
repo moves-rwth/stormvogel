@@ -65,7 +65,7 @@ def test_rewards(mocker):
         0, label="init", group="states", position_dict={}
     )  # type: ignore
     MockNetwork.add_node.assert_any_call(
-        1, label="one\nLOL: 37\nHIHI: 42", group="states", position_dict={}
+        1, label="one\n€\tLOL: 37\tHIHI: 42", group="states", position_dict={}
     )  # type: ignore
     assert MockNetwork.add_node.call_count == 2
     MockNetwork.add_edge.assert_any_call(0, 1, label="1")
@@ -79,7 +79,7 @@ def test_results_count(mocker):
 
     vis = Visualization(model=model, result=result)
     vis.show()
-    RES_SYM = vis.layout.layout["results_and_rewards"]["resultSymbol"]
+    RES_SYM = vis.layout.layout["state_properties"]["result_symbol"]
     MockNetwork.add_node.assert_any_call(
         0, label=f"init\n{RES_SYM} 69", group="states", position_dict={}
     )  # type: ignore

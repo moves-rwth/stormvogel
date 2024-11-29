@@ -216,6 +216,12 @@ class Action:
             return self.labels == other.labels
         return False
 
+    def strict_eq(self, other):
+        """Also requires the names to be equal."""
+        if isinstance(other, Action):
+            return self.name == other.name and self.labels == other.labels
+        return False
+
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action("empty", frozenset())
@@ -397,6 +403,15 @@ class RewardModel:
             RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
             )
+
+    def set_unset_rewards(self, value: Number):
+        """Fills up rewards that were not set yet with the specified values"""
+        expected_length = 0
+        for s_id, state in self.model.states.items():
+            expected_length += len(state.available_actions())
+        for i in range(expected_length):
+            if expected_length not in self.rewards:
+                self.rewards[i] = value
 
     def __lt__(self, other) -> bool:
         if not isinstance(other, RewardModel):

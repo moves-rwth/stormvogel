@@ -42,6 +42,7 @@ class Visualization(stormvogel.displayable.Displayable):
         result: stormvogel.result.Result | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         separate_labels: list[str] = [],
+        positions: dict[str, dict[str, int]] | None = None,
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
@@ -57,9 +58,12 @@ class Visualization(stormvogel.displayable.Displayable):
             result (Result, optional): Result corresponding to the model.
             layout (Layout, optional): Layout used for the visualization.
             separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
-            output (widgets.Output): An output widget within which the network should be displayed.
+            positions (dict[int, dict[str, int]] | None): A dictionary from state ids to positions.
+                Determines where states should be placed in the visualization. Overrides saved positions in a loaded layout.
+                Example: {1: {"x":5, "y":10}, 2: ....}
             do_display (bool): Set to true iff you want the Visualization to display. Defaults to True.
             debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
+            do_init_server (bool): Enable if you would like to start the server which is required for some visualization features. Defaults to True.
         """
         super().__init__(output, do_display, debug_output)
         if name is None:
@@ -72,6 +76,11 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
         )
+        self.positions: dict[str, dict[str, int]]
+        if positions is None:
+            self.positions = self.layout.layout["positions"]
+        else:
+            self.positions = positions
         self.do_init_server: bool = do_init_server
         self.__create_nt()
 
@@ -114,26 +123,35 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         for state in self.model.states.values():
-            if self.layout.layout["results_and_rewards"]["show_results"]:
-                res = self.__format_result(state)
-            else:
-                res = ""
-            if self.layout.layout["results_and_rewards"]["show_rewards"]:
-                rewards = self.__format_rewards(state)
-            else:
-                rewards = ""
-
-            group = "states"  # Default
-            if (
-                len(state.labels) > 0 and und(state.labels[0]) in self.separate_labels
-            ):  # Use a specific group if specified.
-                group = und(state.labels[0])
+            res = (
+                self.__format_result(state)
+                if self.layout.layout["state_properties"]["show_results"]
+                else ""
+            )
+            rewards = (
+                self.__format_rewards(state)
+                if self.layout.layout["state_properties"]["show_rewards"]
+                else ""
+            )
+            observations = (
+                self.__format_observations(state)
+                if self.layout.layout["state_properties"]["show_observations"]
+                else ""
+            )
+            group = (  # Use a non-default group if specified.
+                und(state.labels[0])
+                if (
+                    len(state.labels) > 0  # TODO generalize
+                    and und(state.labels[0]) in self.separate_labels
+                )
+                else "states"
+            )
 
             self.nt.add_node(
                 state.id,
-                label=",".join(state.labels) + rewards + res,
+                label=",".join(state.labels) + rewards + res + observations,
                 group=group,
-                position_dict=self.layout.layout["positions"],
+                position_dict=self.positions,
             )
 
     def __add_transitions(self) -> None:
@@ -147,7 +165,7 @@ class Visualization(stormvogel.displayable.Displayable):
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
-                if action == stormvogel.model.EmptyAction:
+                if action.strict_eq(stormvogel.model.EmptyAction):
                     # Only draw probabilities
                     for prob, target in branch.branch:
                         self.nt.add_edge(
@@ -165,11 +183,12 @@ class Visualization(stormvogel.displayable.Displayable):
                         if choice == action:
                             group = "scheduled_actions"
                     # Add the action's node
+
                     self.nt.add_node(
                         id=action_id,
                         label=action.name,
                         group=group,
-                        position_dict=self.layout.layout["positions"],
+                        position_dict=self.positions,
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore
@@ -201,14 +220,16 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def __format_rewards(self, s: stormvogel.model.State) -> str:
         """Create a string that contains the state-exit reward for this state. Starts with newline"""
-        res = ""
+        if len(self.model.rewards) == 0:
+            return ""
+        res = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
         for reward_model in self.model.rewards:
             try:
-                res += f"\n{reward_model.name}: {reward_model.get_state_reward(s)}"
+                res += f"\t{reward_model.name}: {reward_model.get_state_reward(s)}"
             except (
                 KeyError
             ):  # If this reward model does not have a reward for this state.
-                pass
+                return ""
         return res
 
     def __format_result(self, s: stormvogel.model.State) -> str:
@@ -219,10 +240,21 @@ class Visualization(stormvogel.displayable.Displayable):
             return ""
         return (
             "\n"
-            + self.layout.layout["results_and_rewards"]["resultSymbol"]
+            + self.layout.layout["state_properties"]["result_symbol"]
             + " "
             + self.__format_probability(result_of_state)
         )
+
+    def __format_observations(self, s: stormvogel.model.State) -> str:
+        if s.observation is None:
+            return ""
+        else:
+            return (
+                "\n"
+                + self.layout.layout["state_properties"]["observation_symbol"]
+                + " "
+                + str(s.observation.observation)
+            )
 
     def get_positions(self):
         """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously)."""
