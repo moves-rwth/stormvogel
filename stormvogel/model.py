@@ -405,7 +405,8 @@ class RewardModel:
             )
 
     def set_unset_rewards(self, value: Number):
-        """Fills up rewards that were not set yet with the specified values"""
+        """Fills up rewards that were not set yet with the specified value.
+        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
         expected_length = 0
         for s_id, state in self.model.states.items():
             expected_length += len(state.available_actions())
@@ -632,13 +633,13 @@ class Model:
         else:
             raise RuntimeError("This model is not a MA")
 
-    def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
+    def set_transitions(self, s: State, transitions: Transition | TransitionShorthand) -> None:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
         self.transitions[s.id] = transitions
 
-    def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
+    def add_transitions(self, s: State, transitions: Transition | TransitionShorthand) -> None:
         """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):

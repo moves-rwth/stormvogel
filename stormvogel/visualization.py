@@ -123,21 +123,11 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         for state in self.model.states.values():
-            res = (
-                self.__format_result(state)
-                if self.layout.layout["state_properties"]["show_results"]
-                else ""
-            )
-            rewards = (
-                self.__format_rewards(state)
-                if self.layout.layout["state_properties"]["show_rewards"]
-                else ""
-            )
-            observations = (
-                self.__format_observations(state)
-                if self.layout.layout["state_properties"]["show_observations"]
-                else ""
-            )
+            res = self.__format_result(state)
+            observations = self.__format_observations(state)
+
+            rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
+
             group = (  # Use a non-default group if specified.
                 und(state.labels[0])
                 if (
@@ -182,11 +172,13 @@ class Visualization(stormvogel.displayable.Displayable):
                         )
                         if choice == action:
                             group = "scheduled_actions"
-                    # Add the action's node
+                    
+                    reward = self.__format_rewards(self.model.get_state_by_id(state_id), action)
 
+                    # Add the action's node
                     self.nt.add_node(
                         id=action_id,
-                        label=action.name,
+                        label=action.name + reward,
                         group=group,
                         position_dict=self.positions,
                     )
@@ -218,22 +210,32 @@ class Visualization(stormvogel.displayable.Displayable):
             else:
                 return str(round(float(prob), self.layout.layout["numbers"]["digits"]))
 
-    def __format_rewards(self, s: stormvogel.model.State) -> str:
-        """Create a string that contains the state-exit reward for this state. Starts with newline"""
-        if len(self.model.rewards) == 0:
+    def __format_rewards(self, s: stormvogel.model.State, a: stormvogel.model.Action) -> str:
+        """Create a string that contains either the state exit reward (if actions are not supported)
+        or the reward of taking this action from this state. (if actions ARE supported)
+        Starts with newline"""
+        
+        if len(self.model.rewards) == 0 or not self.layout.layout["state_properties"]["show_rewards"]:
             return ""
         res = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
         for reward_model in self.model.rewards:
+            print("format rewards.", s.labels, a.name, self.model.get_state_action_id(s,a))
             try:
-                res += f"\t{reward_model.name}: {reward_model.get_state_reward(s)}"
-            except (
-                KeyError
-            ):  # If this reward model does not have a reward for this state.
+                reward = 4269
+                if self.model.supports_actions() and a != stormvogel.model.EmptyAction:
+                    reward = reward_model.get_state_action_reward(s, a)
+                else:
+                    reward = reward_model.get_state_reward(s)
+                res += f"\t{reward_model.name}: {reward}"
+            except KeyError as e:  # If this reward model does not have a reward for this state.
+                print("keyerror with", e)
+                print(self.model.get_state_action_id(s,a))
                 return ""
+        print("result:", res)
         return res
 
     def __format_result(self, s: stormvogel.model.State) -> str:
-        if self.result is None:
+        if self.result is None or not self.layout.layout["state_properties"]["show_results"]:
             return ""
         result_of_state = self.result.get_result_of_state(s)
         if result_of_state is None:
@@ -246,7 +248,7 @@ class Visualization(stormvogel.displayable.Displayable):
         )
 
     def __format_observations(self, s: stormvogel.model.State) -> str:
-        if s.observation is None:
+        if s.observation is None or not self.layout.layout["state_properties"]["show_observations"]:
             return ""
         else:
             return (
