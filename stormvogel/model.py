@@ -215,7 +215,7 @@ class Action:
         if isinstance(other, Action):
             return self.labels == other.labels
         return False
-    
+
     def strict_eq(self, other):
         """Also requires the names to be equal."""
         if isinstance(other, Action):
@@ -410,7 +410,7 @@ class RewardModel:
         for s_id, state in self.model.states.items():
             expected_length += len(state.available_actions())
         for i in range(expected_length):
-            if not expected_length in self.rewards:
+            if expected_length not in self.rewards:
                 self.rewards[i] = value
 
     def __lt__(self, other) -> bool:
