@@ -825,15 +825,16 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 
