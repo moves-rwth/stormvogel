@@ -117,6 +117,10 @@
       "__description": "Symbol",
       "__widget": "Text"
     },
+    "show_zero_rewards": {
+      "__description": "Show zero rewards",
+      "__widget": "Checkbox"
+    },
     "show_observations": {
       "__description": "Show observations",
       "__widget": "Checkbox"

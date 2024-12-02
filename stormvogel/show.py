@@ -14,6 +14,7 @@ import IPython.display as ipd
 def show(
     model: stormvogel.model.Model,
     result: stormvogel.result.Result | None = None,
+    scheduler: stormvogel.result.Scheduler | None = None,
     name: str = "model",
     layout: stormvogel.layout.Layout | None = None,
     positions: dict[str, dict[str, int]] | None = None,
@@ -46,6 +47,7 @@ def show(
         model=model,
         name=name,
         result=result,
+        scheduler=scheduler,
         layout=layout,
         positions=positions,
         separate_labels=separate_labels,

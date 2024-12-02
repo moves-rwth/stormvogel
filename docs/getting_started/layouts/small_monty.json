@@ -101,18 +101,39 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 800,
-    "height": 600,
-    "explore": true
+    "width": 575,
+    "height": 148,
+    "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/small_monty.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {},
-  "width": 800,
-  "height": 600,
+  "positions": {
+    "0": {
+      "x": -203,
+      "y": -60
+    },
+    "1": {
+      "x": -99,
+      "y": 2
+    },
+    "2": {
+      "x": 0,
+      "y": 0
+    },
+    "3": {
+      "x": 94,
+      "y": -13
+    },
+    "4": {
+      "x": 204,
+      "y": 38
+    }
+  },
+  "width": 575,
+  "height": 148,
   "physics": true
 }

@@ -40,6 +40,7 @@ class Visualization(stormvogel.displayable.Displayable):
         model: stormvogel.model.Model,
         name: str | None = None,
         result: stormvogel.result.Result | None = None,
+        scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         separate_labels: list[str] = [],
         positions: dict[str, dict[str, int]] | None = None,
@@ -49,13 +50,12 @@ class Visualization(stormvogel.displayable.Displayable):
         do_init_server: bool = True,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
-
-        NEVER CREATE TWO VISUALIZATIONS WITH THE SAME NAME, STUFF MIGHT BREAK.
-
         Args:
             model (Model): The stormvogel model to be displayed.
             name (str, optional): Internally used name. Will be randomly generated if left as None.
             result (Result, optional): Result corresponding to the model.
+            scheduler(Scheduler, optional): Scheduler. The scheduled states can be given a distinct layout. 
+                If not set, then the scheduler from the result will be used.
             layout (Layout, optional): Layout used for the visualization.
             separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
             positions (dict[int, dict[str, int]] | None): A dictionary from state ids to positions.
@@ -66,12 +66,18 @@ class Visualization(stormvogel.displayable.Displayable):
             do_init_server (bool): Enable if you would like to start the server which is required for some visualization features. Defaults to True.
         """
         super().__init__(output, do_display, debug_output)
+        # Having two visualizations with the same name might break some interactive html stuff. This is why we add a random word to it.
         if name is None:
             self.name: str = random_word(10)
         else:
             self.name: str = name + random_word(10)
         self.model: stormvogel.model.Model = model
-        self.result: stormvogel.result.Result = result
+        self.result: stormvogel.result.Result | None = result
+        self.scheduler: stormvogel.result.Scheduler | None = scheduler
+        # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
+        if self.scheduler is None:
+            if not self.result is None:
+                self.scheduler = self.result.scheduler
         self.layout: stormvogel.layout.Layout = layout
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
@@ -151,7 +157,6 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is None:
             return
         action_id = self.ACTION_ID_OFFSET
-        scheduler = self.result.scheduler if self.result is not None else None
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -166,11 +171,11 @@ class Visualization(stormvogel.displayable.Displayable):
                 else:
                     # Put the action in the group scheduled_actions if appropriate.
                     group = "actions"
-                    if scheduler is not None:
-                        choice = scheduler.get_choice_of_state(
+                    if self.scheduler is not None:
+                        choice = self.scheduler.get_choice_of_state(
                             state=self.model.get_state_by_id(state_id)
                         )
-                        if choice == action:
+                        if action.strict_eq(choice):
                             group = "scheduled_actions"
                     
                     reward = self.__format_rewards(self.model.get_state_by_id(state_id), action)
@@ -214,24 +219,20 @@ class Visualization(stormvogel.displayable.Displayable):
         """Create a string that contains either the state exit reward (if actions are not supported)
         or the reward of taking this action from this state. (if actions ARE supported)
         Starts with newline"""
-        
-        if len(self.model.rewards) == 0 or not self.layout.layout["state_properties"]["show_rewards"]:
+        if not self.layout.layout["state_properties"]["show_rewards"]:
             return ""
-        res = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
+        EMPTY_RES = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
+        res = EMPTY_RES
         for reward_model in self.model.rewards:
-            print("format rewards.", s.labels, a.name, self.model.get_state_action_id(s,a))
-            try:
-                reward = 4269
-                if self.model.supports_actions() and a != stormvogel.model.EmptyAction:
-                    reward = reward_model.get_state_action_reward(s, a)
-                else:
-                    reward = reward_model.get_state_reward(s)
+            if self.model.supports_actions():
+                reward = reward_model.get_state_action_reward(s, a)
+            else:
+                reward = reward_model.get_state_reward(s)
+            if not reward is None and not\
+            (not self.layout.layout["state_properties"]["show_zero_rewards"] and reward == 0):
                 res += f"\t{reward_model.name}: {reward}"
-            except KeyError as e:  # If this reward model does not have a reward for this state.
-                print("keyerror with", e)
-                print(self.model.get_state_action_id(s,a))
-                return ""
-        print("result:", res)
+        if res == EMPTY_RES:
+            return ""
         return res
 
     def __format_result(self, s: stormvogel.model.State) -> str:
