@@ -79,7 +79,7 @@ def stormvogel_to_stormpy(
         reward_models = {}
         for rewardmodel in model.rewards:
             reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
-                optional_state_action_reward_vector=list(rewardmodel.rewards.values())
+                optional_state_action_reward_vector=list(rewardmodel.reward_vector())
             )
 
         return reward_models
@@ -339,18 +339,19 @@ def stormpy_to_stormvogel(
         """
         adds the rewards from the sparsemodel to either the states or the state action pairs of the model
         """
-        for reward_model in sparsemodel.reward_models:
-            rewards = sparsemodel.get_reward_model(reward_model)
-            rewardmodel = model.add_rewards(reward_model)
-            for index, reward in enumerate(
+        for reward_model_name in sparsemodel.reward_models:
+            rewards = sparsemodel.get_reward_model(reward_model_name)
+            rewardmodel = model.add_rewards(reward_model_name)
+            reward_vector = (
                 rewards.state_action_rewards
                 if rewards.has_state_action_rewards
                 else rewards.state_rewards
-            ):
-                if model.supports_actions():
-                    rewardmodel.set_state_action_reward_at_id(index, reward)
-                else:
-                    rewardmodel.set_state_reward(model.get_state_by_id(index), reward)
+            )
+
+            if model.supports_actions():
+                rewardmodel.set_from_rewards_vector(reward_vector)
+            else:
+                rewardmodel.set_from_rewards_vector(reward_vector)
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """

@@ -1,6 +1,6 @@
 
           <iframe
-                id="modelaVctEtRnSX"
+                id="modelZVKCIZVJVv"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,66 +27,156 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `t,(1,1)`, group: &quot;t&quot;, x: 200, y: 200 },
-{ id: 1, label: `t,(2,1)`, group: &quot;t&quot;, x: 400, y: 200 },
-{ id: 2, label: `t,(3,1)`, group: &quot;t&quot;, x: 600, y: 200 },
-{ id: 3, label: `t,(1,2)`, group: &quot;t&quot;, x: 200, y: 400 },
-{ id: 4, label: `t,(3,2)`, group: &quot;t&quot;, x: 600, y: 400 },
-{ id: 5, label: `↑,(1,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 6, label: `↓,(1,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 7, label: `←,(1,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 8, label: `→,(1,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 9, label: `↑,(1,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 10, label: `↓,(1,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 11, label: `←,(1,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 12, label: `→,(1,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 13, label: `↑,(2,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 14, label: `↓,(2,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 15, label: `←,(2,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 16, label: `→,(2,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 17, label: `↑,(3,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 18, label: `↓,(3,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 19, label: `←,(3,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 20, label: `→,(3,1)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 21, label: `↑,(3,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 22, label: `↓,(3,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 23, label: `←,(3,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 24, label: `→,(3,2)
-ʘ 0`, group: &quot;states&quot; },
-{ id: 10000000000, label: `↑`, group: &quot;actions&quot;, x: 200, y: 200 },
-{ id: 10000000001, label: `↓`, group: &quot;actions&quot;, x: 200, y: 200 },
-{ id: 10000000002, label: `←`, group: &quot;actions&quot;, x: 200, y: 200 },
-{ id: 10000000003, label: `→`, group: &quot;actions&quot;, x: 200, y: 200 },
+        var nodes = new vis.DataSet([{ id: 0, label: `nijmegen`, group: &quot;states&quot; },
+{ id: 1, label: `eindhoven`, group: &quot;states&quot; },
+{ id: 2, label: `aachen`, group: &quot;states&quot; },
+{ id: 3, label: `saw nijmegen
+ʘ 3`, group: &quot;states&quot; },
+{ id: 4, label: `saw eindhoven
+ʘ 4`, group: &quot;states&quot; },
+{ id: 5, label: `saw aachen
+ʘ 5`, group: &quot;states&quot; },
+{ id: 10000000000, label: `walk`, group: &quot;actions&quot; },
+{ id: 10000000001, label: `stay put`, group: &quot;actions&quot; },
+{ id: 10000000002, label: `walk`, group: &quot;actions&quot; },
+{ id: 10000000003, label: `stay put`, group: &quot;actions&quot; },
+{ id: 10000000004, label: `walk`, group: &quot;actions&quot; },
+{ id: 10000000005, label: `stay put`, group: &quot;actions&quot; },
 ]);
         var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 5, label: &quot;1&quot; },
+{ from: 10000000000, to: 3, label: &quot;1&quot; },
 { from: 0, to: 10000000001 },
-{ from: 10000000001, to: 6, label: &quot;1&quot; },
-{ from: 0, to: 10000000002 },
-{ from: 10000000002, to: 7, label: &quot;1&quot; },
-{ from: 0, to: 10000000003 },
-{ from: 10000000003, to: 8, label: &quot;1&quot; },
+{ from: 10000000001, to: 0, label: &quot;1&quot; },
+{ from: 3, to: 0, label: &quot;1&quot; },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 4, label: &quot;1&quot; },
+{ from: 1, to: 10000000003 },
+{ from: 10000000003, to: 1, label: &quot;1&quot; },
+{ from: 4, to: 1, label: &quot;1&quot; },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 5, label: &quot;1&quot; },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 2, label: &quot;1&quot; },
+{ from: 5, to: 2, label: &quot;1&quot; },
 ]);
-        var options = {};
+        var options = {
+  &quot;__fake_macros&quot;: {
+    &quot;__group_macro&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    }
+  },
+  &quot;groups&quot;: {
+    &quot;states&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;scheduled_actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
+    }
+  },
+  &quot;reload_button&quot;: false,
+  &quot;edges&quot;: {
+    &quot;arrows&quot;: &quot;to&quot;,
+    &quot;font&quot;: {
+      &quot;color&quot;: &quot;black&quot;,
+      &quot;size&quot;: 14
+    },
+    &quot;color&quot;: {
+      &quot;color&quot;: &quot;black&quot;
+    }
+  },
+  &quot;numbers&quot;: {
+    &quot;fractions&quot;: true,
+    &quot;digits&quot;: 5
+  },
+  &quot;state_properties&quot;: {
+    &quot;show_results&quot;: true,
+    &quot;result_symbol&quot;: &quot;\u2606&quot;,
+    &quot;show_rewards&quot;: true,
+    &quot;reward_symbol&quot;: &quot;\u20ac&quot;,
+    &quot;show_zero_rewards&quot;: true,
+    &quot;show_observations&quot;: true,
+    &quot;observation_symbol&quot;: &quot;\u0298&quot;
+  },
+  &quot;layout&quot;: {
+    &quot;randomSeed&quot;: 5
+  },
+  &quot;misc&quot;: {
+    &quot;enable_physics&quot;: true,
+    &quot;width&quot;: 800,
+    &quot;height&quot;: 600,
+    &quot;explore&quot;: false
+  },
+  &quot;saving&quot;: {
+    &quot;relative_path&quot;: true,
+    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;save_button&quot;: false,
+    &quot;load_button&quot;: false
+  },
+  &quot;positions&quot;: {},
+  &quot;width&quot;: 800,
+  &quot;height&quot;: 600,
+  &quot;physics&quot;: true
+};
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);
 var data = {
