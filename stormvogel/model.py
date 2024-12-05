@@ -211,6 +211,7 @@ class Action:
     def __str__(self):
         return f"Action {self.name} with labels {self.labels}"
 
+    # TODO remove these after modifying the whole code base to remove names.
     def __eq__(self, other):
         if isinstance(other, Action):
             return self.labels == other.labels
@@ -221,6 +222,9 @@ class Action:
         if isinstance(other, Action):
             return self.name == other.name and self.labels == other.labels
         return False
+    
+    # def __hash__(self):
+    #     return self.labels.__hash__()
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -418,17 +422,6 @@ class RewardModel:
                     RuntimeError("A reward was not set. You might want to call set_unset_rewards.")
                 vector.append(reward)
         return vector
-
-
-    # def set_state_action_reward_at_id(self, action_state: int, value: Number):
-    #     """sets the reward at said state action pair for a given id (in the case of models with actions).
-    #     WARNING This function is only intended for internal use within stormvogel. Use set_state_action_reward instead!"""
-    #     if self.model.supports_actions():
-    #         self.rewards[action_state] = value
-    #     else:
-    #         RuntimeError(
-    #             "The model this rewardmodel belongs to does not support actions"
-    #         )
 
     def set_unset_rewards(self, value: Number):
         """Fills up rewards that were not set yet with the specified value.
