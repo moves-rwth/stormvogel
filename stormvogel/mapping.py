@@ -342,7 +342,11 @@ def stormpy_to_stormvogel(
         for reward_model_name in sparsemodel.reward_models:
             rewards = sparsemodel.get_reward_model(reward_model_name)
             rewardmodel = model.add_rewards(reward_model_name)
-            reward_vector = rewards.state_action_rewards if rewards.has_state_action_rewards else rewards.state_rewards
+            reward_vector = (
+                rewards.state_action_rewards
+                if rewards.has_state_action_rewards
+                else rewards.state_rewards
+            )
 
             if model.supports_actions():
                 rewardmodel.set_from_rewards_vector(reward_vector)

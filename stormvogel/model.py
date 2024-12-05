@@ -222,7 +222,7 @@ class Action:
         if isinstance(other, Action):
             return self.name == other.name and self.labels == other.labels
         return False
-    
+
     # def __hash__(self):
     #     return self.labels.__hash__()
 
@@ -346,11 +346,13 @@ class RewardModel:
     name: str
     model: "Model"
     rewards: dict[Tuple[int, Action], Number]
-    """Rewards dict. Hashed by state id and Action. 
+    """Rewards dict. Hashed by state id and Action.
     The function update_rewards can be called to update rewards. After this, rewards will correspond to intermediate_rewards.
     Note that in models without actions, EmptyAction will be used here."""
 
-    def __init__(self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]):
+    def __init__(
+        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]
+    ):
         self.name = name
         self.rewards = rewards
         self.model = model
@@ -359,20 +361,22 @@ class RewardModel:
             self.set_action_state = {}
         else:
             self.state_action_pair = None
-    
-    def set_from_rewards_vector(self, vector:list[Number]) -> None:
+
+    def set_from_rewards_vector(self, vector: list[Number]) -> None:
         """Set the rewards of this model according to a stormpy rewards vector."""
         combined_id = 0
         self.rewards = dict()
         for s in self.model.states.values():
             for a in s.available_actions():
-                self.rewards[s.id,a] = vector[combined_id]
+                self.rewards[s.id, a] = vector[combined_id]
                 combined_id += 1
 
     def get_state_reward(self, state: State) -> Number:
         """Gets the reward at said state or state action pair"""
         if self.model.supports_actions():
-            RuntimeError("This is a model with actions. Please call the get_action_state_reward(_at_id) function instead")
+            RuntimeError(
+                "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
+            )
         return self.rewards[state.id, EmptyAction]
 
     def get_state_action_reward(self, state: State, action: Action) -> Number | None:
@@ -399,7 +403,13 @@ class RewardModel:
         else:
             self.rewards[state.id, EmptyAction] = value
 
-    def set_state_action_reward(self, state: State, action: Action, value: Number, auto_update_rewards:bool=True):
+    def set_state_action_reward(
+        self,
+        state: State,
+        action: Action,
+        value: Number,
+        auto_update_rewards: bool = True,
+    ):
         """sets the reward at said state action pair (in case of models with actions).
         If you disable auto_update_rewards, you will need to call update_intermediate_to"""
         if self.model.supports_actions():
@@ -411,15 +421,17 @@ class RewardModel:
             RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
             )
-    
+
     def reward_vector(self) -> list[Number]:
         """Return the rewards in a stormpy format."""
         vector = []
         for s in self.model.states.values():
             for a in s.available_actions():
-                reward = self.rewards[s.id,a]
+                reward = self.rewards[s.id, a]
                 if reward is None:
-                    RuntimeError("A reward was not set. You might want to call set_unset_rewards.")
+                    RuntimeError(
+                        "A reward was not set. You might want to call set_unset_rewards."
+                    )
                 vector.append(reward)
         return vector
 
@@ -650,13 +662,17 @@ class Model:
         else:
             raise RuntimeError("This model is not a MA")
 
-    def set_transitions(self, s: State, transitions: Transition | TransitionShorthand) -> None:
+    def set_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
         self.transitions[s.id] = transitions
 
-    def add_transitions(self, s: State, transitions: Transition | TransitionShorthand) -> None:
+    def add_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
         """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):

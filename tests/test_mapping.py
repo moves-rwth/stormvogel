@@ -139,6 +139,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
 
+
 # TODO re-introduce this test once names are removed from actions
 # def test_stormvogel_to_stormpy_and_back_mdp():
 #     # we test it for monty hall mdp

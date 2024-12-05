@@ -54,7 +54,7 @@ class Visualization(stormvogel.displayable.Displayable):
             model (Model): The stormvogel model to be displayed.
             name (str, optional): Internally used name. Will be randomly generated if left as None.
             result (Result, optional): Result corresponding to the model.
-            scheduler(Scheduler, optional): Scheduler. The scheduled states can be given a distinct layout. 
+            scheduler(Scheduler, optional): Scheduler. The scheduled states can be given a distinct layout.
                 If not set, then the scheduler from the result will be used.
             layout (Layout, optional): Layout used for the visualization.
             separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
@@ -76,7 +76,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
         if self.scheduler is None:
-            if not self.result is None:
+            if self.result is not None:
                 self.scheduler = self.result.scheduler
         self.layout: stormvogel.layout.Layout = layout
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
@@ -177,8 +177,10 @@ class Visualization(stormvogel.displayable.Displayable):
                         )
                         if action.strict_eq(choice):
                             group = "scheduled_actions"
-                    
-                    reward = self.__format_rewards(self.model.get_state_by_id(state_id), action)
+
+                    reward = self.__format_rewards(
+                        self.model.get_state_by_id(state_id), action
+                    )
 
                     # Add the action's node
                     self.nt.add_node(
@@ -215,7 +217,9 @@ class Visualization(stormvogel.displayable.Displayable):
             else:
                 return str(round(float(prob), self.layout.layout["numbers"]["digits"]))
 
-    def __format_rewards(self, s: stormvogel.model.State, a: stormvogel.model.Action) -> str:
+    def __format_rewards(
+        self, s: stormvogel.model.State, a: stormvogel.model.Action
+    ) -> str:
         """Create a string that contains either the state exit reward (if actions are not supported)
         or the reward of taking this action from this state. (if actions ARE supported)
         Starts with newline"""
@@ -228,15 +232,20 @@ class Visualization(stormvogel.displayable.Displayable):
                 reward = reward_model.get_state_action_reward(s, a)
             else:
                 reward = reward_model.get_state_reward(s)
-            if not reward is None and not\
-            (not self.layout.layout["state_properties"]["show_zero_rewards"] and reward == 0):
+            if reward is not None and not (
+                not self.layout.layout["state_properties"]["show_zero_rewards"]
+                and reward == 0
+            ):
                 res += f"\t{reward_model.name}: {reward}"
         if res == EMPTY_RES:
             return ""
         return res
 
     def __format_result(self, s: stormvogel.model.State) -> str:
-        if self.result is None or not self.layout.layout["state_properties"]["show_results"]:
+        if (
+            self.result is None
+            or not self.layout.layout["state_properties"]["show_results"]
+        ):
             return ""
         result_of_state = self.result.get_result_of_state(s)
         if result_of_state is None:
@@ -249,7 +258,10 @@ class Visualization(stormvogel.displayable.Displayable):
         )
 
     def __format_observations(self, s: stormvogel.model.State) -> str:
-        if s.observation is None or not self.layout.layout["state_properties"]["show_observations"]:
+        if (
+            s.observation is None
+            or not self.layout.layout["state_properties"]["show_observations"]
+        ):
             return ""
         else:
             return (

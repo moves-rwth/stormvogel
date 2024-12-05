@@ -4,7 +4,6 @@ import examples.die
 import examples.nuclear_fusion_ctmc
 import pytest
 from typing import cast
-from stormvogel.model import EmptyAction
 
 
 def test_available_actions():
@@ -347,6 +346,7 @@ def test_get_state_action_reward():
     action = state.available_actions()[1]
 
     assert rewardmodel.get_state_action_reward(state, action) == 5
+
 
 # TODO re-introduce this test once names are removed from actions.
 # def test_set_state_action_reward():

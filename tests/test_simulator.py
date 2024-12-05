@@ -1,9 +1,3 @@
-import stormvogel.model
-import examples.die
-import examples.nuclear_fusion_ctmc
-import stormvogel.simulator
-from stormvogel.model import EmptyAction
-
 # TODO re-introduce tests once action names are removed.
 # def test_simulate():
 #     # we make a die dtmc and run the simulator with it
