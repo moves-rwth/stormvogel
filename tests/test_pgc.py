@@ -19,6 +19,9 @@ def test_pgc_mdp():
     def rewards(s: pgc.State, a: pgc.Action):
         return 1
 
+    def labels(s: pgc.State):
+        return [str(s.x)]
+
     def delta(s: pgc.State, action: pgc.Action):
         if action == left:
             return (
@@ -43,14 +46,15 @@ def test_pgc_mdp():
         delta=delta,
         available_actions=available_actions,
         initial_state_pgc=initial_state,
+        labels=labels,
         rewards=rewards,
     )
 
     # we build the model in the regular way:
     model = stormvogel.model.new_mdp(create_initial_state=False)
-    state1 = model.new_state(labels=["init"], features={"x": 1})
-    state2 = model.new_state(features={"x": 2})
-    state0 = model.new_state(features={"0": 0})
+    state1 = model.new_state(labels=["init", "1"], features={"x": 1})
+    state2 = model.new_state(labels=["2"], features={"x": 2})
+    state0 = model.new_state(labels=["0"], features={"0": 0})
     left = model.new_action("left", frozenset({"left"}))
     right = model.new_action("right", frozenset({"right"}))
     branch11 = stormvogel.model.Branch([(0.5, state1), (0.5, state2)])

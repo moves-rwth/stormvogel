@@ -157,5 +157,11 @@ def build_pgc(
                 rewardmodel.set_state_reward(s, reward)
 
     # we add the labels
+    if labels is not None:
+        for state in states_seen:
+            s = model.get_state_by_name(str(state.__dict__))
+            assert s is not None
+            for label in labels(state):
+                s.add_label(label)
 
     return model
