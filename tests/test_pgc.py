@@ -17,7 +17,7 @@ def test_pgc_mdp():
         return [left, right]
 
     def rewards(s: pgc.State, a: pgc.Action):
-        return 1
+        return [1, 2]
 
     def labels(s: pgc.State):
         return [str(s.x)]
@@ -68,9 +68,12 @@ def test_pgc_mdp():
     model.add_transitions(state2, stormvogel.model.Transition({right: branch2}))
     model.add_transitions(state0, stormvogel.model.Transition({left: branch0}))
 
-    rewardmodel = model.add_rewards("rewards")
+    rewardmodel = model.add_rewards("rewardmodel: 0")
     for i in range(2 * N):
         rewardmodel.set_state_action_reward_at_id(i, 1)
+    rewardmodel = model.add_rewards("rewardmodel: 1")
+    for i in range(2 * N):
+        rewardmodel.set_state_action_reward_at_id(i, 2)
 
     assert model == pgc_model
 
@@ -81,7 +84,7 @@ def test_pgc_dtmc():
     initial_state = pgc.State(s=0)
 
     def rewards(s: pgc.State):
-        return 1
+        return [1, 2]
 
     def delta(s: pgc.State):
         match s.s:
@@ -177,8 +180,11 @@ def test_pgc_dtmc():
     model.set_transitions(model.get_state_by_id(12), [(1, model.get_state_by_id(13))])
     model.set_transitions(model.get_state_by_id(13), [(1, model.get_state_by_id(13))])
 
-    rewardmodel = model.add_rewards("rewards")
+    rewardmodel = model.add_rewards("rewardmodel: 0")
     for state in model.states.values():
         rewardmodel.set_state_reward(state, 1)
+    rewardmodel = model.add_rewards("rewardmodel: 1")
+    for state in model.states.values():
+        rewardmodel.set_state_reward(state, 2)
 
     assert pgc_model == model

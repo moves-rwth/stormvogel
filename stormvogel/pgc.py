@@ -32,7 +32,7 @@ class State:
 
 def build_pgc(
     delta,  # Callable[[State, Action], list[tuple[float, State]]],
-    initial_state_pgc: State,  # TODO rewards function, label function
+    initial_state_pgc: State,
     rewards=None,
     labels=None,
     available_actions: Callable[[State], list[Action]] | None = None,
@@ -45,17 +45,15 @@ def build_pgc(
     this works analogous to a prism file, where the delta is the module in this case.
 
     (this function uses the pgc classes State and Action instead of the ones from stormvogel.model)
-
-    (currently only works for mdps)
     """
     if modeltype == stormvogel.model.ModelType.MDP and available_actions is None:
         raise RuntimeError(
             "You have to provide an available actions function for mdp models"
         )
 
+    # we create the model with the given type and initial state
     model = stormvogel.model.new_model(modeltype=modeltype, create_initial_state=False)
 
-    # we create the model with the given type and initial state
     model.new_state(
         labels=["init"],
         features=initial_state_pgc.__dict__,
@@ -134,27 +132,40 @@ def build_pgc(
         )
 
     # we add the rewards
-    # TODO support multiple reward models
     if rewards is not None:
-        rewardmodel = model.add_rewards("rewards")
         if model.supports_actions():
+            # we first create the right number of reward models
+            assert available_actions is not None
+            nr = len(
+                rewards(initial_state_pgc, available_actions(initial_state_pgc)[0])
+            )
+            for i in range(nr):
+                model.add_rewards("rewardmodel: " + str(i))
+
             for state in states_seen:
                 assert available_actions is not None
                 for action in available_actions(state):
-                    reward = rewards(state, action)
+                    rewardlist = rewards(state, action)
                     s = model.get_state_by_name(str(state.__dict__))
                     assert s is not None
-                    rewardmodel.set_state_action_reward(
-                        s,
-                        model.get_action(str(action.labels)),
-                        reward,
-                    )
+                    for index, reward in enumerate(rewardlist):
+                        model.rewards[index].set_state_action_reward(
+                            s,
+                            model.get_action(str(action.labels)),
+                            reward,
+                        )
         else:
+            # we first create the right number of reward models
+            nr = len(rewards(initial_state_pgc))
+            for i in range(nr):
+                model.add_rewards("rewardmodel: " + str(i))
+
             for state in states_seen:
-                reward = rewards(state)
+                rewardlist = rewards(state)
                 s = model.get_state_by_name(str(state.__dict__))
                 assert s is not None
-                rewardmodel.set_state_reward(s, reward)
+                for index, reward in enumerate(rewardlist):
+                    model.rewards[index].set_state_reward(s, reward)
 
     # we add the labels
     if labels is not None:
