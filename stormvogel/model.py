@@ -205,7 +205,7 @@ class Action:
         labels: The labels of this action. Corresponds to Storm labels.
     """
 
-    name: str
+    name: str  # TODO name is stormpy choice label or we don't need a name at all?
     labels: frozenset[str]
 
     def __str__(self):

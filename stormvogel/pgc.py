@@ -4,26 +4,35 @@ from typing import Callable
 
 
 @dataclass
-class State:
-    f: dict[str, int]
+class Action:
+    """pgc action object. Contains a list of labels"""
 
-    def __hash__(self):
-        return hash(self.x)
-
-    def __eq__(self, other):
-        if isinstance(other, State):
-            return self.f == other.f
-        return False
+    labels: list[str]
 
 
 @dataclass
-class Action:
-    labels: list[str]
+class State:
+    """pgc state object. Can contain any number of any type of arguments"""
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def __repr__(self):
+        return f"State({self.__dict__})"
+
+    def __hash__(self):
+        return hash(self.__dict__)
+
+    def __eq__(self, other):
+        if isinstance(other, State):
+            return self.__dict__ == other.__dict__
+        return False
 
 
 def build_pgc(
     delta,  # Callable[[State, Action], list[tuple[float, State]]],
-    initial_state_pgc: State,
+    initial_state_pgc: State,  # TODO rewards function, label function
     available_actions: Callable[[State], list[Action]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ) -> stormvogel.model.Model:
@@ -46,7 +55,9 @@ def build_pgc(
 
     # we create the model with the given type and initial state
     model.new_state(
-        labels=["init"], features=initial_state_pgc.f, name=str(initial_state_pgc.f)
+        labels=["init"],
+        features=initial_state_pgc.__dict__,
+        name=str(initial_state_pgc.__dict__),
     )
 
     # we continue calling delta and adding new states until no states are
@@ -82,14 +93,15 @@ def build_pgc(
                     if tuple[1] not in states_seen:
                         states_seen.append(tuple[1])
                         new_state = model.new_state(
-                            name=str(tuple[1].f), features=tuple[1].f
+                            name=str(tuple[1].__dict__), features=tuple[1].__dict__
                         )
                         branch.append((tuple[0], new_state))
                         states_to_be_visited.append(tuple[1])
                     else:
-                        # TODO what if there are multiple states with the same label? use names?
+                        # print(tuple[1].__dict__)
+                        # print(model.states)
                         branch.append(
-                            (tuple[0], model.get_state_by_name(str(tuple[1].f)))
+                            (tuple[0], model.get_state_by_name(str(tuple[1].__dict__)))
                         )
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
@@ -101,19 +113,20 @@ def build_pgc(
                 if tuple[1] not in states_seen:
                     states_seen.append(tuple[1])
                     new_state = model.new_state(
-                        name=str(tuple[1].f), features=tuple[1].f
+                        name=str(tuple[1].__dict__), features=tuple[1].__dict__
                     )
 
                     branch.append((tuple[0], new_state))
                     states_to_be_visited.append(tuple[1])
                 else:
-                    # TODO what if there are multiple states with the same label? use names?
-                    branch.append((tuple[0], model.get_state_by_name(str(tuple[1].f))))
+                    branch.append(
+                        (tuple[0], model.get_state_by_name(str(tuple[1].__dict__)))
+                    )
                 if branch != []:
                     transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                         branch
                     )
-        s = model.get_state_by_name(str(state.f))
+        s = model.get_state_by_name(str(state.__dict__))
         assert s is not None
         model.add_transitions(
             s,
