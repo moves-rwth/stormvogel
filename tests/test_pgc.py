@@ -16,6 +16,9 @@ def test_pgc_mdp():
     def available_actions(s: pgc.State):
         return [left, right]
 
+    def rewards(s: pgc.State, a: pgc.Action):
+        return 1
+
     def delta(s: pgc.State, action: pgc.Action):
         if action == left:
             return (
@@ -40,6 +43,7 @@ def test_pgc_mdp():
         delta=delta,
         available_actions=available_actions,
         initial_state_pgc=initial_state,
+        rewards=rewards,
     )
 
     # we build the model in the regular way:
@@ -60,6 +64,10 @@ def test_pgc_mdp():
     model.add_transitions(state2, stormvogel.model.Transition({right: branch2}))
     model.add_transitions(state0, stormvogel.model.Transition({left: branch0}))
 
+    rewardmodel = model.add_rewards("rewards")
+    for i in range(2 * N):
+        rewardmodel.set_state_action_reward_at_id(i, 1)
+
     assert model == pgc_model
 
 
@@ -67,6 +75,9 @@ def test_pgc_dtmc():
     # we build the model with pgc:
     p = 0.5
     initial_state = pgc.State(s=0)
+
+    def rewards(s: pgc.State):
+        return 1
 
     def delta(s: pgc.State):
         match s.s:
@@ -96,6 +107,7 @@ def test_pgc_dtmc():
     pgc_model = stormvogel.pgc.build_pgc(
         delta=delta,
         initial_state_pgc=initial_state,
+        rewards=rewards,
         modeltype=stormvogel.model.ModelType.DTMC,
     )
 
@@ -160,5 +172,9 @@ def test_pgc_dtmc():
     model.set_transitions(model.get_state_by_id(11), [(1, model.get_state_by_id(13))])
     model.set_transitions(model.get_state_by_id(12), [(1, model.get_state_by_id(13))])
     model.set_transitions(model.get_state_by_id(13), [(1, model.get_state_by_id(13))])
+
+    rewardmodel = model.add_rewards("rewards")
+    for state in model.states.values():
+        rewardmodel.set_state_reward(state, 1)
 
     assert pgc_model == model

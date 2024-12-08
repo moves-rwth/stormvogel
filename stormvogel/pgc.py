@@ -33,6 +33,8 @@ class State:
 def build_pgc(
     delta,  # Callable[[State, Action], list[tuple[float, State]]],
     initial_state_pgc: State,  # TODO rewards function, label function
+    rewards=None,
+    labels=None,
     available_actions: Callable[[State], list[Action]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ) -> stormvogel.model.Model:
@@ -67,13 +69,13 @@ def build_pgc(
     while len(states_to_be_visited) > 0:
         state = states_to_be_visited[0]
         states_to_be_visited.remove(state)
-        # we loop over all available actions and call the delta function for each action
         transition = {}
 
         if state not in states_seen:
             states_seen.append(state)
 
         if model.supports_actions():
+            # we loop over all available actions and call the delta function for each action
             assert available_actions is not None
             for action in available_actions(state):
                 try:
@@ -98,8 +100,6 @@ def build_pgc(
                         branch.append((tuple[0], new_state))
                         states_to_be_visited.append(tuple[1])
                     else:
-                        # print(tuple[1].__dict__)
-                        # print(model.states)
                         branch.append(
                             (tuple[0], model.get_state_by_name(str(tuple[1].__dict__)))
                         )
@@ -132,5 +132,30 @@ def build_pgc(
             s,
             stormvogel.model.Transition(transition),
         )
+
+    # we add the rewards
+    # TODO support multiple reward models
+    if rewards is not None:
+        rewardmodel = model.add_rewards("rewards")
+        if model.supports_actions():
+            for state in states_seen:
+                assert available_actions is not None
+                for action in available_actions(state):
+                    reward = rewards(state, action)
+                    s = model.get_state_by_name(str(state.__dict__))
+                    assert s is not None
+                    rewardmodel.set_state_action_reward(
+                        s,
+                        model.get_action(str(action.labels)),
+                        reward,
+                    )
+        else:
+            for state in states_seen:
+                reward = rewards(state)
+                s = model.get_state_by_name(str(state.__dict__))
+                assert s is not None
+                rewardmodel.set_state_reward(s, reward)
+
+    # we add the labels
 
     return model
