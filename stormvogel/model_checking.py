@@ -5,7 +5,7 @@ import stormvogel.model
 
 
 def model_checking(
-    model: stormvogel.model.Model, prop: str | stormpy.Property, scheduler: bool = False
+    model: stormvogel.model.Model, prop: str, scheduler: bool = False
 ) -> stormvogel.result.Result | None:
     """
     Instead of calling this function, the stormpy model checker can be used by first mapping a model to a stormpy model,
@@ -13,34 +13,27 @@ def model_checking(
     This function just performs this procedure automatically.
     """
 
-    # We can choose between provoding properties as a string or as a stormpy.Property object
-    if isinstance(prop, str):
-        prop = stormpy.parse_properties_without_context(prop)  # TODO make this work
+    prop = stormpy.parse_properties(prop)
 
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
     stormpy_result = stormpy.model_checking(
-        stormpy_model, prop, extract_scheduler=scheduler
+        stormpy_model, prop[0], extract_scheduler=scheduler
     )
-    assert stormvogel_model is not None
+    assert model is not None
     stormvogel_result = stormvogel.result.convert_model_checking_result(
-        stormvogel_model, stormpy_result
+        model, stormpy_result
     )
 
     return stormvogel_result
 
 
 if __name__ == "__main__":
-    path = stormpy.examples.files.prism_dtmc_die
-    prism_program = stormpy.parse_prism_program(path)
-    formula_str = "P=? [F s=7 & d=2]"
-    properties = stormpy.parse_properties(formula_str, prism_program)
-    model = stormpy.build_model(prism_program, properties)
+    dtmc = stormvogel.model.new_dtmc("Die")
+    init = dtmc.get_initial_state()
+    init.set_transitions(
+        [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
+    )
+    dtmc.add_self_loops()
 
-    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
-
-    assert stormvogel_model is not None
-    stormvogel_results = model_checking(stormvogel_model, properties[0])
+    stormvogel_results = model_checking(dtmc, 'Pmin=? [F "rolled1"]')
     print(stormvogel_results)
-
-    # stormvogel_results = model_checking(stormvogel_model, formula_str)
-    # print(stormvogel_results)
