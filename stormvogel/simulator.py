@@ -7,7 +7,7 @@ import stormpy.examples.files
 import stormpy.examples
 from typing import Callable
 import random
-
+from stormvogel.model import EmptyAction
 
 class Path:
     """
@@ -242,9 +242,10 @@ def simulate(
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
-                reward_model.set_state_action_reward_at_id(
-                    partial_model.get_initial_state().id,
-                    model.rewards[index].get_state_reward(model.get_initial_state()),
+                reward_model.set_state_action_reward(
+                    partial_model.get_initial_state(),
+                    EmptyAction,
+                    model.rewards[index].get_state_reward(model.get_initial_state())
                 )
             else:
                 reward_model.set_state_reward(

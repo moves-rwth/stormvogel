@@ -139,43 +139,41 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
 
+def test_stormvogel_to_stormpy_and_back_mdp():
+    # we test it for monty hall mdp
+    stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
 
-# TODO re-introduce this test once names are removed from actions
-# def test_stormvogel_to_stormpy_and_back_mdp():
-#     # we test it for monty hall mdp
-#     stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
+    # we additionally test if reward models work
+    rewardmodel = stormvogel_mdp.add_rewards("rewardmodel")
+    rewardmodel.set_from_rewards_vector(list(range(67)))
+    rewardmodel2 = stormvogel_mdp.add_rewards("rewardmodel2")
+    rewardmodel2.set_from_rewards_vector(list(range(67)))
 
-#     # we additionally test if reward models work
-#     rewardmodel = stormvogel_mdp.add_rewards("rewardmodel")
-#     rewardmodel.set_from_rewards_vector(list(range(67)))
-#     rewardmodel2 = stormvogel_mdp.add_rewards("rewardmodel2")
-#     rewardmodel2.set_from_rewards_vector(list(range(67)))
+    # print(stormvogel_mdp)
+    stormpy_mdp = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_mdp)
+    # print(stormpy_mdp)
+    new_stormvogel_mdp = stormvogel.mapping.stormpy_to_stormvogel(stormpy_mdp)
 
-#     # print(stormvogel_mdp)
-#     stormpy_mdp = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_mdp)
-#     # print(stormpy_mdp)
-#     new_stormvogel_mdp = stormvogel.mapping.stormpy_to_stormvogel(stormpy_mdp)
+    # rew0 = sorted(stormvogel_mdp.rewards)[0].rewards
+    # rew1 = sorted(new_stormvogel_mdp.rewards)[0].rewards
+    # for k,v in rew0.items():
+    #     if v != rew1[k]:
+    #         print("original:", v, "\tsv:", rew1[k])
+    # print(rew0 == rew1)
+    # quit()
 
-#     # rew0 = sorted(stormvogel_mdp.rewards)[0].rewards
-#     # rew1 = sorted(new_stormvogel_mdp.rewards)[0].rewards
-#     # for k,v in rew0.items():
-#     #     if v != rew1[k]:
-#     #         print("original:", v, "\tsv:", rew1[k])
-#     # print(rew0 == rew1)
-#     # quit()
+    # print(new_stormvogel_mdp)
+    # print(sorted(stormvogel_mdp.rewards)[0] == sorted(new_stormvogel_mdp.rewards)[0])
+    # quit()
+    # print(sorted(stormvogel_mdp.rewards)[0].rewards)
+    # print()
+    # print(sorted(new_stormvogel_mdp.rewards)[0].rewards)
+    # print(sorted(new_stormvogel_mdp.rewards)[0].rewards == sorted(stormvogel_mdp.rewards)[0].rewards)
+    # print(sorted(new_stormvogel_mdp.rewards)[0] == sorted(stormvogel_mdp.rewards)[0])
+    # print(new_stormvogel_mdp == stormvogel_mdp)
+    # quit()
 
-#     # print(new_stormvogel_mdp)
-#     # print(sorted(stormvogel_mdp.rewards)[0] == sorted(new_stormvogel_mdp.rewards)[0])
-#     # quit()
-#     # print(sorted(stormvogel_mdp.rewards)[0].rewards)
-#     # print()
-#     # print(sorted(new_stormvogel_mdp.rewards)[0].rewards)
-#     # print(sorted(new_stormvogel_mdp.rewards)[0].rewards == sorted(stormvogel_mdp.rewards)[0].rewards)
-#     # print(sorted(new_stormvogel_mdp.rewards)[0] == sorted(stormvogel_mdp.rewards)[0])
-#     # print(new_stormvogel_mdp == stormvogel_mdp)
-#     # quit()
-
-#     assert new_stormvogel_mdp == stormvogel_mdp
+    assert new_stormvogel_mdp == stormvogel_mdp
 
 
 def test_stormvogel_to_stormpy_and_back_ctmc():
@@ -211,6 +209,10 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
     # print(stormpy_pomdp)
     new_stormvogel_pomdp = stormvogel.mapping.stormpy_to_stormvogel(stormpy_pomdp)
     # print(new_stormvogel_pomdp)
+    # print(stormvogel_pomdp.actions)
+    # print()
+    # print(new_stormvogel_pomdp.actions)
+    # print(stormvogel_pomdp.actions == new_stormvogel_pomdp.actions)
 
     assert new_stormvogel_pomdp == stormvogel_pomdp
 
@@ -228,7 +230,7 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
     assert sparse_equal(stormpy_pomdp, new_stormpy_pomdp)
 
 
-"""
+
 def test_stormvogel_to_stormpy_and_back_ma():
     # we create a stormpy representation of an example ma
     stormvogel_ma = examples.simple_ma.create_simple_ma()
@@ -252,4 +254,4 @@ def test_stormpy_to_stormvogel_and_back_ma():
     # print(new_stormpy_ma)
 
     assert sparse_equal(stormpy_ma, new_stormpy_ma)
-"""
+

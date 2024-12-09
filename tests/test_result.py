@@ -635,7 +635,7 @@ def test_convert_model_checker_results_mdp():
         0,
         0,
     ] == [
-        int(list(action.name)[0])
+        int(list(action.labels)[0])
         for action in stormvogel_result.scheduler.taken_actions.values()
     ]
 

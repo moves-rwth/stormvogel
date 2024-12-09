@@ -160,7 +160,7 @@ class Visualization(stormvogel.displayable.Displayable):
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
-                if action.strict_eq(stormvogel.model.EmptyAction):
+                if action == stormvogel.model.EmptyAction:
                     # Only draw probabilities
                     for prob, target in branch.branch:
                         self.nt.add_edge(
@@ -175,7 +175,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         choice = self.scheduler.get_choice_of_state(
                             state=self.model.get_state_by_id(state_id)
                         )
-                        if action.strict_eq(choice):
+                        if action == choice:
                             group = "scheduled_actions"
 
                     reward = self.__format_rewards(
@@ -185,7 +185,7 @@ class Visualization(stormvogel.displayable.Displayable):
                     # Add the action's node
                     self.nt.add_node(
                         id=action_id,
-                        label=action.name + reward,
+                        label=",".join(action.labels) + reward,
                         group=group,
                         position_dict=self.positions,
                     )
