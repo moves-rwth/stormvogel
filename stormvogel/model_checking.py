@@ -20,20 +20,15 @@ def model_checking(
         stormpy_model, prop[0], extract_scheduler=scheduler
     )
     assert model is not None
+
+    # to get the correct action labels, we need to convert the model back to stormvogel instead of
+    # using the initial one for now. (otherwise schedulers won't work)
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
+
+    assert stormvogel_model is not None
+
     stormvogel_result = stormvogel.result.convert_model_checking_result(
-        model, stormpy_result
+        stormvogel_model, stormpy_result
     )
 
     return stormvogel_result
-
-
-if __name__ == "__main__":
-    dtmc = stormvogel.model.new_dtmc("Die")
-    init = dtmc.get_initial_state()
-    init.set_transitions(
-        [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
-    )
-    dtmc.add_self_loops()
-
-    stormvogel_results = model_checking(dtmc, 'Pmin=? [F "rolled1"]')
-    print(stormvogel_results)
