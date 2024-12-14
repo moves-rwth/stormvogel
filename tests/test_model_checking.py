@@ -9,7 +9,7 @@ def test_model_checking():
 
     # we get our result using the stormvogel model checker function indirectly
     mdp = examples.monty_hall.create_monty_hall_mdp()
-    prop = 'Pmin=? [F "done"]'
+    prop = 'Pmax=? [F "done"]'
     result = stormvogel.model_checking.model_checking(mdp, prop, True)
 
     # and directly
@@ -28,7 +28,7 @@ def test_model_checking():
 
     # now we do it for a dtmc:
     dtmc = examples.die.create_die_dtmc()
-    prop = 'Pmin=? [F "rolled1"]'
+    prop = 'P=? [F "rolled1"]'
     result = stormvogel.model_checking.model_checking(dtmc, prop, True)
 
     # indirectly:
