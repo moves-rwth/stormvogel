@@ -16,6 +16,10 @@ def test_available_actions():
     ]
     assert mdp.get_state_by_id(1).available_actions() == action
 
+    # we also test it for a state with no available actions
+    mdp = stormvogel.model.new_mdp()
+    assert mdp.get_initial_state().available_actions()
+
 
 def test_get_outgoing_transitions():
     mdp = examples.monty_hall.create_monty_hall_mdp()
@@ -32,6 +36,22 @@ def test_get_outgoing_transitions():
         mdp.get_state_by_id(2),
         mdp.get_state_by_id(3),
     ]
+
+
+def test_is_absorbing():
+    # one example of a ctmc state that is absorbing and one that isn't
+    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    state0 = ctmc.get_state_by_id(4)
+    state1 = ctmc.get_state_by_id(3)
+    assert state0.is_absorbing()
+    assert not state1.is_absorbing()
+
+    # one example of a dtmc state that is absorbing and one that isn't
+    dtmc = examples.die.create_die_dtmc()
+    state0 = dtmc.get_initial_state()
+    state1 = dtmc.get_state_by_id(1)
+    assert state1.is_absorbing()
+    assert not state0.is_absorbing()
 
 
 def test_transition_from_shorthand():
@@ -61,7 +81,7 @@ def test_transition_from_shorthand():
     # Then we test it for a model with actions
     mdp = stormvogel.model.new_mdp()
     state = mdp.new_state()
-    action = mdp.new_action("0", frozenset("action"))
+    action = mdp.new_action("0", frozenset({"action"}))
     transition_shorthand = [(action, state)]
     branch = stormvogel.model.Branch(
         cast(list[tuple[stormvogel.model.Number, stormvogel.model.State]], [(1, state)])
@@ -79,8 +99,8 @@ def test_transition_from_shorthand():
     )
 
 
-def test_is_well_defined():
-    # we check for an instance where it is not well defined
+def test_is_stochastic():
+    # we check for an instance where it is not stochastic
     dtmc = stormvogel.model.new_dtmc()
     state = dtmc.new_state()
     dtmc.set_transitions(
@@ -88,9 +108,9 @@ def test_is_well_defined():
         [(1 / 2, state)],
     )
 
-    assert not dtmc.is_well_defined()
+    assert not dtmc.is_stochastic()
 
-    # we check for an instance where it is well defined
+    # we check for an instance where it is stochastic
     dtmc.set_transitions(
         dtmc.get_initial_state(),
         [(1 / 2, state), (1 / 2, state)],
@@ -98,7 +118,15 @@ def test_is_well_defined():
 
     dtmc.add_self_loops()
 
-    assert dtmc.is_well_defined()
+    assert dtmc.is_stochastic()
+
+    # we check it for a continuous time model
+    ctmc = stormvogel.model.new_ctmc()
+    ctmc.set_transitions(ctmc.get_initial_state(), [(1, ctmc.new_state())])
+
+    ctmc.add_self_loops()
+
+    assert not ctmc.is_stochastic()
 
 
 def test_normalize():
@@ -127,7 +155,7 @@ def test_normalize():
 def test_remove_state():
     # we make a normal ctmc and remove a state
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    ctmc.remove_state(ctmc.get_state_by_id(3), True)
+    ctmc.remove_state(ctmc.get_state_by_id(3))
 
     # we make a ctmc with the state already missing
     new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
@@ -142,6 +170,38 @@ def test_remove_state():
     new_ctmc.add_self_loops()
 
     assert ctmc == new_ctmc
+
+    # we also test if it works for a model that has nontrivial actions:
+    mdp = stormvogel.model.new_mdp()
+    state1 = mdp.new_state()
+    state2 = mdp.new_state()
+    action0 = mdp.new_action("0")
+    action1 = mdp.new_action("1")
+    branch0 = stormvogel.model.Branch(
+        cast(
+            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            [(1 / 2, state1), (1 / 2, state2)],
+        )
+    )
+    branch1 = stormvogel.model.Branch(
+        cast(
+            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            [(1 / 4, state1), (3 / 4, state2)],
+        )
+    )
+    transition = stormvogel.model.Transition({action0: branch0, action1: branch1})
+    mdp.set_transitions(mdp.get_initial_state(), transition)
+
+    # we remove a state
+    mdp.remove_state(mdp.get_state_by_id(0))
+
+    # we make the mdp with the state already missing
+    new_mdp = stormvogel.model.new_mdp(create_initial_state=False)
+    new_mdp.new_state()
+    new_mdp.new_state()
+    new_mdp.add_self_loops()
+
+    assert mdp == new_mdp
 
 
 def test_remove_transitions_between_states():
@@ -246,3 +306,79 @@ def test_add_transitions():
     # print(mdp6.get_transitions(mdp6.get_initial_state()).transition)
     # print([(action6a, state6), (action6b, state6)])
     assert len(mdp6.get_transitions(mdp6.get_initial_state()).transition) == 2
+
+
+def test_get_sub_model():
+    # we create the die dtmc and take a submodel
+    dtmc = examples.die.create_die_dtmc()
+    states = [dtmc.get_state_by_id(0), dtmc.get_state_by_id(1), dtmc.get_state_by_id(2)]
+    sub_model = dtmc.get_sub_model(states)
+
+    # we build what the submodel should look like
+    new_dtmc = stormvogel.model.new_dtmc("Die")
+    init = new_dtmc.get_initial_state()
+    init.set_transitions(
+        [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
+    )
+    new_dtmc.normalize()
+
+    assert sub_model == new_dtmc
+
+
+def test_get_state_action_id():
+    # we create an mdp:
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+    state = mdp.get_state_by_id(2)
+    action = state.available_actions()[1]
+
+    assert mdp.get_state_action_id(state, action) == 5
+
+
+def test_get_state_action_reward():
+    # we create an mdp:
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    # we add a reward model:
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel.set_from_rewards_vector(list(range(67)))
+
+    state = mdp.get_state_by_id(2)
+    action = state.available_actions()[1]
+
+    assert rewardmodel.get_state_action_reward(state, action) == 5
+
+
+# TODO re-introduce this test once names are removed from actions.
+# def test_set_state_action_reward():
+#     # we create an mdp:
+#     mdp = stormvogel.model.new_mdp()
+#     action = stormvogel.model.Action("0", frozenset())
+#     mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
+
+#     # we make a reward model using the set_state_action_reward method:
+#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
+
+#     # we make a reward model manually:
+#     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(0, EmptyAction): 5})
+
+#     print(rewardmodel.rewards)
+#     print()
+#     print(other_rewardmodel.rewards)
+#     quit()
+
+#     assert rewardmodel == other_rewardmodel
+
+#     # we create an mdp:
+#     mdp = examples.monty_hall.create_monty_hall_mdp()
+
+#     # we add a reward model with only one reward
+#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     state = mdp.get_state_by_id(2)
+#     action = state.available_actions()[1]
+#     rewardmodel.set_state_action_reward(state, action, 3)
+
+#     # we make a reward model manually:
+#     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(5, EmptyAction): 3})
+
+#     assert rewardmodel == other_rewardmodel

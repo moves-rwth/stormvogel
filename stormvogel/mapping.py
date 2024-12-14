@@ -79,7 +79,7 @@ def stormvogel_to_stormpy(
         reward_models = {}
         for rewardmodel in model.rewards:
             reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
-                optional_state_action_reward_vector=list(rewardmodel.rewards.values())
+                optional_state_action_reward_vector=list(rewardmodel.reward_vector())
             )
 
         return reward_models
@@ -324,6 +324,7 @@ def stormpy_to_stormvogel(
         """
         helper function to add the states from the sparsemodel to the model
         """
+        model.new_state()
         for state in sparsemodel.states:
             if state.id == 0:
                 for label in state.labels:
@@ -338,18 +339,19 @@ def stormpy_to_stormvogel(
         """
         adds the rewards from the sparsemodel to either the states or the state action pairs of the model
         """
-        for reward_model in sparsemodel.reward_models:
-            rewards = sparsemodel.get_reward_model(reward_model)
-            rewardmodel = model.add_rewards(reward_model)
-            for index, reward in enumerate(
+        for reward_model_name in sparsemodel.reward_models:
+            rewards = sparsemodel.get_reward_model(reward_model_name)
+            rewardmodel = model.add_rewards(reward_model_name)
+            reward_vector = (
                 rewards.state_action_rewards
                 if rewards.has_state_action_rewards
                 else rewards.state_rewards
-            ):
-                if model.supports_actions():
-                    rewardmodel.set_action_state(index, reward)
-                else:
-                    rewardmodel.set(model.get_state_by_id(index), reward)
+            )
+
+            if model.supports_actions():
+                rewardmodel.set_from_rewards_vector(reward_vector)
+            else:
+                rewardmodel.set_from_rewards_vector(reward_vector)
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """
@@ -357,7 +359,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsedtmcs)
-        model = stormvogel.model.new_dtmc(name=None)
+        model = stormvogel.model.new_dtmc(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsedtmc)
@@ -388,7 +390,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model
-        model = stormvogel.model.new_mdp(name=None)
+        model = stormvogel.model.new_mdp(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsemdp)
@@ -404,11 +406,12 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                actionlabels = frozenset(
-                    sparsemdp.choice_labeling.get_labels_of_choice(i)
-                    if sparsemdp.has_choice_labeling()
-                    else str(i)
-                )
+                if sparsemdp.has_choice_labeling():
+                    actionlabels = frozenset(
+                        sparsemdp.choice_labeling.get_labels_of_choice(i)
+                    )
+                else:
+                    actionlabels = frozenset()
                 # TODO assign the correct action name and not only an index
                 action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
@@ -430,7 +433,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsectmcs)
-        model = stormvogel.model.new_ctmc(name=None)
+        model = stormvogel.model.new_ctmc(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsectmc)
@@ -465,7 +468,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsepomdps)
-        model = stormvogel.model.new_pomdp(name=None)
+        model = stormvogel.model.new_pomdp(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsepomdp)
@@ -481,11 +484,13 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                actionlabels = frozenset(
-                    sparsepomdp.choice_labeling.get_labels_of_choice(i)
-                    if sparsepomdp.has_choice_labeling()
-                    else str(i)
-                )
+                if sparsepomdp.has_choice_labeling():
+                    actionlabels = frozenset(
+                        sparsepomdp.choice_labeling.get_labels_of_choice(i)
+                    )
+                else:
+                    actionlabels = frozenset()
+
                 # TODO assign the correct action name and not only an index
                 action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
@@ -511,7 +516,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsemas)
-        model = stormvogel.model.new_ma(name=None)
+        model = stormvogel.model.new_ma(name=None, create_initial_state=False)
 
         # we add the states
         add_states(model, sparsema)
@@ -527,11 +532,13 @@ def stormpy_to_stormvogel(
             for i in range(row_group_start, row_group_end):
                 row = matrix.get_row(i)
 
-                actionlabels = frozenset(
-                    sparsema.choice_labeling.get_labels_of_choice(i)
-                    if sparsema.has_choice_labeling()
-                    else str(i)
-                )
+                if sparsema.has_choice_labeling():
+                    actionlabels = frozenset(
+                        sparsema.choice_labeling.get_labels_of_choice(i)
+                    )
+                else:
+                    actionlabels = frozenset()
+
                 # TODO assign the correct action name and not only an index
                 action = model.new_action(str(i), actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]

@@ -7,7 +7,7 @@ def create_simple_ma():
 
     init = ma.get_initial_state()
 
-    # We have 2 actions
+    # We have 5 actions
     init.set_transitions(
         [
             (
@@ -28,9 +28,6 @@ def create_simple_ma():
 
     # we add self loops to all states with no outgoing transitions
     ma.add_self_loops()
-
-    # we delete a state
-    ma.remove_state(ma.get_state_by_id(3), True)
 
     return ma
 

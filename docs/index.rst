@@ -7,6 +7,14 @@ Welcome to stormvogel's documentation!
 ======================================
 Last update: |today|
 
+Get started here:
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   getting_started/*
+
 Package documentation:
 
 .. autosummary::
@@ -15,15 +23,6 @@ Package documentation:
    :recursive:
 
    stormvogel
-
-Notebook examples:
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   getting_started/*
-
 
 Search for a specific page:
 ===========================

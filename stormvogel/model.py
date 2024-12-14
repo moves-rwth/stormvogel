@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
-from typing import cast
+from typing import Tuple, cast
+import copy
 
 Parameter = str
 
@@ -79,8 +80,8 @@ class State:
                 "There is already a state with this id. Make sure the id is unique."
             )
 
-        names = [state.name for state in self.model.states.values()]
-        if name in names:
+        used_names = [state.name for state in self.model.states.values()]
+        if name in used_names:
             raise RuntimeError(
                 "There is already a state with this name. Make sure the name is unique."
             )
@@ -132,7 +133,7 @@ class State:
 
     def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
-        if self.model.supports_actions():
+        if self.model.supports_actions() and self.id in self.model.transitions.keys():
             action_list = []
             for action in self.model.transitions[self.id].transition.keys():
                 action_list.append(action)
@@ -142,16 +143,28 @@ class State:
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
-    ) -> list[tuple[Number, "State"]]:
+    ) -> list[tuple[Number, "State"]] | None:
         """gets the outgoing transitions"""
         if action and self.model.supports_actions():
-            branch = self.model.transitions[self.id].transition[action]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[action]
+                return branch.branch
         elif self.model.supports_actions() and not action:
             raise RuntimeError("You need to provide a specific action")
         else:
-            branch = self.model.transitions[self.id].transition[EmptyAction]
+            if self.id in self.model.transitions.keys():
+                branch = self.model.transitions[self.id].transition[EmptyAction]
+                return branch.branch
+        return None
 
-        return branch.branch
+    def is_absorbing(self, action: "Action | None" = None) -> bool:
+        """returns if the state has a nonzero transition going to another state or not"""
+        transitions = self.get_outgoing_transitions(action)
+        if transitions is not None:
+            for transition in transitions:
+                if float(transition[0]) > 0 and transition[1] != self:
+                    return False
+        return True
 
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
@@ -162,8 +175,6 @@ class State:
     def __eq__(self, other):
         if isinstance(other, State):
             if self.id == other.id:
-                self.labels.sort()
-                other.labels.sort()
                 if self.model.supports_observations():
                     if self.observation is not None and other.observation is not None:
                         observations_equal = self.observation == other.observation
@@ -171,7 +182,9 @@ class State:
                         observations_equal = True
                 else:
                     observations_equal = True
-                return self.labels == other.labels and observations_equal
+                return (
+                    sorted(self.labels) == sorted(other.labels) and observations_equal
+                )
             return False
         return False
 
@@ -198,6 +211,21 @@ class Action:
     def __str__(self):
         return f"Action {self.name} with labels {self.labels}"
 
+    # TODO remove these after modifying the whole code base to remove names.
+    def __eq__(self, other):
+        if isinstance(other, Action):
+            return self.labels == other.labels
+        return False
+
+    def strict_eq(self, other):
+        """Also requires the names to be equal."""
+        if isinstance(other, Action):
+            return self.name == other.name and self.labels == other.labels
+        return False
+
+    # def __hash__(self):
+    #     return self.labels.__hash__()
+
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action("empty", frozenset())
@@ -222,9 +250,7 @@ class Branch:
 
     def __eq__(self, other):
         if isinstance(other, Branch):
-            self.branch.sort()
-            other.branch.sort()
-            return self.branch == other.branch
+            return sorted(self.branch) == sorted(other.branch)
         return False
 
     def __add__(self, other):
@@ -259,18 +285,21 @@ class Transition:
                 parts.append(f"{action} => {branch}")
         return "; ".join(parts + [])
 
-    def __eq__(self, other):
-        if isinstance(other, Transition):
-            self_values = list(self.transition.values())
-            other_values = list(other.transition.values())
-            self_values.sort()
-            other_values.sort()
-            return self_values == other_values
-        return False
-
     def has_empty_action(self) -> bool:
         # Note that we don't have to deal with the corner case where there are both empty and non-empty transitions. This is dealt with at __init__.
         return self.transition.keys() == {EmptyAction}
+
+    def __eq__(self, other):
+        if isinstance(other, Transition):
+            if len(self.transition) != len(other.transition):
+                return False
+            for item, other_item in zip(
+                sorted(self.transition.items()), sorted(other.transition.items())
+            ):
+                if not (item[0] == other_item[0] and item[1] == other_item[1]):
+                    return False
+            return True
+        return False
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -306,30 +335,123 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     )
 
 
-@dataclass(order=True)
+@dataclass()
 class RewardModel:
     """Represents a state-exit reward model.
-    dtmc.delete_state(dtmc.get_state_by_id(1), True, True)
     Args:
         name: Name of the reward model.
         rewards: The rewards, the keys are the state's ids (or state action pair ids).
     """
 
     name: str
-    # Hashed by the id of the state or state action pair (=number in the matrix)
-    rewards: dict[int, Number]
+    model: "Model"
+    rewards: dict[Tuple[int, Action], Number]
+    """Rewards dict. Hashed by state id and Action.
+    The function update_rewards can be called to update rewards. After this, rewards will correspond to intermediate_rewards.
+    Note that in models without actions, EmptyAction will be used here."""
 
-    def get(self, state: State) -> Number:
-        """Gets the reward at said state."""
-        return self.rewards[state.id]
+    def __init__(
+        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]
+    ):
+        self.name = name
+        self.rewards = rewards
+        self.model = model
 
-    def set(self, state: State, value: Number):
+        if self.model.supports_actions():
+            self.set_action_state = {}
+        else:
+            self.state_action_pair = None
+
+    def set_from_rewards_vector(self, vector: list[Number]) -> None:
+        """Set the rewards of this model according to a stormpy rewards vector."""
+        combined_id = 0
+        self.rewards = dict()
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                self.rewards[s.id, a] = vector[combined_id]
+                combined_id += 1
+
+    def get_state_reward(self, state: State) -> Number:
+        """Gets the reward at said state or state action pair"""
+        if self.model.supports_actions():
+            RuntimeError(
+                "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
+            )
+        return self.rewards[state.id, EmptyAction]
+
+    def get_state_action_reward(self, state: State, action: Action) -> Number | None:
+        """Gets the reward at said state or state action pair. Returns None if no reward was found."""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                try:
+                    return self.rewards[state.id, action]
+                except KeyError:
+                    return None
+            else:
+                RuntimeError("This action is not available in this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def set_state_reward(self, state: State, value: Number):
         """Sets the reward at said state."""
-        self.rewards[state.id] = value
+        if self.model.supports_actions():
+            RuntimeError(
+                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
+            )
+        else:
+            self.rewards[state.id, EmptyAction] = value
 
-    def set_action_state(self, state_action_pair: int, value: Number):
-        """sets the reward at said state action pair"""
-        self.rewards[state_action_pair] = value
+    def set_state_action_reward(
+        self,
+        state: State,
+        action: Action,
+        value: Number,
+        auto_update_rewards: bool = True,
+    ):
+        """sets the reward at said state action pair (in case of models with actions).
+        If you disable auto_update_rewards, you will need to call update_intermediate_to"""
+        if self.model.supports_actions():
+            if action in state.available_actions():
+                self.rewards[state.id, action] = value
+            else:
+                RuntimeError("This action is not available in this state")
+        else:
+            RuntimeError(
+                "The model this rewardmodel belongs to does not support actions"
+            )
+
+    def reward_vector(self) -> list[Number]:
+        """Return the rewards in a stormpy format."""
+        vector = []
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                reward = self.rewards[s.id, a]
+                if reward is None:
+                    RuntimeError(
+                        "A reward was not set. You might want to call set_unset_rewards."
+                    )
+                vector.append(reward)
+        return vector
+
+    def set_unset_rewards(self, value: Number):
+        """Fills up rewards that were not set yet with the specified value.
+        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                if (s.id, a) not in self.rewards:
+                    self.rewards[s.id, a] = value
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, RewardModel):
+            return NotImplemented
+        return self.name < other.name
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, RewardModel):
+            return self.name == other.name and self.rewards == other.rewards
+        return False
 
 
 @dataclass
@@ -340,10 +462,10 @@ class Model:
         name: An optional name for this model.
         type: The model type.
         states: The states of the model. The keys are the state's ids.
+        transitions: The transitions of this model.
         actions: The actions of the model, if this is a model that supports actions.
         rewards: The rewardsmodels of this model.
         exit_rates: The exit rates of the model, optional if this model supports rates.
-        transitions: The transitions of this model.
         markovian_states: list of markovian states in the case of a ma.
     """
 
@@ -359,7 +481,9 @@ class Model:
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
-    def __init__(self, name: str | None, model_type: ModelType):
+    def __init__(
+        self, name: str | None, model_type: ModelType, create_initial_state: bool = True
+    ):
         self.name = name
         self.type = model_type
         self.transitions = {}
@@ -390,29 +514,34 @@ class Model:
         else:
             self.markovian_states = None
 
-        # Add the initial state
-        self.new_state(["init"])
+        # Add the initial state if specified to do so
+        if create_initial_state:
+            self.new_state(["init"])
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
-        return self.type in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
+        return self.get_type() in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
 
     def supports_rates(self):
         """Returns whether this model supports rates."""
-        return self.type in (ModelType.CTMC, ModelType.MA)
+        return self.get_type() in (ModelType.CTMC, ModelType.MA)
 
     def supports_observations(self):
         """Returns whether this model supports observations."""
-        return self.type == ModelType.POMDP
+        return self.get_type() == ModelType.POMDP
 
-    def is_well_defined(self) -> bool:
-        """Checks if all sums of outgoing transition probabilities for all states equal 1"""
+    def is_stochastic(self) -> bool:
+        """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
+        For continuous models: Checks if all sums of outgoing rates sum to 0
+        """
 
-        if self.get_type() in (ModelType.DTMC, ModelType.MDP, ModelType.POMDP):
+        if not self.supports_rates():
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for transition in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
                         if (
                             isinstance(transition[0], float)
                             or isinstance(transition[0], Fraction)
@@ -421,23 +550,34 @@ class Model:
                             sum_prob += transition[0]
                     if sum_prob != 1:
                         return False
-        elif self.get_type() in (
-            ModelType.CTMC,
-            ModelType.MA,
-        ):
-            # TODO make it work for these models
-            raise RuntimeError("Not implemented")
+        else:
+            for state in self.states.values():
+                for action in state.available_actions():
+                    sum_rates = 0
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for transition in transitions:
+                        if (
+                            isinstance(transition[0], float)
+                            or isinstance(transition[0], Fraction)
+                            or isinstance(transition[0], int)
+                        ):
+                            sum_rates += transition[0]
+                    if sum_rates != 0:
+                        return False
 
         return True
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
-        if self.get_type() in (ModelType.DTMC, ModelType.POMDP, ModelType.MDP):
+        if not self.supports_rates():
             self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
                     sum_prob = 0
-                    for tuple in state.get_outgoing_transitions(action):
+                    transitions = state.get_outgoing_transitions(action)
+                    assert transitions is not None
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -446,7 +586,7 @@ class Model:
                             sum_prob += tuple[0]
 
                     new_transitions = []
-                    for tuple in state.get_outgoing_transitions(action):
+                    for tuple in transitions:
                         if (
                             isinstance(tuple[0], float)
                             or isinstance(tuple[0], Fraction)
@@ -460,14 +600,39 @@ class Model:
                     self.transitions[state.id].transition[
                         action
                     ].branch = new_transitions
-        elif self.get_type() in (
-            ModelType.CTMC,
-            ModelType.MA,
-        ):
-            # TODO: As of now, for the CTMCs and MAs we only add self loops
+        else:
+            # for ctmcs and mas we currently only add self loops
             self.add_self_loops()
 
-    def __free_state_id(self):
+    def get_sub_model(self, states: list[State], normalize: bool = True) -> "Model":
+        """Returns a submodel of the model based on a collection of states.
+        The states in the collection are the states that stay in the model."""
+        sub_model = copy.deepcopy(self)
+        remove = []
+        for state in sub_model.states.values():
+            if state not in states:
+                remove.append(state)
+        for state in remove:
+            sub_model.remove_state(state)
+
+        if normalize:
+            sub_model.normalize()
+        return sub_model
+
+    def get_state_action_id(self, state: State, action: Action) -> int | None:
+        """we calculate the appropriate state action id for a given state and action"""
+        id = 0
+        for s in self.states.values():
+            for a in s.available_actions():
+                if (
+                    a.name == action.name
+                    and action in s.available_actions()
+                    and s == state
+                ):
+                    return id
+                id += 1
+
+    def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""
         # TODO: slow, not sure if that will become a problem though
         i = 0
@@ -479,15 +644,16 @@ class Model:
         """adds self loops to all states that do not have an outgoing transition"""
         for id, state in self.states.items():
             if self.transitions.get(id) is None:
-                self.set_transitions(state, [(float(1), state)])
+                self.set_transitions(
+                    state, [(float(0) if self.supports_rates() else float(1), state)]
+                )
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
-        all_states_outgoing_transition = True
         for state in self.states.items():
             if self.transitions.get(state[0]) is None:
-                all_states_outgoing_transition = False
-        return all_states_outgoing_transition
+                return False
+        return True
 
     def add_markovian_state(self, markovian_state: State):
         """Adds a state to the markovian states."""
@@ -496,14 +662,18 @@ class Model:
         else:
             raise RuntimeError("This model is not a MA")
 
-    def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
+    def set_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
         self.transitions[s.id] = transitions
 
-    def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
-        """Add new transitions from a state. If no transition currently exists, the result will be the same as set_transitions."""
+    def add_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
+        """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
@@ -542,8 +712,11 @@ class Model:
                     transitions.transition[EmptyAction]
                 )
             else:
-                for choice, branch in transitions.transition.items():
-                    self.transitions[s.id].transition[choice] = branch
+                for action, branch in transitions.transition.items():
+                    assert self.actions is not None
+                    if action not in self.actions.values():
+                        self.actions[action.name] = action
+                    self.transitions[s.id].transition[action] = branch
 
     def get_transitions(self, state_or_id: State | int) -> Transition:
         """Get the transition at state s. Throws a KeyError if not present."""
@@ -571,34 +744,55 @@ class Model:
             raise RuntimeError(
                 f"Tried to add action {name} but that action already exists"
             )
-        if labels:
-            action = Action(name, labels)
-        else:
-            action = Action(name, frozenset())
+        action = Action(name, labels if labels else frozenset())
         self.actions[name] = action
         return action
 
-    def remove_state(self, state: State, normalize_and_reassign_ids: bool = True):
+    def reassign_ids(self):
+        """reassigns the ids of states, transitions and rates to be in order again"""
+        self.states = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
+        }
+
+        self.transitions = {
+            new_id: value
+            for new_id, (old_id, value) in enumerate(sorted(self.transitions.items()))
+        }
+
+        if self.supports_rates and self.exit_rates is not None:
+            self.exit_rates = {
+                new_id: value
+                for new_id, (old_id, value) in enumerate(
+                    sorted(self.exit_rates.items())
+                )
+            }
+
+    def remove_state(
+        self, state: State, normalize: bool = True, reassign_ids: bool = True
+    ):
         """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
         if state in self.states.values():
             # we remove the state from the transitions
             # first we remove transitions that go into the state
             remove_actions_index = []
             for index, transition in self.transitions.items():
-                for action in transition.transition.items():
-                    for index_tuple, tuple in enumerate(action[1].branch):
+                for action, branch in transition.transition.items():
+                    for index_tuple, tuple in enumerate(branch.branch):
+                        # remove the tuple if it goes to the state
                         if tuple[1].id == state.id:
-                            self.transitions[index].transition[action[0]].branch.pop(
+                            self.transitions[index].transition[action].branch.pop(
                                 index_tuple
                             )
 
-                    # if we have empty objects we need to remove those as well
-                    if self.transitions[index].transition[action[0]].branch == []:
-                        remove_actions_index.append((action[0], index))
-            # here we remove those empty objects
+                    # if we have empty actions we need to remove those as well (later)
+                    if branch.branch == []:
+                        remove_actions_index.append((action, index))
+            # here we remove those empty actions (this needs to happen after the other for loops)
             for action, index in remove_actions_index:
                 self.transitions[index].transition.pop(action)
-                if self.transitions[index].transition == {}:
+                # if we have no actions at all anymore, delete the transition
+                if self.transitions[index].transition == {} and not index == state.id:
                     self.transitions.pop(index)
 
             # we remove transitions that come out of the state
@@ -617,32 +811,15 @@ class Model:
                     self.markovian_states.remove(state)
 
             # we normalize the model if specified to do so
-            if normalize_and_reassign_ids:
+            if normalize:
                 self.normalize()
 
-                self.states = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.states.items())
-                    )
-                }
+            # we reassign the ids if specified to do so
+            if reassign_ids:
+                self.reassign_ids()
                 for other_state in self.states.values():
                     if other_state.id > state.id:
                         other_state.id -= 1
-
-                self.transitions = {
-                    new_id: value
-                    for new_id, (old_id, value) in enumerate(
-                        sorted(self.transitions.items())
-                    )
-                }
-                if self.supports_rates and self.exit_rates is not None:
-                    self.exit_rates = {
-                        new_id: value
-                        for new_id, (old_id, value) in enumerate(
-                            sorted(self.exit_rates.items())
-                        )
-                    }
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
@@ -768,7 +945,7 @@ class Model:
         for model in self.rewards:
             if model.name == name:
                 raise RuntimeError(f"Reward model {name} already present in model.")
-        reward_model = RewardModel(name, {})
+        reward_model = RewardModel(name, self, {})
         self.rewards.append(reward_model)
         return reward_model
 
@@ -791,7 +968,7 @@ class Model:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")
         self.exit_rates[state.id] = rate
 
-    def get_type(self):
+    def get_type(self) -> ModelType:
         """Gets the type of this model"""
         return self.type
 
@@ -839,8 +1016,15 @@ class Model:
 
         return "\n".join(res)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, Model):
+            if self.supports_actions():
+                assert self.actions is not None and other.actions is not None
+                for action, other_action in zip(
+                    sorted(self.actions.values()), sorted(other.actions.values())
+                ):
+                    if not action == other_action:
+                        return False
             return (
                 self.type == other.type
                 and self.states == other.states
@@ -848,36 +1032,37 @@ class Model:
                 and sorted(self.rewards) == sorted(other.rewards)
                 and self.exit_rates == other.exit_rates
                 and self.markovian_states == other.markovian_states
-                # TODO: and self.actions ==  other.actions
             )
         return False
 
 
-def new_dtmc(name: str | None = None):
+def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a DTMC."""
-    return Model(name, ModelType.DTMC)
+    return Model(name, ModelType.DTMC, create_initial_state)
 
 
-def new_mdp(name: str | None = None):
+def new_mdp(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates an MDP."""
-    return Model(name, ModelType.MDP)
+    return Model(name, ModelType.MDP, create_initial_state)
 
 
-def new_ctmc(name: str | None = None):
+def new_ctmc(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a CTMC."""
-    return Model(name, ModelType.CTMC)
+    return Model(name, ModelType.CTMC, create_initial_state)
 
 
-def new_pomdp(name: str | None = None):
+def new_pomdp(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a POMDP."""
-    return Model(name, ModelType.POMDP)
+    return Model(name, ModelType.POMDP, create_initial_state)
 
 
-def new_ma(name: str | None = None):
+def new_ma(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a MA."""
-    return Model(name, ModelType.MA)
+    return Model(name, ModelType.MA, create_initial_state)
 
 
-def new_model(modeltype: ModelType, name: str | None = None):
+def new_model(
+    modeltype: ModelType, name: str | None = None, create_initial_state: bool = True
+) -> Model:
     """More general model creation function"""
-    return Model(name, modeltype)
+    return Model(name, modeltype, create_initial_state)
