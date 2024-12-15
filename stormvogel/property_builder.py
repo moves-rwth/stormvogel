@@ -6,60 +6,86 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
     """When a model is provided, this interative property string builder will help beginner
     users to create a property string"""
 
-    prop = ""
-    print("Welcome to the stormvogel property string builder.")
-    if input("\nCheck probabilities (p) or rewards (r): ") == "p":
-        prop += "P"
-        if (
-            input(
-                "\nDo you want to obtain a truth value (t) or a probability value (p): "
-            )
-            == "p"
-        ):
-            if model.supports_actions():
-                print(
-                    "\nThe model you provided supports actions, hence the reachability probability depends on the scheduler."
-                )
-                if (
-                    input(
-                        "Do you want the maximum (max) or minimum (min) probability? "
-                    )
-                    == "max"
-                ):
-                    prop += "max=?"
+    def probability_or_reward() -> str:
+        while True:
+            choice = input("\nCheck probabilities (p) or rewards (r): ").lower()
+            if choice in {"p", "r"}:
+                if choice == "r":
+                    if model.rewards == []:
+                        print("This model does not have a reward model.")
+                    elif len(model.rewards) > 1:
+                        print("\nThis model has multiple reward models.")
+                        print(model.rewards)
+                        rewardmodel = input("\nChoose one of the above: ")
+                        return choice.upper() + rewardmodel
                 else:
-                    prop += "min=?"
+                    return choice.upper()
             else:
-                prop += "=?"
-        else:
-            op = input(
+                print("Invalid input. Please choose 'p' or 'r'.")
+
+    def compare_or_obtain() -> str:
+        while True:
+            choice = input(
+                "\nDo you want to compare values (c) or obtain one (o): "
+            ).lower()
+            if choice in {"c", "o"}:
+                return choice
+            print("Invalid input. Please choose 'c' or 'o'.")
+
+    def max_or_min() -> str:
+        print(
+            "\nThe model you provided supports actions, hence the values depends on the scheduler."
+        )
+        while True:
+            choice = input(
+                "Do you want the maximum (max) or minimum (min) value: "
+            ).lower()
+            if choice in {"max", "min"}:
+                return choice
+            print("Invalid input. Please choose 'max' or 'min'.")
+
+    def operator() -> str:
+        while True:
+            choice = input(
                 "\nFor what operator do you want to know the truth value (<), (>), (<=), (>=) or (=): "
             )
-            prop += op
-            if (
-                val := float(
-                    input(
-                        "\n For what probability value do you want to check the truth value: "
-                    )
-                )
-            ) >= 0 and val <= 1:
-                prop += str(val)
+            if choice in {"<", ">", "<=", ">=", "="}:
+                return choice
+            print("Invalid input. Please choose '<', '>', '<=', '>=' or '='.")
+
+    def value() -> str:
+        while True:
+            choice = float(
+                input("\nFor what value do you want to check the truth value: ")
+            )
+            if value_type == "P":
+                if 0 <= choice and choice <= 1:
+                    return str(choice)
+                print("Invalid input. Please choose a value between 0 and 1.")
             else:
-                raise RuntimeError(
-                    "Not a valid probability. Choose a value between 0 and 1."
-                )
+                return str(choice)
+
+    def label() -> str:
         labels = model.get_all_state_labels()
         print("\nThese are all the state labels in the model:\n", labels)
-        if (
-            label := input(
+        while True:
+            choice = input(
                 "\nFor what state label do you want to know the reachability probability? "
             )
-        ) in labels:
-            prop += f' [F "{label}"]'
-        else:
-            raise RuntimeError("This label is not part of the model.")
+            if choice in labels:
+                return choice
+            print("Invalid input. Please choose a label from the list.")
+
+    print("Welcome to the stormvogel property string builder.")
+    prop = probability_or_reward()
+    value_type = prop
+
+    if compare_or_obtain() == "o":
+        prop += f"{max_or_min()}=?" if model.supports_actions() else "=?"
     else:
-        prop += "R"
+        prop += operator()
+        prop += value()
+    prop += f' [F "{label()}"]'
 
     print("\nThe resulting property string is: \n", prop)
     return prop
