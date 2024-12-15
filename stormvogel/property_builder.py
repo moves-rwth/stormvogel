@@ -8,12 +8,15 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
 
     def probability_or_reward() -> str:
         while True:
-            choice = input("\nCheck probabilities (p) or rewards (r): ").lower()
+            if model.rewards == []:
+                print(
+                    "\nThis model does not have reward models, therefore we can only do model checking for probabilities."
+                )
+                return "P"
+            choice = input("\nCheck for probabilities (p) or rewards (r): ").lower()
             if choice in {"p", "r"}:
                 if choice == "r":
-                    if model.rewards == []:
-                        print("This model does not have a reward model.")
-                    elif len(model.rewards) > 1:
+                    if len(model.rewards) > 1:
                         print("\nThis model has multiple reward models.")
                         print([r.name for r in model.rewards])
                         rewardmodel = input("\nChoose one of the above: ")
@@ -26,7 +29,7 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
     def compare_or_obtain() -> str:
         while True:
             choice = input(
-                "\nDo you want to compare values (c) or obtain one (o): "
+                "\nDo you want to check if a certain property holds (c) or obtain a value (o): "
             ).lower()
             if choice in {"c", "o"}:
                 return choice
@@ -34,7 +37,7 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
 
     def max_or_min() -> str:
         print(
-            "\nThe model you provided supports actions, hence the values depends on the scheduler."
+            "\nThe model you provided supports actions, hence the values will depend on the scheduler, \ntherefore you must choose between the minimum and maximum value over all schedulers."
         )
         while True:
             choice = input(
@@ -65,16 +68,23 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
             else:
                 return str(choice)
 
-    def label() -> str:
+    def labels() -> str:
         labels = model.get_all_state_labels()
         print("\nThese are all the state labels in the model:\n", labels)
+        s = ""
         while True:
-            choice = input(
-                "\nFor what state label do you want to know the reachability probability? "
-            )
+            choice = input("\nChoose a label to append to the path: ")
             if choice in labels:
-                return choice
-            print("Invalid input. Please choose a label from the list.")
+                s += choice
+            else:
+                print("Invalid input. Please choose a label from the list.")
+            if (
+                input("\nDo you want to append more labels to the path? (y) or (n): ")
+                == "n"
+            ):
+                return s
+            else:
+                s += '" & "'
 
     print("Welcome to the stormvogel property string builder.")
     prop = probability_or_reward()
@@ -85,7 +95,7 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
     else:
         prop += operator()
         prop += value()
-    prop += f' [F "{label()}"]'
+    prop += f' [F "{labels()}"]'
 
     print("\nThe resulting property string is: \n", prop)
     return prop

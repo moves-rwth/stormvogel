@@ -49,9 +49,9 @@ def model_checking(
 if __name__ == "__main__":
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
-    rewardmodel = mdp.add_rewards("rewardmodel")
-    rewardmodel.set_from_rewards_vector(list(range(67)))
-    rewardmodel2 = mdp.add_rewards("rewardmodel2")
-    rewardmodel2.set_from_rewards_vector(list(range(67)))
+    # rewardmodel = mdp.add_rewards("rewardmodel")
+    # rewardmodel.set_from_rewards_vector(list(range(67)))
+    # rewardmodel2 = mdp.add_rewards("rewardmodel2")
+    # rewardmodel2.set_from_rewards_vector(list(range(67)))
 
-    print(model_checking(mdp))
+    print(model_checking(mdp))  # ,'R{"rewardmodel"}min=? [F "target" | "done"]'))
