@@ -845,6 +845,15 @@ class Model:
                 "This method only works for models that don't support actions."
             )
 
+    def get_all_state_labels(self):
+        """returns the set of all state labels of the model"""
+        labels = set()
+        for state in self.states.values():
+            for label in state.labels:
+                if label not in labels:
+                    labels.add(label)
+        return labels
+
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
         if not self.supports_actions():

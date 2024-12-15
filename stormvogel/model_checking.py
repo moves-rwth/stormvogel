@@ -2,10 +2,12 @@ import stormpy
 import stormvogel.mapping
 import stormvogel.result
 import stormvogel.model
+import stormvogel.property_builder
+import examples.monty_hall
 
 
 def model_checking(
-    model: stormvogel.model.Model, prop: str, scheduler: bool = True
+    model: stormvogel.model.Model, prop: str | None = None, scheduler: bool = True
 ) -> stormvogel.result.Result | None:
     """
     Instead of calling this function, the stormpy model checker can be used by first mapping a model to a stormpy model,
@@ -13,10 +15,17 @@ def model_checking(
     This function just performs this procedure automatically.
     """
 
-    prop = stormpy.parse_properties(prop)
+    if prop:
+        prop = stormpy.parse_properties(prop)
+    else:
+        interactive_prop = (
+            stormvogel.property_builder.build_property_string_interactive(model)
+        )
+        prop = stormpy.parse_properties(interactive_prop)
 
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
 
+    assert prop is not None
     if model.supports_actions() and scheduler:
         stormpy_result = stormpy.model_checking(
             stormpy_model, prop[0], extract_scheduler=True
@@ -37,41 +46,7 @@ def model_checking(
     return stormvogel_result
 
 
-class PropertyBuilder:
-    """
-    Aimed to let beginner users build property strings
+if __name__ == "__main__":
+    mdp = examples.monty_hall.create_monty_hall_mdp()
 
-    Args:
-    model: the model that the property string will be used for
-    """
-
-    model: stormvogel.model.Model
-    prop: str
-
-    def __init__(self, model: stormvogel.model.Model):
-        self.model = model
-        self.prop = ""
-
-    def get_reachabilty_probability(self, label: str, value: str = "default") -> str:
-        """To create a property that asks for the reachability probabilities of the states"""
-
-        print(value)
-
-        assert len(self.model.get_states_with_label(label)) > 0
-
-        if value == "default":
-            string = f'P=? [F "{label}"]'
-            self.prop = string
-            return string
-        elif value == "max":
-            string = f'Pmax=? [F "{label}"]'
-            self.prop = string
-            return string
-        elif value == "min":
-            string = f'Pmin=? [F "{label}"]'
-            self.prop = string
-            return string
-        else:
-            raise RuntimeError(
-                "Please choose as value either 'max', 'min' or 'default'."
-            )
+    print(model_checking(mdp))

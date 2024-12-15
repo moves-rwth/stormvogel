@@ -1,72 +1,71 @@
 import stormvogel.model
+import examples.monty_hall
 
 
-class PropertyBuilder:
-    """
-    Aimed to let beginner users build property strings
+def build_property_string_interactive(model: stormvogel.model.Model) -> str:
+    """When a model is provided, this interative property string builder will help beginner
+    users to create a property string"""
 
-    Args:
-    model: the model that the property string will be used for
-    """
-
-    model: stormvogel.model.Model
-    prop: str
-
-    def __init__(self, model: stormvogel.model.Model):
-        self.model = model
-        self.prop = ""
-
-    def get_reachabilty_probability(self, label: str, value: str = "default") -> str:
-        """To create a property that asks for the reachability probabilities of the states"""
-
-        print(value)
-
-        assert len(self.model.get_states_with_label(label)) > 0
-
-        if value == "default":
-            string = f'P=? [F "{label}"]'
-            self.prop = string
-            return string
-        elif value == "max":
-            string = f'Pmax=? [F "{label}"]'
-            self.prop = string
-            return string
-        elif value == "min":
-            string = f'Pmin=? [F "{label}"]'
-            self.prop = string
-            return string
-        else:
-            raise RuntimeError(
-                "Please choose as value either 'max', 'min' or 'default'."
-            )
-
-
-def build_property_string_interactive():
     prop = ""
     print("Welcome to the stormvogel property string builder.")
-    if input("Check propabilities (p) or rewards (r): ") == "p":
+    if input("\nCheck probabilities (p) or rewards (r): ") == "p":
         prop += "P"
-        if input("Does the model support actions (y) or (n)? ") == "y":
-            if (
-                input("Do you want the maximum (max) or minimum (min) probability? ")
-                == "max"
-            ):
-                prop += "max=?"
+        if (
+            input(
+                "\nDo you want to obtain a truth value (t) or a probability value (p): "
+            )
+            == "p"
+        ):
+            if model.supports_actions():
+                print(
+                    "\nThe model you provided supports actions, hence the reachability probability depends on the scheduler."
+                )
+                if (
+                    input(
+                        "Do you want the maximum (max) or minimum (min) probability? "
+                    )
+                    == "max"
+                ):
+                    prop += "max=?"
+                else:
+                    prop += "min=?"
             else:
-                prop += "min=?"
+                prop += "=?"
         else:
-            prop += "=?"
-
-        label = input(
-            "For what state label do you want to know the reachability probability? "
-        )
-        prop += f' [F "{label}"]'
+            op = input(
+                "\nFor what operator do you want to know the truth value (<), (>), (<=), (>=) or (=): "
+            )
+            prop += op
+            if (
+                val := float(
+                    input(
+                        "\n For what probability value do you want to check the truth value: "
+                    )
+                )
+            ) >= 0 and val <= 1:
+                prop += str(val)
+            else:
+                raise RuntimeError(
+                    "Not a valid probability. Choose a value between 0 and 1."
+                )
+        labels = model.get_all_state_labels()
+        print("\nThese are all the state labels in the model:\n", labels)
+        if (
+            label := input(
+                "\nFor what state label do you want to know the reachability probability? "
+            )
+        ) in labels:
+            prop += f' [F "{label}"]'
+        else:
+            raise RuntimeError("This label is not part of the model.")
     else:
         prop += "R"
 
-    print("The resulting property string is: ", prop)
+    print("\nThe resulting property string is: \n", prop)
     return prop
 
 
 if __name__ == "__main__":
-    build_property_string_interactive()
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    build_property_string_interactive(mdp)
