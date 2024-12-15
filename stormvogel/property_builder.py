@@ -15,9 +15,9 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
                         print("This model does not have a reward model.")
                     elif len(model.rewards) > 1:
                         print("\nThis model has multiple reward models.")
-                        print(model.rewards)
+                        print([r.name for r in model.rewards])
                         rewardmodel = input("\nChoose one of the above: ")
-                        return choice.upper() + rewardmodel
+                        return choice.upper() + '{"' + rewardmodel + '"}'
                 else:
                     return choice.upper()
             else:
