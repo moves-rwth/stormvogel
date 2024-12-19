@@ -306,22 +306,12 @@ def simulate(
                 # we add the action to the partial model
                 assert partial_model.actions is not None
                 action = model.states[state_id].available_actions()[select_action]
-                if action not in partial_model.actions.values():
-                    partial_model.new_action(action.name)
-
-                # we add the reward model to the partial model
-                discovery = simulator.step(actions[select_action])
-                reward = discovery[1]
-                for index, rewardmodel in enumerate(partial_model.rewards):
-                    row_group = stormpy_model.transition_matrix.get_row_group_start(
-                        state_id
-                    )
-                    state_action_pair = row_group + select_action
-                    rewardmodel.set_state_action_reward_at_id(
-                        state_action_pair, reward[index]
-                    )
+                if action not in partial_model.actions:
+                    partial_model.new_action(action.labels)
 
                 # we add the state
+                print("\nAdding state!")
+                discovery = simulator.step(actions[select_action])
                 state_id, labels = discovery[0], discovery[2]
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
@@ -337,7 +327,22 @@ def simulate(
 
                     last_state_partial = new_state
                     last_state_id = state_id
+
+                # we add the rewards.
+                reward = discovery[1]
+                for index, rewardmodel in enumerate(partial_model.rewards):
+                    # row_group = stormpy_model.transition_matrix.get_row_group_start(
+                    #     state_id
+                    # )
+                    # state_action_pair = row_group + select_action
+                    state = model.get_state_by_id(state_id)
+                    rewardmodel.set_state_action_reward(state, action, reward[index])
+                    print("ADD REWARD:", state.id, state.name, action.labels, reward[index])
+                    print("INTER:", rewardmodel.rewards)
+                    #print(rewardmodel.rewards.items())
+                print("RESULT", partial_model.rewards[1].rewards)
                 if simulator.is_done():
                     break
 
+                
     return partial_model

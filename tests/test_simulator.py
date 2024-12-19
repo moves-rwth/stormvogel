@@ -74,6 +74,24 @@ def test_simulate():
     rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
     rewardmodel2.rewards = {0: 0, 7: 7, 16: 16}
 
+    # print(partial_model)
+    # print(other_mdp)
+
+
+    self = partial_model
+    other = other_mdp
+    print(sorted(self.rewards) == sorted(other.rewards))
+
+    print(sorted(self.rewards[0].rewards))
+    print(sorted(other.rewards[0].rewards))
+    
+    print(self.type == other.type
+                and self.states == other.states
+                and self.transitions == other.transitions
+                and sorted(self.rewards) == sorted(other.rewards)
+                and self.exit_rates == other.exit_rates
+                and self.markovian_states == other.markovian_states)
+
     assert partial_model == other_mdp
     ######################################################################################################################
 

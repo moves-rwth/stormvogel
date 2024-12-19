@@ -411,7 +411,9 @@ class RewardModel:
         if self.model.supports_actions():
             if action in state.available_actions():
                 self.rewards[state.id, action] = value
+                print("rewards", self.rewards)
             else:
+                print('FAILED', state.available_actions(), action)
                 RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
@@ -873,6 +875,7 @@ class Model:
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
+        print("free state id!", state_id)
         if isinstance(labels, list):
             state = State(labels, features or {}, state_id, self)
         elif isinstance(labels, str):
@@ -893,7 +896,7 @@ class Model:
                 collected_states.append(state)
         return collected_states
 
-    def get_state_by_id(self, state_id) -> State:
+    def get_state_by_id(self, state_id: int) -> State:
         """Get a state by its id."""
         if state_id not in self.states:
             raise RuntimeError("Requested a non-existing state")
