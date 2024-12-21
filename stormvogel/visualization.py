@@ -43,7 +43,6 @@ class Visualization(stormvogel.displayable.Displayable):
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         separate_labels: list[str] = [],
-        positions: dict[str, dict[str, int]] | None = None,
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
@@ -82,15 +81,12 @@ class Visualization(stormvogel.displayable.Displayable):
         self.separate_labels: set[str] = set(map(und, separate_labels)).union(
             self.layout.layout["groups"].keys()
         )
-        self.positions: dict[str, dict[str, int]]
-        if positions is None:
-            self.positions = self.layout.layout["positions"]
-        else:
-            self.positions = positions
         self.do_init_server: bool = do_init_server
         self.__create_nt()
 
     def __create_nt(self) -> None:
+        """Reload the node positions and create the network."""
+        self.positions: dict[str, dict[str, int]] = self.layout.layout["positions"]
         self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
             name=self.name,
             width=self.layout.layout["misc"]["width"],

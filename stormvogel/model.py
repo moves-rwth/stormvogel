@@ -411,9 +411,7 @@ class RewardModel:
         if self.model.supports_actions():
             if action in state.available_actions():
                 self.rewards[state.id, action] = value
-                print("rewards", self.rewards)
             else:
-                print('FAILED', state.available_actions(), action)
                 RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
@@ -875,7 +873,6 @@ class Model:
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
-        print("free state id!", state_id)
         if isinstance(labels, list):
             state = State(labels, features or {}, state_id, self)
         elif isinstance(labels, str):
