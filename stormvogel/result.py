@@ -42,6 +42,11 @@ class Scheduler:
             add = ""
         return add + "taken actions: " + str(self.taken_actions)
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Scheduler):
+            return self.taken_actions == other.taken_actions
+        return False
+
 
 class Result:
     """Result object represents the model checking results for a given model
@@ -111,15 +116,22 @@ class Result:
                 raise RuntimeError("This result does not have a scheduler")
 
     def __str__(self) -> str:
-        s = {}
-        if self.scheduler is not None:
-            for index, action in enumerate(self.scheduler.taken_actions.values()):
-                s[index] = str(list(action.labels))
-
         add = ""
         if self.model.name is not None:
             add = "model: " + str(self.model.name) + "\n"
-        return add + "values: \n " + str(self.values) + "\n" + "scheduler: \n " + str(s)
+        return (
+            add
+            + "values: \n "
+            + str(self.values)
+            + "\n"
+            + "scheduler: \n "
+            + str(self.scheduler)
+        )
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Result):
+            return self.values == other.values and self.scheduler == other.scheduler
+        return False
 
 
 def convert_model_checking_result(
@@ -149,17 +161,3 @@ def convert_model_checking_result(
         stormvogel_result.add_scheduler(stormpy_result.scheduler)
 
     return stormvogel_result
-
-
-if __name__ == "__main__":
-    path = stormpy.examples.files.prism_dtmc_die
-    prism_program = stormpy.parse_prism_program(path)
-    formula_str = "P=? [F s=7 & d=2]"
-    properties = stormpy.parse_properties(formula_str, prism_program)
-
-    model = stormpy.build_model(prism_program, properties)
-    result = stormpy.model_checking(model, properties[0])
-    print(type(result))
-    stormvogel_model = stormvogel.map.stormpy_to_stormvogel(model)
-    if stormvogel_model is not None:
-        convert_model_checking_result(stormvogel_model, result)
