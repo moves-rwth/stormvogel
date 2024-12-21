@@ -86,7 +86,6 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def __create_nt(self) -> None:
         """Reload the node positions and create the network."""
-        self.positions: dict[str, dict[str, int]] = self.layout.layout["positions"]
         self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
             name=self.name,
             width=self.layout.layout["misc"]["width"],
@@ -95,6 +94,7 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output=self.debug_output,
             do_display=False,
             do_init_server=self.do_init_server,
+            positions= self.layout.layout["positions"]
         )
 
     def show(self) -> None:
@@ -143,7 +143,6 @@ class Visualization(stormvogel.displayable.Displayable):
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
-                position_dict=self.positions,
             )
 
     def __add_transitions(self) -> None:
@@ -183,7 +182,6 @@ class Visualization(stormvogel.displayable.Displayable):
                         id=action_id,
                         label=",".join(action.labels) + reward,
                         group=group,
-                        position_dict=self.positions,
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore

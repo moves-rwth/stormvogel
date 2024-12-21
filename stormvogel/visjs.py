@@ -1,5 +1,6 @@
 """Our own Python bindings to the vis.js library in JavaScript."""
 
+from typing import Tuple
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
@@ -12,6 +13,8 @@ import string
 import logging
 
 spam: widgets.Output = widgets.Output()
+from collections import namedtuple
+Node = namedtuple("Node", "id label group")
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -26,6 +29,7 @@ class Network(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
+        positions: dict[str, dict[str, int]] | None = None
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -51,6 +55,11 @@ class Network(stormvogel.displayable.Displayable):
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
             )
+        self.positions: dict[str, dict[str, int]] 
+        if positions is None:
+            self.positions = {}
+        else:
+            self.positions = positions
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
     def enable_exploration_mode(self, initial_node_id: int):
@@ -99,7 +108,6 @@ class Network(stormvogel.displayable.Displayable):
         id: int,
         label: str | None = None,
         group: str | None = None,
-        position_dict: dict | None = None,
     ) -> None:
         """Add a node. Only use before calling show."""
         current = "{ id: " + str(id)
@@ -107,9 +115,9 @@ class Network(stormvogel.displayable.Displayable):
             current += f", label: `{label}`"
         if group is not None:
             current += f', group: "{group}"'
-        if position_dict is not None and str(id) in position_dict:
+        if self.positions is not None and str(id) in self.positions:
             current += (
-                f', x: {position_dict[str(id)]["x"]}, y: {position_dict[str(id)]["y"]}'
+                f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
             )
         if self.new_nodes_hidden and id != self.initial_node_id:
             current += ", hidden: true"
