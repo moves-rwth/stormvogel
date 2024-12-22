@@ -71,4 +71,5 @@ def create_monty_hall_mdp():
 
 if __name__ == "__main__":
     # Print the resulting model in dot format.
+
     print(create_monty_hall_mdp().to_dot())

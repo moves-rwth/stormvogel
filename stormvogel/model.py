@@ -92,7 +92,7 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)
+            self.name = str(id)  # TODO Two states can have same name in some cases
         else:
             self.name = name
 
