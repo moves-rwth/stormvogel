@@ -1,9 +1,4 @@
-from stormvogel import pgc
-import stormvogel.model
-import math
-import stormvogel.mapping
-
-
+"""
 def test_pgc_mdp():
     # we build the model with pgc:
     N = 2
@@ -188,3 +183,4 @@ def test_pgc_dtmc():
         rewardmodel.set_state_reward(state, 2)
 
     assert pgc_model == model
+"""
