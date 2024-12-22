@@ -7,7 +7,6 @@ import stormvogel.model
 import stormvogel.simulator
 
 
-# TODO re-introduce tests once action names are removed.
 def test_simulate():
     # we make a die dtmc and run the simulator with it
     dtmc = examples.die.create_die_dtmc()
@@ -105,7 +104,7 @@ def test_simulate():
 
     assert partial_model == other_mdp
 
-
+# TODO Pim could you also finish this test? :)
 # def test_simulate_path():
 #     # we make the nuclear fusion ctmc and run simulate path with it
 #     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
