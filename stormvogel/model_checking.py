@@ -2,10 +2,12 @@ import stormpy
 import stormvogel.mapping
 import stormvogel.result
 import stormvogel.model
+import stormvogel.property_builder
+import examples.monty_hall
 
 
 def model_checking(
-    model: stormvogel.model.Model, prop: str, scheduler: bool = True
+    model: stormvogel.model.Model, prop: str | None = None, scheduler: bool = True
 ) -> stormvogel.result.Result | None:
     """
     Instead of calling this function, the stormpy model checker can be used by first mapping a model to a stormpy model,
@@ -13,10 +15,17 @@ def model_checking(
     This function just performs this procedure automatically.
     """
 
-    prop = stormpy.parse_properties(prop)
+    if prop:
+        prop = stormpy.parse_properties(prop)
+    else:
+        interactive_prop = (
+            stormvogel.property_builder.build_property_string_interactive(model)
+        )
+        prop = stormpy.parse_properties(interactive_prop)
 
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
 
+    assert prop is not None
     if model.supports_actions() and scheduler:
         stormpy_result = stormpy.model_checking(
             stormpy_model, prop[0], extract_scheduler=True
@@ -35,3 +44,14 @@ def model_checking(
     )
 
     return stormvogel_result
+
+
+if __name__ == "__main__":
+    mdp = examples.monty_hall.create_monty_hall_mdp()
+
+    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel.set_from_rewards_vector(list(range(67)))
+    rewardmodel2 = mdp.add_rewards("rewardmodel2")
+    rewardmodel2.set_from_rewards_vector(list(range(67)))
+
+    print(model_checking(mdp))  # ,'R{"rewardmodel"}min=? [F "target" | "done"]'))

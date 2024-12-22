@@ -92,7 +92,7 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)
+            self.name = str(id)  # TODO Two states can have same name in some cases
         else:
             self.name = name
 
@@ -838,19 +838,29 @@ class Model:
                 "This method only works for models that don't support actions."
             )
 
-    # TODO possibly obsolete?
-    # def get_action(self, name: str) -> Action:
-    #     """Gets an existing action."""
-    #     if not self.supports_actions():
-    #         raise RuntimeError(
-    #             "Called get_action on a model that does not support actions"
-    #         )
-    #     assert self.actions is not None
-    #     if name not in self.actions:
-    #         raise RuntimeError(
-    #             f"Tried to get action {name} but that action does not exist"
-    #         )
-    #     return self.actions[name]
+    def get_all_state_labels(self):
+        """returns the set of all state labels of the model"""
+        labels = set()
+        for state in self.states.values():
+            for label in state.labels:
+                if label not in labels:
+                    labels.add(label)
+        return labels
+
+    def get_action(self, name: str) -> Action:
+        """Gets an existing action."""
+        if not self.supports_actions():
+            raise RuntimeError(
+                "Called get_action on a model that does not support actions"
+            )
+        assert self.actions is not None
+        if name not in self.actions:
+            print(name)
+            print(self.actions)
+            raise RuntimeError(
+                f"Tried to get action {name} but that action does not exist"
+            )
+        return self.actions[name]
 
     def action(self, labels: frozenset[str] | str | None) -> Action:
         """New action or get action if it exists."""
@@ -869,16 +879,17 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         # print("free state id!", state_id)
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 
