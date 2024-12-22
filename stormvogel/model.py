@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
-from typing import cast
+from typing import Tuple, cast
 import copy
 
 Parameter = str
@@ -211,10 +211,20 @@ class Action:
     def __str__(self):
         return f"Action {self.name} with labels {self.labels}"
 
+    # TODO remove these after modifying the whole code base to remove names.
     def __eq__(self, other):
         if isinstance(other, Action):
             return self.labels == other.labels
         return False
+
+    def strict_eq(self, other):
+        """Also requires the names to be equal."""
+        if isinstance(other, Action):
+            return self.name == other.name and self.labels == other.labels
+        return False
+
+    # def __hash__(self):
+    #     return self.labels.__hash__()
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -335,10 +345,14 @@ class RewardModel:
 
     name: str
     model: "Model"
-    # Hashed by the id of the state or state action pair (=number in the matrix)
-    rewards: dict[int, Number]
+    rewards: dict[Tuple[int, Action], Number]
+    """Rewards dict. Hashed by state id and Action.
+    The function update_rewards can be called to update rewards. After this, rewards will correspond to intermediate_rewards.
+    Note that in models without actions, EmptyAction will be used here."""
 
-    def __init__(self, name: str, model: "Model", rewards: dict[int, Number]):
+    def __init__(
+        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]
+    ):
         self.name = name
         self.rewards = rewards
         self.model = model
@@ -348,17 +362,31 @@ class RewardModel:
         else:
             self.state_action_pair = None
 
+    def set_from_rewards_vector(self, vector: list[Number]) -> None:
+        """Set the rewards of this model according to a stormpy rewards vector."""
+        combined_id = 0
+        self.rewards = dict()
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                self.rewards[s.id, a] = vector[combined_id]
+                combined_id += 1
+
     def get_state_reward(self, state: State) -> Number:
         """Gets the reward at said state or state action pair"""
-        return self.rewards[state.id]
+        if self.model.supports_actions():
+            RuntimeError(
+                "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
+            )
+        return self.rewards[state.id, EmptyAction]
 
     def get_state_action_reward(self, state: State, action: Action) -> Number | None:
-        """Gets the reward at said state or state action pair"""
+        """Gets the reward at said state or state action pair. Returns None if no reward was found."""
         if self.model.supports_actions():
             if action in state.available_actions():
-                id = self.model.get_state_action_id(state, action)
-                assert id is not None
-                return self.rewards[id]
+                try:
+                    return self.rewards[state.id, action]
+                except KeyError:
+                    return None
             else:
                 RuntimeError("This action is not available in this state")
         else:
@@ -373,15 +401,20 @@ class RewardModel:
                 "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
             )
         else:
-            self.rewards[state.id] = value
+            self.rewards[state.id, EmptyAction] = value
 
-    def set_state_action_reward(self, state: State, action: Action, value: Number):
-        """sets the reward at said state action pair (in case of models with actions)"""
+    def set_state_action_reward(
+        self,
+        state: State,
+        action: Action,
+        value: Number,
+        auto_update_rewards: bool = True,
+    ):
+        """sets the reward at said state action pair (in case of models with actions).
+        If you disable auto_update_rewards, you will need to call update_intermediate_to"""
         if self.model.supports_actions():
             if action in state.available_actions():
-                id = self.model.get_state_action_id(state, action)
-                assert id is not None
-                self.rewards[id] = value
+                self.rewards[state.id, action] = value
             else:
                 RuntimeError("This action is not available in this state")
         else:
@@ -389,14 +422,26 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def set_state_action_reward_at_id(self, action_state: int, value: Number):
-        """sets the reward at said state action pair for a given id (in the case of models with actions)"""
-        if self.model.supports_actions():
-            self.rewards[action_state] = value
-        else:
-            RuntimeError(
-                "The model this rewardmodel belongs to does not support actions"
-            )
+    def reward_vector(self) -> list[Number]:
+        """Return the rewards in a stormpy format."""
+        vector = []
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                reward = self.rewards[s.id, a]
+                if reward is None:
+                    RuntimeError(
+                        "A reward was not set. You might want to call set_unset_rewards."
+                    )
+                vector.append(reward)
+        return vector
+
+    def set_unset_rewards(self, value: Number):
+        """Fills up rewards that were not set yet with the specified value.
+        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
+        for s in self.model.states.values():
+            for a in s.available_actions():
+                if (s.id, a) not in self.rewards:
+                    self.rewards[s.id, a] = value
 
     def __lt__(self, other) -> bool:
         if not isinstance(other, RewardModel):
@@ -617,13 +662,17 @@ class Model:
         else:
             raise RuntimeError("This model is not a MA")
 
-    def set_transitions(self, s: State, transitions: Transition | TransitionShorthand):
+    def set_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
         self.transitions[s.id] = transitions
 
-    def add_transitions(self, s: State, transitions: Transition | TransitionShorthand):
+    def add_transitions(
+        self, s: State, transitions: Transition | TransitionShorthand
+    ) -> None:
         """Add new transitions from a state to the model. If no transition currently exists, the result will be the same as set_transitions."""
 
         if not isinstance(transitions, Transition):

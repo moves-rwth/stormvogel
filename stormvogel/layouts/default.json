@@ -87,10 +87,14 @@
     "fractions": true,
     "digits": 5
   },
-  "results_and_rewards": {
+  "state_properties": {
     "show_results": true,
-    "resultSymbol": "\u2606",
-    "show_rewards": true
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
   },
   "layout": {
     "randomSeed": 5
