@@ -92,7 +92,7 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)
+            self.name = str(id)  # TODO Two states can have same name in some cases
         else:
             self.name = name
 
@@ -844,6 +844,15 @@ class Model:
             raise RuntimeError(
                 "This method only works for models that don't support actions."
             )
+
+    def get_all_state_labels(self):
+        """returns the set of all state labels of the model"""
+        labels = set()
+        for state in self.states.values():
+            for label in state.labels:
+                if label not in labels:
+                    labels.add(label)
+        return labels
 
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
