@@ -348,6 +348,7 @@ def test_get_state_action_reward():
 
     assert rewardmodel.get_state_action_reward(state, action) == 5
 
+
 def test_set_state_reward():
     # we create an mdp:
     mdp = stormvogel.model.new_mdp()
@@ -359,16 +360,18 @@ def test_set_state_reward():
     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
 
     # we make a reward model manually:
-    other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(0, EmptyAction): 5})
+    other_rewardmodel = stormvogel.model.RewardModel(
+        "rewardmodel", mdp, {(0, EmptyAction): 5}
+    )
 
-    print(rewardmodel.rewards)
-    print()
-    print(other_rewardmodel.rewards)
+    # print(rewardmodel.rewards)
+    # print()
+    # print(other_rewardmodel.rewards)
 
     assert rewardmodel == other_rewardmodel
 
-def test_set_state_action_reward():
 
+def test_set_state_action_reward():
     # we create an mdp:
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
@@ -376,10 +379,12 @@ def test_set_state_action_reward():
     rewardmodel = mdp.add_rewards("rewardmodel")
     state = mdp.get_state_by_id(2)
     action = state.available_actions()[0]
-    print(action)
+    # print(action)
     rewardmodel.set_state_action_reward(state, action, 3)
 
     # we make a reward model manually:
-    other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(2, action): 3})
+    other_rewardmodel = stormvogel.model.RewardModel(
+        "rewardmodel", mdp, {(2, action): 3}
+    )
 
     assert rewardmodel == other_rewardmodel

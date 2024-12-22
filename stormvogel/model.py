@@ -92,7 +92,7 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)
+            self.name = str(id)  # TODO Two states can have same name in some cases
         else:
             self.name = name
 
@@ -205,8 +205,9 @@ class Action:
         name: A name for this action.
         labels: The labels of this action. Corresponds to Storm labels.
     """
-    @staticmethod 
-    def create(labels: frozenset[str] | str | None = None) -> 'Action':
+
+    @staticmethod
+    def create(labels: frozenset[str] | str | None = None) -> "Action":
         if isinstance(labels, str):
             return Action(frozenset({labels}))
         elif isinstance(labels, frozenset):
@@ -620,11 +621,7 @@ class Model:
         id = 0
         for s in self.states.values():
             for a in s.available_actions():
-                if (
-                    a == action
-                    and action in s.available_actions()
-                    and s == state
-                ):
+                if a == action and action in s.available_actions() and s == state:
                     return id
                 id += 1
 
@@ -664,7 +661,7 @@ class Model:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
-        if not self.actions is None and EmptyAction in transitions.transition.keys():
+        if self.actions is not None and EmptyAction in transitions.transition.keys():
             self.actions.add(EmptyAction)
         self.transitions[s.id] = transitions
 
@@ -839,19 +836,29 @@ class Model:
                 "This method only works for models that don't support actions."
             )
 
-    # TODO possibly obsolete?
-    # def get_action(self, name: str) -> Action:
-    #     """Gets an existing action."""
-    #     if not self.supports_actions():
-    #         raise RuntimeError(
-    #             "Called get_action on a model that does not support actions"
-    #         )
-    #     assert self.actions is not None
-    #     if name not in self.actions:
-    #         raise RuntimeError(
-    #             f"Tried to get action {name} but that action does not exist"
-    #         )
-    #     return self.actions[name]
+    def get_all_state_labels(self):
+        """returns the set of all state labels of the model"""
+        labels = set()
+        for state in self.states.values():
+            for label in state.labels:
+                if label not in labels:
+                    labels.add(label)
+        return labels
+
+    def get_action(self, name: str) -> Action:
+        """Gets an existing action."""
+        if not self.supports_actions():
+            raise RuntimeError(
+                "Called get_action on a model that does not support actions"
+            )
+        assert self.actions is not None
+        if name not in self.actions:
+            print(name)
+            print(self.actions)
+            raise RuntimeError(
+                f"Tried to get action {name} but that action does not exist"
+            )
+        return self.actions[name]
 
     def action(self, labels: frozenset[str] | str | None) -> Action:
         """New action or get action if it exists."""
@@ -862,7 +869,7 @@ class Model:
         assert self.actions is not None
         action = Action.create(labels)
 
-        if not action in self.actions:
+        if action not in self.actions:
             self.new_action(labels)
         return action
 
@@ -870,15 +877,16 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 

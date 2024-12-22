@@ -6,7 +6,7 @@ from stormvogel.model import EmptyAction
 import stormvogel.model
 import stormvogel.simulator
 
-# TODO re-introduce tests once action names are removed.
+
 def test_simulate():
     # we make a die dtmc and run the simulator with it
     dtmc = examples.die.create_die_dtmc()
@@ -68,29 +68,14 @@ def test_simulate():
     other_mdp.get_state_by_id(2).set_transitions(
         [(1, other_mdp.new_state("goatrevealed"))]
     )
+    action0 = other_mdp.new_action()
+    action1 = other_mdp.new_action("open0")
+    action2 = other_mdp.new_action()
 
     rewardmodel = other_mdp.add_rewards("rewardmodel")
-    rewardmodel.rewards = {0: 0, 7: 7, 16: 16}
+    rewardmodel.rewards = {(0, action0): 0, (3, action1): 7, (10, action2): 16}
     rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
-    rewardmodel2.rewards = {0: 0, 7: 7, 16: 16}
-
-    # print(partial_model)
-    # print(other_mdp)
-
-
-    self = partial_model
-    other = other_mdp
-    print(sorted(self.rewards) == sorted(other.rewards))
-
-    print(sorted(self.rewards[0].rewards))
-    print(sorted(other.rewards[0].rewards))
-    
-    print(self.type == other.type
-                and self.states == other.states
-                and self.transitions == other.transitions
-                and sorted(self.rewards) == sorted(other.rewards)
-                and self.exit_rates == other.exit_rates
-                and self.markovian_states == other.markovian_states)
+    rewardmodel2.rewards = {(0, action0): 0, (3, action1): 7, (10, action2): 16}
 
     assert partial_model == other_mdp
     ######################################################################################################################
@@ -119,7 +104,7 @@ def test_simulate():
 
     assert partial_model == other_mdp
 
-
+# TODO Pim could you also finish this test? :)
 # def test_simulate_path():
 #     # we make the nuclear fusion ctmc and run simulate path with it
 #     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
