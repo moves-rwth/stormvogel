@@ -205,7 +205,7 @@ class Action:
         labels: The labels of this action. Corresponds to Storm labels.
     """
 
-    name: str
+    name: str  # TODO name is stormpy choice label or we don't need a name at all?
     labels: frozenset[str]
 
     def __str__(self):
@@ -862,6 +862,8 @@ class Model:
             )
         assert self.actions is not None
         if name not in self.actions:
+            print(name)
+            print(self.actions)
             raise RuntimeError(
                 f"Tried to get action {name} but that action does not exist"
             )
@@ -883,15 +885,16 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 
