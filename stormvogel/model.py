@@ -205,8 +205,9 @@ class Action:
         name: A name for this action.
         labels: The labels of this action. Corresponds to Storm labels.
     """
-    @staticmethod 
-    def create(labels: frozenset[str] | str | None = None) -> 'Action':
+
+    @staticmethod
+    def create(labels: frozenset[str] | str | None = None) -> "Action":
         if isinstance(labels, str):
             return Action(frozenset({labels}))
         elif isinstance(labels, frozenset):
@@ -410,10 +411,10 @@ class RewardModel:
         If you disable auto_update_rewards, you will need to call update_intermediate_to"""
         if self.model.supports_actions():
             if action in state.available_actions():
-                self.rewards[state.id, action] = value
-                print("rewards", self.rewards)
+                self.rewards[(state.id, action)] = value
+                # print("rewards", self.rewards)
             else:
-                print('FAILED', state.available_actions(), action)
+                # print('FAILED', state.available_actions(), action)
                 RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
@@ -622,11 +623,7 @@ class Model:
         id = 0
         for s in self.states.values():
             for a in s.available_actions():
-                if (
-                    a == action
-                    and action in s.available_actions()
-                    and s == state
-                ):
+                if a == action and action in s.available_actions() and s == state:
                     return id
                 id += 1
 
@@ -666,7 +663,7 @@ class Model:
         """Set the transition from a state."""
         if not isinstance(transitions, Transition):
             transitions = transition_from_shorthand(transitions)
-        if not self.actions is None and EmptyAction in transitions.transition.keys():
+        if self.actions is not None and EmptyAction in transitions.transition.keys():
             self.actions.add(EmptyAction)
         self.transitions[s.id] = transitions
 
@@ -864,7 +861,7 @@ class Model:
         assert self.actions is not None
         action = Action.create(labels)
 
-        if not action in self.actions:
+        if action not in self.actions:
             self.new_action(labels)
         return action
 
@@ -875,7 +872,7 @@ class Model:
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
-        print("free state id!", state_id)
+        # print("free state id!", state_id)
         if isinstance(labels, list):
             state = State(labels, features or {}, state_id, self)
         elif isinstance(labels, str):
