@@ -7,6 +7,7 @@ import stormpy.examples.files
 import stormpy.examples
 from typing import Callable
 import random
+from stormvogel.model import EmptyAction
 
 
 class Path:
@@ -242,14 +243,19 @@ def simulate(
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
-                reward_model.set_state_action_reward_at_id(
-                    partial_model.get_initial_state().id,
-                    model.rewards[index].get_state_reward(model.get_initial_state()),
+                r = model.rewards[index].get_state_reward(model.get_initial_state())
+                assert r is not None
+                reward_model.set_state_action_reward(
+                    partial_model.get_initial_state(),
+                    EmptyAction,
+                    r,
                 )
             else:
+                r = model.rewards[index].get_state_reward(model.get_initial_state())
+                assert r is not None
                 reward_model.set_state_reward(
                     partial_model.get_initial_state(),
-                    model.rewards[index].get_state_reward(model.get_initial_state()),
+                    r,
                 )
 
     # now we start stepping through the model
@@ -301,26 +307,21 @@ def simulate(
                     if scheduler
                     else random.randint(0, len(actions) - 1)
                 )
-
                 # we add the action to the partial model
                 assert partial_model.actions is not None
                 action = model.states[state_id].available_actions()[select_action]
-                if action not in partial_model.actions.values():
-                    partial_model.new_action(action.name)
+                if action not in partial_model.actions:
+                    partial_model.new_action(action.labels)
 
-                # we add the reward model to the partial model
+                # we get the new discovery
                 discovery = simulator.step(actions[select_action])
+
+                # we add the rewards.
                 reward = discovery[1]
                 for index, rewardmodel in enumerate(partial_model.rewards):
-                    row_group = stormpy_model.transition_matrix.get_row_group_start(
-                        state_id
-                    )
-                    state_action_pair = row_group + select_action
-                    rewardmodel.set_state_action_reward_at_id(
-                        state_action_pair, reward[index]
-                    )
+                    state = model.get_state_by_id(state_id)
+                    rewardmodel.set_state_action_reward(state, action, reward[index])
 
-                # we add the state
                 state_id, labels = discovery[0], discovery[2]
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)

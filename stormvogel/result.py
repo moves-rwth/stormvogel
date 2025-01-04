@@ -80,7 +80,7 @@ class Result:
             self.stormpy_scheduler = stormpy_scheduler
             taken_actions = {}
             for state in self.model.states.values():
-                taken_actions[state.id] = self.model.get_action(
+                taken_actions[state.id] = stormvogel.model.Action.create(
                     str(stormpy_scheduler.get_choice(state.id))
                 )
             self.scheduler = Scheduler(self.model, taken_actions)
