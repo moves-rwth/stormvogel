@@ -49,36 +49,36 @@ If you are working remotely, it might help to forward this port. For example: 's
 If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run.
 This will speed up stormvogel and ignore this message, but it means that you cannot store positions in layout files.
 Please contact the stormvogel developpers if you keep running into issues.""")
-    
+
     def set_current_vis_node_positions_in_layout(self):
         """Try to save the positions of the nodes in the graph to the layout.
         The user is informed if this fails."""
         with self.debug_output:
             logging.debug(f"Status of vis {self.vis}")
         if self.vis is not None:
-                with self.output:
-                    if stormvogel.communication_server.server is None:
+            with self.output:
+                if stormvogel.communication_server.server is None:
+                    with self.debug_output:
+                        logging.info(
+                            "Node positions won't be saved because the server is disabled."
+                        )
+                    with self.output:
+                        print(
+                            "Node positions won't be saved because the server is disabled."
+                        )
+                else:
+                    try:
+                        positions = self.vis.get_positions()
                         with self.debug_output:
-                            logging.info(
-                                "Node positions won't be saved because the server is disabled."
+                            logging.debug(positions)
+                        self.layout.layout["positions"] = positions
+                    except TimeoutError:
+                        with self.debug_output:
+                            logging.warning(
+                                "Failed to save node positions in layout file."
                             )
                         with self.output:
-                            print(
-                                "Node positions won't be saved because the server is disabled."
-                            )
-                    else:
-                        try:
-                            positions = self.vis.get_positions()
-                            with self.debug_output:
-                                logging.debug(positions)
-                            self.layout.layout["positions"] = positions
-                        except TimeoutError:
-                            with self.debug_output:
-                                logging.warning(
-                                    "Failed to save node positions in layout file."
-                                )
-                            with self.output:
-                                self.__warn_failed_positions_save()
+                            self.__warn_failed_positions_save()
 
     def process_save_button(self):
         if self.layout.layout["saving"]["save_button"]:

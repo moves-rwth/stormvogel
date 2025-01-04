@@ -1,6 +1,5 @@
 """Our own Python bindings to the vis.js library in JavaScript."""
 
-from typing import Tuple
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
@@ -12,9 +11,8 @@ import random
 import string
 import logging
 
+
 spam: widgets.Output = widgets.Output()
-from collections import namedtuple
-Node = namedtuple("Node", "id label group")
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -29,7 +27,7 @@ class Network(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
-        positions: dict[str, dict[str, int]] | None = None
+        positions: dict[str, dict[str, int]] | None = None,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -55,7 +53,7 @@ class Network(stormvogel.displayable.Displayable):
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
             )
-        self.positions: dict[str, dict[str, int]] 
+        self.positions: dict[str, dict[str, int]]
         if positions is None:
             self.positions = {}
         else:
@@ -116,9 +114,7 @@ class Network(stormvogel.displayable.Displayable):
         if group is not None:
             current += f', group: "{group}"'
         if self.positions is not None and str(id) in self.positions:
-            current += (
-                f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
-            )
+            current += f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
         if self.new_nodes_hidden and id != self.initial_node_id:
             current += ", hidden: true"
         current += " },\n"

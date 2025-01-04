@@ -35,11 +35,10 @@ def show(
     """
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
-    do_init_server = ( # We only need to start the server if we want to have the layout editor.
-        show_editor
-        and stormvogel.communication_server.enable_server
+    do_init_server = (  # We only need to start the server if we want to have the layout editor.
+        show_editor and stormvogel.communication_server.enable_server
     )
-    #do_display = not show_editor
+    # do_display = not show_editor
     vis = stormvogel.visualization.Visualization(
         model=model,
         name=name,
@@ -52,14 +51,14 @@ def show(
         do_init_server=do_init_server,
     )
     vis.show()
-    if show_editor: 
+    if show_editor:
         e = stormvogel.layout_editor.LayoutEditor(
             layout, vis, do_display=False, debug_output=debug_output
         )
         e.show()
         box = widgets.HBox(children=[vis.output, e.output])
         ipd.display(box)
-    else: # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
+    else:  # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
         iframe = vis.nt.generate_iframe()
         with open(name + ".html", "w") as f:
             f.write(iframe)

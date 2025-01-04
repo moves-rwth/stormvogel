@@ -139,6 +139,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
 
+
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
     stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
@@ -230,7 +231,6 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
     assert sparse_equal(stormpy_pomdp, new_stormpy_pomdp)
 
 
-
 def test_stormvogel_to_stormpy_and_back_ma():
     # we create a stormpy representation of an example ma
     stormvogel_ma = examples.simple_ma.create_simple_ma()
@@ -254,4 +254,3 @@ def test_stormpy_to_stormvogel_and_back_ma():
     # print(new_stormpy_ma)
 
     assert sparse_equal(stormpy_ma, new_stormpy_ma)
-

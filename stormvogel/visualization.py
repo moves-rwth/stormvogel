@@ -94,7 +94,7 @@ class Visualization(stormvogel.displayable.Displayable):
             debug_output=self.debug_output,
             do_display=False,
             do_init_server=self.do_init_server,
-            positions= self.layout.layout["positions"]
+            positions=self.layout.layout["positions"],
         )
 
     def show(self) -> None:

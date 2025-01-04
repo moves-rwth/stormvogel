@@ -39,17 +39,14 @@ def test_show(mocker):
         debug_output=vis.debug_output,
         do_display=False,
         do_init_server=vis.do_init_server,
-        positions= vis.layout.layout["positions"]
+        positions=vis.layout.layout["positions"],
     )
-    MockNetwork.add_node.assert_any_call(
-        0, label="init", group="states"
-    )  # type: ignore
-    MockNetwork.add_node.assert_any_call(
-        1, label="one", group="states"
-    )  # type: ignore
+    MockNetwork.add_node.assert_any_call(0, label="init", group="states")  # type: ignore
+    MockNetwork.add_node.assert_any_call(1, label="one", group="states")  # type: ignore
     assert MockNetwork.add_node.call_count == 2
     MockNetwork.add_edge.assert_any_call(0, 1, label="1")
     assert MockNetwork.add_edge.call_count == 1
+
 
 def test_rewards(mocker):
     MockNetwork = boilerplate(mocker)
@@ -61,9 +58,7 @@ def test_rewards(mocker):
     model.get_rewards("HIHI").set_state_reward(one, 42)
     vis = Visualization(model=model)
     vis.show()
-    MockNetwork.add_node.assert_any_call(
-        0, label="init", group="states"
-    )  # type: ignore
+    MockNetwork.add_node.assert_any_call(0, label="init", group="states")  # type: ignore
     MockNetwork.add_node.assert_any_call(
         1, label="one\n€\tLOL: 37\tHIHI: 42", group="states"
     )  # type: ignore
@@ -80,12 +75,8 @@ def test_results_count(mocker):
     vis = Visualization(model=model, result=result)
     vis.show()
     RES_SYM = vis.layout.layout["state_properties"]["result_symbol"]
-    MockNetwork.add_node.assert_any_call(
-        0, label=f"init\n{RES_SYM} 69", group="states"
-    )  # type: ignore
-    MockNetwork.add_node.assert_any_call(
-        1, label=f"one\n{RES_SYM} 12", group="states"
-    )  # type: ignore
+    MockNetwork.add_node.assert_any_call(0, label=f"init\n{RES_SYM} 69", group="states")  # type: ignore
+    MockNetwork.add_node.assert_any_call(1, label=f"one\n{RES_SYM} 12", group="states")  # type: ignore
 
     assert result.values == {0: 69, 1: 12}
     assert MockNetwork.add_node.call_count == 2
@@ -105,9 +96,7 @@ def test_results_scheduler(mocker):
     result = Result(model, [1, 2], scheduler)
     vis = Visualization(model=model, result=result)
     vis.show()
-    MockNetwork.add_node.assert_any_call(
-        id=10000000001, label="BAD", group="actions"
-    )
+    MockNetwork.add_node.assert_any_call(id=10000000001, label="BAD", group="actions")
     MockNetwork.add_node.assert_any_call(
         id=10000000000, label="GOOD", group="scheduled_actions"
     )
