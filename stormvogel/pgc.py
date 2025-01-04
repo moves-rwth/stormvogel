@@ -80,7 +80,7 @@ def build_pgc(
                     stormvogel_action = model.new_action(
                         str(action.labels),
                         frozenset(
-                            {action.labels[0]}
+                            {action.labels[0]}  # type: ignore TODO Pim please fix i don't know how myself :)
                         ),  # right now we only look at one label
                     )
                 except RuntimeError:
