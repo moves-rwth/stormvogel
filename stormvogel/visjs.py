@@ -10,9 +10,25 @@ import json
 import random
 import string
 import logging
+from dataclasses import dataclass
 
 
 spam: widgets.Output = widgets.Output()
+
+
+@dataclass(frozen=True)
+class Node:
+    id: int
+    label: str | None
+    group: str | None
+    visible: bool
+
+
+@dataclass(frozen=True)
+class Edge:
+    from_: int
+    to_: int
+    label: str | None
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -59,6 +75,8 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = {}
         else:
             self.positions = positions
+        self.nodes: dict[int, Node]
+        self.edges: dict[int, set[Edge]] = {}
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
     def enable_exploration_mode(self, initial_node_id: int):
@@ -96,37 +114,52 @@ class Network(stormvogel.displayable.Displayable):
                 logging.warning("Timed out. Could not retrieve position data.")
             raise TimeoutError("Timed out. Could not retrieve position data.")
 
+    def __add_node_pre(self, node: Node) -> None:
+        """Add the node to the pre-creation Javascript."""
+        current = "{ id: " + str(node.id)
+        if node.label is not None:
+            current += f", label: `{node.label}`"
+        if node.group is not None:
+            current += f', group: "{node.group}"'
+        if self.positions is not None and str(node.id) in self.positions:
+            current += f', x: {self.positions[str(node.id)]["x"]}, y: {self.positions[str(node.id)]["y"]}'
+        if self.new_nodes_hidden and node.id != self.initial_node_id:
+            current += ", hidden: true"
+        current += " },\n"
+        self.nodes_js += current
+
     def add_node(
         self,
         id: int,
         label: str | None = None,
         group: str | None = None,
+        visible: bool = True,
     ) -> None:
         """Add a node. Only use before calling show."""
-        current = "{ id: " + str(id)
-        if label is not None:
-            current += f", label: `{label}`"
-        if group is not None:
-            current += f', group: "{group}"'
-        if self.positions is not None and str(id) in self.positions:
-            current += f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
-        if self.new_nodes_hidden and id != self.initial_node_id:
-            current += ", hidden: true"
+        node = Node(id, label, group, visible)
+        self.nodes[id] = node
+        if visible:
+            self.__add_node_pre(node)
+
+    def add_edge_pre(self, edge: Edge):
+        """Add the edge to the pre-creation Javascript."""
+        current = "{ from: " + str(edge.from_) + ", to: " + str(edge.to_)
+        if edge.label is not None:
+            current += f', label: "{edge.label}"'
         current += " },\n"
-        self.nodes_js += current
+        self.edges_js += current
 
     def add_edge(
         self,
         from_: int,
-        to: int,
+        to_: int,
         label: str | None = None,
     ) -> None:
         """Add an edge. Only use before calling show."""
-        current = "{ from: " + str(from_) + ", to: " + str(to)
-        if label is not None:
-            current += f', label: "{label}"'
-        current += " },\n"
-        self.edges_js += current
+        edge = Edge(from_, to_, label)
+        self.edges[from_].add(edge)
+        if self.nodes[from_].visible and self.nodes[from_].visible:
+            self.add_edge_pre(edge)
 
     def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""
