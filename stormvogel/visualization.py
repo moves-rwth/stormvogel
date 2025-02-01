@@ -105,7 +105,8 @@ class Visualization(stormvogel.displayable.Displayable):
             ipd.clear_output()
         self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
-            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
+            self.nt.enable_exploration_mode()
+            self.nt.make_node_visible(self.model.get_initial_state().id)
         self.layout.set_groups(self.separate_labels)
         self.__add_states()
         self.__add_transitions()
@@ -143,6 +144,7 @@ class Visualization(stormvogel.displayable.Displayable):
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
+                visible=not self.layout.layout["misc"]["explore"],
             )
 
     def __add_transitions(self) -> None:

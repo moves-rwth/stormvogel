@@ -65,7 +65,6 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
-        self.new_nodes_hidden: bool = False
         if do_init_server:
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
@@ -75,23 +74,14 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = {}
         else:
             self.positions = positions
-        self.nodes: dict[int, Node]
+        self.nodes: dict[int, Node] = {}
         self.edges: dict[int, set[Edge]] = {}
-        # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
-    def enable_exploration_mode(self, initial_node_id: int):
-        """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
-        self.new_nodes_hidden = True
-        self.initial_node_id = initial_node_id
+    def enable_exploration_mode(self):
+        """Make the initial node visible, and inject the JS that enables exploration by clicking."""
 
-    def update_exploration_mode(self, initial_node_id: int):
-        # Make all nodes invisible.
-        ipd.display(ipd.Javascript(self.content_window + ".makeAllNodesInvisible()"))
-        # Make the initial state visible.
-        ipd.display(
-            ipd.Javascript(self.content_window + f".makeNodeVisible({initial_node_id})")
-        )
-        # All future nodes to be added will be hidden as well.
+    def make_node_visible(self, id):
+        """Make the node with this id visible."""
 
     def get_positions(self) -> dict:
         """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
@@ -123,8 +113,6 @@ class Network(stormvogel.displayable.Displayable):
             current += f', group: "{node.group}"'
         if self.positions is not None and str(node.id) in self.positions:
             current += f', x: {self.positions[str(node.id)]["x"]}, y: {self.positions[str(node.id)]["y"]}'
-        if self.new_nodes_hidden and node.id != self.initial_node_id:
-            current += ", hidden: true"
         current += " },\n"
         self.nodes_js += current
 
@@ -157,7 +145,10 @@ class Network(stormvogel.displayable.Displayable):
     ) -> None:
         """Add an edge. Only use before calling show."""
         edge = Edge(from_, to_, label)
-        self.edges[from_].add(edge)
+        if from_ in self.edges:
+            self.edges[from_].add(edge)
+        else:
+            self.edges[from_] = set()
         if self.nodes[from_].visible and self.nodes[from_].visible:
             self.add_edge_pre(edge)
 
