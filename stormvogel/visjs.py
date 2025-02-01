@@ -16,7 +16,7 @@ from dataclasses import dataclass
 spam: widgets.Output = widgets.Output()
 
 
-@dataclass(frozen=True)
+@dataclass
 class Node:
     id: int
     label: str | None
@@ -76,15 +76,40 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = positions
         self.nodes: dict[int, Node] = {}
         self.edges: dict[int, set[Edge]] = {}
+        self.reverse_edges: dict[int, set[Edge]] = {}
 
     def enable_exploration_mode(self):
-        """Make the initial node visible, and inject the JS that enables exploration by clicking."""
+        """Inject the JS that enables exploration by clicking."""
+        js = f"""//js
+{self.content_window}.network.on( 'click', function(properties) {{
+    var nodeId = {self.content_window}.network.getNodeAt({{x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY}});
+    if (! (nodeId === undefined)) {{
+        FUNCTION(nodeId);
+    }}
+}});"""
+        self.server.add_event(js, self.make_neighbors_visible)
 
-    def make_node_visible(self, id):
-        """Make the node with this id visible."""
+    def make_neighbors_visible(self, id: str) -> None:
+        """Make the neighbors of this node visible."""
+        print("explore", id)
+        for edge in self.edges[int(id)]:
+            print(edge.to_)
+            self.make_node_visible(edge.to_, True)
+
+    def make_node_visible(self, id: int, two: bool = False) -> None:
+        """Make the node with this id visible, i.e. adding it to the JS network.
+        Add incoming edges if the source node is visible and outgoing edges if the target node is visible."""
+        print("make visible", id, type(id))
+        node = self.nodes[id]
+        node.visible = True
+        js = f"""alert('{id}');"""
+        if two:
+            js = f"""{self.content_window}.nodes.update({self.__create_node_code(node)});"""
+        print(js)
+        ipd.display(ipd.Javascript(js))
 
     def get_positions(self) -> dict:
-        """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
+        """Get the current positions of the nodes on the canvas. Returns empty dict if unsuccessful.
         Example result: {"0": {"x": 5, "y": 10}}"""
         if self.server is None:
             with self.debug_output:
@@ -104,8 +129,8 @@ class Network(stormvogel.displayable.Displayable):
                 logging.warning("Timed out. Could not retrieve position data.")
             raise TimeoutError("Timed out. Could not retrieve position data.")
 
-    def __add_node_pre(self, node: Node) -> None:
-        """Add the node to the pre-creation Javascript."""
+    def __create_node_code(self, node: Node) -> str:
+        """Generate the code to add the node to the pre-creation Javascript."""
         current = "{ id: " + str(node.id)
         if node.label is not None:
             current += f", label: `{node.label}`"
@@ -113,8 +138,8 @@ class Network(stormvogel.displayable.Displayable):
             current += f', group: "{node.group}"'
         if self.positions is not None and str(node.id) in self.positions:
             current += f', x: {self.positions[str(node.id)]["x"]}, y: {self.positions[str(node.id)]["y"]}'
-        current += " },\n"
-        self.nodes_js += current
+        current += " }"
+        return current
 
     def add_node(
         self,
@@ -127,15 +152,15 @@ class Network(stormvogel.displayable.Displayable):
         node = Node(id, label, group, visible)
         self.nodes[id] = node
         if visible:
-            self.__add_node_pre(node)
+            self.nodes_js += self.__create_node_code(node) + ",\n"
 
-    def add_edge_pre(self, edge: Edge):
+    def __create_edge_code(self, edge: Edge) -> str:
         """Add the edge to the pre-creation Javascript."""
         current = "{ from: " + str(edge.from_) + ", to: " + str(edge.to_)
         if edge.label is not None:
             current += f', label: "{edge.label}"'
         current += " },\n"
-        self.edges_js += current
+        return current
 
     def add_edge(
         self,
@@ -148,9 +173,14 @@ class Network(stormvogel.displayable.Displayable):
         if from_ in self.edges:
             self.edges[from_].add(edge)
         else:
-            self.edges[from_] = set()
+            self.edges[from_] = {edge}
+        if to_ in self.reverse_edges:
+            self.reverse_edges[to_].add(edge)
+        else:
+            self.reverse_edges[to_] = {edge}
+
         if self.nodes[from_].visible and self.nodes[from_].visible:
-            self.add_edge_pre(edge)
+            self.edges_js += self.__create_edge_code(edge)
 
     def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""
