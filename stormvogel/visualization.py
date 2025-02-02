@@ -3,7 +3,6 @@
 # Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
 # If you remove a with output: statement, everything might just break, be prepared.
 
-from time import sleep
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -105,6 +104,8 @@ class Visualization(stormvogel.displayable.Displayable):
         with self.output:
             ipd.clear_output()
         self.__create_nt()
+        if self.layout.layout["misc"]["explore"]:
+            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
         self.layout.set_groups(self.separate_labels)
         self.__add_states()
         self.__add_transitions()
@@ -113,14 +114,6 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is not None:
             self.nt.show()
         self.maybe_display_output()
-
-    def after_show(self) -> None:
-        """Initialization that needs to be called after the network is shown."""
-        sleep(1)  # Delay because JS needs some time to load.
-        if self.layout.layout["misc"]["explore"]:
-            self.nt.enable_exploration_mode()
-            # sleep(3)
-            # self.nt.make_node_visible(self.model.get_initial_state().id, two=True)
 
     def update(self) -> None:
         """Tries to update an existing visualization to apply layout changes WITHOUT reloading. If show was not called before, nothing happens."""
@@ -150,7 +143,6 @@ class Visualization(stormvogel.displayable.Displayable):
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
-                visible=not self.layout.layout["misc"]["explore"],
             )
 
     def __add_transitions(self) -> None:
@@ -190,7 +182,6 @@ class Visualization(stormvogel.displayable.Displayable):
                         id=action_id,
                         label=",".join(action.labels) + reward,
                         group=group,
-                        visible=not self.layout.layout["misc"]["explore"],
                     )
                     # Add transition from this state TO the action.
                     self.nt.add_edge(state_id, action_id)  # type: ignore

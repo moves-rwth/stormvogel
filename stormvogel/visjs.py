@@ -10,25 +10,9 @@ import json
 import random
 import string
 import logging
-from dataclasses import dataclass
 
 
 spam: widgets.Output = widgets.Output()
-
-
-@dataclass
-class Node:
-    id: int
-    label: str | None
-    group: str | None
-    visible: bool
-
-
-@dataclass(frozen=True)
-class Edge:
-    from_: int
-    to_: int
-    label: str | None
 
 
 class Network(stormvogel.displayable.Displayable):
@@ -65,6 +49,7 @@ class Network(stormvogel.displayable.Displayable):
         self.nodes_js: str = ""
         self.edges_js: str = ""
         self.options_js: str = "{}"
+        self.new_nodes_hidden: bool = False
         if do_init_server:
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
@@ -74,42 +59,24 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = {}
         else:
             self.positions = positions
-        self.nodes: dict[int, Node] = {}
-        self.edges: dict[int, set[Edge]] = {}
-        self.reverse_edges: dict[int, set[Edge]] = {}
+        # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
-    def enable_exploration_mode(self):
-        """Inject the JS that enables exploration by clicking."""
-        js = f"""//js
-{self.content_window}.network.on( 'click', function(properties) {{
-    var nodeId = {self.content_window}.network.getNodeAt({{x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY}});
-    if (! (nodeId === undefined)) {{
-        FUNCTION(nodeId);
-    }}
-}});"""
-        self.server.add_event(js, self.make_neighbors_visible)
+    def enable_exploration_mode(self, initial_node_id: int):
+        """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
+        self.new_nodes_hidden = True
+        self.initial_node_id = initial_node_id
 
-    def make_neighbors_visible(self, id: str) -> None:
-        """Make the neighbors of this node visible."""
-        print("explore", id)
-        for edge in self.edges[int(id)]:
-            print(edge.to_)
-            self.make_node_visible(edge.to_, True)
-
-    def make_node_visible(self, id: int, two: bool = False) -> None:
-        """Make the node with this id visible, i.e. adding it to the JS network.
-        Add incoming edges if the source node is visible and outgoing edges if the target node is visible."""
-        print("make visible", id, type(id))
-        node = self.nodes[id]
-        node.visible = True
-        js = f"""alert('{id}');"""
-        if two:
-            js = f"""{self.content_window}.nodes.update({self.__create_node_code(node)});"""
-        print(js)
-        ipd.display(ipd.Javascript(js))
+    def update_exploration_mode(self, initial_node_id: int):
+        # Make all nodes invisible.
+        ipd.display(ipd.Javascript(self.content_window + ".makeAllNodesInvisible()"))
+        # Make the initial state visible.
+        ipd.display(
+            ipd.Javascript(self.content_window + f".makeNodeVisible({initial_node_id})")
+        )
+        # All future nodes to be added will be hidden as well.
 
     def get_positions(self) -> dict:
-        """Get the current positions of the nodes on the canvas. Returns empty dict if unsuccessful.
+        """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
         Example result: {"0": {"x": 5, "y": 10}}"""
         if self.server is None:
             with self.debug_output:
@@ -129,58 +96,37 @@ class Network(stormvogel.displayable.Displayable):
                 logging.warning("Timed out. Could not retrieve position data.")
             raise TimeoutError("Timed out. Could not retrieve position data.")
 
-    def __create_node_code(self, node: Node) -> str:
-        """Generate the code to add the node to the pre-creation Javascript."""
-        current = "{ id: " + str(node.id)
-        if node.label is not None:
-            current += f", label: `{node.label}`"
-        if node.group is not None:
-            current += f', group: "{node.group}"'
-        if self.positions is not None and str(node.id) in self.positions:
-            current += f', x: {self.positions[str(node.id)]["x"]}, y: {self.positions[str(node.id)]["y"]}'
-        current += " }"
-        return current
-
     def add_node(
         self,
         id: int,
         label: str | None = None,
         group: str | None = None,
-        visible: bool = True,
     ) -> None:
         """Add a node. Only use before calling show."""
-        node = Node(id, label, group, visible)
-        self.nodes[id] = node
-        if visible:
-            self.nodes_js += self.__create_node_code(node) + ",\n"
-
-    def __create_edge_code(self, edge: Edge) -> str:
-        """Add the edge to the pre-creation Javascript."""
-        current = "{ from: " + str(edge.from_) + ", to: " + str(edge.to_)
-        if edge.label is not None:
-            current += f', label: "{edge.label}"'
+        current = "{ id: " + str(id)
+        if label is not None:
+            current += f", label: `{label}`"
+        if group is not None:
+            current += f', group: "{group}"'
+        if self.positions is not None and str(id) in self.positions:
+            current += f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
+        if self.new_nodes_hidden and id != self.initial_node_id:
+            current += ", hidden: true"
         current += " },\n"
-        return current
+        self.nodes_js += current
 
     def add_edge(
         self,
         from_: int,
-        to_: int,
+        to: int,
         label: str | None = None,
     ) -> None:
         """Add an edge. Only use before calling show."""
-        edge = Edge(from_, to_, label)
-        if from_ in self.edges:
-            self.edges[from_].add(edge)
-        else:
-            self.edges[from_] = {edge}
-        if to_ in self.reverse_edges:
-            self.reverse_edges[to_].add(edge)
-        else:
-            self.reverse_edges[to_] = {edge}
-
-        if self.nodes[from_].visible and self.nodes[from_].visible:
-            self.edges_js += self.__create_edge_code(edge)
+        current = "{ from: " + str(from_) + ", to: " + str(to)
+        if label is not None:
+            current += f', label: "{label}"'
+        current += " },\n"
+        self.edges_js += current
 
     def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""

@@ -103,7 +103,7 @@
     "enable_physics": true,
     "width": 800,
     "height": 600,
-    "explore": true
+    "explore": false
   },
   "saving": {
     "relative_path": true,

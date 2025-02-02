@@ -1,6 +1,6 @@
 
           <iframe
-                id="studymrkLMSGkNb"
+                id="studyNsXSOjuhzk"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -217,6 +217,33 @@ var data = {
     edges: edges,
 };
 var network = new vis.Network(container, data, options);
+function makeAllNodesInvisible() {
+    ids = nodes.getIds();
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = true;
+        nodes.update(node);
+    }
+};
+function makeNeighborsVisible(myNode) {
+    var ids = network.getConnectedNodes(myNode, &#x27;to&#x27;);
+    for (let i = 0; i &lt; ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node[&quot;hidden&quot;] = false;
+        nodes.update(node);
+    }
+};
+function makeNodeVisible(nodeId) {
+    var node = nodes.get(nodeId);
+    node[&quot;hidden&quot;] = false;
+    nodes.update(node);
+};
+network.on( &#x27;click&#x27;, function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
 
     &lt;/script&gt;
   &lt;/body&gt;

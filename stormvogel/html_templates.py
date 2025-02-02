@@ -33,19 +33,6 @@ var data = {
     edges: edges,
 };
 var network = new vis.Network(container, data, options);
-// network.on( 'click', function(properties) {
-//     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
-//     alert(nodeId);
-// });
-"""
-
-NETWORK_JS_OLD = """//js
-var container = document.getElementById("mynetwork");
-var data = {
-    nodes: nodes,
-    edges: edges,
-};
-var network = new vis.Network(container, data, options);
 function makeAllNodesInvisible() {
     ids = nodes.getIds();
     for (let i = 0; i < ids.length; i++) {
@@ -69,4 +56,8 @@ function makeNodeVisible(nodeId) {
     node["hidden"] = false;
     nodes.update(node);
 };
+network.on( 'click', function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
 """
