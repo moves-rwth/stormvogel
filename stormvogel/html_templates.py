@@ -39,16 +39,33 @@ function makeAllNodesInvisible() {
         var nodeId = ids[i];
         var node = nodes.get(nodeId);
         node["hidden"] = true;
+        node["physics"] = false;
         nodes.update(node);
     }
 };
-function makeNeighborsVisible(myNode) {
-    var ids = network.getConnectedNodes(myNode, 'to');
-    for (let i = 0; i < ids.length; i++) {
-        var nodeId = ids[i];
+function makeNeighborsVisible(homeId) {
+    //var ids = network.getConnectedNodes(myNode);
+    homeNode = nodes.get(homeId);
+    var edgeIds = network.getConnectedEdges(homeId, 'to');
+    for (let i = 0; i < edgeIds.length; i++) {
+        var edgeId = edgeIds[i];
+        var edge = edges.get(edgeId);
+        var nodeId = edge.to;
         var node = nodes.get(nodeId);
-        node["hidden"] = false;
-        nodes.update(node);
+
+        if (node["hidden"]) {
+          node["hidden"] = false;
+          node["physics"] = true;
+          // node["x"] = network.getPosition(homeId)["x"];
+          // node["y"] = network.getPosition(homeId)["y"];
+          nodes.update(node);
+          // node["x"] = undefined;
+          // node["y"] = undefined;
+          // nodes.update(node);
+        }
+        edge["hidden"] = false;
+        edge["physics"] = true;
+        edges.update(edge);
     }
 };
 function makeNodeVisible(nodeId) {

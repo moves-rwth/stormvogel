@@ -112,6 +112,7 @@ class Network(stormvogel.displayable.Displayable):
             current += f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
         if self.new_nodes_hidden and id != self.initial_node_id:
             current += ", hidden: true"
+            current += ", physics: false"
         current += " },\n"
         self.nodes_js += current
 
@@ -125,6 +126,9 @@ class Network(stormvogel.displayable.Displayable):
         current = "{ from: " + str(from_) + ", to: " + str(to)
         if label is not None:
             current += f', label: "{label}"'
+        if self.new_nodes_hidden:
+            current += ", hidden: true"
+            current += ", physics: false"
         current += " },\n"
         self.edges_js += current
 

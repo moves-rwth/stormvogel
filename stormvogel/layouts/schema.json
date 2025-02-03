@@ -132,10 +132,6 @@
   },
   "misc": {
     "__collapse": true,
-    "enable_physics": {
-      "__description": "enable physics",
-      "__widget": "Checkbox"
-    },
     "width": {
       "__description": "Width",
       "__widget": "IntSlider",
@@ -187,6 +183,22 @@
     "__widget": "Button",
     "__kwargs": {
       "button_style": "info"
+    }
+  },
+  "physics": {
+    "enabled": {
+      "__description": "Enabled",
+      "__widget": "Checkbox"
+    },
+    "repulsion": {
+      "centralGravity": {
+        "__description": "Central gravity",
+        "__widget": "FloatSlider",
+        "__kwargs": {
+          "min": 0,
+          "max": 2
+        }
+      }
     }
   }
 }

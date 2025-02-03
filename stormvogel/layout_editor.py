@@ -35,7 +35,9 @@ class LayoutEditor(stormvogel.displayable.Displayable):
     def copy_settings(self):
         """Copy some settings from one place in the layout to another place in the layout.
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
-        self.layout.layout["physics"] = self.layout.layout["misc"]["enable_physics"]
+        self.layout.layout["physics"]["enabled"] = self.layout.layout["misc"][
+            "enable_physics"
+        ]
         self.layout.layout["width"] = self.layout.layout["misc"]["width"]
         self.layout.layout["height"] = self.layout.layout["misc"]["height"]
 
