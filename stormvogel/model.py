@@ -92,7 +92,11 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)  # TODO Two states can have same name in some cases
+            if str(id) in used_names:
+                raise RuntimeError(
+                    "You need to choose a state name because of a conflict caused by removal of states."
+                )
+            self.name = str(id)
         else:
             self.name = name
 
@@ -740,7 +744,13 @@ class Model:
         return action
 
     def reassign_ids(self):
-        """reassigns the ids of states, transitions and rates to be in order again"""
+        """reassigns the ids of states, transitions and rates to be in order again.
+        Mainly useful to keep consistent with storm."""
+
+        print(
+            "Warning: Using this can cause problems in your code if there are existing references to states by id."
+        )
+
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -760,9 +770,10 @@ class Model:
             }
 
     def remove_state(
-        self, state: State, normalize: bool = True, reassign_ids: bool = True
+        self, state: State, normalize: bool = True, reassign_ids: bool = False
     ):
-        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
+        """Properly removes a state, it can optionally normalize the model and reassign ids automatically."""
+
         if state in self.states.values():
             # we remove the state from the transitions
             # first we remove transitions that go into the state

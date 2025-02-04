@@ -156,7 +156,7 @@ def test_normalize():
 def test_remove_state():
     # we make a normal ctmc and remove a state
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
-    ctmc.remove_state(ctmc.get_state_by_id(3))
+    ctmc.remove_state(ctmc.get_state_by_id(3), reassign_ids=True)
 
     # we make a ctmc with the state already missing
     new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
@@ -194,7 +194,7 @@ def test_remove_state():
     mdp.set_transitions(mdp.get_initial_state(), transition)
 
     # we remove a state
-    mdp.remove_state(mdp.get_state_by_id(0))
+    mdp.remove_state(mdp.get_state_by_id(0), reassign_ids=True)
 
     # we make the mdp with the state already missing
     new_mdp = stormvogel.model.new_mdp(create_initial_state=False)
@@ -203,6 +203,27 @@ def test_remove_state():
     new_mdp.add_self_loops()
 
     assert mdp == new_mdp
+
+    # this should fail:
+    new_dtmc = examples.die.create_die_dtmc()
+    state0 = new_dtmc.get_state_by_id(0)
+    new_dtmc.remove_state(new_dtmc.get_initial_state(), reassign_ids=True)
+    state1 = new_dtmc.get_state_by_id(0)
+
+    assert state0 != state1
+
+    # This should complain that names are the same:
+    try:
+        new_dtmc.new_state()
+        assert False
+    except RuntimeError:
+        pass
+
+    # But no longer if we do this:
+    try:
+        new_dtmc.new_state(name="new_name")
+    except RuntimeError:
+        assert False
 
 
 def test_remove_transitions_between_states():
@@ -322,7 +343,6 @@ def test_get_sub_model():
         [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
     )
     new_dtmc.normalize()
-
     assert sub_model == new_dtmc
 
 
