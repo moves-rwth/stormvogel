@@ -92,7 +92,11 @@ class State:
         self.observation = None
 
         if name is None:
-            self.name = str(id)  # TODO Two states can have same name in some cases
+            if str(id) in used_names:
+                raise RuntimeError(
+                    "You need to choose a state name because of a conflict caused by removal of states."
+                )
+            self.name = str(id)
         else:
             self.name = name
 
@@ -769,9 +773,15 @@ class Model:
             }
 
     def remove_state(
-        self, state: State, normalize: bool = True, reassign_ids: bool = True
+        self, state: State, normalize: bool = True, reassign_ids: bool = False
     ):
-        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
+        """Properly removes a state, it can optionally normalize the model and reassign ids automatically."""
+
+        if reassign_ids:
+            print(
+                "Warning: Using this can cause problems in your code if there are existing references to states by id."
+            )
+
         if state in self.states.values():
             # we remove the state from the transitions
             # first we remove transitions that go into the state
@@ -885,16 +895,15 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
-        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self, name=name)
+            state = State(labels, features or {}, state_id, self)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self, name=name)
+            state = State([labels], features or {}, state_id, self)
         elif labels is None:
-            state = State([], features or {}, state_id, self, name=name)
+            state = State([], features or {}, state_id, self)
 
         self.states[state_id] = state
 
