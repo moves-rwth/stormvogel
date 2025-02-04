@@ -753,7 +753,13 @@ class Model:
         return action
 
     def reassign_ids(self):
-        """reassigns the ids of states, transitions and rates to be in order again"""
+        """reassigns the ids of states, transitions and rates to be in order again.
+        Mainly useful to keep consistent with storm."""
+
+        print(
+            "Warning: Using this can cause problems in your code if there are existing references to states by id."
+        )
+
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -776,11 +782,6 @@ class Model:
         self, state: State, normalize: bool = True, reassign_ids: bool = False
     ):
         """Properly removes a state, it can optionally normalize the model and reassign ids automatically."""
-
-        if reassign_ids:
-            print(
-                "Warning: Using this can cause problems in your code if there are existing references to states by id."
-            )
 
         if state in self.states.values():
             # we remove the state from the transitions
@@ -895,15 +896,16 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 

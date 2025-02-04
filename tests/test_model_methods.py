@@ -211,6 +211,19 @@ def test_remove_state():
 
     assert state0 != state1
 
+    # This should complain that names are the same:
+    try:
+        new_dtmc.new_state()
+        assert False
+    except RuntimeError:
+        pass
+
+    # But no longer if we do this:
+    try:
+        new_dtmc.new_state(name="new_name")
+    except RuntimeError:
+        assert False
+
 
 def test_remove_transitions_between_states():
     # we make a model and remove transitions between two states
@@ -329,7 +342,6 @@ def test_get_sub_model():
         [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
     )
     new_dtmc.normalize()
-
     assert sub_model == new_dtmc
 
 
