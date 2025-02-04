@@ -46,26 +46,30 @@ function makeAllNodesInvisible() {
 function makeNeighborsVisible(homeId) {
     //var ids = network.getConnectedNodes(myNode);
     homeNode = nodes.get(homeId);
-    var edgeIds = network.getConnectedEdges(homeId, 'to');
+
+    // Make outgoing nodes visible
+    var nodeIds = network.getConnectedNodes(homeId, "to");
+    for (let i = 0; i < nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = nodes.get(toNodeId);
+      toNode["hidden"] = false;
+      toNode["physics"] = true;
+      toNode["x"] = network.getPosition(homeId)["x"];
+      toNode["y"] = network.getPosition(homeId)["y"];
+      nodes.update(toNode);
+    }
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = network.getConnectedEdges(homeId);
     for (let i = 0; i < edgeIds.length; i++) {
         var edgeId = edgeIds[i];
         var edge = edges.get(edgeId);
-        var nodeId = edge.to;
-        var node = nodes.get(nodeId);
-
-        if (node["hidden"]) {
-          node["hidden"] = false;
-          node["physics"] = true;
-          // node["x"] = network.getPosition(homeId)["x"];
-          // node["y"] = network.getPosition(homeId)["y"];
-          nodes.update(node);
-          // node["x"] = undefined;
-          // node["y"] = undefined;
-          // nodes.update(node);
+        var fromNode = nodes.get(edge.from);
+        var toNode = nodes.get(edge.to);
+        if ((! fromNode["hidden"]) && (! toNode["hidden"])) {
+          edge["hidden"] = false;
+          edge["physics"] = true;
+          edges.update(edge);
         }
-        edge["hidden"] = false;
-        edge["physics"] = true;
-        edges.update(edge);
     }
 };
 function makeNodeVisible(nodeId) {
