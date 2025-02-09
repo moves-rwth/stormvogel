@@ -230,6 +230,7 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 
     assert sparse_equal(stormpy_pomdp, new_stormpy_pomdp)
 
+
 # TODO for some reason, this test crashes but only in Github workflows?
 # def test_stormvogel_to_stormpy_and_back_ma():
 #     # we create a stormpy representation of an example ma

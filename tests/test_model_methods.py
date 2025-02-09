@@ -212,7 +212,7 @@ def test_remove_state():
     state1 = new_dtmc.get_state_by_id(0)
 
     assert state0 != state1
-    
+
     # This should complain that names are the same:
     try:
         new_dtmc.new_state()
