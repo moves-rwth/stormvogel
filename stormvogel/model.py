@@ -92,6 +92,10 @@ class State:
         self.observation = None
 
         if name is None:
+            if str(id) in used_names:
+                raise RuntimeError(
+                    "You need to choose a state name because of a conflict caused by removal of states."
+                )
             self.name = str(id)
         else:
             self.name = name
@@ -410,10 +414,8 @@ class RewardModel:
         If you disable auto_update_rewards, you will need to call update_intermediate_to"""
         if self.model.supports_actions():
             if action in state.available_actions():
-                self.rewards[(state.id, action)] = value
-                # print("rewards", self.rewards)
+                self.rewards[state.id, action] = value
             else:
-                # print('FAILED', state.available_actions(), action)
                 RuntimeError("This action is not available in this state")
         else:
             RuntimeError(
@@ -748,7 +750,13 @@ class Model:
         return action
 
     def reassign_ids(self):
-        """reassigns the ids of states, transitions and rates to be in order again"""
+        """reassigns the ids of states, transitions and rates to be in order again.
+        Mainly useful to keep consistent with storm."""
+
+        print(
+            "Warning: Using this can cause problems in your code if there are existing references to states by id."
+        )
+
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -768,9 +776,10 @@ class Model:
             }
 
     def remove_state(
-        self, state: State, normalize: bool = True, reassign_ids: bool = True
+        self, state: State, normalize: bool = True, reassign_ids: bool = False
     ):
-        """properly removes a state, it can optionally normalize the model and reassign ids automatically"""
+        """Properly removes a state, it can optionally normalize the model and reassign ids automatically."""
+
         if state in self.states.values():
             # we remove the state from the transitions
             # first we remove transitions that go into the state
@@ -844,19 +853,29 @@ class Model:
                 "This method only works for models that don't support actions."
             )
 
-    # TODO possibly obsolete?
-    # def get_action(self, name: str) -> Action:
-    #     """Gets an existing action."""
-    #     if not self.supports_actions():
-    #         raise RuntimeError(
-    #             "Called get_action on a model that does not support actions"
-    #         )
-    #     assert self.actions is not None
-    #     if name not in self.actions:
-    #         raise RuntimeError(
-    #             f"Tried to get action {name} but that action does not exist"
-    #         )
-    #     return self.actions[name]
+    def get_all_state_labels(self):
+        """returns the set of all state labels of the model"""
+        labels = set()
+        for state in self.states.values():
+            for label in state.labels:
+                if label not in labels:
+                    labels.add(label)
+        return labels
+
+    def get_action(self, name: str) -> Action:
+        """Gets an existing action."""
+        if not self.supports_actions():
+            raise RuntimeError(
+                "Called get_action on a model that does not support actions"
+            )
+        assert self.actions is not None
+        if name not in self.actions:
+            print(name)
+            print(self.actions)
+            raise RuntimeError(
+                f"Tried to get action {name} but that action does not exist"
+            )
+        return self.actions[name]
 
     def action(self, labels: frozenset[str] | str | None) -> Action:
         """New action or get action if it exists."""
@@ -875,16 +894,16 @@ class Model:
         self,
         labels: list[str] | str | None = None,
         features: dict[str, int] | None = None,
+        name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
-        # print("free state id!", state_id)
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self)
+            state = State(labels, features or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self)
+            state = State([labels], features or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self)
+            state = State([], features or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 

@@ -87,10 +87,14 @@
     "fractions": true,
     "digits": 5
   },
-  "results_and_rewards": {
+  "state_properties": {
     "show_results": true,
-    "resultSymbol": "\u2606",
-    "show_rewards": true
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
   },
   "layout": {
     "randomSeed": 5
@@ -103,45 +107,50 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "pinkgreen.json",
+    "filename": "layouts/pinkgreen.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": 5,
-      "y": -186
+      "x": -27,
+      "y": -203
     },
     "1": {
-      "x": 98,
-      "y": 11
+      "x": -84,
+      "y": -6
     },
     "2": {
-      "x": -120,
-      "y": -7
+      "x": 57,
+      "y": -10
     },
     "3": {
-      "x": 0,
-      "y": 99
+      "x": -56,
+      "y": 102
     },
     "4": {
-      "x": -24,
-      "y": 37
+      "x": 58,
+      "y": 61
     },
     "5": {
-      "x": -62,
-      "y": 182
+      "x": 24,
+      "y": 187
     },
     "10000000000": {
-      "x": 119,
-      "y": -118
+      "x": -136,
+      "y": -127
     },
     "10000000001": {
-      "x": -122,
-      "y": -141
+      "x": 77,
+      "y": -144
     }
   },
   "width": 800,
   "height": 600,
-  "physics": true
+  "physics": true,
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
+  }
 }

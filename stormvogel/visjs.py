@@ -11,6 +11,7 @@ import random
 import string
 import logging
 
+
 spam: widgets.Output = widgets.Output()
 
 
@@ -26,6 +27,7 @@ class Network(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
+        positions: dict[str, dict[str, int]] | None = None,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -41,6 +43,7 @@ class Network(stormvogel.displayable.Displayable):
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
         else:
             self.name: str = name
+        self.content_window = f"document.getElementById('{self.name}').contentWindow"
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""
@@ -51,6 +54,11 @@ class Network(stormvogel.displayable.Displayable):
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
             )
+        self.positions: dict[str, dict[str, int]]
+        if positions is None:
+            self.positions = {}
+        else:
+            self.positions = positions
         # Note that this refers to the same server as the global variable in stormvogel.communication_server.
 
     def enable_exploration_mode(self, initial_node_id: int):
@@ -60,16 +68,10 @@ class Network(stormvogel.displayable.Displayable):
 
     def update_exploration_mode(self, initial_node_id: int):
         # Make all nodes invisible.
-        ipd.display(
-            ipd.Javascript(
-                f"document.getElementById('{self.name}').contentWindow.makeAllNodesInvisible()"
-            )
-        )
+        ipd.display(ipd.Javascript(self.content_window + ".makeAllNodesInvisible()"))
         # Make the initial state visible.
         ipd.display(
-            ipd.Javascript(
-                f"document.getElementById('{self.name}').contentWindow.makeNodeVisible({initial_node_id})"
-            )
+            ipd.Javascript(self.content_window + f".makeNodeVisible({initial_node_id})")
         )
         # All future nodes to be added will be hidden as well.
 
@@ -84,8 +86,8 @@ class Network(stormvogel.displayable.Displayable):
             raise TimeoutError("Server not initialized.")
         try:
             positions: dict = json.loads(
-                self.server.request(
-                    f"""JSON.stringify(document.getElementById('{self.name}').contentWindow.network.getPositions())"""
+                self.server.result(
+                    f"""RETURN({self.content_window}.network.getPositions())"""
                 )
             )
             return positions
@@ -99,7 +101,6 @@ class Network(stormvogel.displayable.Displayable):
         id: int,
         label: str | None = None,
         group: str | None = None,
-        position_dict: dict | None = None,
     ) -> None:
         """Add a node. Only use before calling show."""
         current = "{ id: " + str(id)
@@ -107,12 +108,11 @@ class Network(stormvogel.displayable.Displayable):
             current += f", label: `{label}`"
         if group is not None:
             current += f', group: "{group}"'
-        if position_dict is not None and str(id) in position_dict:
-            current += (
-                f', x: {position_dict[str(id)]["x"]}, y: {position_dict[str(id)]["y"]}'
-            )
+        if self.positions is not None and str(id) in self.positions:
+            current += f', x: {self.positions[str(id)]["x"]}, y: {self.positions[str(id)]["y"]}'
         if self.new_nodes_hidden and id != self.initial_node_id:
             current += ", hidden: true"
+            current += ", physics: false"
         current += " },\n"
         self.nodes_js += current
 
@@ -126,6 +126,9 @@ class Network(stormvogel.displayable.Displayable):
         current = "{ from: " + str(from_) + ", to: " + str(to)
         if label is not None:
             current += f', label: "{label}"'
+        if self.new_nodes_hidden:
+            current += ", hidden: true"
+            current += ", physics: false"
         current += " },\n"
         self.edges_js += current
 
@@ -190,7 +193,7 @@ class Network(stormvogel.displayable.Displayable):
     def update_options(self, options: str):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
-        js = f"""document.getElementById('{self.name}').contentWindow.network.setOptions({options});"""
+        js = f"""{self.content_window}.network.setOptions({options});"""
         with self.spam:
             ipd.display(ipd.Javascript(js))
         self.spam_side_effects()

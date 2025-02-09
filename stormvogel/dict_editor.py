@@ -15,6 +15,7 @@ class WidgetWrapper:
 
     convert_dict = {
         "IntSlider": widgets.IntSlider,
+        "FloatSlider": widgets.FloatSlider,
         "ColorPicker": widgets.ColorPicker,
         "Checkbox": widgets.Checkbox,
         "Text": widgets.Text,

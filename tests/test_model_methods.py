@@ -204,22 +204,23 @@ def test_remove_state():
 
     assert mdp == new_mdp
 
-    #this should fail:
+
+    # this should fail:
     new_dtmc = examples.die.create_die_dtmc()
     state0 = new_dtmc.get_state_by_id(0)
     new_dtmc.remove_state(new_dtmc.get_initial_state(), reassign_ids=True)
     state1 = new_dtmc.get_state_by_id(0)
 
     assert state0 != state1
-
-    #This should complain that names are the same:
+    
+    # This should complain that names are the same:
     try:
         new_dtmc.new_state()
         assert False
     except RuntimeError:
         pass
 
-    #But no longer if we do this:
+    # But no longer if we do this:
     try:
         new_dtmc.new_state(name="new_name")
     except RuntimeError:
