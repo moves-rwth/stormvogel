@@ -206,7 +206,6 @@ class Action:
         Two actions with the same labels are considered equal.
 
     Args:
-        name: A name for this action.
         labels: The labels of this action. Corresponds to Storm labels.
     """
 
@@ -731,6 +730,13 @@ class Model:
         if EmptyAction not in transition:
             raise RuntimeError("Called get_branch on a non-empty transition.")
         return transition[EmptyAction]
+
+    def get_action_with_labels(self, labels: frozenset[str]) -> Action | None:
+        """Get the action with provided list of labels"""
+        assert self.actions is not None
+        for action in self.actions:
+            if action.labels == labels:
+                return action
 
     def new_action(self, labels: frozenset[str] | str | None = None) -> Action:
         """Creates a new action and returns it."""
