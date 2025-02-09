@@ -7,20 +7,13 @@ import http.server
 import random
 import string
 import threading
-from typing import Callable
+import urllib
 import IPython.display as ipd
 import logging
 from time import sleep
 import ipywidgets as widgets
 import socket
 import warnings
-import json
-
-
-def random_word(k: int) -> str:
-    """Random word of lenght k"""
-    return "".join(random.choices(string.ascii_letters, k=k))
-
 
 enable_server: bool = True
 """Disable if you don't want to use an internal communication server. Some features might break."""
@@ -36,10 +29,7 @@ server_port: int = 8888
 """Global variable storing the port that is being used by this process. Changes when initialize_server is called."""
 
 awaiting: dict = {}
-
-events: dict[str, Callable] = {}
-"""Dictionary that stores currently active events, along with their function, hashed by randomly generated ids."""
-
+mutex: threading.Lock = threading.Lock()
 server_running: bool = False
 spam: widgets.Output = widgets.Output()
 
@@ -50,38 +40,53 @@ class CommunicationServer:
     def __init__(self, server_port: int = 8080) -> None:
         """Run a web server in the background to receive Javascript communications.
         Warning! We don't currently account for race conditions etc.
-        It might behave unexpectedly if multiple requests are going on at the same time.
+        JSMessenger might behave unexpectedly if multiple requests are going on at the same time.
 
         Args:
             server_port (int, optional): Defaults to 8080.
         """
         self.server_port: int = server_port
-        # Define a function within javascript that posts.
-        js = """
-function return_id_result(url, id, data) {
-        fetch(url, {
-            method: 'POST',
-            body: JSON.stringify({
-                'id': id,
-                'data': data
-            })
-        })
-    }
-"""
-        ipd.display(ipd.HTML(f"<script>{js}</script>"))
-        # print(js)
 
         class InnerServer(http.server.BaseHTTPRequestHandler):
-            def do_POST(self):
-                # print("POST!!!")
-                content_length = int(self.headers.get("Content-Length", 0))
-                body = json.loads(self.rfile.read(content_length).decode("utf-8"))
-                id = body["id"]
-                data = json.dumps(body["data"])
-                logging.info(f"Received request: {id}\n{data}")
-                # print(f"Received request: {id}\n{data}")
-                f = events[id]
-                f(data)
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(
+                    bytes(
+                        "<html><head><title>Stormvogel's Javascript and IPython communication channel.</title></head>",
+                        "utf-8",
+                    )
+                )
+                self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
+                self.wfile.write(bytes("<body>", "utf-8"))
+                self.wfile.write(
+                    bytes(
+                        "<p>Stormvogel's Javascript and IPython communication channel.</p>",
+                        "utf-8",
+                    )
+                )
+                self.wfile.write(bytes("</body></html>", "utf-8"))
+                logging.info(f"Received request: {urllib.parse.unquote(self.path)}")
+                try:
+                    identifier, message = urllib.parse.unquote(self.path)[1:].split(
+                        "/MESSAGE/"
+                    )
+                    global awaiting, spam
+                    if identifier in awaiting:
+                        awaiting[identifier] = message
+                    logging.info(f"Stored message {identifier}")
+                    try:
+                        logging.debug(awaiting[identifier])
+                    except KeyError:
+                        pass
+                    # There was a weird bug where sometimes a request simply wouldn't work if triggered from a button.
+                    # These two lines seem to fix it don't ask me why, and also don't remove them. I think it might somehow force threads to syncronize
+                    # If you really want to remove them, be sure to test the code a lot of times afterwards because it might be inconsistent.
+                    with spam:
+                        ipd.display(awaiting)
+                except ValueError:
+                    logging.warning("Could not split message!")
 
             def log_message(self, format, *args):
                 """To prevent an unwanted default log message from coming up. Not used by stormvogel."""
@@ -93,56 +98,50 @@ function return_id_result(url, id, data) {
         thr = threading.Thread(target=self.run_server)
         thr.start()
 
-    def add_event(self, js: str, function: Callable) -> str:
-        """Add an event using some JavaScript code.
-            Within your js, use the special function FUNCTION(...) to call the Python function.
-
-        Returns event id which can be used to remove it later.
-        """
-        global server_running, server
+    def request(self, js: str):
+        """Return the result of a single line of Javascript. Waits for at most 2 seconds, then throws TimeoutError.
+        Also waits for server to boot up if it is not finished yet.
+        Should be thread safe. (I hope).
+        WHEN SENDING JAVASCRIPT, DO NOT FORGET EXTRA QUOTES AROUND STRINGS."""
+        global server
         if server is None:
             raise TimeoutError("There is no server running.")
-        while not server_running:
-            sleep(0.1)
-            logging.debug("Waiting for server to finish booting up.")
 
-        id = random_word(k=20)
-        # Parse the RETURN.
-        returning_js = js.replace(
-            "FUNCTION(",
-            f"return_id_result('http://127.0.0.1:{self.server_port}', '{id}', ",
-        )
-        # ipd.display(ipd.HTML(f"<script>{returning_js}</script>"))
-        ipd.display(ipd.Javascript(returning_js))
-        # print(returning_js)
-        events[id] = function
-        return id
+        global awaiting, server_running
+        while not server_running:  # Wait for server to start.
+            sleep(0.2)
+            logging.debug("Request waiting for server to run.")
+        # Random identifier of lenght 10.
+        identifier = "".join(random.choices(string.ascii_letters, k=10))
+        html = f"<script>fetch('http://127.0.0.1:{self.server_port}/{identifier}/MESSAGE/' + {js})</script>"
+        logging.debug(f"full html: {html}")
+        # Request the info
+        ipd.display(ipd.HTML(html))
 
-    def remove_event(self, event_id: str) -> Callable:
-        """Remove the event associated with this event id."""
-        return events.pop(event_id)
+        awaiting[identifier] = AWAITING
+        logging.info(f"Request sent for: {identifier}")
+        # Wait until result is received.
+        MAX_TRIES = 10
+        while MAX_TRIES > 0 and awaiting[identifier] == AWAITING:
+            sleep(0.2)
+            MAX_TRIES -= 1
+            logging.debug(f"Waiting for request result: {identifier}")
+            logging.debug(f"Current awaiting[identifier]: {awaiting[identifier]}")
+            ipd.display(ipd.HTML(html))
+        # Handle case of failure
 
-    def result(self, js: str, timeout_seconds: float = 2.0) -> str:
-        """Execute some JavaScript, then use the special function RETURN(...) to return the result."""
-        result = None
+        result = awaiting[identifier]
 
-        def on_result(data: str):
-            nonlocal result
-            result = data
-
-        id = self.add_event(js.replace("RETURN", "FUNCTION"), on_result)
-        passed_seconds = 0
-        DELTA = 0.1
-        while result is None and passed_seconds < timeout_seconds:
-            sleep(DELTA)
-            passed_seconds += DELTA
-
-        self.remove_event(id)
-        if result is None:
+        if result == AWAITING:
             raise TimeoutError(
-                f"CommunicationServer.request did not receive result in time for request {id}:\n{js}"
+                f"CommunicationServer.request did not receive result in time for request {identifier}:\n{js}"
             )
         else:
+            logging.info(f"Succesfully received result of request: {identifier}")
+            try:
+                awaiting.pop(identifier)
+            except KeyError:
+                pass
             return result
 
     def run_server(self):
@@ -235,7 +234,7 @@ def initialize_server() -> CommunicationServer | None:
             server = CommunicationServer(server_port=server_port)
             logging.info("Succesfully initialized server.")
             try:
-                server.result("RETURN('test message')")
+                server.request("'test message'")
                 logging.info("Succesfully received test message.")
             except TimeoutError:
                 __warn_request()
