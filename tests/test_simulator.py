@@ -105,7 +105,6 @@ def test_simulate():
     assert partial_model == other_mdp
 
 
-# TODO Pim could you also finish this test? :)
 def test_simulate_path():
     # we make the nuclear fusion ctmc and run simulate path with it
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
