@@ -294,6 +294,7 @@ class Transition:
                 sorted(self.transition.items()), sorted(other.transition.items())
             ):
                 if not (item[0] == other_item[0] and item[1] == other_item[1]):
+                    print(item, "\n", other_item)
                     return False
             return True
         return False
@@ -371,7 +372,7 @@ class RewardModel:
     def get_state_reward(self, state: State) -> Number | None:
         """Gets the reward at said state or state action pair. Return None if no reward is present."""
         if self.model.supports_actions():
-            RuntimeError(
+            raise RuntimeError(
                 "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
             )
         if (state.id, EmptyAction) in self.rewards:
@@ -388,16 +389,16 @@ class RewardModel:
                 else:
                     return None
             else:
-                RuntimeError("This action is not available in this state")
+                raise RuntimeError("This action is not available in this state")
         else:
-            RuntimeError(
+            raise RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
             )
 
     def set_state_reward(self, state: State, value: Number):
         """Sets the reward at said state."""
         if self.model.supports_actions():
-            RuntimeError(
+            raise RuntimeError(
                 "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
             )
         else:
@@ -416,9 +417,9 @@ class RewardModel:
             if action in state.available_actions():
                 self.rewards[state.id, action] = value
             else:
-                RuntimeError("This action is not available in this state")
+                raise RuntimeError("This action is not available in this state")
         else:
-            RuntimeError(
+            raise RuntimeError(
                 "The model this rewardmodel belongs to does not support actions"
             )
 
@@ -429,7 +430,7 @@ class RewardModel:
             for a in s.available_actions():
                 reward = self.rewards[s.id, a]
                 if reward is None:
-                    RuntimeError(
+                    raise RuntimeError(
                         "A reward was not set. You might want to call set_unset_rewards."
                     )
                 vector.append(reward)
@@ -627,6 +628,15 @@ class Model:
                 if a == action and action in s.available_actions() and s == state:
                     return id
                 id += 1
+
+    def get_state_action_pair(self, id: int) -> tuple[State, Action] | None:
+        """Does the inverse of the function above"""
+        i = 0
+        for s in self.states.values():
+            for a in s.available_actions():
+                if id == i:
+                    return (s, a)
+                i += 1
 
     def __free_state_id(self) -> int:
         """Gets a free id in the states dict."""
