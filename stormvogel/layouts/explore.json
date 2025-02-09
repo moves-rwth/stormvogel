@@ -100,6 +100,7 @@
     "randomSeed": 5
   },
   "misc": {
+    "enable_physics": true,
     "width": 800,
     "height": 600,
     "explore": true
@@ -113,11 +114,5 @@
   "positions": {},
   "width": 800,
   "height": 600,
-  "physics": {
-    "enabled": true,
-    "repulsion": {
-      "centralGravity": 0
-    },
-    "solver": "repulsion"
-  }
+  "physics": true
 }
