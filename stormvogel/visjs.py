@@ -66,15 +66,6 @@ class Network(stormvogel.displayable.Displayable):
         self.new_nodes_hidden = True
         self.initial_node_id = initial_node_id
 
-    def update_exploration_mode(self, initial_node_id: int):
-        # Make all nodes invisible.
-        ipd.display(ipd.Javascript(self.content_window + ".makeAllNodesInvisible()"))
-        # Make the initial state visible.
-        ipd.display(
-            ipd.Javascript(self.content_window + f".makeNodeVisible({initial_node_id})")
-        )
-        # All future nodes to be added will be hidden as well.
-
     def get_positions(self) -> dict:
         """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
         Example result: {"0": {"x": 5, "y": 10}}"""
