@@ -152,7 +152,6 @@ def test_normalize():
     assert dtmc0 == dtmc1
 
 
-"""
 def test_remove_state():
     # we make a normal ctmc and remove a state
     ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
@@ -204,7 +203,6 @@ def test_remove_state():
 
     assert mdp == new_mdp
 
-
     # this should fail:
     new_dtmc = examples.die.create_die_dtmc()
     state0 = new_dtmc.get_state_by_id(0)
@@ -225,7 +223,6 @@ def test_remove_state():
         new_dtmc.new_state(name="new_name")
     except RuntimeError:
         assert False
-"""
 
 
 def test_remove_transitions_between_states():

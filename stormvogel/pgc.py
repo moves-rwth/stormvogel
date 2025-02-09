@@ -1,6 +1,5 @@
 import stormvogel.model
 from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass
@@ -35,7 +34,7 @@ def build_pgc(
     initial_state_pgc: State,
     rewards=None,
     labels=None,
-    available_actions: Callable[[State], list[Action]] | None = None,
+    available_actions=None,  # Callable[[State], list[Action]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ) -> stormvogel.model.Model:
     """
@@ -78,13 +77,14 @@ def build_pgc(
             for action in available_actions(state):
                 try:
                     stormvogel_action = model.new_action(
-                        str(action.labels),
                         frozenset(
-                            {action.labels[0]}  # type: ignore TODO Pim please fix i don't know how myself :)
+                            {action.labels[0]}  # type: ignore
                         ),  # right now we only look at one label
                     )
                 except RuntimeError:
-                    stormvogel_action = model.get_action(str(action.labels))
+                    stormvogel_action = model.get_action_with_labels(
+                        frozenset(action.labels)
+                    )
 
                 tuples = delta(state, action)
                 # we add all the newly found transitions to the model
@@ -149,9 +149,11 @@ def build_pgc(
                     s = model.get_state_by_name(str(state.__dict__))
                     assert s is not None
                     for index, reward in enumerate(rewardlist):
+                        a = model.get_action_with_labels(frozenset(action.labels))
+                        assert a is not None
                         model.rewards[index].set_state_action_reward(
                             s,
-                            model.get_action(str(action.labels)),
+                            a,
                             reward,
                         )
         else:
