@@ -50,6 +50,7 @@ def test_show(mocker):
     MockNetwork.add_edge.assert_any_call(0, 1, label="1")
     assert MockNetwork.add_edge.call_count == 1
 
+
 def test_rewards(mocker):
     MockNetwork = boilerplate(mocker)
     model, one, init = simple_model()
