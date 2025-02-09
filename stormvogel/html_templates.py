@@ -44,7 +44,6 @@ function makeAllNodesInvisible() {
     }
 };
 function makeNeighborsVisible(homeId) {
-    //var ids = network.getConnectedNodes(myNode);
     homeNode = nodes.get(homeId);
 
     // Make outgoing nodes visible
@@ -71,11 +70,6 @@ function makeNeighborsVisible(homeId) {
           edges.update(edge);
         }
     }
-};
-function makeNodeVisible(nodeId) {
-    var node = nodes.get(nodeId);
-    node["hidden"] = false;
-    nodes.update(node);
 };
 network.on( 'click', function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
