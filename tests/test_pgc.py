@@ -12,12 +12,12 @@ def test_pgc_mdp():
     right = pgc.Action(["right"])
 
     def available_actions(s: pgc.State):
-        if s.x == 1:
-            return [left, right]
-        elif s.x == 2:
+        if s.x == N:
             return [right]
-        else:
+        elif s.x == 0:
             return [left]
+        else:
+            return [left, right]
 
     def rewards(s: pgc.State, a: pgc.Action):
         return [1, 2]
@@ -95,12 +95,12 @@ def test_pgc_mdp_int():
     right = pgc.Action(["right"])
 
     def available_actions(s):
-        if s == 1:
-            return [left, right]
-        elif s == 2:
+        if s == N:
             return [right]
-        else:
+        elif s == 0:
             return [left]
+        else:
+            return [left, right]
 
     def rewards(s, a: pgc.Action):
         return [1, 2]
@@ -293,7 +293,7 @@ def test_pgc_dtmc():
     assert pgc_model == regular_model
 
 
-def test_pgc_dtmc_string():
+def test_pgc_dtmc_arbitrary():
     def delta(current_state):
         match current_state:
             case "hungry":
