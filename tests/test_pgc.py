@@ -291,3 +291,26 @@ def test_pgc_dtmc():
         rewardmodel.set_state_reward(state, 2)
 
     assert pgc_model == regular_model
+
+
+def test_pgc_dtmc_string():
+    def delta(current_state):
+        match current_state:
+            case "hungry":
+                return [(1.0, "eating")]
+            case "eating":
+                return [(1.0, "hungry")]
+
+    pgc_model = pgc.build_pgc(
+        delta, initial_state_pgc="hungry", modeltype=model.ModelType.DTMC
+    )
+
+    regular_model = model.new_dtmc()
+    regular_model.set_transitions(
+        regular_model.get_initial_state(), [(1, regular_model.new_state())]
+    )
+    regular_model.set_transitions(
+        regular_model.get_state_by_id(1), [(1, regular_model.get_initial_state())]
+    )
+
+    assert pgc_model == regular_model
