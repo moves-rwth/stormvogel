@@ -223,7 +223,10 @@ class Visualization(stormvogel.displayable.Displayable):
         res = EMPTY_RES
         for reward_model in self.model.rewards:
             if self.model.supports_actions():
-                reward = reward_model.get_state_action_reward(s, a)
+                if a in s.available_actions():
+                    reward = reward_model.get_state_action_reward(s, a)
+                else:
+                    reward = None
             else:
                 reward = reward_model.get_state_reward(s)
             if reward is not None and not (

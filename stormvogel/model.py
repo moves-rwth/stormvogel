@@ -373,7 +373,7 @@ class RewardModel:
         """Gets the reward at said state or state action pair. Return None if no reward is present."""
         if self.model.supports_actions():
             raise RuntimeError(
-                "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
+                "This is a model with actions. Please call the get_state_action_reward(state, action) function instead"
             )
         if (state.id, EmptyAction) in self.rewards:
             return self.rewards[state.id, EmptyAction]
