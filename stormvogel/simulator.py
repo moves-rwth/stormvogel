@@ -85,7 +85,7 @@ class Path:
                     and isinstance(t[0], stormvogel.model.Action)
                     and isinstance(t[1], stormvogel.model.State)
                 )
-                path += f" --(action: {t[0].name})--> state: {t[1].id}"
+                path += f" --(action: {t[0].labels})--> state: {t[1].id}"
         else:
             for state in self.path.values():
                 path += f" --> state: {state.id}"
@@ -243,7 +243,9 @@ def simulate(
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
-                r = model.rewards[index].get_state_reward(model.get_initial_state())
+                r = model.rewards[index].get_state_action_reward(
+                    model.get_initial_state(), EmptyAction
+                )
                 assert r is not None
                 reward_model.set_state_action_reward(
                     partial_model.get_initial_state(),

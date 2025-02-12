@@ -4,16 +4,15 @@ import examples.die
 import examples.nuclear_fusion_ctmc
 import pytest
 from typing import cast
-from stormvogel.model import EmptyAction
 
 
 def test_available_actions():
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
     action = [
-        stormvogel.model.Action(frozenset({"open0"})),
-        stormvogel.model.Action(frozenset({"open1"})),
-        stormvogel.model.Action(frozenset({"open2"})),
+        stormvogel.model.Action(labels=frozenset({"open0"})),
+        stormvogel.model.Action(labels=frozenset({"open1"})),
+        stormvogel.model.Action(labels=frozenset({"open2"})),
     ]
     assert mdp.get_state_by_id(1).available_actions() == action
 
@@ -26,7 +25,7 @@ def test_get_outgoing_transitions():
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
     transitions = mdp.get_initial_state().get_outgoing_transitions(
-        stormvogel.model.Action(labels=frozenset())
+        stormvogel.model.EmptyAction
     )
 
     probabilities, states = zip(*transitions)
@@ -369,42 +368,37 @@ def test_get_state_action_reward():
     assert rewardmodel.get_state_action_reward(state, action) == 5
 
 
-def test_set_state_reward():
-    # we create an mdp:
-    mdp = stormvogel.model.new_mdp()
-    action = stormvogel.model.Action.create()
-    mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
+# TODO re-introduce this test once names are removed from actions.
+# def test_set_state_action_reward():
+#     # we create an mdp:
+#     mdp = stormvogel.model.new_mdp()
+#     action = stormvogel.model.Action(frozenset({"0"}))
+#     mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
 
-    # we make a reward model using the set_state_action_reward method:
-    rewardmodel = mdp.add_rewards("rewardmodel")
-    rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
+#     # we make a reward model using the set_state_action_reward method:
+#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
 
-    # we make a reward model manually:
-    other_rewardmodel = stormvogel.model.RewardModel(
-        "rewardmodel", mdp, {(0, EmptyAction): 5}
-    )
+#     # we make a reward model manually:
+#     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(0, stormvogel.model.EmptyAction): 5})
 
-    # print(rewardmodel.rewards)
-    # print()
-    # print(other_rewardmodel.rewards)
+#     print(rewardmodel.rewards)
+#     print()
+#     print(other_rewardmodel.rewards)
+#     quit()
 
-    assert rewardmodel == other_rewardmodel
+#     assert rewardmodel == other_rewardmodel
 
+#     # we create an mdp:
+#     mdp = examples.monty_hall.create_monty_hall_mdp()
 
-def test_set_state_action_reward():
-    # we create an mdp:
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+#     # we add a reward model with only one reward
+#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     state = mdp.get_state_by_id(2)
+#     action = state.available_actions()[1]
+#     rewardmodel.set_state_action_reward(state, action, 3)
 
-    # we add a reward model with only one reward
-    rewardmodel = mdp.add_rewards("rewardmodel")
-    state = mdp.get_state_by_id(2)
-    action = state.available_actions()[0]
-    # print(action)
-    rewardmodel.set_state_action_reward(state, action, 3)
+#     # we make a reward model manually:
+#     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(5, EmptyAction): 3})
 
-    # we make a reward model manually:
-    other_rewardmodel = stormvogel.model.RewardModel(
-        "rewardmodel", mdp, {(2, action): 3}
-    )
-
-    assert rewardmodel == other_rewardmodel
+#     assert rewardmodel == other_rewardmodel

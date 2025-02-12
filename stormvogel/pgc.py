@@ -1,6 +1,5 @@
 import stormvogel.model
 from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass
@@ -31,11 +30,11 @@ class State:
 
 
 def build_pgc(
-    delta,  # Callable[[State, Action], list[tuple[float, State]]],
-    initial_state_pgc: State,
+    delta,
+    initial_state_pgc,
     rewards=None,
     labels=None,
-    available_actions: Callable[[State], list[Action]] | None = None,
+    available_actions=None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ) -> stormvogel.model.Model:
     """
@@ -54,11 +53,7 @@ def build_pgc(
     # we create the model with the given type and initial state
     model = stormvogel.model.new_model(modeltype=modeltype, create_initial_state=False)
 
-    model.new_state(
-        labels=["init"],
-        features=initial_state_pgc.__dict__,
-        name=str(initial_state_pgc.__dict__),
-    )
+    model.new_state(labels=["init", str(initial_state_pgc)])
 
     # we continue calling delta and adding new states until no states are
     # left to be checked
@@ -78,13 +73,14 @@ def build_pgc(
             for action in available_actions(state):
                 try:
                     stormvogel_action = model.new_action(
-                        str(action.labels),
                         frozenset(
-                            {action.labels[0]}  # type: ignore TODO Pim please fix i don't know how myself :)
+                            {action.labels[0]}  # type: ignore
                         ),  # right now we only look at one label
                     )
                 except RuntimeError:
-                    stormvogel_action = model.get_action(str(action.labels))
+                    stormvogel_action = model.get_action_with_labels(
+                        frozenset(action.labels)
+                    )
 
                 tuples = delta(state, action)
                 # we add all the newly found transitions to the model
@@ -92,14 +88,12 @@ def build_pgc(
                 for tuple in tuples:
                     if tuple[1] not in states_seen:
                         states_seen.append(tuple[1])
-                        new_state = model.new_state(
-                            name=str(tuple[1].__dict__), features=tuple[1].__dict__
-                        )
+                        new_state = model.new_state(labels=str(tuple[1]))
                         branch.append((tuple[0], new_state))
                         states_to_be_visited.append(tuple[1])
                     else:
                         branch.append(
-                            (tuple[0], model.get_state_by_name(str(tuple[1].__dict__)))
+                            (tuple[0], model.get_states_with_label(str(tuple[1]))[0])
                         )
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
@@ -110,21 +104,19 @@ def build_pgc(
             for tuple in tuples:
                 if tuple[1] not in states_seen:
                     states_seen.append(tuple[1])
-                    new_state = model.new_state(
-                        name=str(tuple[1].__dict__), features=tuple[1].__dict__
-                    )
+                    new_state = model.new_state(labels=str(tuple[1]))
 
                     branch.append((tuple[0], new_state))
                     states_to_be_visited.append(tuple[1])
                 else:
                     branch.append(
-                        (tuple[0], model.get_state_by_name(str(tuple[1].__dict__)))
+                        (tuple[0], model.get_states_with_label(str(tuple[1]))[0])
                     )
                 if branch != []:
                     transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                         branch
                     )
-        s = model.get_state_by_name(str(state.__dict__))
+        s = model.get_states_with_label(str(state))[0]
         assert s is not None
         model.add_transitions(
             s,
@@ -146,12 +138,14 @@ def build_pgc(
                 assert available_actions is not None
                 for action in available_actions(state):
                     rewardlist = rewards(state, action)
-                    s = model.get_state_by_name(str(state.__dict__))
+                    s = model.get_states_with_label(str(state))[0]
                     assert s is not None
                     for index, reward in enumerate(rewardlist):
+                        a = model.get_action_with_labels(frozenset(action.labels))
+                        assert a is not None
                         model.rewards[index].set_state_action_reward(
                             s,
-                            model.get_action(str(action.labels)),
+                            a,
                             reward,
                         )
         else:
@@ -162,7 +156,7 @@ def build_pgc(
 
             for state in states_seen:
                 rewardlist = rewards(state)
-                s = model.get_state_by_name(str(state.__dict__))
+                s = model.get_states_with_label(str(state))[0]
                 assert s is not None
                 for index, reward in enumerate(rewardlist):
                     model.rewards[index].set_state_reward(s, reward)
@@ -170,9 +164,20 @@ def build_pgc(
     # we add the labels
     if labels is not None:
         for state in states_seen:
-            s = model.get_state_by_name(str(state.__dict__))
+            s = model.get_states_with_label(str(state))[0]
+            if "init" in s.labels:
+                s.labels = ["init"]
+            else:
+                s.labels = []
             assert s is not None
             for label in labels(state):
                 s.add_label(label)
+    else:
+        for state in states_seen:
+            s = model.get_states_with_label(str(state))[0]
+            if "init" in s.labels:
+                s.labels = ["init"]
+            else:
+                s.labels = []
 
     return model
