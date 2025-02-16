@@ -389,7 +389,6 @@ class RewardModel:
                 else:
                     return None
             else:
-                print(state, action)
                 raise RuntimeError("This action is not available in this state")
         else:
             raise RuntimeError(
@@ -881,8 +880,6 @@ class Model:
             )
         assert self.actions is not None
         if name not in self.actions:
-            print(name)
-            print(self.actions)
             raise RuntimeError(
                 f"Tried to get action {name} but that action does not exist"
             )
