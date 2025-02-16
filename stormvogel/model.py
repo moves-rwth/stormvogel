@@ -389,6 +389,7 @@ class RewardModel:
                 else:
                     return None
             else:
+                print(state, action)
                 raise RuntimeError("This action is not available in this state")
         else:
             raise RuntimeError(
