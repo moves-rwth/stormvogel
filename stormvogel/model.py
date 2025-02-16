@@ -880,8 +880,6 @@ class Model:
             )
         assert self.actions is not None
         if name not in self.actions:
-            print(name)
-            print(self.actions)
             raise RuntimeError(
                 f"Tried to get action {name} but that action does not exist"
             )
