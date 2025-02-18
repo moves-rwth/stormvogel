@@ -4,7 +4,6 @@ import tempfile
 from warnings import warn
 from IPython.core.magic import register_cell_magic
 from IPython.core.getipython import get_ipython
-import stormpy
 
 
 def parse_program(line, cell, parser_function, name):
@@ -32,10 +31,14 @@ def parse_program(line, cell, parser_function, name):
 @register_cell_magic
 def prism(line, cell):
     """Prism cell magic."""
+    import stormpy
+
     return parse_program(line, cell, stormpy.parse_prism_program, "prism")
 
 
 @register_cell_magic
 def jani(line, cell):
     """JANI cell magic."""
+    import stormpy
+
     return parse_program(line, cell, stormpy.parse_jani_model, "jani")

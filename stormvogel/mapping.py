@@ -1,5 +1,11 @@
-import stormpy.storage
 import stormvogel.model
+
+try:
+    import stormpy.storage
+
+    stormpy_installed = True
+except ImportError:
+    stormpy_installed = False
 
 
 def stormvogel_to_stormpy(

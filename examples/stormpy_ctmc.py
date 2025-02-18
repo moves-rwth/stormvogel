@@ -1,9 +1,10 @@
-import stormpy
 import numpy as np
 
 
 def example_building_ctmcs_01():
     # Building the transition matrix using numpy
+    import stormpy
+
     transitions = np.array(
         [
             [0, 1.5, 0, 0],

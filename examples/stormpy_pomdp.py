@@ -1,14 +1,11 @@
-import stormpy
-import stormpy.info
-
-
-import stormpy.examples
-import stormpy.examples.files
-
-import stormpy.pomdp
-
-
 def example_building_pomdps_01():
+    import stormpy
+    import stormpy.info
+
+    import stormpy.examples
+    import stormpy.examples.files
+
+    import stormpy.pomdp
     # Check support for parameters
 
     path = stormpy.examples.files.prism_pomdp_maze

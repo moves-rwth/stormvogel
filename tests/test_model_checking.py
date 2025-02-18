@@ -1,7 +1,14 @@
 import stormvogel.model_checking
 import examples.monty_hall
 import examples.die
-import stormpy
+
+
+try:
+    import stormpy
+
+    stormpy_installed = True
+except ImportError:
+    stormpy_installed = False
 
 
 def test_model_checking():

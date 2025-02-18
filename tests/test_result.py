@@ -1,6 +1,12 @@
 import stormvogel.result
-import stormpy
 import pytest
+
+try:
+    import stormpy
+
+    stormpy_installed = True
+except ImportError:
+    stormpy_installed = False
 
 
 def test_convert_model_checker_results_dtmc():

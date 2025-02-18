@@ -1,4 +1,3 @@
-import stormpy
 import stormvogel.mapping
 import stormvogel.result
 import stormvogel.model
@@ -14,6 +13,8 @@ def model_checking(
     then calling the stormpy model checker with it followed by converting the model checker result to a stormvogel result.
     This function just performs this procedure automatically.
     """
+
+    import stormpy
 
     if prop:
         prop = stormpy.parse_properties(prop)

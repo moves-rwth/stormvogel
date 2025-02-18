@@ -3,6 +3,7 @@
   "venv": ".venv",
   "reportAttributeAccessIssue": false,
   "reportMissingImports": false,
+  "reportPossiblyUnboundVariable": false,
   "ignore": [
     "**/.vscode/**",
     "**.ipynb"

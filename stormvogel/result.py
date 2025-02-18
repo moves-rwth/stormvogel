@@ -1,8 +1,12 @@
-import stormpy
 import stormvogel.mapping
 import stormvogel.model
-import stormpy.examples.files
-import stormpy.examples
+
+try:
+    import stormpy
+
+    stormpy_installed = True
+except ImportError:
+    stormpy_installed = False
 
 
 class Scheduler:

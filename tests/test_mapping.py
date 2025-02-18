@@ -10,8 +10,14 @@ import examples.nuclear_fusion_ctmc
 import examples.monty_hall_pomdp
 import examples.stormpy_ma
 import examples.simple_ma
-import stormpy
 from stormvogel.model import EmptyAction
+
+try:
+    import stormpy
+
+    stormpy_installed = True
+except ImportError:
+    stormpy_installed = False
 
 
 def sparse_equal(
