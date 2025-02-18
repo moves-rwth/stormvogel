@@ -1,9 +1,13 @@
-import stormpy
 import stormvogel.mapping
 import stormvogel.result
 import stormvogel.model
 import stormvogel.property_builder
 import examples.monty_hall
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def model_checking(
@@ -15,6 +19,7 @@ def model_checking(
     This function just performs this procedure automatically.
     """
 
+    assert stormpy is not None
     if prop:
         prop = stormpy.parse_properties(prop)
     else:

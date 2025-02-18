@@ -1018,7 +1018,7 @@ class Model:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
                 else:
                     # Draw actions, then probabilities
-                    dot += f'{state_id} -> {state_id} [ label = "{action.name}" ];\n'
+                    dot += f'{state_id} -> {state_id} [ label = "{action.labels}" ];\n'
                     for prob, target in branch.branch:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
 

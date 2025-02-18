@@ -1,13 +1,14 @@
-import stormpy
-import stormpy.simulator
 import stormvogel.result
 import stormvogel.mapping
 import stormvogel.model
-import stormpy.examples.files
-import stormpy.examples
 from typing import Callable
 import random
 from stormvogel.model import EmptyAction
+
+try:
+    import stormpy.simulator
+except ImportError:
+    stormpy = None
 
 
 class Path:
@@ -151,6 +152,7 @@ def simulate_path(
 
     Returns a path object.
     """
+    assert stormpy is not None
 
     # we initialize the simulator
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
@@ -222,6 +224,7 @@ def simulate(
 
     Returns the partial model discovered by all the runs of the simulator together
     """
+    assert stormpy is not None
 
     # we initialize the simulator
     stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)

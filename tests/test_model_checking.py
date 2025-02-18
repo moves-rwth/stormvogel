@@ -1,11 +1,15 @@
 import stormvogel.model_checking
 import examples.monty_hall
 import examples.die
-import stormpy
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def test_model_checking():
-    # TODO this test is maybe too trivial?
+    assert stormpy is not None
 
     # we get our result using the stormvogel model checker function indirectly
     mdp = examples.monty_hall.create_monty_hall_mdp()

@@ -1,8 +1,7 @@
-import stormpy
-
-
 # Knuth's model of a fair die using only fair coins
 def example_building_mdps_01():
+    import stormpy
+
     nr_states = 13
     nr_choices = 14
 
