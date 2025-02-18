@@ -6,16 +6,5 @@
   "ignore": [
     "**/.vscode/**",
     "**.ipynb"
-  ],
-  "overrides": [
-    {
-      "files": [
-        "**/*.py"
-      ],
-      "exclude": [
-        "**/stormpy/**"
-      ],
-      "reportPossiblyUnboundVariable": false
-    }
   ]
 }
