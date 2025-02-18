@@ -12,12 +12,8 @@ import examples.stormpy_ma
 import examples.simple_ma
 from stormvogel.model import EmptyAction
 
-try:
-    import stormpy
 
-    stormpy_installed = True
-except ImportError:
-    stormpy_installed = False
+import stormpy.storage
 
 
 def sparse_equal(

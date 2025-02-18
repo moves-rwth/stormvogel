@@ -3,12 +3,7 @@ import examples.monty_hall
 import examples.die
 
 
-try:
-    import stormpy
-
-    stormpy_installed = True
-except ImportError:
-    stormpy_installed = False
+import stormpy
 
 
 def test_model_checking():
