@@ -3,10 +3,8 @@ import stormvogel.model
 
 try:
     import stormpy
-
-    stormpy_installed = True
 except ImportError:
-    stormpy_installed = False
+    stormpy = None
 
 
 class Scheduler:
@@ -148,6 +146,7 @@ def convert_model_checking_result(
     """
     Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
     """
+    assert stormpy is not None
 
     if (
         type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult

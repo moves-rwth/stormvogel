@@ -7,11 +7,8 @@ from stormvogel.model import EmptyAction
 
 try:
     import stormpy.simulator
-
-    stormpy_installed = True
 except ImportError:
     stormpy = None
-    stormpy_installed = False
 
 
 class Path:
