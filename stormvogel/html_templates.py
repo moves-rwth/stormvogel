@@ -51,11 +51,13 @@ function makeNeighborsVisible(homeId) {
     for (let i = 0; i < nodeIds.length; i++) {
       var toNodeId = nodeIds[i];
       var toNode = nodes.get(toNodeId);
-      toNode["hidden"] = false;
-      toNode["physics"] = true;
-      toNode["x"] = network.getPosition(homeId)["x"];
-      toNode["y"] = network.getPosition(homeId)["y"];
-      nodes.update(toNode);
+      if (toNode["hidden"]) {
+        toNode["hidden"] = false;
+        toNode["physics"] = true;
+        toNode["x"] = network.getPosition(homeId)["x"];
+        toNode["y"] = network.getPosition(homeId)["y"];
+        nodes.update(toNode);
+      }
     }
     // Make edges visible, if both of the nodes are also visible
     var edgeIds = network.getConnectedEdges(homeId);
