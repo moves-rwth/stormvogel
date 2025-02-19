@@ -1,8 +1,8 @@
 
           <iframe
-                id="modelZzyFZrfYby"
-                width="223"
-                height="233"
+                id="modelUboZEulyKC"
+                width="401"
+                height="394"
                 frameborder="0"
                 srcdoc="
 &lt;!DOCTYPE html&gt;
@@ -16,8 +16,8 @@
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
 
-        width: 203px;
-        height: 213px;
+        width: 381px;
+        height: 374px;
         border: 1px solid lightgray;
 
       }
@@ -27,9 +27,26 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `🐦`, group: &quot;states&quot;, x: -163, y: 433 },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: 0, y: 0 },
+{ id: 1, label: `rolled0`, group: &quot;states&quot;, x: 114, y: 78 },
+{ id: 2, label: `rolled1`, group: &quot;states&quot;, x: 7, y: -140 },
+{ id: 3, label: `rolled2`, group: &quot;states&quot;, x: 127, y: -64 },
+{ id: 4, label: `rolled3`, group: &quot;states&quot;, x: -112, y: -82 },
+{ id: 5, label: `rolled4`, group: &quot;states&quot;, x: -14, y: 141 },
+{ id: 6, label: `rolled5`, group: &quot;states&quot;, x: -130, y: 56 },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 0, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/6&quot; },
+{ from: 0, to: 2, label: &quot;1/6&quot; },
+{ from: 0, to: 3, label: &quot;1/6&quot; },
+{ from: 0, to: 4, label: &quot;1/6&quot; },
+{ from: 0, to: 5, label: &quot;1/6&quot; },
+{ from: 0, to: 6, label: &quot;1/6&quot; },
+{ from: 1, to: 1, label: &quot;1&quot; },
+{ from: 2, to: 2, label: &quot;1&quot; },
+{ from: 3, to: 3, label: &quot;1&quot; },
+{ from: 4, to: 4, label: &quot;1&quot; },
+{ from: 5, to: 5, label: &quot;1&quot; },
+{ from: 6, to: 6, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -53,10 +70,10 @@
   },
   &quot;groups&quot;: {
     &quot;states&quot;: {
-      &quot;borderWidth&quot;: 7,
+      &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;#d1d1d1&quot;,
-        &quot;border&quot;: &quot;#5b98fb&quot;,
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
           &quot;border&quot;: &quot;red&quot;
@@ -65,8 +82,8 @@
       &quot;shape&quot;: &quot;ellipse&quot;,
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
-        &quot;color&quot;: &quot;#000000&quot;,
-        &quot;size&quot;: 74
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
       }
     },
     &quot;actions&quot;: {
@@ -134,28 +151,48 @@
   },
   &quot;misc&quot;: {
     &quot;enable_physics&quot;: true,
-    &quot;width&quot;: 203,
-    &quot;height&quot;: 213,
+    &quot;width&quot;: 381,
+    &quot;height&quot;: 374,
     &quot;explore&quot;: false
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/sv.json&quot;,
+    &quot;filename&quot;: &quot;layouts/die.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
   &quot;positions&quot;: {
     &quot;0&quot;: {
-      &quot;x&quot;: -163,
-      &quot;y&quot;: 433
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 0
     },
     &quot;1&quot;: {
-      &quot;x&quot;: -12,
-      &quot;y&quot;: -70
+      &quot;x&quot;: 114,
+      &quot;y&quot;: 78
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: 7,
+      &quot;y&quot;: -140
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 127,
+      &quot;y&quot;: -64
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: -112,
+      &quot;y&quot;: -82
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: -14,
+      &quot;y&quot;: 141
+    },
+    &quot;6&quot;: {
+      &quot;x&quot;: -130,
+      &quot;y&quot;: 56
     }
   },
-  &quot;width&quot;: 203,
-  &quot;height&quot;: 213,
+  &quot;width&quot;: 381,
+  &quot;height&quot;: 374,
   &quot;physics&quot;: true
 };
         //js
@@ -183,11 +220,13 @@ function makeNeighborsVisible(homeId) {
     for (let i = 0; i &lt; nodeIds.length; i++) {
       var toNodeId = nodeIds[i];
       var toNode = nodes.get(toNodeId);
-      toNode[&quot;hidden&quot;] = false;
-      toNode[&quot;physics&quot;] = true;
-      toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
-      toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
-      nodes.update(toNode);
+      if (toNode[&quot;hidden&quot;]) {
+        toNode[&quot;hidden&quot;] = false;
+        toNode[&quot;physics&quot;] = true;
+        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+        nodes.update(toNode);
+      }
     }
     // Make edges visible, if both of the nodes are also visible
     var edgeIds = network.getConnectedEdges(homeId);
