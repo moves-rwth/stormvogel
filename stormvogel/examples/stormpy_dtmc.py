@@ -1,7 +1,9 @@
-import stormpy  # type: ignore
+# type: ignore
 
 
 def example_building_dtmcs_01():
+    import stormpy
+
     # Use the SparseMatrixBuilder for constructing the transition matrix
     builder = stormpy.SparseMatrixBuilder(
         rows=0,

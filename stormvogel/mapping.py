@@ -1,5 +1,9 @@
-import stormpy.storage
 import stormvogel.model
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def stormvogel_to_stormpy(
@@ -19,6 +23,7 @@ def stormvogel_to_stormpy(
         Takes a model and creates a stormpy sparsematrix that represents the same transitions
         """
 
+        assert stormpy is not None
         row_grouping = model.supports_actions()
         builder = stormpy.SparseMatrixBuilder(
             rows=0,
@@ -56,6 +61,7 @@ def stormvogel_to_stormpy(
         """
         Takes a model creates a state labelling object that determines which states get which labels in the stormpy representation
         """
+        assert stormpy is not None
 
         state_labeling = stormpy.storage.StateLabeling(len(model.states))
 
@@ -76,6 +82,8 @@ def stormvogel_to_stormpy(
         """
         Takes a model and creates a dictionary of all the stormpy representations of reward models
         """
+        assert stormpy is not None
+
         reward_models = {}
         for rewardmodel in model.rewards:
             reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
@@ -88,6 +96,7 @@ def stormvogel_to_stormpy(
         """
         Takes a simple representation of a dtmc as input and outputs a dtmc how it is represented in stormpy
         """
+        assert stormpy is not None
 
         # we first build the SparseMatrix
         matrix = build_matrix(model, None)
@@ -112,6 +121,7 @@ def stormvogel_to_stormpy(
         """
         Takes a simple representation of an mdp as input and outputs an mdp how it is represented in stormpy
         """
+        assert stormpy is not None
 
         # we determine the number of choices and the labels
         count = 0
@@ -152,6 +162,7 @@ def stormvogel_to_stormpy(
         """
         Takes a simple representation of a ctmc as input and outputs a ctmc how it is represented in stormpy
         """
+        assert stormpy is not None
 
         # we first build the SparseMatrix (in stormvogel these are always the rate transitions)
         matrix = build_matrix(model, None)
@@ -180,6 +191,7 @@ def stormvogel_to_stormpy(
         """
         Takes a simple representation of an pomdp as input and outputs an pomdp how it is represented in stormpy
         """
+        assert stormpy is not None
 
         # we determine the number of choices and the labels
         count = 0
@@ -230,6 +242,7 @@ def stormvogel_to_stormpy(
         """
         Takes a simple representation of an ma as input and outputs an ma how it is represented in stormpy
         """
+        assert stormpy is not None
 
         # we determine the number of choices and the labels
         count = 0
@@ -283,6 +296,8 @@ def stormvogel_to_stormpy(
         return ma
 
     if model.all_states_outgoing_transition():
+        assert stormpy is not None
+
         # we make a mapping between stormvogel and stormpy ids in case they are out of order.
         stormpy_id = {}
         for index, stormvogel_id in enumerate(model.states.keys()):

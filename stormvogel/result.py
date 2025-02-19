@@ -1,8 +1,10 @@
-import stormpy
 import stormvogel.mapping
 import stormvogel.model
-import stormpy.examples.files
-import stormpy.examples
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 class Scheduler:
@@ -144,6 +146,7 @@ def convert_model_checking_result(
     """
     Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
     """
+    assert stormpy is not None
 
     if (
         type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult

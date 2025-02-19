@@ -373,7 +373,7 @@ class RewardModel:
         """Gets the reward at said state or state action pair. Return None if no reward is present."""
         if self.model.supports_actions():
             raise RuntimeError(
-                "This is a model with actions. Please call the get_action_state_reward(_at_id) function instead"
+                "This is a model with actions. Please call the get_state_action_reward(state, action) function instead"
             )
         if (state.id, EmptyAction) in self.rewards:
             return self.rewards[state.id, EmptyAction]
@@ -880,8 +880,6 @@ class Model:
             )
         assert self.actions is not None
         if name not in self.actions:
-            print(name)
-            print(self.actions)
             raise RuntimeError(
                 f"Tried to get action {name} but that action does not exist"
             )
@@ -1020,7 +1018,7 @@ class Model:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
                 else:
                     # Draw actions, then probabilities
-                    dot += f'{state_id} -> {state_id} [ label = "{action.name}" ];\n'
+                    dot += f'{state_id} -> {state_id} [ label = "{action.labels}" ];\n'
                     for prob, target in branch.branch:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
 

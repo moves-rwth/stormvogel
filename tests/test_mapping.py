@@ -10,8 +10,12 @@ import examples.nuclear_fusion_ctmc
 import examples.monty_hall_pomdp
 import examples.stormpy_ma
 import examples.simple_ma
-import stormpy
 from stormvogel.model import EmptyAction
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def sparse_equal(
@@ -22,6 +26,7 @@ def sparse_equal(
     outputs true if the sparse models are the same and false otherwise
     Note: this function is only here because the equality functions in storm do not work currently.
     """
+    assert stormpy is not None
 
     # check if states are the same:
     states_equal = True

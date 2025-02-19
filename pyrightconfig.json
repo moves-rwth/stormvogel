@@ -6,5 +6,6 @@
   "ignore": [
     "**/.vscode/**",
     "**.ipynb"
-  ]
+  ],
+  "reportInvalidTypeForm": false
 }

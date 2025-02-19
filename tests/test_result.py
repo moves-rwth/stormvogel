@@ -1,9 +1,14 @@
 import stormvogel.result
-import stormpy
 import pytest
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def test_convert_model_checker_results_dtmc():
+    assert stormpy is not None
     path = stormpy.examples.files.prism_dtmc_die
     prism_program = stormpy.parse_prism_program(path)
     formula_str = "P=? [F s=7 & d=2]"
@@ -36,6 +41,7 @@ def test_convert_model_checker_results_dtmc():
 
 
 def test_convert_model_checker_results_dtmc_qualitative():
+    assert stormpy is not None
     path = stormpy.examples.files.prism_dtmc_die
     prism_program = stormpy.parse_prism_program(path)
     formula_str = "P>=0.5 [F s=7 & d=2]"
@@ -69,6 +75,7 @@ def test_convert_model_checker_results_dtmc_qualitative():
 
 
 def test_convert_model_checker_results_mdp():
+    assert stormpy is not None
     path = stormpy.examples.files.prism_mdp_coin_2_2
 
     prism_program = stormpy.parse_prism_program(path)
@@ -641,6 +648,7 @@ def test_convert_model_checker_results_mdp():
 
 
 def test_convert_model_checker_results_mdp_qualitative():
+    assert stormpy is not None
     path = stormpy.examples.files.prism_mdp_coin_2_2
 
     prism_program = stormpy.parse_prism_program(path)

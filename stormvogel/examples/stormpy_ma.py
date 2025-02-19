@@ -1,8 +1,9 @@
-import stormpy
 import numpy as np
 
 
 def example_building_mas_01():
+    import stormpy
+
     # Building the transition matrix using numpy
     transitions = np.array(
         [
