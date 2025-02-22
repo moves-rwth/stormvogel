@@ -1,6 +1,6 @@
 
           <iframe
-                id="diehpOPtbbKyg"
+                id="dieAurOLjyXrJ"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -179,22 +179,39 @@ function makeAllNodesInvisible() {
         var nodeId = ids[i];
         var node = nodes.get(nodeId);
         node[&quot;hidden&quot;] = true;
+        node[&quot;physics&quot;] = false;
         nodes.update(node);
     }
 };
-function makeNeighborsVisible(myNode) {
-    var ids = network.getConnectedNodes(myNode, &#x27;to&#x27;);
-    for (let i = 0; i &lt; ids.length; i++) {
-        var nodeId = ids[i];
-        var node = nodes.get(nodeId);
-        node[&quot;hidden&quot;] = false;
-        nodes.update(node);
+function makeNeighborsVisible(homeId) {
+    homeNode = nodes.get(homeId);
+
+    // Make outgoing nodes visible
+    var nodeIds = network.getConnectedNodes(homeId, &quot;to&quot;);
+    for (let i = 0; i &lt; nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = nodes.get(toNodeId);
+      if (toNode[&quot;hidden&quot;]) {
+        toNode[&quot;hidden&quot;] = false;
+        toNode[&quot;physics&quot;] = true;
+        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+        nodes.update(toNode);
+      }
     }
-};
-function makeNodeVisible(nodeId) {
-    var node = nodes.get(nodeId);
-    node[&quot;hidden&quot;] = false;
-    nodes.update(node);
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = network.getConnectedEdges(homeId);
+    for (let i = 0; i &lt; edgeIds.length; i++) {
+        var edgeId = edgeIds[i];
+        var edge = edges.get(edgeId);
+        var fromNode = nodes.get(edge.from);
+        var toNode = nodes.get(edge.to);
+        if ((! fromNode[&quot;hidden&quot;]) &amp;&amp; (! toNode[&quot;hidden&quot;])) {
+          edge[&quot;hidden&quot;] = false;
+          edge[&quot;physics&quot;] = true;
+          edges.update(edge);
+        }
+    }
 };
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
