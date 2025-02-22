@@ -17,7 +17,7 @@ def show(
     scheduler: stormvogel.result.Scheduler | None = None,
     name: str = "model",
     layout: stormvogel.layout.Layout | None = None,
-    show_editor: bool = True,
+    show_editor: bool = False,
     separate_labels: list[str] = [],
     debug_output: widgets.Output = widgets.Output(),
 ) -> stormvogel.visualization.Visualization:
