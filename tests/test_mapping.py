@@ -1,15 +1,15 @@
-import examples.monty_hall
-import examples.stormpy_mdp
+import stormvogel.examples.monty_hall
+import stormvogel.examples.stormpy_mdp
 import stormvogel.mapping
 import stormvogel.model
-import examples.stormpy_dtmc
-import examples.die
-import examples.stormpy_ctmc
-import examples.stormpy_pomdp
-import examples.nuclear_fusion_ctmc
-import examples.monty_hall_pomdp
-import examples.stormpy_ma
-import examples.simple_ma
+import stormvogel.examples.stormpy_dtmc
+import stormvogel.examples.die
+import stormvogel.examples.stormpy_ctmc
+import stormvogel.examples.stormpy_pomdp
+import stormvogel.examples.nuclear_fusion_ctmc
+import stormvogel.examples.monty_hall_pomdp
+import stormvogel.examples.stormpy_ma
+import stormvogel.examples.simple_ma
 from stormvogel.model import EmptyAction
 
 try:
@@ -100,7 +100,7 @@ def sparse_equal(
 
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
-    stormpy_dtmc = examples.stormpy_dtmc.example_building_dtmcs_01()
+    stormpy_dtmc = stormvogel.examples.stormpy_dtmc.example_building_dtmcs_01()
     # print(stormpy_dtmc.transition_matrix)
     stormvogel_dtmc = stormvogel.mapping.stormpy_to_stormvogel(stormpy_dtmc)
     # print(stormvogel_dtmc)
@@ -113,7 +113,7 @@ def test_stormpy_to_stormvogel_and_back_dtmc():
 
 def test_stormvogel_to_stormpy_and_back_dtmc():
     # we test it for the die dtmc
-    stormvogel_dtmc = examples.die.create_die_dtmc()
+    stormvogel_dtmc = stormvogel.examples.die.create_die_dtmc()
 
     # we test if rewardmodels work:
     rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
@@ -134,7 +134,7 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
 
 def test_stormpy_to_stormvogel_and_back_mdp():
     # we test it for an example stormpy representation of an mdp
-    stormpy_mdp = examples.stormpy_mdp.example_building_mdps_01()
+    stormpy_mdp = stormvogel.examples.stormpy_mdp.example_building_mdps_01()
     # print(stormpy_mdp)
     stormvogel_mdp = stormvogel.mapping.stormpy_to_stormvogel(stormpy_mdp)
     # print(stormvogel_mdp)
@@ -147,7 +147,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
 
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
-    stormvogel_mdp = examples.monty_hall.create_monty_hall_mdp()
+    stormvogel_mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     # we additionally test if reward models work
     rewardmodel = stormvogel_mdp.add_rewards("rewardmodel")
@@ -184,7 +184,9 @@ def test_stormvogel_to_stormpy_and_back_mdp():
 
 def test_stormvogel_to_stormpy_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
-    stormvogel_ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    stormvogel_ctmc = (
+        stormvogel.examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    )
     # print(stormvogel_ctmc)
     stormpy_ctmc = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_ctmc)
     # print(stormpy_ctmc)
@@ -196,7 +198,7 @@ def test_stormvogel_to_stormpy_and_back_ctmc():
 
 def test_stormpy_to_stormvogel_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
-    stormpy_ctmc = examples.stormpy_ctmc.example_building_ctmcs_01()
+    stormpy_ctmc = stormvogel.examples.stormpy_ctmc.example_building_ctmcs_01()
     # print(stormpy_ctmc)
     stormvogel_ctmc = stormvogel.mapping.stormpy_to_stormvogel(stormpy_ctmc)
     # print(stormvogel_ctmc)
@@ -209,7 +211,7 @@ def test_stormpy_to_stormvogel_and_back_ctmc():
 
 def test_stormvogel_to_stormpy_and_back_pomdp():
     # we create a stormpy representation of an example pomdp
-    stormvogel_pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
+    stormvogel_pomdp = stormvogel.examples.monty_hall_pomdp.create_monty_hall_pomdp()
     # print(stormvogel_pomdp)
     stormpy_pomdp = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_pomdp)
     # print(stormpy_pomdp)
@@ -225,7 +227,7 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
 
 def test_stormpy_to_stormvogel_and_back_pomdp():
     # we create a stormpy representation of an example pomdp
-    stormpy_pomdp = examples.stormpy_pomdp.example_building_pomdps_01()
+    stormpy_pomdp = stormvogel.examples.stormpy_pomdp.example_building_pomdps_01()
     # print(stormpy_pomdp)
     stormvogel_pomdp = stormvogel.mapping.stormpy_to_stormvogel(stormpy_pomdp)
     # print(stormvogel_pomdp)
@@ -239,7 +241,7 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 # TODO for some reason, this test crashes but only in Github workflows?
 # def test_stormvogel_to_stormpy_and_back_ma():
 #     # we create a stormpy representation of an example ma
-#     stormvogel_ma = examples.simple_ma.create_simple_ma()
+#     stormvogel_ma = stormvogel.examples.simple_ma.create_simple_ma()
 #     # print(stormvogel_ma)
 #     stormpy_ma = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_ma)
 #     # print(stormpy_ma)
@@ -251,7 +253,7 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 
 def test_stormpy_to_stormvogel_and_back_ma():
     # we create a stormpy representation of an example ma
-    stormpy_ma = examples.stormpy_ma.example_building_mas_01()
+    stormpy_ma = stormvogel.examples.stormpy_ma.example_building_mas_01()
     # print(stormpy_ma)
     stormvogel_ma = stormvogel.mapping.stormpy_to_stormvogel(stormpy_ma)
     # print(stormvogel_ma)

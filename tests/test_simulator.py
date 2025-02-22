@@ -1,7 +1,7 @@
-import examples.die
-import examples.monty_hall
-import examples.nuclear_fusion_ctmc
-import examples.monty_hall_pomdp
+import stormvogel.examples.die
+import stormvogel.examples.monty_hall
+import stormvogel.examples.nuclear_fusion_ctmc
+import stormvogel.examples.monty_hall_pomdp
 from stormvogel.model import EmptyAction
 import stormvogel.model
 import stormvogel.simulator
@@ -9,7 +9,7 @@ import stormvogel.simulator
 
 def test_simulate():
     # we make a die dtmc and run the simulator with it
-    dtmc = examples.die.create_die_dtmc()
+    dtmc = stormvogel.examples.die.create_die_dtmc()
     rewardmodel = dtmc.add_rewards("rewardmodel")
     for stateid in dtmc.states.keys():
         rewardmodel.rewards[(stateid, EmptyAction)] = 3
@@ -44,7 +44,7 @@ def test_simulate():
     assert partial_model == other_dtmc
     ######################################################################################################################
     # we make a monty hall mdp and run the simulator with it
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
     rewardmodel = mdp.add_rewards("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
     rewardmodel2 = mdp.add_rewards("rewardmodel2")
@@ -86,7 +86,7 @@ def test_simulate():
         actions = state.available_actions()
         return actions[0]
 
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     partial_model = stormvogel.simulator.simulate(
         mdp, runs=1, steps=3, seed=1, scheduler=scheduler
@@ -107,7 +107,7 @@ def test_simulate():
 
 def test_simulate_path():
     # we make the nuclear fusion ctmc and run simulate path with it
-    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    ctmc = stormvogel.examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
     path = stormvogel.simulator.simulate_path(ctmc, steps=5, seed=1)
 
     # we make the path that the simulate path function should create
@@ -124,7 +124,7 @@ def test_simulate_path():
     assert path == other_path
     ##############################################################################################
     # we make the monty hall pomdp and run simulate path with it
-    pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
+    pomdp = stormvogel.examples.monty_hall_pomdp.create_monty_hall_pomdp()
     taken_actions = {}
     for id, state in pomdp.states.items():
         taken_actions[id] = state.available_actions()[
@@ -166,7 +166,7 @@ def test_simulate_path():
         actions = state.available_actions()
         return actions[0]
 
-    pomdp = examples.monty_hall_pomdp.create_monty_hall_pomdp()
+    pomdp = stormvogel.examples.monty_hall_pomdp.create_monty_hall_pomdp()
     path = stormvogel.simulator.simulate_path(
         pomdp, steps=4, seed=1, scheduler=scheduler
     )
