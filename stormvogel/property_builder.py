@@ -1,5 +1,4 @@
 import stormvogel.model
-import examples.monty_hall
 
 
 def build_property_string_interactive(model: stormvogel.model.Model) -> str:
@@ -102,6 +101,8 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
 
 
 if __name__ == "__main__":
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    import stormvogel.examples.monty_hall
+
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     build_property_string_interactive(mdp)

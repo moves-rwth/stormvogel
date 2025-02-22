@@ -2,7 +2,6 @@ import stormvogel.mapping
 import stormvogel.result
 import stormvogel.model
 import stormvogel.property_builder
-import examples.monty_hall
 
 try:
     import stormpy
@@ -52,7 +51,9 @@ def model_checking(
 
 
 if __name__ == "__main__":
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    import stormvogel.examples.monty_hall
+
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     rewardmodel = mdp.add_rewards("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))

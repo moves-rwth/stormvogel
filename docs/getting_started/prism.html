@@ -1,6 +1,6 @@
 
           <iframe
-                id="prismLMoYBkjdpt"
+                id="prismMwNjHIHzQW"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -552,7 +552,7 @@
 { id: 174, label: `nextnand
 €	: 1.0
 ☆ 0`, group: &quot;states&quot;, hidden: true, physics: false },
-{ id: 175, label: `end,target
+{ id: 175, label: `target,end
 €	: 0.0
 ☆ 1`, group: &quot;states&quot;, hidden: true, physics: false },
 { id: 176, label: `end
@@ -942,7 +942,6 @@ function makeAllNodesInvisible() {
     }
 };
 function makeNeighborsVisible(homeId) {
-    //var ids = network.getConnectedNodes(myNode);
     homeNode = nodes.get(homeId);
 
     // Make outgoing nodes visible
@@ -950,11 +949,13 @@ function makeNeighborsVisible(homeId) {
     for (let i = 0; i &lt; nodeIds.length; i++) {
       var toNodeId = nodeIds[i];
       var toNode = nodes.get(toNodeId);
-      toNode[&quot;hidden&quot;] = false;
-      toNode[&quot;physics&quot;] = true;
-      toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;] + 30;
-      toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
-      nodes.update(toNode);
+      if (toNode[&quot;hidden&quot;]) {
+        toNode[&quot;hidden&quot;] = false;
+        toNode[&quot;physics&quot;] = true;
+        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+        nodes.update(toNode);
+      }
     }
     // Make edges visible, if both of the nodes are also visible
     var edgeIds = network.getConnectedEdges(homeId);
@@ -969,11 +970,6 @@ function makeNeighborsVisible(homeId) {
           edges.update(edge);
         }
     }
-};
-function makeNodeVisible(nodeId) {
-    var node = nodes.get(nodeId);
-    node[&quot;hidden&quot;] = false;
-    nodes.update(node);
 };
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
