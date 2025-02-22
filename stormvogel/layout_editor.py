@@ -152,9 +152,8 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.maybe_display_output()
         self.loaded = True
 
-
-def __warn_failed_positions_save(self):
-    warnings.warn(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
+    def __warn_failed_positions_save(self):
+        warnings.warn(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
 Sorry for the inconvenience. Here are some possible fixes.
 1) Restart the kernel and re-run.
 2) Is the port {stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} (from the machine where jupyterlab runs) available?
