@@ -1,6 +1,6 @@
 
           <iframe
-                id="modelkGoQPzeNdR"
+                id="modeltpoiYSfdYH"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,19 +27,19 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;states&quot; },
-{ id: 1, label: `red light,still`, group: &quot;states&quot; },
-{ id: 2, label: `green light,moving`, group: &quot;states&quot; },
-{ id: 3, label: `red light,moving`, group: &quot;states&quot; },
-{ id: 4, label: `accident`, group: &quot;states&quot; },
-{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot; },
-{ id: 10000000001, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot; },
-{ id: 10000000003, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000004, label: `brake`, group: &quot;actions&quot; },
-{ id: 10000000005, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000006, label: `brake`, group: &quot;actions&quot; },
-{ id: 10000000007, label: `wait`, group: &quot;actions&quot; },
+        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;states&quot;, x: -261, y: 16 },
+{ id: 1, label: `red light,still`, group: &quot;states&quot;, x: -56, y: 173 },
+{ id: 2, label: `green light,moving`, group: &quot;states&quot;, x: -127, y: -199 },
+{ id: 3, label: `red light,moving`, group: &quot;states&quot;, x: 90, y: -26 },
+{ id: 4, label: `accident`, group: &quot;states&quot;, x: 353, y: -62 },
+{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot;, x: -157, y: -77 },
+{ id: 10000000001, label: `wait`, group: &quot;actions&quot;, x: -214, y: 169 },
+{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot;, x: 81, y: 127 },
+{ id: 10000000003, label: `wait`, group: &quot;actions&quot;, x: -145, y: 79 },
+{ id: 10000000004, label: `brake`, group: &quot;actions&quot;, x: -265, y: -140 },
+{ id: 10000000005, label: `wait`, group: &quot;actions&quot;, x: 14, y: -158 },
+{ id: 10000000006, label: `brake`, group: &quot;actions&quot;, x: -10, y: 42 },
+{ id: 10000000007, label: `wait`, group: &quot;actions&quot;, x: 226, y: -51 },
 ]);
         var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
 { from: 10000000000, to: 2, label: &quot;1&quot; },
@@ -79,6 +79,12 @@
       }
     }
   },
+  &quot;edit_groups&quot;: {
+    &quot;groups&quot;: [
+      &quot;states&quot;,
+      &quot;actions&quot;
+    ]
+  },
   &quot;groups&quot;: {
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
@@ -100,37 +106,36 @@
     &quot;actions&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;background&quot;: &quot;white&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
           &quot;border&quot;: &quot;red&quot;
         }
       },
-      &quot;shape&quot;: &quot;box&quot;,
+      &quot;shape&quot;: &quot;ellipse&quot;,
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
         &quot;size&quot;: 14
       }
     },
-    &quot;scheduled_actions&quot;: {
+    &quot;green_light&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;pink&quot;,
+        &quot;background&quot;: &quot;#53f35e&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
           &quot;border&quot;: &quot;red&quot;
         }
       },
-      &quot;shape&quot;: &quot;box&quot;,
+      &quot;shape&quot;: &quot;ellipse&quot;,
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
         &quot;size&quot;: 14
-      },
-      &quot;schedColor&quot;: false
+      }
     }
   },
   &quot;reload_button&quot;: false,
@@ -168,11 +173,64 @@
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;filename&quot;: &quot;layouts/testing.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {},
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: -261,
+      &quot;y&quot;: 16
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: -56,
+      &quot;y&quot;: 173
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: -127,
+      &quot;y&quot;: -199
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 90,
+      &quot;y&quot;: -26
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: 353,
+      &quot;y&quot;: -62
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: -157,
+      &quot;y&quot;: -77
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: -214,
+      &quot;y&quot;: 169
+    },
+    &quot;10000000002&quot;: {
+      &quot;x&quot;: 81,
+      &quot;y&quot;: 127
+    },
+    &quot;10000000003&quot;: {
+      &quot;x&quot;: -145,
+      &quot;y&quot;: 79
+    },
+    &quot;10000000004&quot;: {
+      &quot;x&quot;: -265,
+      &quot;y&quot;: -140
+    },
+    &quot;10000000005&quot;: {
+      &quot;x&quot;: 14,
+      &quot;y&quot;: -158
+    },
+    &quot;10000000006&quot;: {
+      &quot;x&quot;: -10,
+      &quot;y&quot;: 42
+    },
+    &quot;10000000007&quot;: {
+      &quot;x&quot;: 226,
+      &quot;y&quot;: -51
+    }
+  },
   &quot;width&quot;: 800,
   &quot;height&quot;: 600,
   &quot;physics&quot;: true

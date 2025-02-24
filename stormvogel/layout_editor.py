@@ -1,5 +1,6 @@
 """Layout editor."""
 
+import copy
 import stormvogel.communication_server
 import stormvogel.dict_editor
 import stormvogel.displayable
@@ -24,6 +25,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         super().__init__(output, do_display, debug_output)
         self.vis: stormvogel.visualization.Visualization | None = visualization
         self.layout: stormvogel.layout.Layout = layout
+        self.update_possible_groups()
         self.loaded: bool = False  # True iff the layout is done loading.
         self.editor = stormvogel.dict_editor.DictEditor(
             schema=self.layout.schema,
@@ -31,6 +33,24 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             on_update=self.try_update,
             do_display=False,
         )
+
+    def update_possible_groups(self):
+        # Save changes to the schema. The visualization object will handle putting nodes into the correct groups.
+        groups = self.layout.layout["edit_groups"]["groups"]
+        self.layout.schema["groups"] = {}
+        for g in groups:
+            # TODO change to merge dict
+            # For the settings themselves, we need to manually copy everything.
+            if g not in self.layout.layout["groups"]:
+                layout_group_macro = copy.deepcopy(
+                    self.layout.layout["__fake_macros"]["__group_macro"]
+                )
+                self.layout.layout["groups"][g] = layout_group_macro
+            # For the schema, dict_editor already handles macros, so there is no need to do it manually here.
+            if g not in self.layout.schema["groups"]:
+                self.layout.schema["groups"][g] = {"__use_macro": "__group_macro"}
+        if self.vis is not None:
+            self.vis.show()
 
     def copy_settings(self):
         """Copy some settings from one place in the layout to another place in the layout.
@@ -115,7 +135,9 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             with self.debug_output:
                 logging.info("Received reload button request.")
             self.set_current_vis_node_positions_in_layout()
+            self.update_possible_groups()
             self.vis.show()
+            self.show()
 
     def try_update(self):
         """Process the updates from the layout editor where required."""

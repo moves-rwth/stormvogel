@@ -18,60 +18,13 @@
       }
     }
   },
-  "groups": {
-    "states": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "actions": {
-      "borderWidth": 1,
-      "color": {
-        "background": "lightblue",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "scheduled_actions": {
-      "borderWidth": 1,
-      "color": {
-        "background": "pink",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      },
-      "schedColor": false
-    }
+  "edit_groups": {
+    "groups": [
+      "states",
+      "actions"
+    ]
   },
+  "groups": {},
   "reload_button": false,
   "edges": {
     "arrows": "to",

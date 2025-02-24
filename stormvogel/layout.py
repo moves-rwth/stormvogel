@@ -2,7 +2,6 @@
 
 import stormvogel.rdict
 
-import copy
 import os
 import json
 
@@ -49,22 +48,9 @@ class Layout:
             schema_str = f.read()
         self.schema = json.loads(schema_str)
 
-    def set_groups(self, groups: set[str]):
-        """Add the specified groups to the layout and schema.
-        They will use the specified __group_macro.
-        Note that the changes to schema won't be saved to schema.json."""
-        for g in groups:
-            if g not in self.layout["groups"]:
-                layout_group_macro = copy.deepcopy(
-                    self.layout["__fake_macros"]["__group_macro"]
-                )
-                self.layout["groups"][g] = layout_group_macro
-            if g not in self.schema["groups"]:
-                self.schema["groups"][
-                    g
-                ] = {  # dict_editor already handles macros, so there is no need to do it manually here.
-                    "__use_macro": "__group_macro"
-                }
+    def set_possible_groups(self, groups: set[str]):
+        """Set the groups of states that the user can choose from under edit_groups."""
+        self.schema["edit_groups"]["groups"]["__kwargs"]["allowed_tags"] = list(groups)
 
     def save(self, path: str, path_relative: bool = True) -> None:
         """Save this layout as a json file. Raises runtime error if a filename does not end in json, and OSError if file not found.
