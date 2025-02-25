@@ -1,5 +1,9 @@
 import stormvogel.model
-import examples.monty_hall
+import stormvogel.layout
+import stormvogel.layout_editor
+import stormvogel.communication_server
+import ipywidgets as widgets
+import IPython.display as ipd
 
 
 def build_property_string_interactive(model: stormvogel.model.Model) -> str:
@@ -101,7 +105,19 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
     return prop
 
 
+def build_property_string(model: stormvogel.model.Model):
+    """Lets the user build a property string using a widget"""
+    layout = stormvogel.layout.PROPERTY_STRING()
+    # do_init_server = stormvogel.communication_server.enable_server
+    e = stormvogel.layout_editor.LayoutEditor(layout, do_display=False)
+    e.show()
+    box = widgets.HBox(children=[e.output])
+    ipd.display(box)
+
+
 if __name__ == "__main__":
+    import examples.monty_hall
+
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
-    build_property_string_interactive(mdp)
+    build_property_string(mdp)

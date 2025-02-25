@@ -98,3 +98,10 @@ def EXPLORE():
     return Layout(
         os.path.join(PACKAGE_ROOT_DIR, "layouts/explore.json"), path_relative=False
     )
+
+
+def PROPERTY_STRING():
+    return Layout(
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/property_string.json"),
+        path_relative=False,
+    )
