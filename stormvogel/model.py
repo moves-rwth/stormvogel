@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
+from stormvogel import rational_function
 import copy
 
-Parameter = str
-
-Number = float | Parameter | Fraction | int
+Number = float | Fraction | int | rational_function.RationalFunction
 
 
 class ModelType(Enum):
