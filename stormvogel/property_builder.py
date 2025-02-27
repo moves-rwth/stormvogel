@@ -1,8 +1,6 @@
 import stormvogel.model
-import stormvogel.layout
-import stormvogel.layout_editor
-import stormvogel.communication_server
 import ipywidgets as widgets
+from stormvogel.dict_editor import DictEditor
 import IPython.display as ipd
 
 
@@ -107,12 +105,130 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
 
 def build_property_string(model: stormvogel.model.Model):
     """Lets the user build a property string using a widget"""
-    layout = stormvogel.layout.PROPERTY_STRING()
-    # do_init_server = stormvogel.communication_server.enable_server
-    e = stormvogel.layout_editor.LayoutEditor(layout, do_display=False)
-    e.show()
-    box = widgets.HBox(children=[e.output])
-    ipd.display(box)
+
+    debug_output = widgets.Output()
+
+    values = {
+        "type of task": {
+            "type": "probability",
+            "task": "obtain",
+            "maxmin": "max",
+            "operator": "=",
+            "value": 0.00,
+        },
+        "path": {"path": "init"},
+    }
+    schema = {
+        "type of task": {
+            "__collapse": True,
+            "type": {
+                "__html": "<p>Do you want to learn about probabilities or rewards?</p>",
+                "__description": "Choose one",
+                "__widget": "Dropdown",
+                "__kwargs": {
+                    "options": [
+                        "probability",
+                        "reward",
+                    ]
+                },
+            },
+            "task": {
+                "__html": "<p>Do you want to compare values to check if a certain property holds or obtain a value?</p>",
+                "__description": "Choose one",
+                "__widget": "Dropdown",
+                "__kwargs": {
+                    "options": [
+                        "obtain",
+                        "compare",
+                    ]
+                },
+            },
+            "maxmin": {
+                "__html": "<p>Since your model has actions your result depends on the scheduler. Do you want the maximum or minimum value?</p>",
+                "__description": "Choose one",
+                "__widget": "Dropdown",
+                "__kwargs": {
+                    "options": [
+                        "max",
+                        "min",
+                    ]
+                },
+            },
+            "operator": {
+                "__html": "<p>If you chose 'compare', you should select a comparison operator.</p>",
+                "__description": "Choose one",
+                "__widget": "Dropdown",
+                "__kwargs": {
+                    "options": [
+                        "<",
+                        ">",
+                        ">=",
+                        "<=",
+                        "=",
+                    ]
+                },
+            },
+            "value": {
+                "__html": "<p>If you chose 'compare', you need to choose a value.</p>",
+                "__description": "Choose one",
+                "__widget": "FloatSlider",
+            },
+        },
+        "path": {
+            "__collapse": True,
+            "path": {
+                "__html": "<p>Select the states you want to append to your path</p>",
+                "__description": "",
+                "__widget": "TagsInput",
+                "__kwargs": {
+                    "options": [
+                        "init",
+                    ]
+                },
+            },
+        },
+    }
+
+    class S:
+        x = 0
+        out = widgets.Output()
+
+        def on_update(self):
+            self.x = self.x + 1
+            with self.out:
+                ipd.clear_output()
+                print(s.x)
+
+    s = S()
+
+    de = DictEditor(schema, values, s.on_update, debug_output=debug_output)
+    de.show()
+
+    s.out
+
+    if values["type of task"]["type"] == "reward":
+        print("Rewards")
+
+    return values["type of task"]["type"]
+
+
+"""
+    prop = ""
+    if values["type of task"]["type"] == "reward":
+        prop += "R"
+    else:
+        prop += "P"
+
+    if values["type of task"]["task"] == "obtain":
+        prop += f"{"max" if values["type of task"]["maxmin"] == "max" else "min"}=?" if model.supports_actions() else "=?"
+    else:
+        prop += values["type of task"]["operator"]
+        prop += values["type of task"]["value"]
+    prop += f' [F "{path}"]'
+
+    print("\nThe resulting property string is: \n", prop)
+    return prop
+"""
 
 
 if __name__ == "__main__":
