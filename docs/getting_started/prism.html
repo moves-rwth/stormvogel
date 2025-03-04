@@ -1,6 +1,6 @@
 
           <iframe
-                id="prismMwNjHIHzQW"
+                id="prismiFStcpTChT"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -942,6 +942,7 @@ function makeAllNodesInvisible() {
     }
 };
 function makeNeighborsVisible(homeId) {
+    //var ids = network.getConnectedNodes(myNode);
     homeNode = nodes.get(homeId);
 
     // Make outgoing nodes visible
@@ -949,13 +950,11 @@ function makeNeighborsVisible(homeId) {
     for (let i = 0; i &lt; nodeIds.length; i++) {
       var toNodeId = nodeIds[i];
       var toNode = nodes.get(toNodeId);
-      if (toNode[&quot;hidden&quot;]) {
-        toNode[&quot;hidden&quot;] = false;
-        toNode[&quot;physics&quot;] = true;
-        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
-        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
-        nodes.update(toNode);
-      }
+      toNode[&quot;hidden&quot;] = false;
+      toNode[&quot;physics&quot;] = true;
+      toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+      toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+      nodes.update(toNode);
     }
     // Make edges visible, if both of the nodes are also visible
     var edgeIds = network.getConnectedEdges(homeId);
@@ -970,6 +969,11 @@ function makeNeighborsVisible(homeId) {
           edges.update(edge);
         }
     }
+};
+function makeNodeVisible(nodeId) {
+    var node = nodes.get(nodeId);
+    node[&quot;hidden&quot;] = false;
+    nodes.update(node);
 };
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
