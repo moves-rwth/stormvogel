@@ -20,6 +20,7 @@ class WidgetWrapper:
         "Checkbox": widgets.Checkbox,
         "Text": widgets.Text,
         "Dropdown": widgets.Dropdown,
+        "TagsInput": widgets.TagsInput,
     }
 
     def __init__(

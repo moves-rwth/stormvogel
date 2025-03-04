@@ -63,7 +63,7 @@ def stormvogel_to_stormpy(
         """
         assert stormpy is not None
 
-        state_labeling = stormpy.storage.StateLabeling(len(model.states))
+        state_labeling = stormpy.storage.StateLabeling(len(list(model.states.keys())))
 
         # we first add all the different labels
         for label in model.get_labels():
