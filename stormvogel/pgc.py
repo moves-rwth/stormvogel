@@ -72,15 +72,21 @@ def build_pgc(
             assert available_actions is not None
             for action in available_actions(state):
                 try:
-                    stormvogel_action = model.new_action(
-                        frozenset(
-                            {action.labels[0]}  # type: ignore
-                        ),  # right now we only look at one label
-                    )
+                    if action.labels != []:
+                        stormvogel_action = model.new_action(
+                            frozenset(
+                                {action.labels[0]}  # type: ignore
+                            ),  # right now we only look at one label
+                        )
+                    else:
+                        stormvogel_action = stormvogel.model.EmptyAction
                 except RuntimeError:
-                    stormvogel_action = model.get_action_with_labels(
-                        frozenset(action.labels)
-                    )
+                    if action.labels != []:
+                        stormvogel_action = model.get_action_with_labels(
+                            frozenset(action.labels)
+                        )
+                    else:
+                        stormvogel_action = stormvogel.model.EmptyAction
 
                 tuples = delta(state, action)
                 # we add all the newly found transitions to the model
