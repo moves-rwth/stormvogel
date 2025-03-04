@@ -149,7 +149,10 @@ def test_pgc_mdp_int():
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
     regular_model.add_transitions(
-        state1, model.Transition({left: branch12, right: branch10})
+        state1,
+        model.Transition(
+            {right: branch10, left: branch12}
+        ),  # state1, model.Transition({left: branch12, right: branch10})
     )
     regular_model.add_transitions(state2, model.Transition({right: branch21}))
     regular_model.add_transitions(state0, model.Transition({left: branch01}))

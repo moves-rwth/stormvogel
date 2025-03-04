@@ -224,8 +224,8 @@ def build_property_string(model: stormvogel.model.Model):
 
 
 if __name__ == "__main__":
-    import stormvogel.examples.monty_hall
+    import examples.monty_hall
 
-    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    mdp = examples.monty_hall.create_monty_hall_mdp()
 
     build_property_string(mdp)
