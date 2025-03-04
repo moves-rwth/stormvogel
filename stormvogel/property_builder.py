@@ -106,18 +106,6 @@ def build_property_string_interactive(model: stormvogel.model.Model) -> str:
 def build_property_string(model: stormvogel.model.Model):
     """Lets the user build a property string using a widget"""
 
-    debug_output = widgets.Output()
-
-    values = {
-        "type of task": {
-            "type": "probability",
-            "task": "obtain",
-            "maxmin": "max",
-            "operator": "=",
-            "value": 0.00,
-        },
-        "path": {"path": "init"},
-    }
     schema = {
         "type of task": {
             "__collapse": True,
@@ -177,58 +165,62 @@ def build_property_string(model: stormvogel.model.Model):
         "path": {
             "__collapse": True,
             "path": {
-                "__html": "<p>Select the states you want to append to your path</p>",
-                "__description": "",
-                "__widget": "TagsInput",
-                "__kwargs": {
-                    "options": [
-                        "init",
-                    ]
-                },
+                "__html": "<p>Beta version. More complicated paths in the future.</p>",
+                "__description": "State:",
+                "__widget": "Text",
             },
         },
     }
 
-    class S:
+    class Values:
+        """We need a stateful object so that we can refer to out if on_update is called"""
+
         x = 0
+        values = {
+            "type of task": {
+                "type": "probability",
+                "task": "obtain",
+                "maxmin": "max",
+                "operator": "=",
+                "value": 0.00,
+            },
+            "path": {"path": "init"},
+        }
         out = widgets.Output()
+
+        def calculate_prop_string(self):
+            """Calculate the property string based on the values attribute."""
+            prop = ""
+            if self.values["type of task"]["type"] == "reward":
+                prop += "R"
+            else:
+                prop += "P"
+
+            if self.values["type of task"]["task"] == "obtain":
+                prop += (
+                    f"{"max" if self.values["type of task"]["maxmin"] == "max" else "min"}=?"
+                    if model.supports_actions()
+                    else "=?"
+                )
+            else:
+                prop += str(self.values["type of task"]["operator"])
+                prop += str(self.values["type of task"]["value"])
+            prop += f' [F "{self.values['path']['path']}"]'
+
+            return prop
 
         def on_update(self):
             self.x = self.x + 1
             with self.out:
                 ipd.clear_output()
-                print(s.x)
+                print(self.calculate_prop_string())
 
-    s = S()
+    v = Values()
 
-    de = DictEditor(schema, values, s.on_update, debug_output=debug_output)
+    de = DictEditor(schema, v.values, v.on_update)
     de.show()
 
-    s.out
-
-    if values["type of task"]["type"] == "reward":
-        print("Rewards")
-
-    return values["type of task"]["type"]
-
-
-"""
-    prop = ""
-    if values["type of task"]["type"] == "reward":
-        prop += "R"
-    else:
-        prop += "P"
-
-    if values["type of task"]["task"] == "obtain":
-        prop += f"{"max" if values["type of task"]["maxmin"] == "max" else "min"}=?" if model.supports_actions() else "=?"
-    else:
-        prop += values["type of task"]["operator"]
-        prop += values["type of task"]["value"]
-    prop += f' [F "{path}"]'
-
-    print("\nThe resulting property string is: \n", prop)
-    return prop
-"""
+    ipd.display(v.out)
 
 
 if __name__ == "__main__":
