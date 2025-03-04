@@ -99,9 +99,12 @@ def EXPLORE():
         os.path.join(PACKAGE_ROOT_DIR, "layouts/explore.json"), path_relative=False
     )
 
-
-def PROPERTY_STRING():
+def SV():
     return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/property_string.json"),
-        path_relative=False,
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/sv.json"), path_relative=False
     )
+
+def CAR():
+    return Layout(
+        os.path.join(PACKAGE_ROOT_DIR, "layouts/car.json"), path_relative=False
+

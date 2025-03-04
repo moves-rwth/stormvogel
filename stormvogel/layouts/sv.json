@@ -1,0 +1,127 @@
+{
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "groups": {
+    "states": {
+      "borderWidth": 7,
+      "color": {
+        "background": "#d1d1d1",
+        "border": "#5b98fb",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "#000000",
+        "size": 74
+      }
+    },
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14
+    },
+    "color": {
+      "color": "black"
+    }
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 203,
+    "height": 213,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/sv.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": -163,
+      "y": 433
+    },
+    "1": {
+      "x": -12,
+      "y": -70
+    }
+  },
+  "width": 203,
+  "height": 213,
+  "physics": true
+}

@@ -17,7 +17,7 @@ def show(
     scheduler: stormvogel.result.Scheduler | None = None,
     name: str = "model",
     layout: stormvogel.layout.Layout | None = None,
-    show_editor: bool = True,
+    show_editor: bool = False,
     separate_labels: list[str] = [],
     debug_output: widgets.Output = widgets.Output(),
 ) -> stormvogel.visualization.Visualization:
@@ -65,3 +65,10 @@ def show(
         ipd.display(ipd.HTML(filename=name + ".html"))
 
     return vis
+
+
+def show_bird():
+    m = stormvogel.model.new_dtmc(create_initial_state=False)
+    m.new_state("🐦")
+    m.add_self_loops()
+    return show(m, show_editor=False, layout=stormvogel.layout.SV())

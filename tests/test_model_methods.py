@@ -1,13 +1,13 @@
 import stormvogel.model
-import examples.monty_hall
-import examples.die
-import examples.nuclear_fusion_ctmc
+import stormvogel.examples.monty_hall
+import stormvogel.examples.die
+import stormvogel.examples.nuclear_fusion_ctmc
 import pytest
 from typing import cast
 
 
 def test_available_actions():
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     action = [
         stormvogel.model.Action(labels=frozenset({"open0"})),
@@ -22,7 +22,7 @@ def test_available_actions():
 
 
 def test_get_outgoing_transitions():
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     transitions = mdp.get_initial_state().get_outgoing_transitions(
         stormvogel.model.EmptyAction
@@ -40,14 +40,14 @@ def test_get_outgoing_transitions():
 
 def test_is_absorbing():
     # one example of a ctmc state that is absorbing and one that isn't
-    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    ctmc = stormvogel.examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
     state0 = ctmc.get_state_by_id(4)
     state1 = ctmc.get_state_by_id(3)
     assert state0.is_absorbing()
     assert not state1.is_absorbing()
 
     # one example of a dtmc state that is absorbing and one that isn't
-    dtmc = examples.die.create_die_dtmc()
+    dtmc = stormvogel.examples.die.create_die_dtmc()
     state0 = dtmc.get_initial_state()
     state1 = dtmc.get_state_by_id(1)
     assert state1.is_absorbing()
@@ -154,7 +154,7 @@ def test_normalize():
 
 def test_remove_state():
     # we make a normal ctmc and remove a state
-    ctmc = examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
+    ctmc = stormvogel.examples.nuclear_fusion_ctmc.create_nuclear_fusion_ctmc()
     ctmc.remove_state(ctmc.get_state_by_id(3), reassign_ids=True)
 
     # we make a ctmc with the state already missing
@@ -204,7 +204,7 @@ def test_remove_state():
     assert mdp == new_mdp
 
     # this should fail:
-    new_dtmc = examples.die.create_die_dtmc()
+    new_dtmc = stormvogel.examples.die.create_die_dtmc()
     state0 = new_dtmc.get_state_by_id(0)
     new_dtmc.remove_state(new_dtmc.get_initial_state(), reassign_ids=True)
     state1 = new_dtmc.get_state_by_id(0)
@@ -331,7 +331,7 @@ def test_add_transitions():
 
 def test_get_sub_model():
     # we create the die dtmc and take a submodel
-    dtmc = examples.die.create_die_dtmc()
+    dtmc = stormvogel.examples.die.create_die_dtmc()
     states = [dtmc.get_state_by_id(0), dtmc.get_state_by_id(1), dtmc.get_state_by_id(2)]
     sub_model = dtmc.get_sub_model(states)
 
@@ -347,7 +347,7 @@ def test_get_sub_model():
 
 def test_get_state_action_id():
     # we create an mdp:
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
     state = mdp.get_state_by_id(2)
     action = state.available_actions()[1]
 
@@ -356,7 +356,7 @@ def test_get_state_action_id():
 
 def test_get_state_action_reward():
     # we create an mdp:
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     # we add a reward model:
     rewardmodel = mdp.add_rewards("rewardmodel")
@@ -390,7 +390,7 @@ def test_get_state_action_reward():
 #     assert rewardmodel == other_rewardmodel
 
 #     # we create an mdp:
-#     mdp = examples.monty_hall.create_monty_hall_mdp()
+#     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
 #     # we add a reward model with only one reward
 #     rewardmodel = mdp.add_rewards("rewardmodel")

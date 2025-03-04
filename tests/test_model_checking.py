@@ -1,6 +1,6 @@
 import stormvogel.model_checking
-import examples.monty_hall
-import examples.die
+import stormvogel.examples.monty_hall
+import stormvogel.examples.die
 
 try:
     import stormpy
@@ -12,7 +12,7 @@ def test_model_checking():
     assert stormpy is not None
 
     # we get our result using the stormvogel model checker function indirectly
-    mdp = examples.monty_hall.create_monty_hall_mdp()
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
     prop = 'Pmax=? [F "done"]'
     result = stormvogel.model_checking.model_checking(mdp, prop, True)
 
@@ -31,7 +31,7 @@ def test_model_checking():
     )
 
     # now we do it for a dtmc:
-    dtmc = examples.die.create_die_dtmc()
+    dtmc = stormvogel.examples.die.create_die_dtmc()
     prop = 'P=? [F "rolled1"]'
     result = stormvogel.model_checking.model_checking(dtmc, prop, True)
 
