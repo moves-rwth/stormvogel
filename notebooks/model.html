@@ -1,6 +1,6 @@
 
           <iframe
-                id="modelnHmPQWYzzH"
+                id="modeljmaYQhfFAA"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -28,10 +28,25 @@
     &lt;script type=&quot;text/javascript&quot;&gt;
 
         var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
-{ id: 1, label: `Stormvogel`, group: &quot;states&quot; },
+{ id: 1, label: `rolled1`, group: &quot;states&quot; },
+{ id: 2, label: `rolled2`, group: &quot;states&quot; },
+{ id: 3, label: `rolled3`, group: &quot;states&quot; },
+{ id: 4, label: `rolled4`, group: &quot;states&quot; },
+{ id: 5, label: `rolled5`, group: &quot;states&quot; },
+{ id: 6, label: `rolled6`, group: &quot;states&quot; },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 0, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/6&quot; },
+{ from: 0, to: 2, label: &quot;1/6&quot; },
+{ from: 0, to: 3, label: &quot;1/6&quot; },
+{ from: 0, to: 4, label: &quot;1/6&quot; },
+{ from: 0, to: 5, label: &quot;1/6&quot; },
+{ from: 0, to: 6, label: &quot;1/6&quot; },
 { from: 1, to: 1, label: &quot;1&quot; },
+{ from: 2, to: 2, label: &quot;1&quot; },
+{ from: 3, to: 3, label: &quot;1&quot; },
+{ from: 4, to: 4, label: &quot;1&quot; },
+{ from: 5, to: 5, label: &quot;1&quot; },
+{ from: 6, to: 6, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -53,60 +68,13 @@
       }
     }
   },
-  &quot;groups&quot;: {
-    &quot;states&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;white&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      }
-    },
-    &quot;actions&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;lightblue&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;box&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      }
-    },
-    &quot;scheduled_actions&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;pink&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;box&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      },
-      &quot;schedColor&quot;: false
-    }
+  &quot;edit_groups&quot;: {
+    &quot;groups&quot;: [
+      &quot;states&quot;,
+      &quot;actions&quot;
+    ]
   },
+  &quot;groups&quot;: {},
   &quot;reload_button&quot;: false,
   &quot;edges&quot;: {
     &quot;arrows&quot;: &quot;to&quot;,
@@ -176,11 +144,13 @@ function makeNeighborsVisible(homeId) {
     for (let i = 0; i &lt; nodeIds.length; i++) {
       var toNodeId = nodeIds[i];
       var toNode = nodes.get(toNodeId);
-      toNode[&quot;hidden&quot;] = false;
-      toNode[&quot;physics&quot;] = true;
-      toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
-      toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
-      nodes.update(toNode);
+      if (toNode[&quot;hidden&quot;]) {
+        toNode[&quot;hidden&quot;] = false;
+        toNode[&quot;physics&quot;] = true;
+        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+        nodes.update(toNode);
+      }
     }
     // Make edges visible, if both of the nodes are also visible
     var edgeIds = network.getConnectedEdges(homeId);
@@ -199,6 +169,9 @@ function makeNeighborsVisible(homeId) {
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
     makeNeighborsVisible(nodeId);
+});
+network.on( &#x27;doubleClick&#x27;, function(properties) {
+    network.setData(data);
 });
 
     &lt;/script&gt;

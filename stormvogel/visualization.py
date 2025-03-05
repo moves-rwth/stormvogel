@@ -42,7 +42,6 @@ class Visualization(stormvogel.displayable.Displayable):
         result: stormvogel.result.Result | None = None,
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
-        separate_labels: list[str] = [],
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
@@ -74,13 +73,13 @@ class Visualization(stormvogel.displayable.Displayable):
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
+        self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
             if self.result is not None:
                 self.scheduler = self.result.scheduler
-        self.layout: stormvogel.layout.Layout = layout
-        self.separate_labels: set[str] = set(map(und, separate_labels)).union(
-            self.layout.layout["groups"].keys()
-        )
+        if self.scheduler is not None:  # Enable scheduled_actions as a default.
+            self.layout.set_active_groups(["states", "actions", "scheduled_actions"])
+
         self.do_init_server: bool = do_init_server
         self.__create_nt()
 
@@ -106,7 +105,14 @@ class Visualization(stormvogel.displayable.Displayable):
         self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
             self.nt.enable_exploration_mode(self.model.get_initial_state().id)
-        self.layout.set_groups(self.separate_labels)
+
+        # Set the (possibly updated) possible edit groups
+        underscored_labels = set(map(und, self.model.get_labels()))
+        possible_groups = underscored_labels.union({"states", "actions"})
+        if self.scheduler is not None:
+            possible_groups.add("scheduled_actions")
+        self.layout.set_possible_groups(possible_groups)
+
         self.__add_states()
         self.__add_transitions()
         self.__update_physics_enabled()
@@ -120,6 +126,28 @@ class Visualization(stormvogel.displayable.Displayable):
         if self.nt is not None:
             self.nt.update_options(str(self.layout))
 
+    def __group_state(self, s: stormvogel.model.State, default: str) -> str:
+        """Return the group of this state.
+        That is, the label of s that has the highest priority, as specified by the user under edit_groups"""
+        und_labels = set(map(lambda x: und(x), s.labels))
+        res = list(
+            filter(
+                lambda x: x in und_labels, self.layout.layout["edit_groups"]["groups"]
+            )
+        )
+        return und(res[0]) if res != [] else default
+
+    def __group_action(
+        self, s_id: int, a: stormvogel.model.Action, default: str
+    ) -> str:
+        """Return the group of this action. Only relevant for scheduling"""
+        # Put the action in the group scheduled_actions if appropriate.
+        if self.scheduler is None:
+            return default
+
+        choice = self.scheduler.get_choice_of_state(self.model.get_state_by_id(s_id))
+        return "scheduled_actions" if a == choice else default
+
     def __add_states(self) -> None:
         """For each state in the model, add a node to the graph."""
         if self.nt is None:
@@ -127,17 +155,8 @@ class Visualization(stormvogel.displayable.Displayable):
         for state in self.model.states.values():
             res = self.__format_result(state)
             observations = self.__format_observations(state)
-
             rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
-
-            group = (  # Use a non-default group if specified.
-                und(state.labels[0])
-                if (
-                    len(state.labels) > 0  # TODO generalize
-                    and und(state.labels[0]) in self.separate_labels
-                )
-                else "states"
-            )
+            group = self.__group_state(state, "states")
 
             self.nt.add_node(
                 state.id,
@@ -164,15 +183,7 @@ class Visualization(stormvogel.displayable.Displayable):
                             label=self.__format_probability(prob),
                         )
                 else:
-                    # Put the action in the group scheduled_actions if appropriate.
-                    group = "actions"
-                    if self.scheduler is not None:
-                        choice = self.scheduler.get_choice_of_state(
-                            state=self.model.get_state_by_id(state_id)
-                        )
-                        if action == choice:
-                            group = "scheduled_actions"
-
+                    group = self.__group_action(state_id, action, "actions")
                     reward = self.__format_rewards(
                         self.model.get_state_by_id(state_id), action
                     )

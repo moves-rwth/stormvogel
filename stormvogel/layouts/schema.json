@@ -53,21 +53,18 @@
       }
     }
   },
-  "groups": {
-    "states": {
-      "__use_macro": "__group_macro"
-    },
-    "actions": {
-      "__use_macro": "__group_macro"
-    },
-    "scheduled_actions": {
-      "__use_macro": "__group_macro",
-      "schedColor": {
-        "__description": "Scheduled edge color",
-        "__widget": "Checkbox"
+  "edit_groups": {
+    "__html": "<p>Select the labels which should have a separate layout. If multiple labels are present, then the first item in this list will be chosen. Click below to add a new label. Drag to change the priorities. Press the reload button to apply changes. For more info, consult the documentation.</p>",
+    "__collapse": true,
+    "groups": {
+      "__description": "Active state groups",
+      "__widget": "TagsInput",
+      "__kwargs": {
+        "allow_duplicates": false
       }
     }
   },
+  "groups": {},
   "edges": {
     "__collapse": true,
     "color": {

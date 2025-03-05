@@ -18,7 +18,6 @@ def show(
     name: str = "model",
     layout: stormvogel.layout.Layout | None = None,
     show_editor: bool = False,
-    separate_labels: list[str] = [],
     debug_output: widgets.Output = widgets.Output(),
 ) -> stormvogel.visualization.Visualization:
     """Create and show a visualization of a Model using a visjs Network
@@ -45,7 +44,6 @@ def show(
         result=result,
         scheduler=scheduler,
         layout=layout,
-        separate_labels=separate_labels,
         do_display=False,
         debug_output=debug_output,
         do_init_server=do_init_server,
@@ -58,6 +56,7 @@ def show(
         e.show()
         box = widgets.HBox(children=[vis.output, e.output])
         ipd.display(box)
+        vis.update()
     else:  # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
         iframe = vis.nt.generate_iframe()
         with open(name + ".html", "w") as f:
