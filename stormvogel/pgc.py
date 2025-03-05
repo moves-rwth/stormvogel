@@ -75,7 +75,7 @@ def build_pgc(
                     if action.labels != []:
                         stormvogel_action = model.new_action(
                             frozenset(
-                                {action.labels[0]}  # type: ignore
+                                action.labels  # type: ignore
                             ),  # right now we only look at one label
                         )
                     else:

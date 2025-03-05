@@ -1,8 +1,8 @@
 
           <iframe
-                id="modelCzdWeiwIpI"
-                width="820"
-                height="620"
+                id="modeloyrqiPoBwl"
+                width="1030"
+                height="797"
                 frameborder="0"
                 srcdoc="
 &lt;!DOCTYPE html&gt;
@@ -16,8 +16,8 @@
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
 
-        width: 800px;
-        height: 600px;
+        width: 1010px;
+        height: 777px;
         border: 1px solid lightgray;
 
       }
@@ -27,250 +27,266 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
-{ id: 1, label: `carchosen`, group: &quot;states&quot; },
-{ id: 2, label: `carchosen`, group: &quot;states&quot; },
-{ id: 3, label: `carchosen`, group: &quot;states&quot; },
-{ id: 4, label: `chose,1`, group: &quot;states&quot; },
-{ id: 5, label: `chose,2`, group: &quot;states&quot; },
-{ id: 6, label: `chose,3`, group: &quot;states&quot; },
-{ id: 7, label: `chose,1`, group: &quot;states&quot; },
-{ id: 8, label: `chose,2`, group: &quot;states&quot; },
-{ id: 9, label: `chose,3`, group: &quot;states&quot; },
-{ id: 10, label: `chose,1`, group: &quot;states&quot; },
-{ id: 11, label: `chose,2`, group: &quot;states&quot; },
-{ id: 12, label: `chose,3`, group: &quot;states&quot; },
-{ id: 13, label: `chosen,1,goat,2`, group: &quot;states&quot; },
-{ id: 14, label: `chosen,1,goat,3`, group: &quot;states&quot; },
-{ id: 15, label: `chosen,2,goat,3`, group: &quot;states&quot; },
-{ id: 16, label: `chosen,3,goat,2`, group: &quot;states&quot; },
-{ id: 17, label: `chosen,1,goat,3`, group: &quot;states&quot; },
-{ id: 18, label: `chosen,2,goat,1`, group: &quot;states&quot; },
-{ id: 19, label: `chosen,2,goat,3`, group: &quot;states&quot; },
-{ id: 20, label: `chosen,3,goat,1`, group: &quot;states&quot; },
-{ id: 21, label: `chosen,1,goat,2`, group: &quot;states&quot; },
-{ id: 22, label: `chosen,2,goat,1`, group: &quot;states&quot; },
-{ id: 23, label: `chosen,3,goat,1`, group: &quot;states&quot; },
-{ id: 24, label: `chosen,3,goat,2`, group: &quot;states&quot; },
-{ id: 25, label: `won`, group: &quot;states&quot; },
-{ id: 26, label: `lost`, group: &quot;states&quot; },
-{ id: 27, label: `won`, group: &quot;states&quot; },
-{ id: 28, label: `lost`, group: &quot;states&quot; },
-{ id: 29, label: `lost`, group: &quot;states&quot; },
-{ id: 30, label: `won`, group: &quot;states&quot; },
-{ id: 31, label: `lost`, group: &quot;states&quot; },
-{ id: 32, label: `won`, group: &quot;states&quot; },
-{ id: 33, label: `lost`, group: &quot;states&quot; },
-{ id: 34, label: `won`, group: &quot;states&quot; },
-{ id: 35, label: `won`, group: &quot;states&quot; },
-{ id: 36, label: `lost`, group: &quot;states&quot; },
-{ id: 37, label: `won`, group: &quot;states&quot; },
-{ id: 38, label: `lost`, group: &quot;states&quot; },
-{ id: 39, label: `lost`, group: &quot;states&quot; },
-{ id: 40, label: `won`, group: &quot;states&quot; },
-{ id: 41, label: `lost`, group: &quot;states&quot; },
-{ id: 42, label: `won`, group: &quot;states&quot; },
-{ id: 43, label: `lost`, group: &quot;states&quot; },
-{ id: 44, label: `won`, group: &quot;states&quot; },
-{ id: 45, label: `won`, group: &quot;states&quot; },
-{ id: 46, label: `lost`, group: &quot;states&quot; },
-{ id: 47, label: `won`, group: &quot;states&quot; },
-{ id: 48, label: `lost`, group: &quot;states&quot; },
-{ id: 10000000000, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000001, label: `choosedoor`, group: &quot;actions&quot; },
-{ id: 10000000002, label: `choosedoor`, group: &quot;actions&quot; },
-{ id: 10000000003, label: `choosedoor`, group: &quot;actions&quot; },
-{ id: 10000000004, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000005, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000006, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000007, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000008, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000009, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000010, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000011, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000012, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000013, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000014, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000015, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000016, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000017, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000018, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000019, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000020, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000021, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000022, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000023, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000024, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000025, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000026, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000027, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000028, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000029, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000030, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000031, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000032, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000033, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000034, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000035, label: `stay`, group: &quot;actions&quot; },
-{ id: 10000000036, label: `switch`, group: &quot;actions&quot; },
-{ id: 10000000037, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000038, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000039, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000040, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000041, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000042, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000043, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000044, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000045, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000046, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000047, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000048, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000049, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000050, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000051, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000052, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000053, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000054, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000055, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000056, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000057, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000058, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000059, label: `emp`, group: &quot;actions&quot; },
-{ id: 10000000060, label: `emp`, group: &quot;actions&quot; },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: 0, y: 0 },
+{ id: 1, label: `carchosen,1`, group: &quot;states&quot;, x: -279, y: 8 },
+{ id: 2, label: `carchosen,2`, group: &quot;states&quot;, x: 124, y: -257 },
+{ id: 3, label: `carchosen,3`, group: &quot;states&quot;, x: 127, y: 242 },
+{ id: 4, label: `open,1`, group: &quot;states&quot;, x: -671, y: 207 },
+{ id: 5, label: `open,2`, group: &quot;states&quot;, x: -596, y: -252 },
+{ id: 6, label: `open,3`, group: &quot;states&quot;, x: -259, y: 299 },
+{ id: 7, label: `open,1`, group: &quot;states&quot;, x: 536, y: -384 },
+{ id: 8, label: `open,2`, group: &quot;states&quot;, x: -132, y: -393 },
+{ id: 9, label: `open,3`, group: &quot;states&quot;, x: 150, y: -695 },
+{ id: 10, label: `open,1`, group: &quot;states&quot;, x: 82, y: 654 },
+{ id: 11, label: `open,2`, group: &quot;states&quot;, x: 507, y: 455 },
+{ id: 12, label: `open,3`, group: &quot;states&quot;, x: 294, y: 63 },
+{ id: 13, label: `opened,1,goat,2`, group: &quot;states&quot;, x: -740, y: 390 },
+{ id: 14, label: `opened,1,goat,3`, group: &quot;states&quot;, x: -849, y: 180 },
+{ id: 15, label: `opened,2,goat,2`, group: &quot;states&quot;, x: -649, y: -434 },
+{ id: 16, label: `opened,2,goat,3`, group: &quot;states&quot;, x: -767, y: -244 },
+{ id: 17, label: `opened,3,goat,2`, group: &quot;states&quot;, x: -348, y: 433 },
+{ id: 18, label: `opened,3,goat,3`, group: &quot;states&quot;, x: -122, y: 342 },
+{ id: 19, label: `opened,1,goat,1`, group: &quot;states&quot;, x: 620, y: -531 },
+{ id: 20, label: `opened,1,goat,3`, group: &quot;states&quot;, x: 721, y: -332 },
+{ id: 21, label: `opened,2,goat,1`, group: &quot;states&quot;, x: -210, y: -535 },
+{ id: 22, label: `opened,2,goat,3`, group: &quot;states&quot;, x: -199, y: -263 },
+{ id: 23, label: `opened,3,goat,1`, group: &quot;states&quot;, x: 47, y: -857 },
+{ id: 24, label: `opened,3,goat,3`, group: &quot;states&quot;, x: 280, y: -826 },
+{ id: 25, label: `opened,1,goat,1`, group: &quot;states&quot;, x: -43, y: 797 },
+{ id: 26, label: `opened,1,goat,2`, group: &quot;states&quot;, x: 189, y: 790 },
+{ id: 27, label: `opened,2,goat,1`, group: &quot;states&quot;, x: 693, y: 400 },
+{ id: 28, label: `opened,2,goat,2`, group: &quot;states&quot;, x: 591, y: 612 },
+{ id: 29, label: `opened,3,goat,1`, group: &quot;states&quot;, x: 444, y: 99 },
+{ id: 30, label: `opened,3,goat,2`, group: &quot;states&quot;, x: 315, y: -66 },
+{ id: 31, label: `lost`, group: &quot;states&quot;, x: -969, y: 582 },
+{ id: 32, label: `won`, group: &quot;states&quot;, x: -722, y: 687 },
+{ id: 33, label: `lost`, group: &quot;states&quot;, x: -1107, y: 55 },
+{ id: 34, label: `won`, group: &quot;states&quot;, x: -1112, y: 318 },
+{ id: 35, label: `lost`, group: &quot;states&quot;, x: -639, y: -725 },
+{ id: 36, label: `won`, group: &quot;states&quot;, x: -872, y: -634 },
+{ id: 37, label: `lost`, group: &quot;states&quot;, x: -1020, y: -400 },
+{ id: 38, label: `won`, group: &quot;states&quot;, x: -1025, y: -154 },
+{ id: 39, label: `lost`, group: &quot;states&quot;, x: -561, y: 320 },
+{ id: 40, label: `won`, group: &quot;states&quot;, x: -461, y: 700 },
+{ id: 41, label: `lost`, group: &quot;states&quot;, x: -53, y: 93 },
+{ id: 42, label: `won`, group: &quot;states&quot;, x: -174, y: 602 },
+{ id: 43, label: `lost`, group: &quot;states&quot;, x: 388, y: -611 },
+{ id: 44, label: `won`, group: &quot;states&quot;, x: 847, y: -722 },
+{ id: 45, label: `lost`, group: &quot;states&quot;, x: 1005, y: -424 },
+{ id: 46, label: `won`, group: &quot;states&quot;, x: 951, y: -150 },
+{ id: 47, label: `lost`, group: &quot;states&quot;, x: -407, y: -746 },
+{ id: 48, label: `won`, group: &quot;states&quot;, x: -193, y: -781 },
+{ id: 49, label: `lost`, group: &quot;states&quot;, x: -30, y: -74 },
+{ id: 50, label: `won`, group: &quot;states&quot;, x: -415, y: -387 },
+{ id: 51, label: `lost`, group: &quot;states&quot;, x: -201, y: -1023 },
+{ id: 52, label: `won`, group: &quot;states&quot;, x: 38, y: -1154 },
+{ id: 53, label: `lost`, group: &quot;states&quot;, x: 343, y: -1116 },
+{ id: 54, label: `won`, group: &quot;states&quot;, x: 552, y: -936 },
+{ id: 55, label: `lost`, group: &quot;states&quot;, x: -90, y: 1091 },
+{ id: 56, label: `won`, group: &quot;states&quot;, x: -306, y: 928 },
+{ id: 57, label: `lost`, group: &quot;states&quot;, x: 202, y: 1085 },
+{ id: 58, label: `won`, group: &quot;states&quot;, x: 414, y: 950 },
+{ id: 59, label: `lost`, group: &quot;states&quot;, x: 983, y: 470 },
+{ id: 60, label: `won`, group: &quot;states&quot;, x: 927, y: 218 },
+{ id: 61, label: `lost`, group: &quot;states&quot;, x: 860, y: 735 },
+{ id: 62, label: `won`, group: &quot;states&quot;, x: 641, y: 893 },
+{ id: 63, label: `lost`, group: &quot;states&quot;, x: 497, y: 308 },
+{ id: 64, label: `won`, group: &quot;states&quot;, x: 729, y: 61 },
+{ id: 65, label: `lost`, group: &quot;states&quot;, x: 382, y: -238 },
+{ id: 66, label: `won`, group: &quot;states&quot;, x: 588, y: -121 },
+{ id: 10000000000, label: `open,1`, group: &quot;actions&quot;, x: -479, y: 99 },
+{ id: 10000000001, label: `open,2`, group: &quot;actions&quot;, x: -438, y: -120 },
+{ id: 10000000002, label: `open,3`, group: &quot;actions&quot;, x: -259, y: 148 },
+{ id: 10000000003, label: `open,1`, group: &quot;actions&quot;, x: 324, y: -340 },
+{ id: 10000000004, label: `open,2`, group: &quot;actions&quot;, x: -4, y: -317 },
+{ id: 10000000005, label: `open,3`, group: &quot;actions&quot;, x: 137, y: -479 },
+{ id: 10000000006, label: `open,1`, group: &quot;actions&quot;, x: 106, y: 449 },
+{ id: 10000000007, label: `open,2`, group: &quot;actions&quot;, x: 308, y: 363 },
+{ id: 10000000008, label: `open,3`, group: &quot;actions&quot;, x: 170, y: 120 },
+{ id: 10000000009, label: `stay`, group: &quot;actions&quot;, x: -871, y: 483 },
+{ id: 10000000010, label: `switch`, group: &quot;actions&quot;, x: -714, y: 547 },
+{ id: 10000000011, label: `stay`, group: &quot;actions&quot;, x: -973, y: 92 },
+{ id: 10000000012, label: `switch`, group: &quot;actions&quot;, x: -983, y: 263 },
+{ id: 10000000013, label: `stay`, group: &quot;actions&quot;, x: -620, y: -587 },
+{ id: 10000000014, label: `switch`, group: &quot;actions&quot;, x: -776, y: -532 },
+{ id: 10000000015, label: `stay`, group: &quot;actions&quot;, x: -895, y: -337 },
+{ id: 10000000016, label: `switch`, group: &quot;actions&quot;, x: -889, y: -163 },
+{ id: 10000000017, label: `stay`, group: &quot;actions&quot;, x: -452, y: 354 },
+{ id: 10000000018, label: `switch`, group: &quot;actions&quot;, x: -403, y: 576 },
+{ id: 10000000019, label: `stay`, group: &quot;actions&quot;, x: -60, y: 220 },
+{ id: 10000000020, label: `switch`, group: &quot;actions&quot;, x: -119, y: 482 },
+{ id: 10000000021, label: `stay`, group: &quot;actions&quot;, x: 515, y: -618 },
+{ id: 10000000022, label: `switch`, group: &quot;actions&quot;, x: 744, y: -630 },
+{ id: 10000000023, label: `stay`, group: &quot;actions&quot;, x: 869, y: -392 },
+{ id: 10000000024, label: `switch`, group: &quot;actions&quot;, x: 832, y: -221 },
+{ id: 10000000025, label: `stay`, group: &quot;actions&quot;, x: -331, y: -630 },
+{ id: 10000000026, label: `switch`, group: &quot;actions&quot;, x: -151, y: -658 },
+{ id: 10000000027, label: `stay`, group: &quot;actions&quot;, x: -132, y: -146 },
+{ id: 10000000028, label: `switch`, group: &quot;actions&quot;, x: -330, y: -292 },
+{ id: 10000000029, label: `stay`, group: &quot;actions&quot;, x: -91, y: -935 },
+{ id: 10000000030, label: `switch`, group: &quot;actions&quot;, x: 56, y: -1016 },
+{ id: 10000000031, label: `stay`, group: &quot;actions&quot;, x: 301, y: -983 },
+{ id: 10000000032, label: `switch`, group: &quot;actions&quot;, x: 430, y: -868 },
+{ id: 10000000033, label: `stay`, group: &quot;actions&quot;, x: -57, y: 955 },
+{ id: 10000000034, label: `switch`, group: &quot;actions&quot;, x: -191, y: 849 },
+{ id: 10000000035, label: `stay`, group: &quot;actions&quot;, x: 184, y: 947 },
+{ id: 10000000036, label: `switch`, group: &quot;actions&quot;, x: 326, y: 846 },
+{ id: 10000000037, label: `stay`, group: &quot;actions&quot;, x: 845, y: 450 },
+{ id: 10000000038, label: `switch`, group: &quot;actions&quot;, x: 805, y: 288 },
+{ id: 10000000039, label: `stay`, group: &quot;actions&quot;, x: 738, y: 668 },
+{ id: 10000000040, label: `switch`, group: &quot;actions&quot;, x: 592, y: 764 },
+{ id: 10000000041, label: `stay`, group: &quot;actions&quot;, x: 413, y: 227 },
+{ id: 10000000042, label: `switch`, group: &quot;actions&quot;, x: 595, y: 83 },
+{ id: 10000000043, label: `stay`, group: &quot;actions&quot;, x: 270, y: -175 },
+{ id: 10000000044, label: `switch`, group: &quot;actions&quot;, x: 457, y: -95 },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 1, label: &quot;1/3&quot; },
-{ from: 10000000000, to: 2, label: &quot;1/3&quot; },
-{ from: 10000000000, to: 3, label: &quot;1/3&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/3&quot; },
+{ from: 0, to: 2, label: &quot;1/3&quot; },
+{ from: 0, to: 3, label: &quot;1/3&quot; },
+{ from: 1, to: 10000000000 },
+{ from: 10000000000, to: 4, label: &quot;1&quot; },
 { from: 1, to: 10000000001 },
-{ from: 10000000001, to: 4, label: &quot;1/3&quot; },
-{ from: 10000000001, to: 5, label: &quot;1/3&quot; },
-{ from: 10000000001, to: 6, label: &quot;1/3&quot; },
-{ from: 2, to: 10000000002 },
-{ from: 10000000002, to: 7, label: &quot;1/3&quot; },
-{ from: 10000000002, to: 8, label: &quot;1/3&quot; },
-{ from: 10000000002, to: 9, label: &quot;1/3&quot; },
-{ from: 3, to: 10000000003 },
-{ from: 10000000003, to: 10, label: &quot;1/3&quot; },
-{ from: 10000000003, to: 11, label: &quot;1/3&quot; },
-{ from: 10000000003, to: 12, label: &quot;1/3&quot; },
-{ from: 4, to: 10000000004 },
-{ from: 10000000004, to: 13, label: &quot;1/2&quot; },
-{ from: 10000000004, to: 14, label: &quot;1/2&quot; },
-{ from: 5, to: 10000000005 },
-{ from: 10000000005, to: 15, label: &quot;1&quot; },
-{ from: 6, to: 10000000006 },
-{ from: 10000000006, to: 16, label: &quot;1&quot; },
-{ from: 7, to: 10000000007 },
-{ from: 10000000007, to: 17, label: &quot;1&quot; },
-{ from: 8, to: 10000000008 },
-{ from: 10000000008, to: 18, label: &quot;1/2&quot; },
-{ from: 10000000008, to: 19, label: &quot;1/2&quot; },
-{ from: 9, to: 10000000009 },
-{ from: 10000000009, to: 20, label: &quot;1&quot; },
-{ from: 10, to: 10000000010 },
-{ from: 10000000010, to: 21, label: &quot;1&quot; },
-{ from: 11, to: 10000000011 },
-{ from: 10000000011, to: 22, label: &quot;1&quot; },
-{ from: 12, to: 10000000012 },
-{ from: 10000000012, to: 23, label: &quot;1/2&quot; },
-{ from: 10000000012, to: 24, label: &quot;1/2&quot; },
-{ from: 13, to: 10000000013 },
-{ from: 10000000013, to: 25, label: &quot;1&quot; },
-{ from: 13, to: 10000000014 },
-{ from: 10000000014, to: 26, label: &quot;1&quot; },
-{ from: 14, to: 10000000015 },
-{ from: 10000000015, to: 27, label: &quot;1&quot; },
-{ from: 14, to: 10000000016 },
-{ from: 10000000016, to: 28, label: &quot;1&quot; },
-{ from: 15, to: 10000000017 },
-{ from: 10000000017, to: 29, label: &quot;1&quot; },
-{ from: 15, to: 10000000018 },
-{ from: 10000000018, to: 30, label: &quot;1&quot; },
-{ from: 16, to: 10000000019 },
-{ from: 10000000019, to: 31, label: &quot;1&quot; },
-{ from: 16, to: 10000000020 },
-{ from: 10000000020, to: 32, label: &quot;1&quot; },
-{ from: 17, to: 10000000021 },
-{ from: 10000000021, to: 33, label: &quot;1&quot; },
-{ from: 17, to: 10000000022 },
-{ from: 10000000022, to: 34, label: &quot;1&quot; },
-{ from: 18, to: 10000000023 },
-{ from: 10000000023, to: 35, label: &quot;1&quot; },
-{ from: 18, to: 10000000024 },
-{ from: 10000000024, to: 36, label: &quot;1&quot; },
-{ from: 19, to: 10000000025 },
-{ from: 10000000025, to: 37, label: &quot;1&quot; },
-{ from: 19, to: 10000000026 },
-{ from: 10000000026, to: 38, label: &quot;1&quot; },
-{ from: 20, to: 10000000027 },
-{ from: 10000000027, to: 39, label: &quot;1&quot; },
-{ from: 20, to: 10000000028 },
-{ from: 10000000028, to: 40, label: &quot;1&quot; },
-{ from: 21, to: 10000000029 },
-{ from: 10000000029, to: 41, label: &quot;1&quot; },
-{ from: 21, to: 10000000030 },
-{ from: 10000000030, to: 42, label: &quot;1&quot; },
-{ from: 22, to: 10000000031 },
-{ from: 10000000031, to: 43, label: &quot;1&quot; },
-{ from: 22, to: 10000000032 },
-{ from: 10000000032, to: 44, label: &quot;1&quot; },
-{ from: 23, to: 10000000033 },
-{ from: 10000000033, to: 45, label: &quot;1&quot; },
-{ from: 23, to: 10000000034 },
-{ from: 10000000034, to: 46, label: &quot;1&quot; },
-{ from: 24, to: 10000000035 },
-{ from: 10000000035, to: 47, label: &quot;1&quot; },
-{ from: 24, to: 10000000036 },
-{ from: 10000000036, to: 48, label: &quot;1&quot; },
-{ from: 25, to: 10000000037 },
-{ from: 10000000037, to: 25, label: &quot;1&quot; },
-{ from: 26, to: 10000000038 },
-{ from: 10000000038, to: 26, label: &quot;1&quot; },
-{ from: 27, to: 10000000039 },
-{ from: 10000000039, to: 27, label: &quot;1&quot; },
+{ from: 10000000001, to: 5, label: &quot;1&quot; },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 6, label: &quot;1&quot; },
+{ from: 2, to: 10000000003 },
+{ from: 10000000003, to: 7, label: &quot;1&quot; },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 8, label: &quot;1&quot; },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 9, label: &quot;1&quot; },
+{ from: 3, to: 10000000006 },
+{ from: 10000000006, to: 10, label: &quot;1&quot; },
+{ from: 3, to: 10000000007 },
+{ from: 10000000007, to: 11, label: &quot;1&quot; },
+{ from: 3, to: 10000000008 },
+{ from: 10000000008, to: 12, label: &quot;1&quot; },
+{ from: 4, to: 13, label: &quot;1/2&quot; },
+{ from: 4, to: 14, label: &quot;1/2&quot; },
+{ from: 5, to: 15, label: &quot;1/2&quot; },
+{ from: 5, to: 16, label: &quot;1/2&quot; },
+{ from: 6, to: 17, label: &quot;1/2&quot; },
+{ from: 6, to: 18, label: &quot;1/2&quot; },
+{ from: 7, to: 19, label: &quot;1/2&quot; },
+{ from: 7, to: 20, label: &quot;1/2&quot; },
+{ from: 8, to: 21, label: &quot;1/2&quot; },
+{ from: 8, to: 22, label: &quot;1/2&quot; },
+{ from: 9, to: 23, label: &quot;1/2&quot; },
+{ from: 9, to: 24, label: &quot;1/2&quot; },
+{ from: 10, to: 25, label: &quot;1/2&quot; },
+{ from: 10, to: 26, label: &quot;1/2&quot; },
+{ from: 11, to: 27, label: &quot;1/2&quot; },
+{ from: 11, to: 28, label: &quot;1/2&quot; },
+{ from: 12, to: 29, label: &quot;1/2&quot; },
+{ from: 12, to: 30, label: &quot;1/2&quot; },
+{ from: 13, to: 10000000009 },
+{ from: 10000000009, to: 31, label: &quot;1&quot; },
+{ from: 13, to: 10000000010 },
+{ from: 10000000010, to: 32, label: &quot;1&quot; },
+{ from: 14, to: 10000000011 },
+{ from: 10000000011, to: 33, label: &quot;1&quot; },
+{ from: 14, to: 10000000012 },
+{ from: 10000000012, to: 34, label: &quot;1&quot; },
+{ from: 15, to: 10000000013 },
+{ from: 10000000013, to: 35, label: &quot;1&quot; },
+{ from: 15, to: 10000000014 },
+{ from: 10000000014, to: 36, label: &quot;1&quot; },
+{ from: 16, to: 10000000015 },
+{ from: 10000000015, to: 37, label: &quot;1&quot; },
+{ from: 16, to: 10000000016 },
+{ from: 10000000016, to: 38, label: &quot;1&quot; },
+{ from: 17, to: 10000000017 },
+{ from: 10000000017, to: 39, label: &quot;1&quot; },
+{ from: 17, to: 10000000018 },
+{ from: 10000000018, to: 40, label: &quot;1&quot; },
+{ from: 18, to: 10000000019 },
+{ from: 10000000019, to: 41, label: &quot;1&quot; },
+{ from: 18, to: 10000000020 },
+{ from: 10000000020, to: 42, label: &quot;1&quot; },
+{ from: 19, to: 10000000021 },
+{ from: 10000000021, to: 43, label: &quot;1&quot; },
+{ from: 19, to: 10000000022 },
+{ from: 10000000022, to: 44, label: &quot;1&quot; },
+{ from: 20, to: 10000000023 },
+{ from: 10000000023, to: 45, label: &quot;1&quot; },
+{ from: 20, to: 10000000024 },
+{ from: 10000000024, to: 46, label: &quot;1&quot; },
+{ from: 21, to: 10000000025 },
+{ from: 10000000025, to: 47, label: &quot;1&quot; },
+{ from: 21, to: 10000000026 },
+{ from: 10000000026, to: 48, label: &quot;1&quot; },
+{ from: 22, to: 10000000027 },
+{ from: 10000000027, to: 49, label: &quot;1&quot; },
+{ from: 22, to: 10000000028 },
+{ from: 10000000028, to: 50, label: &quot;1&quot; },
+{ from: 23, to: 10000000029 },
+{ from: 10000000029, to: 51, label: &quot;1&quot; },
+{ from: 23, to: 10000000030 },
+{ from: 10000000030, to: 52, label: &quot;1&quot; },
+{ from: 24, to: 10000000031 },
+{ from: 10000000031, to: 53, label: &quot;1&quot; },
+{ from: 24, to: 10000000032 },
+{ from: 10000000032, to: 54, label: &quot;1&quot; },
+{ from: 25, to: 10000000033 },
+{ from: 10000000033, to: 55, label: &quot;1&quot; },
+{ from: 25, to: 10000000034 },
+{ from: 10000000034, to: 56, label: &quot;1&quot; },
+{ from: 26, to: 10000000035 },
+{ from: 10000000035, to: 57, label: &quot;1&quot; },
+{ from: 26, to: 10000000036 },
+{ from: 10000000036, to: 58, label: &quot;1&quot; },
+{ from: 27, to: 10000000037 },
+{ from: 10000000037, to: 59, label: &quot;1&quot; },
+{ from: 27, to: 10000000038 },
+{ from: 10000000038, to: 60, label: &quot;1&quot; },
+{ from: 28, to: 10000000039 },
+{ from: 10000000039, to: 61, label: &quot;1&quot; },
 { from: 28, to: 10000000040 },
-{ from: 10000000040, to: 28, label: &quot;1&quot; },
+{ from: 10000000040, to: 62, label: &quot;1&quot; },
 { from: 29, to: 10000000041 },
-{ from: 10000000041, to: 29, label: &quot;1&quot; },
-{ from: 30, to: 10000000042 },
-{ from: 10000000042, to: 30, label: &quot;1&quot; },
-{ from: 31, to: 10000000043 },
-{ from: 10000000043, to: 31, label: &quot;1&quot; },
-{ from: 32, to: 10000000044 },
-{ from: 10000000044, to: 32, label: &quot;1&quot; },
-{ from: 33, to: 10000000045 },
-{ from: 10000000045, to: 33, label: &quot;1&quot; },
-{ from: 34, to: 10000000046 },
-{ from: 10000000046, to: 34, label: &quot;1&quot; },
-{ from: 35, to: 10000000047 },
-{ from: 10000000047, to: 35, label: &quot;1&quot; },
-{ from: 36, to: 10000000048 },
-{ from: 10000000048, to: 36, label: &quot;1&quot; },
-{ from: 37, to: 10000000049 },
-{ from: 10000000049, to: 37, label: &quot;1&quot; },
-{ from: 38, to: 10000000050 },
-{ from: 10000000050, to: 38, label: &quot;1&quot; },
-{ from: 39, to: 10000000051 },
-{ from: 10000000051, to: 39, label: &quot;1&quot; },
-{ from: 40, to: 10000000052 },
-{ from: 10000000052, to: 40, label: &quot;1&quot; },
-{ from: 41, to: 10000000053 },
-{ from: 10000000053, to: 41, label: &quot;1&quot; },
-{ from: 42, to: 10000000054 },
-{ from: 10000000054, to: 42, label: &quot;1&quot; },
-{ from: 43, to: 10000000055 },
-{ from: 10000000055, to: 43, label: &quot;1&quot; },
-{ from: 44, to: 10000000056 },
-{ from: 10000000056, to: 44, label: &quot;1&quot; },
-{ from: 45, to: 10000000057 },
-{ from: 10000000057, to: 45, label: &quot;1&quot; },
-{ from: 46, to: 10000000058 },
-{ from: 10000000058, to: 46, label: &quot;1&quot; },
-{ from: 47, to: 10000000059 },
-{ from: 10000000059, to: 47, label: &quot;1&quot; },
-{ from: 48, to: 10000000060 },
-{ from: 10000000060, to: 48, label: &quot;1&quot; },
+{ from: 10000000041, to: 63, label: &quot;1&quot; },
+{ from: 29, to: 10000000042 },
+{ from: 10000000042, to: 64, label: &quot;1&quot; },
+{ from: 30, to: 10000000043 },
+{ from: 10000000043, to: 65, label: &quot;1&quot; },
+{ from: 30, to: 10000000044 },
+{ from: 10000000044, to: 66, label: &quot;1&quot; },
+{ from: 31, to: 31, label: &quot;1&quot; },
+{ from: 32, to: 32, label: &quot;1&quot; },
+{ from: 33, to: 33, label: &quot;1&quot; },
+{ from: 34, to: 34, label: &quot;1&quot; },
+{ from: 35, to: 35, label: &quot;1&quot; },
+{ from: 36, to: 36, label: &quot;1&quot; },
+{ from: 37, to: 37, label: &quot;1&quot; },
+{ from: 38, to: 38, label: &quot;1&quot; },
+{ from: 39, to: 39, label: &quot;1&quot; },
+{ from: 40, to: 40, label: &quot;1&quot; },
+{ from: 41, to: 41, label: &quot;1&quot; },
+{ from: 42, to: 42, label: &quot;1&quot; },
+{ from: 43, to: 43, label: &quot;1&quot; },
+{ from: 44, to: 44, label: &quot;1&quot; },
+{ from: 45, to: 45, label: &quot;1&quot; },
+{ from: 46, to: 46, label: &quot;1&quot; },
+{ from: 47, to: 47, label: &quot;1&quot; },
+{ from: 48, to: 48, label: &quot;1&quot; },
+{ from: 49, to: 49, label: &quot;1&quot; },
+{ from: 50, to: 50, label: &quot;1&quot; },
+{ from: 51, to: 51, label: &quot;1&quot; },
+{ from: 52, to: 52, label: &quot;1&quot; },
+{ from: 53, to: 53, label: &quot;1&quot; },
+{ from: 54, to: 54, label: &quot;1&quot; },
+{ from: 55, to: 55, label: &quot;1&quot; },
+{ from: 56, to: 56, label: &quot;1&quot; },
+{ from: 57, to: 57, label: &quot;1&quot; },
+{ from: 58, to: 58, label: &quot;1&quot; },
+{ from: 59, to: 59, label: &quot;1&quot; },
+{ from: 60, to: 60, label: &quot;1&quot; },
+{ from: 61, to: 61, label: &quot;1&quot; },
+{ from: 62, to: 62, label: &quot;1&quot; },
+{ from: 63, to: 63, label: &quot;1&quot; },
+{ from: 64, to: 64, label: &quot;1&quot; },
+{ from: 65, to: 65, label: &quot;1&quot; },
+{ from: 66, to: 66, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -313,7 +329,7 @@
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
+        &quot;size&quot;: 34
       }
     },
     &quot;states&quot;: {
@@ -330,7 +346,7 @@
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
+        &quot;size&quot;: 29
       }
     }
   },
@@ -363,19 +379,468 @@
   },
   &quot;misc&quot;: {
     &quot;enable_physics&quot;: true,
-    &quot;width&quot;: 800,
-    &quot;height&quot;: 600,
+    &quot;width&quot;: 1010,
+    &quot;height&quot;: 777,
     &quot;explore&quot;: false
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;filename&quot;: &quot;layouts/monty.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {},
-  &quot;width&quot;: 800,
-  &quot;height&quot;: 600,
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 0
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: -279,
+      &quot;y&quot;: 8
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: 124,
+      &quot;y&quot;: -257
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 127,
+      &quot;y&quot;: 242
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: -671,
+      &quot;y&quot;: 207
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: -596,
+      &quot;y&quot;: -252
+    },
+    &quot;6&quot;: {
+      &quot;x&quot;: -259,
+      &quot;y&quot;: 299
+    },
+    &quot;7&quot;: {
+      &quot;x&quot;: 536,
+      &quot;y&quot;: -384
+    },
+    &quot;8&quot;: {
+      &quot;x&quot;: -132,
+      &quot;y&quot;: -393
+    },
+    &quot;9&quot;: {
+      &quot;x&quot;: 150,
+      &quot;y&quot;: -695
+    },
+    &quot;10&quot;: {
+      &quot;x&quot;: 82,
+      &quot;y&quot;: 654
+    },
+    &quot;11&quot;: {
+      &quot;x&quot;: 507,
+      &quot;y&quot;: 455
+    },
+    &quot;12&quot;: {
+      &quot;x&quot;: 294,
+      &quot;y&quot;: 63
+    },
+    &quot;13&quot;: {
+      &quot;x&quot;: -740,
+      &quot;y&quot;: 390
+    },
+    &quot;14&quot;: {
+      &quot;x&quot;: -849,
+      &quot;y&quot;: 180
+    },
+    &quot;15&quot;: {
+      &quot;x&quot;: -649,
+      &quot;y&quot;: -434
+    },
+    &quot;16&quot;: {
+      &quot;x&quot;: -767,
+      &quot;y&quot;: -244
+    },
+    &quot;17&quot;: {
+      &quot;x&quot;: -348,
+      &quot;y&quot;: 433
+    },
+    &quot;18&quot;: {
+      &quot;x&quot;: -122,
+      &quot;y&quot;: 342
+    },
+    &quot;19&quot;: {
+      &quot;x&quot;: 620,
+      &quot;y&quot;: -531
+    },
+    &quot;20&quot;: {
+      &quot;x&quot;: 721,
+      &quot;y&quot;: -332
+    },
+    &quot;21&quot;: {
+      &quot;x&quot;: -210,
+      &quot;y&quot;: -535
+    },
+    &quot;22&quot;: {
+      &quot;x&quot;: -199,
+      &quot;y&quot;: -263
+    },
+    &quot;23&quot;: {
+      &quot;x&quot;: 47,
+      &quot;y&quot;: -857
+    },
+    &quot;24&quot;: {
+      &quot;x&quot;: 280,
+      &quot;y&quot;: -826
+    },
+    &quot;25&quot;: {
+      &quot;x&quot;: -43,
+      &quot;y&quot;: 797
+    },
+    &quot;26&quot;: {
+      &quot;x&quot;: 189,
+      &quot;y&quot;: 790
+    },
+    &quot;27&quot;: {
+      &quot;x&quot;: 693,
+      &quot;y&quot;: 400
+    },
+    &quot;28&quot;: {
+      &quot;x&quot;: 591,
+      &quot;y&quot;: 612
+    },
+    &quot;29&quot;: {
+      &quot;x&quot;: 444,
+      &quot;y&quot;: 99
+    },
+    &quot;30&quot;: {
+      &quot;x&quot;: 315,
+      &quot;y&quot;: -66
+    },
+    &quot;31&quot;: {
+      &quot;x&quot;: -969,
+      &quot;y&quot;: 582
+    },
+    &quot;32&quot;: {
+      &quot;x&quot;: -722,
+      &quot;y&quot;: 687
+    },
+    &quot;33&quot;: {
+      &quot;x&quot;: -1107,
+      &quot;y&quot;: 55
+    },
+    &quot;34&quot;: {
+      &quot;x&quot;: -1112,
+      &quot;y&quot;: 318
+    },
+    &quot;35&quot;: {
+      &quot;x&quot;: -639,
+      &quot;y&quot;: -725
+    },
+    &quot;36&quot;: {
+      &quot;x&quot;: -872,
+      &quot;y&quot;: -634
+    },
+    &quot;37&quot;: {
+      &quot;x&quot;: -1020,
+      &quot;y&quot;: -400
+    },
+    &quot;38&quot;: {
+      &quot;x&quot;: -1025,
+      &quot;y&quot;: -154
+    },
+    &quot;39&quot;: {
+      &quot;x&quot;: -561,
+      &quot;y&quot;: 320
+    },
+    &quot;40&quot;: {
+      &quot;x&quot;: -461,
+      &quot;y&quot;: 700
+    },
+    &quot;41&quot;: {
+      &quot;x&quot;: -53,
+      &quot;y&quot;: 93
+    },
+    &quot;42&quot;: {
+      &quot;x&quot;: -174,
+      &quot;y&quot;: 602
+    },
+    &quot;43&quot;: {
+      &quot;x&quot;: 388,
+      &quot;y&quot;: -611
+    },
+    &quot;44&quot;: {
+      &quot;x&quot;: 847,
+      &quot;y&quot;: -722
+    },
+    &quot;45&quot;: {
+      &quot;x&quot;: 1005,
+      &quot;y&quot;: -424
+    },
+    &quot;46&quot;: {
+      &quot;x&quot;: 951,
+      &quot;y&quot;: -150
+    },
+    &quot;47&quot;: {
+      &quot;x&quot;: -407,
+      &quot;y&quot;: -746
+    },
+    &quot;48&quot;: {
+      &quot;x&quot;: -193,
+      &quot;y&quot;: -781
+    },
+    &quot;49&quot;: {
+      &quot;x&quot;: -30,
+      &quot;y&quot;: -74
+    },
+    &quot;50&quot;: {
+      &quot;x&quot;: -415,
+      &quot;y&quot;: -387
+    },
+    &quot;51&quot;: {
+      &quot;x&quot;: -201,
+      &quot;y&quot;: -1023
+    },
+    &quot;52&quot;: {
+      &quot;x&quot;: 38,
+      &quot;y&quot;: -1154
+    },
+    &quot;53&quot;: {
+      &quot;x&quot;: 343,
+      &quot;y&quot;: -1116
+    },
+    &quot;54&quot;: {
+      &quot;x&quot;: 552,
+      &quot;y&quot;: -936
+    },
+    &quot;55&quot;: {
+      &quot;x&quot;: -90,
+      &quot;y&quot;: 1091
+    },
+    &quot;56&quot;: {
+      &quot;x&quot;: -306,
+      &quot;y&quot;: 928
+    },
+    &quot;57&quot;: {
+      &quot;x&quot;: 202,
+      &quot;y&quot;: 1085
+    },
+    &quot;58&quot;: {
+      &quot;x&quot;: 414,
+      &quot;y&quot;: 950
+    },
+    &quot;59&quot;: {
+      &quot;x&quot;: 983,
+      &quot;y&quot;: 470
+    },
+    &quot;60&quot;: {
+      &quot;x&quot;: 927,
+      &quot;y&quot;: 218
+    },
+    &quot;61&quot;: {
+      &quot;x&quot;: 860,
+      &quot;y&quot;: 735
+    },
+    &quot;62&quot;: {
+      &quot;x&quot;: 641,
+      &quot;y&quot;: 893
+    },
+    &quot;63&quot;: {
+      &quot;x&quot;: 497,
+      &quot;y&quot;: 308
+    },
+    &quot;64&quot;: {
+      &quot;x&quot;: 729,
+      &quot;y&quot;: 61
+    },
+    &quot;65&quot;: {
+      &quot;x&quot;: 382,
+      &quot;y&quot;: -238
+    },
+    &quot;66&quot;: {
+      &quot;x&quot;: 588,
+      &quot;y&quot;: -121
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: -479,
+      &quot;y&quot;: 99
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: -438,
+      &quot;y&quot;: -120
+    },
+    &quot;10000000002&quot;: {
+      &quot;x&quot;: -259,
+      &quot;y&quot;: 148
+    },
+    &quot;10000000003&quot;: {
+      &quot;x&quot;: 324,
+      &quot;y&quot;: -340
+    },
+    &quot;10000000004&quot;: {
+      &quot;x&quot;: -4,
+      &quot;y&quot;: -317
+    },
+    &quot;10000000005&quot;: {
+      &quot;x&quot;: 137,
+      &quot;y&quot;: -479
+    },
+    &quot;10000000006&quot;: {
+      &quot;x&quot;: 106,
+      &quot;y&quot;: 449
+    },
+    &quot;10000000007&quot;: {
+      &quot;x&quot;: 308,
+      &quot;y&quot;: 363
+    },
+    &quot;10000000008&quot;: {
+      &quot;x&quot;: 170,
+      &quot;y&quot;: 120
+    },
+    &quot;10000000009&quot;: {
+      &quot;x&quot;: -871,
+      &quot;y&quot;: 483
+    },
+    &quot;10000000010&quot;: {
+      &quot;x&quot;: -714,
+      &quot;y&quot;: 547
+    },
+    &quot;10000000011&quot;: {
+      &quot;x&quot;: -973,
+      &quot;y&quot;: 92
+    },
+    &quot;10000000012&quot;: {
+      &quot;x&quot;: -983,
+      &quot;y&quot;: 263
+    },
+    &quot;10000000013&quot;: {
+      &quot;x&quot;: -620,
+      &quot;y&quot;: -587
+    },
+    &quot;10000000014&quot;: {
+      &quot;x&quot;: -776,
+      &quot;y&quot;: -532
+    },
+    &quot;10000000015&quot;: {
+      &quot;x&quot;: -895,
+      &quot;y&quot;: -337
+    },
+    &quot;10000000016&quot;: {
+      &quot;x&quot;: -889,
+      &quot;y&quot;: -163
+    },
+    &quot;10000000017&quot;: {
+      &quot;x&quot;: -452,
+      &quot;y&quot;: 354
+    },
+    &quot;10000000018&quot;: {
+      &quot;x&quot;: -403,
+      &quot;y&quot;: 576
+    },
+    &quot;10000000019&quot;: {
+      &quot;x&quot;: -60,
+      &quot;y&quot;: 220
+    },
+    &quot;10000000020&quot;: {
+      &quot;x&quot;: -119,
+      &quot;y&quot;: 482
+    },
+    &quot;10000000021&quot;: {
+      &quot;x&quot;: 515,
+      &quot;y&quot;: -618
+    },
+    &quot;10000000022&quot;: {
+      &quot;x&quot;: 744,
+      &quot;y&quot;: -630
+    },
+    &quot;10000000023&quot;: {
+      &quot;x&quot;: 869,
+      &quot;y&quot;: -392
+    },
+    &quot;10000000024&quot;: {
+      &quot;x&quot;: 832,
+      &quot;y&quot;: -221
+    },
+    &quot;10000000025&quot;: {
+      &quot;x&quot;: -331,
+      &quot;y&quot;: -630
+    },
+    &quot;10000000026&quot;: {
+      &quot;x&quot;: -151,
+      &quot;y&quot;: -658
+    },
+    &quot;10000000027&quot;: {
+      &quot;x&quot;: -132,
+      &quot;y&quot;: -146
+    },
+    &quot;10000000028&quot;: {
+      &quot;x&quot;: -330,
+      &quot;y&quot;: -292
+    },
+    &quot;10000000029&quot;: {
+      &quot;x&quot;: -91,
+      &quot;y&quot;: -935
+    },
+    &quot;10000000030&quot;: {
+      &quot;x&quot;: 56,
+      &quot;y&quot;: -1016
+    },
+    &quot;10000000031&quot;: {
+      &quot;x&quot;: 301,
+      &quot;y&quot;: -983
+    },
+    &quot;10000000032&quot;: {
+      &quot;x&quot;: 430,
+      &quot;y&quot;: -868
+    },
+    &quot;10000000033&quot;: {
+      &quot;x&quot;: -57,
+      &quot;y&quot;: 955
+    },
+    &quot;10000000034&quot;: {
+      &quot;x&quot;: -191,
+      &quot;y&quot;: 849
+    },
+    &quot;10000000035&quot;: {
+      &quot;x&quot;: 184,
+      &quot;y&quot;: 947
+    },
+    &quot;10000000036&quot;: {
+      &quot;x&quot;: 326,
+      &quot;y&quot;: 846
+    },
+    &quot;10000000037&quot;: {
+      &quot;x&quot;: 845,
+      &quot;y&quot;: 450
+    },
+    &quot;10000000038&quot;: {
+      &quot;x&quot;: 805,
+      &quot;y&quot;: 288
+    },
+    &quot;10000000039&quot;: {
+      &quot;x&quot;: 738,
+      &quot;y&quot;: 668
+    },
+    &quot;10000000040&quot;: {
+      &quot;x&quot;: 592,
+      &quot;y&quot;: 764
+    },
+    &quot;10000000041&quot;: {
+      &quot;x&quot;: 413,
+      &quot;y&quot;: 227
+    },
+    &quot;10000000042&quot;: {
+      &quot;x&quot;: 595,
+      &quot;y&quot;: 83
+    },
+    &quot;10000000043&quot;: {
+      &quot;x&quot;: 270,
+      &quot;y&quot;: -175
+    },
+    &quot;10000000044&quot;: {
+      &quot;x&quot;: 457,
+      &quot;y&quot;: -95
+    }
+  },
+  &quot;width&quot;: 1010,
+  &quot;height&quot;: 777,
   &quot;physics&quot;: true,
   &quot;autoResize&quot;: true
 };
