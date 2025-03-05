@@ -35,6 +35,7 @@ def merge_dict(dict1: dict, dict2: dict) -> dict:
         dict1 (dict):
         dict2 (dict):
 
+    In general, dict1 gets priority!
     If dict2 has a value that dict1 does not have, then the value in dict2 is chosen.
     If dict1 has a DICTIONARY and dict2 has a VALUE with the same key, then dict1 gets priority.
 

@@ -4,6 +4,7 @@ import stormvogel.rdict
 
 import os
 import json
+import copy
 
 PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -51,6 +52,23 @@ class Layout:
     def set_possible_groups(self, groups: set[str]):
         """Set the groups of states that the user can choose from under edit_groups."""
         self.schema["edit_groups"]["groups"]["__kwargs"]["allowed_tags"] = list(groups)
+        # Save changes to the schema. The visualization object will handle putting nodes into the correct groups.
+        groups = self.layout["edit_groups"]["groups"]
+        self.schema["groups"] = {}
+        for g in groups:
+            # For the settings themselves, we need to manually copy everything.
+            layout_group_macro = copy.deepcopy(
+                self.layout["__fake_macros"]["__group_macro"]
+            )
+            # Merge the macro with any existing changes.
+            existing = self.layout["groups"][g] if g in self.layout["groups"] else {}
+            self.layout["groups"][g] = stormvogel.rdict.merge_dict(
+                layout_group_macro, existing
+            )
+
+            # For the schema, dict_editor already handles macros, so there is no need to do it manually here.
+            if g not in self.schema["groups"]:
+                self.schema["groups"][g] = {"__use_macro": "__group_macro"}
 
     def save(self, path: str, path_relative: bool = True) -> None:
         """Save this layout as a json file. Raises runtime error if a filename does not end in json, and OSError if file not found.

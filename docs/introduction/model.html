@@ -1,6 +1,6 @@
 
           <iframe
-                id="modeltpoiYSfdYH"
+                id="modelCzdWeiwIpI"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,37 +27,250 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;states&quot;, x: -261, y: 16 },
-{ id: 1, label: `red light,still`, group: &quot;states&quot;, x: -56, y: 173 },
-{ id: 2, label: `green light,moving`, group: &quot;states&quot;, x: -127, y: -199 },
-{ id: 3, label: `red light,moving`, group: &quot;states&quot;, x: 90, y: -26 },
-{ id: 4, label: `accident`, group: &quot;states&quot;, x: 353, y: -62 },
-{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot;, x: -157, y: -77 },
-{ id: 10000000001, label: `wait`, group: &quot;actions&quot;, x: -214, y: 169 },
-{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot;, x: 81, y: 127 },
-{ id: 10000000003, label: `wait`, group: &quot;actions&quot;, x: -145, y: 79 },
-{ id: 10000000004, label: `brake`, group: &quot;actions&quot;, x: -265, y: -140 },
-{ id: 10000000005, label: `wait`, group: &quot;actions&quot;, x: 14, y: -158 },
-{ id: 10000000006, label: `brake`, group: &quot;actions&quot;, x: -10, y: 42 },
-{ id: 10000000007, label: `wait`, group: &quot;actions&quot;, x: 226, y: -51 },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
+{ id: 1, label: `carchosen`, group: &quot;states&quot; },
+{ id: 2, label: `carchosen`, group: &quot;states&quot; },
+{ id: 3, label: `carchosen`, group: &quot;states&quot; },
+{ id: 4, label: `chose,1`, group: &quot;states&quot; },
+{ id: 5, label: `chose,2`, group: &quot;states&quot; },
+{ id: 6, label: `chose,3`, group: &quot;states&quot; },
+{ id: 7, label: `chose,1`, group: &quot;states&quot; },
+{ id: 8, label: `chose,2`, group: &quot;states&quot; },
+{ id: 9, label: `chose,3`, group: &quot;states&quot; },
+{ id: 10, label: `chose,1`, group: &quot;states&quot; },
+{ id: 11, label: `chose,2`, group: &quot;states&quot; },
+{ id: 12, label: `chose,3`, group: &quot;states&quot; },
+{ id: 13, label: `chosen,1,goat,2`, group: &quot;states&quot; },
+{ id: 14, label: `chosen,1,goat,3`, group: &quot;states&quot; },
+{ id: 15, label: `chosen,2,goat,3`, group: &quot;states&quot; },
+{ id: 16, label: `chosen,3,goat,2`, group: &quot;states&quot; },
+{ id: 17, label: `chosen,1,goat,3`, group: &quot;states&quot; },
+{ id: 18, label: `chosen,2,goat,1`, group: &quot;states&quot; },
+{ id: 19, label: `chosen,2,goat,3`, group: &quot;states&quot; },
+{ id: 20, label: `chosen,3,goat,1`, group: &quot;states&quot; },
+{ id: 21, label: `chosen,1,goat,2`, group: &quot;states&quot; },
+{ id: 22, label: `chosen,2,goat,1`, group: &quot;states&quot; },
+{ id: 23, label: `chosen,3,goat,1`, group: &quot;states&quot; },
+{ id: 24, label: `chosen,3,goat,2`, group: &quot;states&quot; },
+{ id: 25, label: `won`, group: &quot;states&quot; },
+{ id: 26, label: `lost`, group: &quot;states&quot; },
+{ id: 27, label: `won`, group: &quot;states&quot; },
+{ id: 28, label: `lost`, group: &quot;states&quot; },
+{ id: 29, label: `lost`, group: &quot;states&quot; },
+{ id: 30, label: `won`, group: &quot;states&quot; },
+{ id: 31, label: `lost`, group: &quot;states&quot; },
+{ id: 32, label: `won`, group: &quot;states&quot; },
+{ id: 33, label: `lost`, group: &quot;states&quot; },
+{ id: 34, label: `won`, group: &quot;states&quot; },
+{ id: 35, label: `won`, group: &quot;states&quot; },
+{ id: 36, label: `lost`, group: &quot;states&quot; },
+{ id: 37, label: `won`, group: &quot;states&quot; },
+{ id: 38, label: `lost`, group: &quot;states&quot; },
+{ id: 39, label: `lost`, group: &quot;states&quot; },
+{ id: 40, label: `won`, group: &quot;states&quot; },
+{ id: 41, label: `lost`, group: &quot;states&quot; },
+{ id: 42, label: `won`, group: &quot;states&quot; },
+{ id: 43, label: `lost`, group: &quot;states&quot; },
+{ id: 44, label: `won`, group: &quot;states&quot; },
+{ id: 45, label: `won`, group: &quot;states&quot; },
+{ id: 46, label: `lost`, group: &quot;states&quot; },
+{ id: 47, label: `won`, group: &quot;states&quot; },
+{ id: 48, label: `lost`, group: &quot;states&quot; },
+{ id: 10000000000, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000001, label: `choosedoor`, group: &quot;actions&quot; },
+{ id: 10000000002, label: `choosedoor`, group: &quot;actions&quot; },
+{ id: 10000000003, label: `choosedoor`, group: &quot;actions&quot; },
+{ id: 10000000004, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000005, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000006, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000007, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000008, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000009, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000010, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000011, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000012, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000013, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000014, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000015, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000016, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000017, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000018, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000019, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000020, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000021, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000022, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000023, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000024, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000025, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000026, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000027, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000028, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000029, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000030, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000031, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000032, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000033, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000034, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000035, label: `stay`, group: &quot;actions&quot; },
+{ id: 10000000036, label: `switch`, group: &quot;actions&quot; },
+{ id: 10000000037, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000038, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000039, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000040, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000041, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000042, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000043, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000044, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000045, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000046, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000047, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000048, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000049, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000050, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000051, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000052, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000053, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000054, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000055, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000056, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000057, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000058, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000059, label: `emp`, group: &quot;actions&quot; },
+{ id: 10000000060, label: `emp`, group: &quot;actions&quot; },
 ]);
         var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 2, label: &quot;1&quot; },
-{ from: 0, to: 10000000001 },
-{ from: 10000000001, to: 1, label: &quot;1&quot; },
-{ from: 1, to: 10000000002 },
-{ from: 10000000002, to: 3, label: &quot;1&quot; },
-{ from: 1, to: 10000000003 },
-{ from: 10000000003, to: 0, label: &quot;1&quot; },
-{ from: 2, to: 10000000004 },
-{ from: 10000000004, to: 0, label: &quot;1&quot; },
-{ from: 2, to: 10000000005 },
-{ from: 10000000005, to: 3, label: &quot;1&quot; },
-{ from: 3, to: 10000000006 },
-{ from: 10000000006, to: 1, label: &quot;1&quot; },
-{ from: 3, to: 10000000007 },
-{ from: 10000000007, to: 4, label: &quot;1&quot; },
-{ from: 4, to: 4, label: &quot;1&quot; },
+{ from: 10000000000, to: 1, label: &quot;1/3&quot; },
+{ from: 10000000000, to: 2, label: &quot;1/3&quot; },
+{ from: 10000000000, to: 3, label: &quot;1/3&quot; },
+{ from: 1, to: 10000000001 },
+{ from: 10000000001, to: 4, label: &quot;1/3&quot; },
+{ from: 10000000001, to: 5, label: &quot;1/3&quot; },
+{ from: 10000000001, to: 6, label: &quot;1/3&quot; },
+{ from: 2, to: 10000000002 },
+{ from: 10000000002, to: 7, label: &quot;1/3&quot; },
+{ from: 10000000002, to: 8, label: &quot;1/3&quot; },
+{ from: 10000000002, to: 9, label: &quot;1/3&quot; },
+{ from: 3, to: 10000000003 },
+{ from: 10000000003, to: 10, label: &quot;1/3&quot; },
+{ from: 10000000003, to: 11, label: &quot;1/3&quot; },
+{ from: 10000000003, to: 12, label: &quot;1/3&quot; },
+{ from: 4, to: 10000000004 },
+{ from: 10000000004, to: 13, label: &quot;1/2&quot; },
+{ from: 10000000004, to: 14, label: &quot;1/2&quot; },
+{ from: 5, to: 10000000005 },
+{ from: 10000000005, to: 15, label: &quot;1&quot; },
+{ from: 6, to: 10000000006 },
+{ from: 10000000006, to: 16, label: &quot;1&quot; },
+{ from: 7, to: 10000000007 },
+{ from: 10000000007, to: 17, label: &quot;1&quot; },
+{ from: 8, to: 10000000008 },
+{ from: 10000000008, to: 18, label: &quot;1/2&quot; },
+{ from: 10000000008, to: 19, label: &quot;1/2&quot; },
+{ from: 9, to: 10000000009 },
+{ from: 10000000009, to: 20, label: &quot;1&quot; },
+{ from: 10, to: 10000000010 },
+{ from: 10000000010, to: 21, label: &quot;1&quot; },
+{ from: 11, to: 10000000011 },
+{ from: 10000000011, to: 22, label: &quot;1&quot; },
+{ from: 12, to: 10000000012 },
+{ from: 10000000012, to: 23, label: &quot;1/2&quot; },
+{ from: 10000000012, to: 24, label: &quot;1/2&quot; },
+{ from: 13, to: 10000000013 },
+{ from: 10000000013, to: 25, label: &quot;1&quot; },
+{ from: 13, to: 10000000014 },
+{ from: 10000000014, to: 26, label: &quot;1&quot; },
+{ from: 14, to: 10000000015 },
+{ from: 10000000015, to: 27, label: &quot;1&quot; },
+{ from: 14, to: 10000000016 },
+{ from: 10000000016, to: 28, label: &quot;1&quot; },
+{ from: 15, to: 10000000017 },
+{ from: 10000000017, to: 29, label: &quot;1&quot; },
+{ from: 15, to: 10000000018 },
+{ from: 10000000018, to: 30, label: &quot;1&quot; },
+{ from: 16, to: 10000000019 },
+{ from: 10000000019, to: 31, label: &quot;1&quot; },
+{ from: 16, to: 10000000020 },
+{ from: 10000000020, to: 32, label: &quot;1&quot; },
+{ from: 17, to: 10000000021 },
+{ from: 10000000021, to: 33, label: &quot;1&quot; },
+{ from: 17, to: 10000000022 },
+{ from: 10000000022, to: 34, label: &quot;1&quot; },
+{ from: 18, to: 10000000023 },
+{ from: 10000000023, to: 35, label: &quot;1&quot; },
+{ from: 18, to: 10000000024 },
+{ from: 10000000024, to: 36, label: &quot;1&quot; },
+{ from: 19, to: 10000000025 },
+{ from: 10000000025, to: 37, label: &quot;1&quot; },
+{ from: 19, to: 10000000026 },
+{ from: 10000000026, to: 38, label: &quot;1&quot; },
+{ from: 20, to: 10000000027 },
+{ from: 10000000027, to: 39, label: &quot;1&quot; },
+{ from: 20, to: 10000000028 },
+{ from: 10000000028, to: 40, label: &quot;1&quot; },
+{ from: 21, to: 10000000029 },
+{ from: 10000000029, to: 41, label: &quot;1&quot; },
+{ from: 21, to: 10000000030 },
+{ from: 10000000030, to: 42, label: &quot;1&quot; },
+{ from: 22, to: 10000000031 },
+{ from: 10000000031, to: 43, label: &quot;1&quot; },
+{ from: 22, to: 10000000032 },
+{ from: 10000000032, to: 44, label: &quot;1&quot; },
+{ from: 23, to: 10000000033 },
+{ from: 10000000033, to: 45, label: &quot;1&quot; },
+{ from: 23, to: 10000000034 },
+{ from: 10000000034, to: 46, label: &quot;1&quot; },
+{ from: 24, to: 10000000035 },
+{ from: 10000000035, to: 47, label: &quot;1&quot; },
+{ from: 24, to: 10000000036 },
+{ from: 10000000036, to: 48, label: &quot;1&quot; },
+{ from: 25, to: 10000000037 },
+{ from: 10000000037, to: 25, label: &quot;1&quot; },
+{ from: 26, to: 10000000038 },
+{ from: 10000000038, to: 26, label: &quot;1&quot; },
+{ from: 27, to: 10000000039 },
+{ from: 10000000039, to: 27, label: &quot;1&quot; },
+{ from: 28, to: 10000000040 },
+{ from: 10000000040, to: 28, label: &quot;1&quot; },
+{ from: 29, to: 10000000041 },
+{ from: 10000000041, to: 29, label: &quot;1&quot; },
+{ from: 30, to: 10000000042 },
+{ from: 10000000042, to: 30, label: &quot;1&quot; },
+{ from: 31, to: 10000000043 },
+{ from: 10000000043, to: 31, label: &quot;1&quot; },
+{ from: 32, to: 10000000044 },
+{ from: 10000000044, to: 32, label: &quot;1&quot; },
+{ from: 33, to: 10000000045 },
+{ from: 10000000045, to: 33, label: &quot;1&quot; },
+{ from: 34, to: 10000000046 },
+{ from: 10000000046, to: 34, label: &quot;1&quot; },
+{ from: 35, to: 10000000047 },
+{ from: 10000000047, to: 35, label: &quot;1&quot; },
+{ from: 36, to: 10000000048 },
+{ from: 10000000048, to: 36, label: &quot;1&quot; },
+{ from: 37, to: 10000000049 },
+{ from: 10000000049, to: 37, label: &quot;1&quot; },
+{ from: 38, to: 10000000050 },
+{ from: 10000000050, to: 38, label: &quot;1&quot; },
+{ from: 39, to: 10000000051 },
+{ from: 10000000051, to: 39, label: &quot;1&quot; },
+{ from: 40, to: 10000000052 },
+{ from: 10000000052, to: 40, label: &quot;1&quot; },
+{ from: 41, to: 10000000053 },
+{ from: 10000000053, to: 41, label: &quot;1&quot; },
+{ from: 42, to: 10000000054 },
+{ from: 10000000054, to: 42, label: &quot;1&quot; },
+{ from: 43, to: 10000000055 },
+{ from: 10000000055, to: 43, label: &quot;1&quot; },
+{ from: 44, to: 10000000056 },
+{ from: 10000000056, to: 44, label: &quot;1&quot; },
+{ from: 45, to: 10000000057 },
+{ from: 10000000057, to: 45, label: &quot;1&quot; },
+{ from: 46, to: 10000000058 },
+{ from: 10000000058, to: 46, label: &quot;1&quot; },
+{ from: 47, to: 10000000059 },
+{ from: 10000000059, to: 47, label: &quot;1&quot; },
+{ from: 48, to: 10000000060 },
+{ from: 10000000060, to: 48, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -86,44 +299,27 @@
     ]
   },
   &quot;groups&quot;: {
+    &quot;actions&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
         &quot;background&quot;: &quot;white&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      }
-    },
-    &quot;actions&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;white&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      }
-    },
-    &quot;green_light&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;#53f35e&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -173,67 +369,15 @@
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/testing.json&quot;,
+    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {
-    &quot;0&quot;: {
-      &quot;x&quot;: -261,
-      &quot;y&quot;: 16
-    },
-    &quot;1&quot;: {
-      &quot;x&quot;: -56,
-      &quot;y&quot;: 173
-    },
-    &quot;2&quot;: {
-      &quot;x&quot;: -127,
-      &quot;y&quot;: -199
-    },
-    &quot;3&quot;: {
-      &quot;x&quot;: 90,
-      &quot;y&quot;: -26
-    },
-    &quot;4&quot;: {
-      &quot;x&quot;: 353,
-      &quot;y&quot;: -62
-    },
-    &quot;10000000000&quot;: {
-      &quot;x&quot;: -157,
-      &quot;y&quot;: -77
-    },
-    &quot;10000000001&quot;: {
-      &quot;x&quot;: -214,
-      &quot;y&quot;: 169
-    },
-    &quot;10000000002&quot;: {
-      &quot;x&quot;: 81,
-      &quot;y&quot;: 127
-    },
-    &quot;10000000003&quot;: {
-      &quot;x&quot;: -145,
-      &quot;y&quot;: 79
-    },
-    &quot;10000000004&quot;: {
-      &quot;x&quot;: -265,
-      &quot;y&quot;: -140
-    },
-    &quot;10000000005&quot;: {
-      &quot;x&quot;: 14,
-      &quot;y&quot;: -158
-    },
-    &quot;10000000006&quot;: {
-      &quot;x&quot;: -10,
-      &quot;y&quot;: 42
-    },
-    &quot;10000000007&quot;: {
-      &quot;x&quot;: 226,
-      &quot;y&quot;: -51
-    }
-  },
+  &quot;positions&quot;: {},
   &quot;width&quot;: 800,
   &quot;height&quot;: 600,
-  &quot;physics&quot;: true
+  &quot;physics&quot;: true,
+  &quot;autoResize&quot;: true
 };
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);
@@ -285,6 +429,9 @@ function makeNeighborsVisible(homeId) {
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
     makeNeighborsVisible(nodeId);
+});
+network.on( &#x27;doubleClick&#x27;, function(properties) {
+    network.setData(data);
 });
 
     &lt;/script&gt;
