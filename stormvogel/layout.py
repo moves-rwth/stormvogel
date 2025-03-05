@@ -49,12 +49,17 @@ class Layout:
             schema_str = f.read()
         self.schema = json.loads(schema_str)
 
+    def set_active_groups(self, groups: list[str]):
+        self.layout["edit_groups"]["groups"] = groups
+
     def set_possible_groups(self, groups: set[str]):
         """Set the groups of states that the user can choose from under edit_groups."""
         self.schema["edit_groups"]["groups"]["__kwargs"]["allowed_tags"] = list(groups)
         # Save changes to the schema. The visualization object will handle putting nodes into the correct groups.
         groups = self.layout["edit_groups"]["groups"]
-        self.schema["groups"] = {}
+        self.schema[
+            "groups"
+        ] = {}  # empty the schema groups, to clear existing groups that we may not want
         for g in groups:
             # For the settings themselves, we need to manually copy everything.
             layout_group_macro = copy.deepcopy(
