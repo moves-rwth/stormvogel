@@ -3,9 +3,11 @@
 # Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
 # If you remove a with output: statement, everything might just break, be prepared.
 
+from typing import Callable
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
+import stormvogel.simulator
 import stormvogel.visjs
 import stormvogel.displayable
 
@@ -82,6 +84,8 @@ class Visualization(stormvogel.displayable.Displayable):
 
         self.do_init_server: bool = do_init_server
         self.__create_nt()
+        self.network_action_map_id: dict[tuple[int, stormvogel.model.Action], int] = {}
+        # Keeps track of the ids of states for us.
 
     def __create_nt(self) -> None:
         """Reload the node positions and create the network."""
@@ -170,7 +174,7 @@ class Visualization(stormvogel.displayable.Displayable):
         Note that an action may appear multiple times in the model with a different state as source."""
         if self.nt is None:
             return
-        action_id = self.ACTION_ID_OFFSET
+        network_action_id = self.ACTION_ID_OFFSET
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
@@ -190,7 +194,7 @@ class Visualization(stormvogel.displayable.Displayable):
 
                     # Add the action's node
                     self.nt.add_node(
-                        id=action_id,
+                        id=network_action_id,
                         label=",".join(action.labels) + reward,
                         group=group,
                     )
@@ -205,16 +209,19 @@ class Visualization(stormvogel.displayable.Displayable):
                         edge_color = None
 
                     # Add transition from this state TO the action.
-                    self.nt.add_edge(state_id, action_id, color=edge_color)  # type: ignore
+                    self.nt.add_edge(state_id, network_action_id, color=edge_color)  # type: ignore
                     # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
+                        self.network_action_map_id[target.id, action] = (
+                            network_action_id
+                        )
                         self.nt.add_edge(
-                            action_id,
+                            network_action_id,
                             target.id,
                             label=self.__format_probability(prob),
                             color=edge_color,
                         )
-                    action_id += 1
+                    network_action_id += 1
 
     def __update_physics_enabled(self) -> None:
         """Enable physics iff the model has less than 10000 states."""
@@ -290,6 +297,28 @@ class Visualization(stormvogel.displayable.Displayable):
                 + str(s.observation.observation)
             )
 
-    def get_positions(self):
-        """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously)."""
+    def get_positions(self) -> dict:
+        """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously).
+        NOTE: This method only works after the network is properly loaded."""
         return self.nt.get_positions() if self.nt is not None else {}
+
+    def highlight_path(
+        self,
+        path: stormvogel.simulator.Path,
+        color: str,
+        delay_function: Callable | None = None,
+    ) -> None:
+        for _, v in path.path.items():
+            if isinstance(v, tuple):
+                action = v[0]
+                state = v[1]
+                if (state.id, action) in self.network_action_map_id:
+                    self.nt.set_node_color(
+                        self.network_action_map_id[state.id, action], color
+                    )
+                self.nt.set_node_color(state.id, color)
+            else:
+                self.nt.set_node_color(v.id, color)
+            if delay_function is not None:
+                delay_function()
+        self.show()
