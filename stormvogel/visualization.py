@@ -194,14 +194,25 @@ class Visualization(stormvogel.displayable.Displayable):
                         label=",".join(action.labels) + reward,
                         group=group,
                     )
+                    if group == "scheduled_actions":
+                        try:
+                            edge_color = self.layout.layout["groups"][
+                                "scheduled_actions"
+                            ]["color"]["border"]
+                        except KeyError:
+                            edge_color = None
+                    else:
+                        edge_color = None
+
                     # Add transition from this state TO the action.
-                    self.nt.add_edge(state_id, action_id)  # type: ignore
+                    self.nt.add_edge(state_id, action_id, color=edge_color)  # type: ignore
                     # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
                         self.nt.add_edge(
                             action_id,
                             target.id,
                             label=self.__format_probability(prob),
+                            color=edge_color,
                         )
                     action_id += 1
 

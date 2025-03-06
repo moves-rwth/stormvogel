@@ -112,11 +112,14 @@ class Network(stormvogel.displayable.Displayable):
         from_: int,
         to: int,
         label: str | None = None,
+        color: str | None = None,
     ) -> None:
         """Add an edge. Only use before calling show."""
         current = "{ from: " + str(from_) + ", to: " + str(to)
         if label is not None:
             current += f', label: "{label}"'
+        if color is not None:
+            current += f', color: "{color}"'
         if self.new_nodes_hidden:
             current += ", hidden: true"
             current += ", physics: false"

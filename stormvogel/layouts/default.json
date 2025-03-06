@@ -30,6 +30,13 @@
       "color": {
         "background": "lightblue"
       }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "red"
+      }
     }
   },
   "reload_button": false,
