@@ -21,6 +21,7 @@ class Polynomial:
                         s += f"x_{i}"
                         if id[i] != 1:
                             s += f"^{id[i]}"
+                # if they are all zero... print 1.
                 s += " + "
 
         return s[:-3]

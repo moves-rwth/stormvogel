@@ -285,6 +285,7 @@ def simulate(
                         stormvogel.model.EmptyAction
                     ].branch:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], (int, float))
                             probability += float(tuple[0])
                     new_state = partial_model.new_state(list(labels))
                     partial_model.get_state_by_id(last_state_id).add_transitions(
@@ -336,6 +337,7 @@ def simulate(
                     transitions = model.get_transitions(last_state_id)
                     for tuple in transitions.transition[action].branch:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], (int, float))
                             probability += float(tuple[0])
                     new_state = partial_model.new_state(list(labels))
                     last_state_partial.add_transitions([(probability, new_state)])
