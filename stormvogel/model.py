@@ -189,13 +189,12 @@ class State:
                 return (
                     sorted(self.labels) == sorted(other.labels) and observations_equal
                 )
-            return False
         return False
 
     def __lt__(self, other):
         if not isinstance(other, State):
             return NotImplemented
-        return str(self.id) < str(other.id)
+        return str(self.labels) < str(other.labels)
 
 
 @dataclass(frozen=True)
