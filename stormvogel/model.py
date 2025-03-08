@@ -4,10 +4,16 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
-from stormvogel import rational_function
+from stormvogel import parametric_representation
 import copy
 
-Number = float | Fraction | int | rational_function.RationalFunction
+Number = (
+    float
+    | Fraction
+    | int
+    | parametric_representation.RationalFunction
+    | parametric_representation.Polynomial
+)
 
 
 class ModelType(Enum):
@@ -165,6 +171,7 @@ class State:
         transitions = self.get_outgoing_transitions(action)
         if transitions is not None:
             for transition in transitions:
+                assert isinstance(transition[0], (int, float))
                 if float(transition[0]) > 0 and transition[1] != self:
                     return False
         return True
@@ -323,6 +330,8 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, int)
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
+        or isinstance(first_element, parametric_representation.Polynomial)
+        or isinstance(first_element, parametric_representation.RationalFunction)
     ):
         return Transition(
             {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
@@ -618,6 +627,9 @@ class Model:
         if normalize:
             sub_model.normalize()
         return sub_model
+
+    # def apply_valuation(self):
+    # TODO:
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""

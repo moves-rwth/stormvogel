@@ -31,8 +31,16 @@ class RationalFunction:
     denominator: Polynomial
 
     def __init__(self, numerator: Polynomial, denominator: Polynomial):
-        self.numerator = numerator
-        self.denominator = denominator
+        denominator_all_zero = True
+        for index, id in enumerate(np.ndindex(denominator.coefficients.shape)):
+            if denominator.coefficients[id] != 0:
+                denominator_all_zero = False
+
+        if not denominator_all_zero:
+            self.numerator = numerator
+            self.denominator = denominator
+        else:
+            raise RuntimeError("dividing by 0 is not allowed")
 
     def __str__(self) -> str:
         s = str(self.numerator) + "\n"
