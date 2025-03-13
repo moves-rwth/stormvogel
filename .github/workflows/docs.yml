@@ -55,9 +55,9 @@ jobs:
           files: |
             docs/**/*.ipynb
 
-      # - name: Run documentation notebooks
-      #   run: |
-      #    poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
+      - name: Run documentation notebooks
+        run: |
+         poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
 
       - name: Generate docs
         working-directory: docs/
