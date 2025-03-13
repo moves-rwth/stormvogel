@@ -77,4 +77,12 @@ network.on( 'click', function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
     makeNeighborsVisible(nodeId);
 });
+network.on( 'doubleClick', function(properties) {
+    network.setData(data);
+});
+function setNodeColor(id, color) {
+  var node = nodes.get(id);
+  node["color"] = color
+  nodes.update(node);
+}
 """

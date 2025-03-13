@@ -24,6 +24,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         super().__init__(output, do_display, debug_output)
         self.vis: stormvogel.visualization.Visualization | None = visualization
         self.layout: stormvogel.layout.Layout = layout
+        self.update_possible_groups()
         self.loaded: bool = False  # True iff the layout is done loading.
         self.editor = stormvogel.dict_editor.DictEditor(
             schema=self.layout.schema,
@@ -31,6 +32,10 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             on_update=self.try_update,
             do_display=False,
         )
+
+    def update_possible_groups(self):
+        if self.vis is not None:
+            self.vis.show()
 
     def copy_settings(self):
         """Copy some settings from one place in the layout to another place in the layout.
@@ -115,7 +120,9 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             with self.debug_output:
                 logging.info("Received reload button request.")
             self.set_current_vis_node_positions_in_layout()
+            self.update_possible_groups()
             self.vis.show()
+            self.show()
 
     def try_update(self):
         """Process the updates from the layout editor where required."""
