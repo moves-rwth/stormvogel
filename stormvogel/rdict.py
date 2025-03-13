@@ -12,13 +12,20 @@ def rget(d: dict, path: list) -> Any:
     )  # Throws KeyError if key not present.
 
 
-def rset(d: dict, path: list, value: Any) -> dict:
-    """Recursively set dict value."""
+def rset(d: dict, path: list[str], value: Any, create_new_keys: bool = False) -> dict:
+    """Recursively set dict value.
+    Args:
+        d (dict).
+        path (list[str]).
+        value (Any).
+        create_new_keys (bool). If a key that is on the path does not exist yet, create it. Defaults to False"""
     if len(path) == 0:
         return d
 
     def __rset(d: dict, path: list, value: Any):
         first = path.pop(0)
+        if create_new_keys and first not in d:
+            d[first] = {}
         if len(path) == 0:
             d[first] = value
         else:
