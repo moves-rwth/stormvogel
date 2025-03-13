@@ -22,7 +22,7 @@ Package documentation:
    :template: custom-module-template.rst
    :recursive:
 
-   stormvogel
+   stormvogel/*
 
 Search for a specific page:
 ===========================
