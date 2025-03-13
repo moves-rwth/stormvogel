@@ -1,6 +1,6 @@
 
           <iframe
-                id="prismKtLgIPCyLE"
+                id="prismGkmDDFfzHj"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,7 +27,7 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `nextnand,init
+        var nodes = new vis.DataSet([{ id: 0, label: `init,nextnand
 €	: 0.0
 ☆ 113/152`, group: &quot;states&quot; },
 { id: 1, label: `selection
@@ -850,6 +850,24 @@
         &quot;size&quot;: 14
       }
     },
+    &quot;scheduled_actions&quot;: {
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;borderWidth&quot;: 1,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
+    },
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
@@ -866,24 +884,6 @@
         &quot;color&quot;: &quot;black&quot;,
         &quot;size&quot;: 14
       }
-    },
-    &quot;scheduled_actions&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;pink&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;box&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      },
-      &quot;schedColor&quot;: false
     }
   },
   &quot;reload_button&quot;: false,
@@ -985,6 +985,11 @@ network.on( &#x27;click&#x27;, function(properties) {
 network.on( &#x27;doubleClick&#x27;, function(properties) {
     network.setData(data);
 });
+function setNodeColor(id, color) {
+  var node = nodes.get(id);
+  node[&quot;color&quot;] = color
+  nodes.update(node);
+}
 
     &lt;/script&gt;
   &lt;/body&gt;

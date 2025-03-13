@@ -1,6 +1,6 @@
 
           <iframe
-                id="studyWiVmwOCnEO"
+                id="dieMEqKslibll"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,32 +27,26 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -27, y: -203 },
-{ id: 1, label: `studied
-€	R: 0`, group: &quot;states&quot;, x: -84, y: -6 },
-{ id: 2, label: `didn&#x27;t study
-€	R: 15`, group: &quot;states&quot;, x: 57, y: -10 },
-{ id: 3, label: `pass test
-€	R: 100`, group: &quot;states&quot;, x: -56, y: 102 },
-{ id: 4, label: `fail test
-€	R: 0`, group: &quot;states&quot;, x: 58, y: 61 },
-{ id: 5, label: `end
-€	R: 0`, group: &quot;states&quot;, x: 24, y: 187 },
-{ id: 10000000000, label: `study
-€	R: 0`, group: &quot;actions&quot;, x: -136, y: -127 },
-{ id: 10000000001, label: `don&#x27;t study
-€	R: 0`, group: &quot;actions&quot;, x: 77, y: -144 },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
+{ id: 1, label: `rolled1`, group: &quot;states&quot; },
+{ id: 2, label: `rolled2`, group: &quot;states&quot; },
+{ id: 3, label: `rolled3`, group: &quot;states&quot; },
+{ id: 4, label: `rolled4`, group: &quot;states&quot; },
+{ id: 5, label: `rolled5`, group: &quot;states&quot; },
+{ id: 6, label: `rolled6`, group: &quot;states&quot; },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 1, label: &quot;1&quot; },
-{ from: 0, to: 10000000001 },
-{ from: 10000000001, to: 2, label: &quot;1&quot; },
-{ from: 1, to: 3, label: &quot;9/10&quot; },
-{ from: 1, to: 4, label: &quot;1/10&quot; },
-{ from: 2, to: 3, label: &quot;2/5&quot; },
-{ from: 2, to: 4, label: &quot;3/5&quot; },
-{ from: 3, to: 5, label: &quot;1&quot; },
-{ from: 4, to: 5, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1/6&quot; },
+{ from: 0, to: 2, label: &quot;1/6&quot; },
+{ from: 0, to: 3, label: &quot;1/6&quot; },
+{ from: 0, to: 4, label: &quot;1/6&quot; },
+{ from: 0, to: 5, label: &quot;1/6&quot; },
+{ from: 0, to: 6, label: &quot;1/6&quot; },
+{ from: 1, to: 1, label: &quot;1&quot; },
+{ from: 2, to: 2, label: &quot;1&quot; },
+{ from: 3, to: 3, label: &quot;1&quot; },
+{ from: 4, to: 4, label: &quot;1&quot; },
+{ from: 5, to: 5, label: &quot;1&quot; },
+{ from: 6, to: 6, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -74,28 +68,17 @@
       }
     }
   },
+  &quot;edit_groups&quot;: {
+    &quot;groups&quot;: [
+      &quot;states&quot;,
+      &quot;actions&quot;
+    ]
+  },
   &quot;groups&quot;: {
-    &quot;states&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;#8ff0a4&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      }
-    },
     &quot;actions&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;#ffc0cb&quot;,
+        &quot;background&quot;: &quot;lightblue&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -110,22 +93,28 @@
       }
     },
     &quot;scheduled_actions&quot;: {
-      &quot;borderWidth&quot;: 1,
+      &quot;shape&quot;: &quot;box&quot;,
       &quot;color&quot;: {
         &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;red&quot;
+      }
+    },
+    &quot;states&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
           &quot;border&quot;: &quot;red&quot;
         }
       },
-      &quot;shape&quot;: &quot;box&quot;,
+      &quot;shape&quot;: &quot;ellipse&quot;,
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
         &quot;size&quot;: 14
-      },
-      &quot;schedColor&quot;: false
+      }
     }
   },
   &quot;reload_button&quot;: false,
@@ -163,52 +152,15 @@
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/pinkgreen.json&quot;,
+    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {
-    &quot;0&quot;: {
-      &quot;x&quot;: -27,
-      &quot;y&quot;: -203
-    },
-    &quot;1&quot;: {
-      &quot;x&quot;: -84,
-      &quot;y&quot;: -6
-    },
-    &quot;2&quot;: {
-      &quot;x&quot;: 57,
-      &quot;y&quot;: -10
-    },
-    &quot;3&quot;: {
-      &quot;x&quot;: -56,
-      &quot;y&quot;: 102
-    },
-    &quot;4&quot;: {
-      &quot;x&quot;: 58,
-      &quot;y&quot;: 61
-    },
-    &quot;5&quot;: {
-      &quot;x&quot;: 24,
-      &quot;y&quot;: 187
-    },
-    &quot;10000000000&quot;: {
-      &quot;x&quot;: -136,
-      &quot;y&quot;: -127
-    },
-    &quot;10000000001&quot;: {
-      &quot;x&quot;: 77,
-      &quot;y&quot;: -144
-    }
-  },
+  &quot;positions&quot;: {},
   &quot;width&quot;: 800,
   &quot;height&quot;: 600,
   &quot;physics&quot;: true,
-  &quot;results_and_rewards&quot;: {
-    &quot;show_results&quot;: true,
-    &quot;resultSymbol&quot;: &quot;\u2606&quot;,
-    &quot;show_rewards&quot;: true
-  }
+  &quot;autoResize&quot;: true
 };
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);
@@ -223,27 +175,52 @@ function makeAllNodesInvisible() {
         var nodeId = ids[i];
         var node = nodes.get(nodeId);
         node[&quot;hidden&quot;] = true;
+        node[&quot;physics&quot;] = false;
         nodes.update(node);
     }
 };
-function makeNeighborsVisible(myNode) {
-    var ids = network.getConnectedNodes(myNode, &#x27;to&#x27;);
-    for (let i = 0; i &lt; ids.length; i++) {
-        var nodeId = ids[i];
-        var node = nodes.get(nodeId);
-        node[&quot;hidden&quot;] = false;
-        nodes.update(node);
+function makeNeighborsVisible(homeId) {
+    homeNode = nodes.get(homeId);
+
+    // Make outgoing nodes visible
+    var nodeIds = network.getConnectedNodes(homeId, &quot;to&quot;);
+    for (let i = 0; i &lt; nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = nodes.get(toNodeId);
+      if (toNode[&quot;hidden&quot;]) {
+        toNode[&quot;hidden&quot;] = false;
+        toNode[&quot;physics&quot;] = true;
+        toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
+        toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
+        nodes.update(toNode);
+      }
     }
-};
-function makeNodeVisible(nodeId) {
-    var node = nodes.get(nodeId);
-    node[&quot;hidden&quot;] = false;
-    nodes.update(node);
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = network.getConnectedEdges(homeId);
+    for (let i = 0; i &lt; edgeIds.length; i++) {
+        var edgeId = edgeIds[i];
+        var edge = edges.get(edgeId);
+        var fromNode = nodes.get(edge.from);
+        var toNode = nodes.get(edge.to);
+        if ((! fromNode[&quot;hidden&quot;]) &amp;&amp; (! toNode[&quot;hidden&quot;])) {
+          edge[&quot;hidden&quot;] = false;
+          edge[&quot;physics&quot;] = true;
+          edges.update(edge);
+        }
+    }
 };
 network.on( &#x27;click&#x27;, function(properties) {
     var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
     makeNeighborsVisible(nodeId);
 });
+network.on( &#x27;doubleClick&#x27;, function(properties) {
+    network.setData(data);
+});
+function setNodeColor(id, color) {
+  var node = nodes.get(id);
+  node[&quot;color&quot;] = color
+  nodes.update(node);
+}
 
     &lt;/script&gt;
   &lt;/body&gt;
