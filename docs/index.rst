@@ -13,7 +13,7 @@ Get started here:
    :maxdepth: 2
    :glob:
 
-   getting_started/*
+   introduction/*
 
 Package documentation:
 
