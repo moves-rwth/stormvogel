@@ -3,7 +3,8 @@
 # Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
 # If you remove a with output: statement, everything might just break, be prepared.
 
-from typing import Callable
+from time import sleep
+from typing import Tuple
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -302,23 +303,47 @@ class Visualization(stormvogel.displayable.Displayable):
         NOTE: This method only works after the network is properly loaded."""
         return self.nt.get_positions() if self.nt is not None else {}
 
+    def __set_tuple_color(
+        self,
+        v: Tuple[stormvogel.model.Action, stormvogel.model.State]
+        | stormvogel.model.State,
+        color: str | None,
+    ) -> None:
+        if isinstance(v, tuple):
+            action = v[0]
+            state = v[1]
+            if (state.id, action) in self.network_action_map_id:
+                self.nt.set_node_color(
+                    self.network_action_map_id[state.id, action], color
+                )
+            self.nt.set_node_color(state.id, color)
+        else:
+            self.nt.set_node_color(v.id, color)
+
     def highlight_path(
         self,
         path: stormvogel.simulator.Path,
         color: str,
-        delay_function: Callable | None = None,
+        delay: float | None = None,
+        clear: bool = False,
     ) -> None:
+        """Highlight the path that is provided as an argument in the model.
+        Args:
+            path (stormvogel.simulator.Path): The path to highlight.
+            color (str | None): The color that the highlighted states should get (in HTML color standard).
+                Set to None, in order to clear existing highlights on this path.
+            delay (float | None): If not None, there will be a pause of a specified time before highlighting the next state in the path.
+            clear (bool): Clear the highlighting of a state after it was highlighted. Only works if delay is not None.
+                This is particularly useful for highlighting paths with loops."""
+        init = self.model.get_initial_state()
+        self.nt.set_node_color(init.id, color)
+        if delay is not None:
+            sleep(delay)
+            if clear:
+                self.__set_tuple_color(init, None)
         for _, v in path.path.items():
-            if isinstance(v, tuple):
-                action = v[0]
-                state = v[1]
-                if (state.id, action) in self.network_action_map_id:
-                    self.nt.set_node_color(
-                        self.network_action_map_id[state.id, action], color
-                    )
-                self.nt.set_node_color(state.id, color)
-            else:
-                self.nt.set_node_color(v.id, color)
-            if delay_function is not None:
-                delay_function()
-        self.show()
+            self.__set_tuple_color(v, color)
+            if delay is not None:
+                sleep(delay)
+                if clear:
+                    self.__set_tuple_color(v, None)

@@ -206,7 +206,10 @@ class Network(stormvogel.displayable.Displayable):
         """Set the color of the node with this node id. Only works once the network is properly loaded."""
         if color is None:
             color = "null"
-        js = f"""{self.content_window}.setNodeColor({node_id}, "{color}");"""
+        else:
+            color = f'"{color}"'
+
+        js = f"""{self.content_window}.setNodeColor({node_id}, {color});"""
         with self.spam:
             ipd.display(ipd.Javascript(js))
         self.spam_side_effects()
