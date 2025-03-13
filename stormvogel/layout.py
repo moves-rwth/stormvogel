@@ -1,5 +1,6 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+from typing import Any
 import stormvogel.rdict
 
 import os
@@ -92,6 +93,10 @@ class Layout:
             complete_path = path
         with open(complete_path, "w") as f:
             json.dump(self.layout, f, indent=2)
+
+    def set_value(self, path: list[str], value: Any):
+        """Set a value in the layout. Also works if a key in the path does not exist."""
+        stormvogel.rdict.rset(self.layout, path, value, create_new_keys=True)
 
     def __str__(self) -> str:
         return json.dumps(self.layout, indent=2)

@@ -24,7 +24,21 @@
       "actions"
     ]
   },
-  "groups": {},
+  "groups": {
+    "actions": {
+      "shape": "box",
+      "color": {
+        "background": "lightblue"
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "red"
+      }
+    }
+  },
   "reload_button": false,
   "edges": {
     "arrows": "to",
@@ -68,6 +82,7 @@
   "width": 800,
   "height": 600,
   "physics": true,
+  "autoResize": true,
   "init": {
     "color": "TEST_COLOR"
   }
