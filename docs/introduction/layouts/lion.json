@@ -1,0 +1,273 @@
+{
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edit_groups": {
+    "groups": [
+      "dead...",
+      "states",
+      "actions"
+    ]
+  },
+  "groups": {
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "borderWidth": 1,
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#f5c211",
+        "border": "#c64600",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 5,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "dead...": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#c0bfbc",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "hunt_>:D": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#2ec27e",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "desparate_hunt!": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ff7800",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "starving_:((": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "satisfied_:)": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14
+    },
+    "color": {
+      "color": "black"
+    }
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 687,
+    "height": 519,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/lion.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": -311,
+      "y": -306
+    },
+    "1": {
+      "x": -111,
+      "y": 167
+    },
+    "2": {
+      "x": -122,
+      "y": -117
+    },
+    "3": {
+      "x": 185,
+      "y": -110
+    },
+    "4": {
+      "x": 295,
+      "y": 152
+    },
+    "5": {
+      "x": 137,
+      "y": 286
+    },
+    "10000000000": {
+      "x": -178,
+      "y": 35
+    },
+    "10000000001": {
+      "x": -246,
+      "y": 85
+    },
+    "10000000002": {
+      "x": -14,
+      "y": -27
+    },
+    "10000000003": {
+      "x": 17,
+      "y": -216
+    },
+    "10000000004": {
+      "x": 84,
+      "y": 19
+    },
+    "10000000005": {
+      "x": 328,
+      "y": -37
+    },
+    "10000000006": {
+      "x": 78,
+      "y": 109
+    },
+    "10000000007": {
+      "x": 277,
+      "y": 305
+    }
+  },
+  "physics": true,
+  "autoResize": true,
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
+  },
+  "width": 687,
+  "height": 519
+}

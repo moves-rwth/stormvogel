@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Network</title>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+    <style type="text/css">
+      #mynetwork {
+
+        width: 800px;
+        height: 600px;
+        border: 1px solid lightgray;
+
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mynetwork"></div>
+    <script type="text/javascript">
+
+        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: "states" },
+{ id: 1, label: `red light,still`, group: "states" },
+{ id: 2, label: `green light,moving`, group: "states" },
+{ id: 3, label: `red light,moving`, group: "states" },
+{ id: 4, label: `accident`, group: "states" },
+{ id: 10000000000, label: `accelerate`, group: "actions" },
+{ id: 10000000001, label: `wait`, group: "actions" },
+{ id: 10000000002, label: `accelerate`, group: "actions" },
+{ id: 10000000003, label: `wait`, group: "actions" },
+{ id: 10000000004, label: `brake`, group: "actions" },
+{ id: 10000000005, label: `wait`, group: "actions" },
+{ id: 10000000006, label: `brake`, group: "actions" },
+{ id: 10000000007, label: `wait`, group: "actions" },
+]);
+        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 2, label: "1" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 1, label: "1" },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 3, label: "1" },
+{ from: 1, to: 10000000003 },
+{ from: 10000000003, to: 0, label: "1" },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 0, label: "1" },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 3, label: "1" },
+{ from: 3, to: 10000000006 },
+{ from: 10000000006, to: 1, label: "1" },
+{ from: 3, to: 10000000007 },
+{ from: 10000000007, to: 4, label: "1" },
+{ from: 4, to: 4, label: "1" },
+]);
+        var options = {
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edit_groups": {
+    "groups": [
+      "states",
+      "actions"
+    ]
+  },
+  "groups": {
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "red"
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14
+    },
+    "color": {
+      "color": "black"
+    }
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 800,
+    "height": 600,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/NAME.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {},
+  "physics": true,
+  "autoResize": true
+};
+        //js
+var container = document.getElementById("mynetwork");
+var data = {
+    nodes: nodes,
+    edges: edges,
+};
+var network = new vis.Network(container, data, options);
+function makeAllNodesInvisible() {
+    ids = nodes.getIds();
+    for (let i = 0; i < ids.length; i++) {
+        var nodeId = ids[i];
+        var node = nodes.get(nodeId);
+        node["hidden"] = true;
+        node["physics"] = false;
+        nodes.update(node);
+    }
+};
+function makeNeighborsVisible(homeId) {
+    homeNode = nodes.get(homeId);
+
+    // Make outgoing nodes visible
+    var nodeIds = network.getConnectedNodes(homeId, "to");
+    for (let i = 0; i < nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = nodes.get(toNodeId);
+      if (toNode["hidden"]) {
+        toNode["hidden"] = false;
+        toNode["physics"] = true;
+        toNode["x"] = network.getPosition(homeId)["x"];
+        toNode["y"] = network.getPosition(homeId)["y"];
+        nodes.update(toNode);
+      }
+    }
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = network.getConnectedEdges(homeId);
+    for (let i = 0; i < edgeIds.length; i++) {
+        var edgeId = edgeIds[i];
+        var edge = edges.get(edgeId);
+        var fromNode = nodes.get(edge.from);
+        var toNode = nodes.get(edge.to);
+        if ((! fromNode["hidden"]) && (! toNode["hidden"])) {
+          edge["hidden"] = false;
+          edge["physics"] = true;
+          edges.update(edge);
+        }
+    }
+};
+network.on( 'click', function(properties) {
+    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+    makeNeighborsVisible(nodeId);
+});
+network.on( 'doubleClick', function(properties) {
+    network.setData(data);
+});
+function setNodeColor(id, color) {
+  var node = nodes.get(id);
+  node["color"] = color
+  nodes.update(node);
+}
+
+    </script>
+  </body>
+</html>

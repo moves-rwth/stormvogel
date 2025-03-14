@@ -210,6 +210,5 @@ class Network(stormvogel.displayable.Displayable):
             color = f'"{color}"'
 
         js = f"""{self.content_window}.setNodeColor({node_id}, {color});"""
-        with self.spam:
-            ipd.display(ipd.Javascript(js))
-        self.spam_side_effects()
+        ipd.display(ipd.Javascript(js))
+        ipd.clear_output()
