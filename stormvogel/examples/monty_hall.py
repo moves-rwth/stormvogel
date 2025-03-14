@@ -49,14 +49,14 @@ def create_monty_hall_mdp():
                 (
                     mdp.action("stay"),
                     mdp.new_state(
-                        ["done"] + (["target"] if chosen_pos == car_pos else []),
+                        ["done"] + (["target"] if chosen_pos == car_pos else ["lost"]),
                         s.features | {"chosen_pos": chosen_pos},
                     ),
                 ),
                 (
                     mdp.action("switch"),
                     mdp.new_state(
-                        ["done"] + (["target"] if other_pos == car_pos else []),
+                        ["done"] + (["target"] if other_pos == car_pos else ["lost"]),
                         s.features | {"chosen_pos": other_pos},
                     ),
                 ),
