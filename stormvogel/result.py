@@ -82,14 +82,9 @@ class Result:
             self.stormpy_scheduler = stormpy_scheduler
             taken_actions = {}
             for state in self.model.states.values():
-                # taken_actions[state.id] = stormvogel.model.Action.create(
-                #     str(stormpy_scheduler.get_choice(state.id))
-                # )
-                av_act = state.available_actions()
-                choice = stormpy_scheduler.get_choice(state.id)
-                action_index = choice.get_deterministic_choice()
-                taken_actions[state.id] = av_act[action_index]
-
+                taken_actions[state.id] = stormvogel.model.Action.create(
+                    str(stormpy_scheduler.get_choice(state.id))
+                )
             self.scheduler = Scheduler(self.model, taken_actions)
         else:
             raise RuntimeError("This result already has a scheduler")

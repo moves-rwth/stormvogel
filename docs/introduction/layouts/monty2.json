@@ -21,8 +21,7 @@
   "edit_groups": {
     "groups": [
       "states",
-      "actions",
-      "scheduled_actions"
+      "actions"
     ]
   },
   "groups": {
@@ -44,16 +43,16 @@
       }
     },
     "scheduled_actions": {
-      "borderWidth": 1,
+      "shape": "box",
       "color": {
         "background": "pink",
-        "border": "#ff7070",
+        "border": "black",
         "highlight": {
           "background": "white",
           "border": "red"
         }
       },
-      "shape": "box",
+      "borderWidth": 1,
       "mass": 1,
       "font": {
         "color": "black",
@@ -84,14 +83,11 @@
     "arrows": "to",
     "font": {
       "color": "black",
-      "size": 30,
-      "strokeColor": "white",
-      "strokeWidth": 2
+      "size": 30
     },
     "color": {
       "color": "black"
-    },
-    "width": 2
+    }
   },
   "numbers": {
     "fractions": true,
@@ -451,8 +447,8 @@
       "y": -786
     }
   },
-  "physics": true,
-  "autoResize": true,
   "width": 929,
-  "height": 745
+  "height": 745,
+  "physics": true,
+  "autoResize": true
 }

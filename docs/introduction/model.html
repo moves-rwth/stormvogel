@@ -1,8 +1,8 @@
 
           <iframe
-                id="modelULXATVifwP"
-                width="675"
-                height="395"
+                id="modelPIozahTdwc"
+                width="820"
+                height="620"
                 frameborder="0"
                 srcdoc="
 &lt;!DOCTYPE html&gt;
@@ -16,8 +16,8 @@
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
 
-        width: 655px;
-        height: 375px;
+        width: 800px;
+        height: 600px;
         border: 1px solid lightgray;
 
       }
@@ -27,19 +27,19 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;green_light&quot;, x: 194, y: -96 },
-{ id: 1, label: `red light,still`, group: &quot;red_light&quot;, x: -51, y: -142 },
-{ id: 2, label: `green light,moving`, group: &quot;green_light&quot;, x: 186, y: 153 },
-{ id: 3, label: `red light,moving`, group: &quot;red_light&quot;, x: -108, y: 98 },
-{ id: 4, label: `accident`, group: &quot;states&quot;, x: -367, y: 177 },
-{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot;, x: 144, y: 35 },
-{ id: 10000000001, label: `wait`, group: &quot;actions&quot;, x: 68, y: -99 },
-{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot;, x: -158, y: -50 },
-{ id: 10000000003, label: `wait`, group: &quot;actions&quot;, x: 87, y: -212 },
-{ id: 10000000004, label: `brake`, group: &quot;actions&quot;, x: 275, y: 33 },
-{ id: 10000000005, label: `wait`, group: &quot;actions&quot;, x: 33, y: 176 },
-{ id: 10000000006, label: `brake`, group: &quot;actions&quot;, x: -25, y: -3 },
-{ id: 10000000007, label: `wait`, group: &quot;actions&quot;, x: -238, y: 163 },
+        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;states&quot; },
+{ id: 1, label: `red light,still`, group: &quot;states&quot; },
+{ id: 2, label: `green light,moving`, group: &quot;states&quot; },
+{ id: 3, label: `red light,moving`, group: &quot;states&quot; },
+{ id: 4, label: `accident`, group: &quot;states&quot; },
+{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot; },
+{ id: 10000000001, label: `wait`, group: &quot;actions&quot; },
+{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot; },
+{ id: 10000000003, label: `wait`, group: &quot;actions&quot; },
+{ id: 10000000004, label: `brake`, group: &quot;actions&quot; },
+{ id: 10000000005, label: `wait`, group: &quot;actions&quot; },
+{ id: 10000000006, label: `brake`, group: &quot;actions&quot; },
+{ id: 10000000007, label: `wait`, group: &quot;actions&quot; },
 ]);
         var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
 { from: 10000000000, to: 2, label: &quot;1&quot; },
@@ -81,8 +81,6 @@
   },
   &quot;edit_groups&quot;: {
     &quot;groups&quot;: [
-      &quot;green_light&quot;,
-      &quot;red_light&quot;,
       &quot;states&quot;,
       &quot;actions&quot;
     ]
@@ -102,48 +100,20 @@
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 20
+        &quot;size&quot;: 14
       }
     },
     &quot;scheduled_actions&quot;: {
       &quot;shape&quot;: &quot;box&quot;,
       &quot;color&quot;: {
         &quot;background&quot;: &quot;pink&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;borderWidth&quot;: 1,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 14
-      },
-      &quot;schedColor&quot;: false
+        &quot;border&quot;: &quot;red&quot;
+      }
     },
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;#000000&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;#ffffff&quot;,
-        &quot;size&quot;: 20
-      }
-    },
-    &quot;red_light&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;#ec9393&quot;,
+        &quot;background&quot;: &quot;white&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -154,41 +124,7 @@
       &quot;mass&quot;: 1,
       &quot;font&quot;: {
         &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 20
-      }
-    },
-    &quot;green_light&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;#bcfe58&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 20
-      }
-    },
-    &quot;init&quot;: {
-      &quot;borderWidth&quot;: 1,
-      &quot;color&quot;: {
-        &quot;background&quot;: &quot;#bcfe58&quot;,
-        &quot;border&quot;: &quot;black&quot;,
-        &quot;highlight&quot;: {
-          &quot;background&quot;: &quot;white&quot;,
-          &quot;border&quot;: &quot;red&quot;
-        }
-      },
-      &quot;shape&quot;: &quot;ellipse&quot;,
-      &quot;mass&quot;: 1,
-      &quot;font&quot;: {
-        &quot;color&quot;: &quot;black&quot;,
-        &quot;size&quot;: 20
+        &quot;size&quot;: 14
       }
     }
   },
@@ -197,14 +133,11 @@
     &quot;arrows&quot;: &quot;to&quot;,
     &quot;font&quot;: {
       &quot;color&quot;: &quot;black&quot;,
-      &quot;size&quot;: 14,
-      &quot;strokeColor&quot;: &quot;white&quot;,
-      &quot;strokeWidth&quot;: 2
+      &quot;size&quot;: 14
     },
     &quot;color&quot;: {
       &quot;color&quot;: &quot;black&quot;
-    },
-    &quot;width&quot;: 1
+    }
   },
   &quot;numbers&quot;: {
     &quot;fractions&quot;: true,
@@ -224,74 +157,19 @@
   },
   &quot;misc&quot;: {
     &quot;enable_physics&quot;: true,
-    &quot;width&quot;: 655,
-    &quot;height&quot;: 375,
+    &quot;width&quot;: 800,
+    &quot;height&quot;: 600,
     &quot;explore&quot;: false
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/car.json&quot;,
+    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {
-    &quot;0&quot;: {
-      &quot;x&quot;: 194,
-      &quot;y&quot;: -96
-    },
-    &quot;1&quot;: {
-      &quot;x&quot;: -51,
-      &quot;y&quot;: -142
-    },
-    &quot;2&quot;: {
-      &quot;x&quot;: 186,
-      &quot;y&quot;: 153
-    },
-    &quot;3&quot;: {
-      &quot;x&quot;: -108,
-      &quot;y&quot;: 98
-    },
-    &quot;4&quot;: {
-      &quot;x&quot;: -367,
-      &quot;y&quot;: 177
-    },
-    &quot;10000000000&quot;: {
-      &quot;x&quot;: 144,
-      &quot;y&quot;: 35
-    },
-    &quot;10000000001&quot;: {
-      &quot;x&quot;: 68,
-      &quot;y&quot;: -99
-    },
-    &quot;10000000002&quot;: {
-      &quot;x&quot;: -158,
-      &quot;y&quot;: -50
-    },
-    &quot;10000000003&quot;: {
-      &quot;x&quot;: 87,
-      &quot;y&quot;: -212
-    },
-    &quot;10000000004&quot;: {
-      &quot;x&quot;: 275,
-      &quot;y&quot;: 33
-    },
-    &quot;10000000005&quot;: {
-      &quot;x&quot;: 33,
-      &quot;y&quot;: 176
-    },
-    &quot;10000000006&quot;: {
-      &quot;x&quot;: -25,
-      &quot;y&quot;: -3
-    },
-    &quot;10000000007&quot;: {
-      &quot;x&quot;: -238,
-      &quot;y&quot;: 163
-    }
-  },
+  &quot;positions&quot;: {},
   &quot;physics&quot;: true,
-  &quot;autoResize&quot;: true,
-  &quot;width&quot;: 655,
-  &quot;height&quot;: 375
+  &quot;autoResize&quot;: true
 };
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);
