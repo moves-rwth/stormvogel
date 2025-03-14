@@ -82,7 +82,19 @@
       "size": {
         "__description": "Size",
         "__widget": "IntSlider"
+      },
+      "strokeColor": {
+        "__description": "Text outline color",
+        "__widget": "ColorPicker"
+      },
+      "strokeWidth": {
+        "__description": "Text outline width",
+        "__widget": "IntSlider"
       }
+    },
+    "width": {
+      "__description": "Wdith",
+      "__widget": "IntSlider"
     }
   },
   "numbers": {
