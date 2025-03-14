@@ -128,7 +128,6 @@
     }
   },
   "misc": {
-    "__html": "<p>These settings require a reload to take effect.</p>",
     "__collapse": true,
     "enable_physics": {
       "__description": "enable physics",

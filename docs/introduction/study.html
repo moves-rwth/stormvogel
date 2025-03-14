@@ -1,6 +1,6 @@
 
           <iframe
-                id="lionouwtlBWkFx"
+                id="studyseEKlSJXhW"
                 width="820"
                 height="620"
                 frameborder="0"
@@ -27,52 +27,32 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
-{ id: 1, label: `full :D`, group: &quot;states&quot; },
-{ id: 2, label: `satisfied :)`, group: &quot;states&quot; },
-{ id: 3, label: `hungry :(`, group: &quot;states&quot; },
-{ id: 4, label: `starving :((`, group: &quot;states&quot; },
-{ id: 5, label: `dead...`, group: &quot;states&quot; },
-{ id: 10000000000, label: `hunt &gt;:D`, group: &quot;actions&quot; },
-{ id: 10000000001, label: `rawr`, group: &quot;actions&quot; },
-{ id: 10000000002, label: `hunt &gt;:D`, group: &quot;actions&quot; },
-{ id: 10000000003, label: `rawr`, group: &quot;actions&quot; },
-{ id: 10000000004, label: `hunt &gt;:D`, group: &quot;actions&quot; },
-{ id: 10000000005, label: `rawr`, group: &quot;actions&quot; },
-{ id: 10000000006, label: `hunt &gt;:D`, group: &quot;actions&quot; },
-{ id: 10000000007, label: `rawr`, group: &quot;actions&quot; },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -27, y: -203 },
+{ id: 1, label: `studied
+€	R: 0`, group: &quot;states&quot;, x: -84, y: -6 },
+{ id: 2, label: `didn&#x27;t study
+€	R: 15`, group: &quot;states&quot;, x: 57, y: -10 },
+{ id: 3, label: `pass test
+€	R: 100`, group: &quot;states&quot;, x: -56, y: 102 },
+{ id: 4, label: `fail test
+€	R: 0`, group: &quot;states&quot;, x: 58, y: 61 },
+{ id: 5, label: `end
+€	R: 0`, group: &quot;states&quot;, x: 24, y: 187 },
+{ id: 10000000000, label: `study
+€	R: 0`, group: &quot;actions&quot;, x: -136, y: -127 },
+{ id: 10000000001, label: `don&#x27;t study
+€	R: 0`, group: &quot;actions&quot;, x: 77, y: -144 },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 2, label: &quot;1&quot; },
-{ from: 1, to: 10000000000 },
-{ from: 10000000000, to: 2, label: &quot;1/2&quot; },
-{ from: 10000000000, to: 1, label: &quot;1/2&quot; },
-{ from: 1, to: 10000000001 },
-{ from: 10000000001, to: 1, label: &quot;9/10&quot; },
-{ from: 10000000001, to: 2, label: &quot;1/10&quot; },
-{ from: 2, to: 10000000002 },
-{ from: 10000000002, to: 2, label: &quot;1/2&quot; },
-{ from: 10000000002, to: 1, label: &quot;3/10&quot; },
-{ from: 10000000002, to: 3, label: &quot;1/5&quot; },
-{ from: 2, to: 10000000003 },
-{ from: 10000000003, to: 2, label: &quot;9/10&quot; },
-{ from: 10000000003, to: 3, label: &quot;1/10&quot; },
-{ from: 3, to: 10000000004 },
-{ from: 10000000004, to: 1, label: &quot;1/5&quot; },
-{ from: 10000000004, to: 2, label: &quot;1/2&quot; },
-{ from: 10000000004, to: 3, label: &quot;1/10&quot; },
-{ from: 10000000004, to: 4, label: &quot;1/5&quot; },
-{ from: 3, to: 10000000005 },
-{ from: 10000000005, to: 3, label: &quot;9/10&quot; },
-{ from: 10000000005, to: 4, label: &quot;1/10&quot; },
-{ from: 4, to: 10000000006 },
-{ from: 10000000006, to: 1, label: &quot;1/10&quot; },
-{ from: 10000000006, to: 2, label: &quot;1/2&quot; },
-{ from: 10000000006, to: 3, label: &quot;1/5&quot; },
-{ from: 10000000006, to: 5, label: &quot;1/5&quot; },
-{ from: 4, to: 10000000007 },
-{ from: 10000000007, to: 4, label: &quot;9/10&quot; },
-{ from: 10000000007, to: 5, label: &quot;1/10&quot; },
-{ from: 5, to: 5, label: &quot;1&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: &quot;1&quot; },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 2, label: &quot;1&quot; },
+{ from: 1, to: 3, label: &quot;9/10&quot; },
+{ from: 1, to: 4, label: &quot;1/10&quot; },
+{ from: 2, to: 3, label: &quot;2/5&quot; },
+{ from: 2, to: 4, label: &quot;3/5&quot; },
+{ from: 3, to: 5, label: &quot;1&quot; },
+{ from: 4, to: 5, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -104,7 +84,7 @@
     &quot;actions&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;background&quot;: &quot;#ffc0cb&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -118,10 +98,28 @@
         &quot;size&quot;: 14
       }
     },
+    &quot;scheduled_actions&quot;: {
+      &quot;shape&quot;: &quot;box&quot;,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;pink&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;borderWidth&quot;: 1,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
+    },
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;white&quot;,
+        &quot;background&quot;: &quot;#8ff0a4&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -171,15 +169,53 @@
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;filename&quot;: &quot;layouts/pinkgreen.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {},
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: -27,
+      &quot;y&quot;: -203
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: -84,
+      &quot;y&quot;: -6
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: 57,
+      &quot;y&quot;: -10
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: -56,
+      &quot;y&quot;: 102
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: 58,
+      &quot;y&quot;: 61
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: 24,
+      &quot;y&quot;: 187
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: -136,
+      &quot;y&quot;: -127
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: 77,
+      &quot;y&quot;: -144
+    }
+  },
   &quot;width&quot;: 800,
   &quot;height&quot;: 600,
   &quot;physics&quot;: true,
-  &quot;autoResize&quot;: true
+  &quot;autoResize&quot;: true,
+  &quot;results_and_rewards&quot;: {
+    &quot;show_results&quot;: true,
+    &quot;resultSymbol&quot;: &quot;\u2606&quot;,
+    &quot;show_rewards&quot;: true
+  }
 };
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);
@@ -235,6 +271,11 @@ network.on( &#x27;click&#x27;, function(properties) {
 network.on( &#x27;doubleClick&#x27;, function(properties) {
     network.setData(data);
 });
+function setNodeColor(id, color) {
+  var node = nodes.get(id);
+  node[&quot;color&quot;] = color
+  nodes.update(node);
+}
 
     &lt;/script&gt;
   &lt;/body&gt;

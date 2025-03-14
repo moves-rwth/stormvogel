@@ -41,6 +41,8 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         """Copy some settings from one place in the layout to another place in the layout.
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout.layout["physics"] = self.layout.layout["misc"]["enable_physics"]
+        self.layout.layout["width"] = self.layout.layout["misc"]["width"]
+        self.layout.layout["height"] = self.layout.layout["misc"]["height"]
 
     def set_current_vis_node_positions_in_layout(self):
         """Try to save the positions of the nodes in the graph to the layout.

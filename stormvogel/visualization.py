@@ -4,6 +4,7 @@
 # If you remove a with output: statement, everything might just break, be prepared.
 
 from time import sleep
+from typing import Tuple
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -85,7 +86,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.do_init_server: bool = do_init_server
         self.__create_nt()
         self.network_action_map_id: dict[tuple[int, stormvogel.model.Action], int] = {}
-        # Relate state ids and actions to the node id of the action for this state in the network.
+        # Keeps track of the ids of states for us.
 
     def __create_nt(self) -> None:
         """Reload the node positions and create the network."""
@@ -212,7 +213,9 @@ class Visualization(stormvogel.displayable.Displayable):
                     self.nt.add_edge(state_id, network_action_id, color=edge_color)  # type: ignore
                     # Add transition FROM the action to the states in its branch.
                     for prob, target in branch.branch:
-                        self.network_action_map_id[state_id, action] = network_action_id
+                        self.network_action_map_id[target.id, action] = (
+                            network_action_id
+                        )
                         self.nt.add_edge(
                             network_action_id,
                             target.id,
@@ -295,64 +298,52 @@ class Visualization(stormvogel.displayable.Displayable):
                 + str(s.observation.observation)
             )
 
-    def generate_html(self) -> str:
-        """Get HTML code that can be used to export this visualization."""
-        return self.nt.generate_html() if self.nt is not None else ""
-
-    def save_html(self, name: str) -> None:
-        with open(name + ".html", "w") as f:
-            f.write(self.generate_html())
-
     def get_positions(self) -> dict:
         """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously).
         NOTE: This method only works after the network is properly loaded."""
         return self.nt.get_positions() if self.nt is not None else {}
 
-    def __to_state_action_sequence(
-        self, path: stormvogel.simulator.Path
-    ) -> list[stormvogel.model.Action | stormvogel.model.State]:
-        res: list[stormvogel.model.Action | stormvogel.model.State] = [
-            self.model.get_initial_state(),
-            self.model.get_initial_state(),
-        ]
-        # For some reason, it will skip the first one so if you start with the initial state twice it will work properly
-        # Don't ask me why
-        for _, v in path.path.items():
-            if isinstance(v, tuple):
-                res += list(v)
-            else:
-                res.append(v)
-        return res
+    def __set_tuple_color(
+        self,
+        v: Tuple[stormvogel.model.Action, stormvogel.model.State]
+        | stormvogel.model.State,
+        color: str | None,
+    ) -> None:
+        if isinstance(v, tuple):
+            action = v[0]
+            state = v[1]
+            if (state.id, action) in self.network_action_map_id:
+                self.nt.set_node_color(
+                    self.network_action_map_id[state.id, action], color
+                )
+            self.nt.set_node_color(state.id, color)
+        else:
+            self.nt.set_node_color(v.id, color)
 
     def highlight_path(
         self,
         path: stormvogel.simulator.Path,
         color: str,
-        delay: float = 1,
-        clear: bool = True,
+        delay: float | None = None,
+        clear: bool = False,
     ) -> None:
         """Highlight the path that is provided as an argument in the model.
         Args:
             path (stormvogel.simulator.Path): The path to highlight.
             color (str | None): The color that the highlighted states should get (in HTML color standard).
                 Set to None, in order to clear existing highlights on this path.
-            delay (float): If not None, there will be a pause of a specified time before highlighting the next state in the path.
+            delay (float | None): If not None, there will be a pause of a specified time before highlighting the next state in the path.
             clear (bool): Clear the highlighting of a state after it was highlighted. Only works if delay is not None.
                 This is particularly useful for highlighting paths with loops."""
-        seq = self.__to_state_action_sequence(path)
-        for i, v in enumerate(seq):
-            if isinstance(v, stormvogel.model.State):
-                print(v)
-                self.nt.set_node_color(v.id, color)
+        init = self.model.get_initial_state()
+        self.nt.set_node_color(init.id, color)
+        if delay is not None:
+            sleep(delay)
+            if clear:
+                self.__set_tuple_color(init, None)
+        for _, v in path.path.items():
+            self.__set_tuple_color(v, color)
+            if delay is not None:
                 sleep(delay)
                 if clear:
-                    self.nt.set_node_color(v.id, None)
-            elif (
-                isinstance(v, stormvogel.model.Action)
-                and (seq[i - 1].id, v) in self.network_action_map_id
-            ):
-                node_id = self.network_action_map_id[seq[i - 1].id, v]
-                self.nt.set_node_color(node_id, color)
-                sleep(delay)
-                if clear:
-                    self.nt.set_node_color(node_id, None)
+                    self.__set_tuple_color(v, None)
