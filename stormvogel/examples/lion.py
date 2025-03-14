@@ -8,7 +8,7 @@ def create_lion_mdp():
     satisfied = lion.new_state("satisfied :)")
     hungry = lion.new_state("hungry :(")
     starving = lion.new_state("starving :((")
-    dead = lion.new_state("dead...")
+    dead = lion.new_state("dead")
 
     hunt = lion.new_action("hunt >:D")
     rawr = lion.new_action("rawr")
