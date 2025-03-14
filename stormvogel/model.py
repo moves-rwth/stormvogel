@@ -396,9 +396,11 @@ class RewardModel:
             )
 
     def set_state_reward(self, state: State, value: Number):
-        """Sets the reward at said state. If the model has actions, try to use the empty state."""
+        """Sets the reward at said state."""
         if self.model.supports_actions():
-            self.set_state_action_reward(state, EmptyAction, value)
+            raise RuntimeError(
+                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
+            )
         else:
             self.rewards[state.id, EmptyAction] = value
 
@@ -1027,7 +1029,7 @@ class Model:
         res = [f"{self.type} with name {self.name}"]
         res += ["", "States:"] + [f"{state}" for (_id, state) in self.states.items()]
         res += ["", "Transitions:"] + [
-            f"{id}: {transition}" for (id, transition) in self.transitions.items()
+            f"{transition}" for (_id, transition) in self.transitions.items()
         ]
 
         if self.supports_rates() and self.exit_rates is not None:

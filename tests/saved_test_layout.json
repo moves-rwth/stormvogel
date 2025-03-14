@@ -44,14 +44,11 @@
     "arrows": "to",
     "font": {
       "color": "black",
-      "size": 14,
-      "strokeColor": "white",
-      "strokeWidth": 2
+      "size": 14
     },
     "color": {
       "color": "black"
-    },
-    "width": 1
+    }
   },
   "numbers": {
     "fractions": true,
@@ -82,6 +79,8 @@
     "load_button": false
   },
   "positions": {},
+  "width": 800,
+  "height": 600,
   "physics": true,
   "autoResize": true,
   "init": {
