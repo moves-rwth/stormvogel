@@ -79,8 +79,6 @@
     "load_button": false
   },
   "positions": {},
-  "width": 800,
-  "height": 600,
   "physics": true,
   "autoResize": true,
   "init": {
