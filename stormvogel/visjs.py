@@ -159,6 +159,7 @@ class Network(stormvogel.displayable.Displayable):
                 id="{self.name}"
                 width="{self.width + self.EXTRA_PIXELS}"
                 height="{self.height + self.EXTRA_PIXELS}"
+                sandbox="allow-scripts"
                 frameborder="0"
                 srcdoc="{html.escape(self.generate_html())}"
                 border:none !important;
