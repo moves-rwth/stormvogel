@@ -215,7 +215,7 @@ class Visualization(stormvogel.displayable.Displayable):
                     return str(
                         round(float(prob), self.layout.layout["numbers"]["digits"])
                     )
-            else:
+            else:  # TODO case for when we have parameters
                 return ""
 
     def __format_rewards(
