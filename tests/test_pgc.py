@@ -20,7 +20,7 @@ def test_pgc_mdp():
             return [left, right]
 
     def rewards(s: pgc.State, a: pgc.Action):
-        return [1, 2]
+        return {"r1": 1, "r2": 2}
 
     def labels(s: pgc.State):
         return [str(s.x)]
@@ -71,12 +71,12 @@ def test_pgc_mdp():
     regular_model.add_transitions(state2, model.Transition({right: branch21}))
     regular_model.add_transitions(state0, model.Transition({left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("rewardmodel: 0")
+    rewardmodel = regular_model.add_rewards("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("rewardmodel: 1")
+    rewardmodel = regular_model.add_rewards("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -103,7 +103,7 @@ def test_pgc_mdp_int():
             return [left, right]
 
     def rewards(s, a: pgc.Action):
-        return [1, 2]
+        return {"r1": 1, "r2": 2}
 
     def labels(s):
         return [str(s)]
@@ -154,12 +154,12 @@ def test_pgc_mdp_int():
     regular_model.add_transitions(state2, model.Transition({right: branch21}))
     regular_model.add_transitions(state0, model.Transition({left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("rewardmodel: 0")
+    rewardmodel = regular_model.add_rewards("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("rewardmodel: 1")
+    rewardmodel = regular_model.add_rewards("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -174,7 +174,7 @@ def test_pgc_dtmc():
     initial_state = pgc.State(s=0)
 
     def rewards(s: pgc.State):
-        return [1, 2]
+        return {"r1": 1, "r2": 2}
 
     def delta(s: pgc.State):
         match s.s:
@@ -283,10 +283,10 @@ def test_pgc_dtmc():
         regular_model.get_state_by_id(13), [(1, regular_model.get_state_by_id(13))]
     )
 
-    rewardmodel = regular_model.add_rewards("rewardmodel: 0")
+    rewardmodel = regular_model.add_rewards("r1")
     for state in regular_model.states.values():
         rewardmodel.set_state_reward(state, 1)
-    rewardmodel = regular_model.add_rewards("rewardmodel: 1")
+    rewardmodel = regular_model.add_rewards("r2")
     for state in regular_model.states.values():
         rewardmodel.set_state_reward(state, 2)
 

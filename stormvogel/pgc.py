@@ -152,35 +152,33 @@ def valid_input(
     if rewards is not None:
         if supports_actions:
             assert available_actions is not None
-            nr = len(
-                rewards(initial_state_pgc, available_actions(initial_state_pgc)[0])
-            )
+            action = available_actions(initial_state_pgc)[0]
+            initial_state_rewards = rewards(initial_state_pgc, action)
 
             for state in states_seen:
-                assert available_actions is not None
                 for action in available_actions(state):
-                    rewardlist = rewards(state, action)
-                    if not isinstance(rewardlist, list):
+                    rewarddict = rewards(state, action)
+                    if not isinstance(rewarddict, dict):
                         raise ValueError(
-                            f"On input pair {state} {action}, the rewards function does not return a list. Make sure to change it to [<your output>]"
+                            f"On input pair {state} {action}, the rewards function does not return a dictionary. Make sure to change it to the format {{<rewardmodel>:<reward>}}"
                         )
-                    if len(rewardlist) != nr:
+                    if rewarddict.keys() != initial_state_rewards.keys():
                         raise ValueError(
-                            "Make sure that the rewards function returns a list with the same length on each return"
+                            "Make sure that the rewards function returns a dictionary with the same keys on each return"
                         )
 
         else:
-            nr = len(rewards(initial_state_pgc))
+            initial_state_rewards = rewards(initial_state_pgc)
 
             for state in states_seen:
-                rewardlist = rewards(state)
-                if not isinstance(rewardlist, list):
+                rewarddict = rewards(state)
+                if not isinstance(rewarddict, dict):
                     raise ValueError(
-                        f"On input {state}, the rewards function does not return a list. Make sure to change it to [<your output>]"
+                        f"On input {state}, the rewards function does not return a dictionary. Make sure to change it to the format {{<rewardmodel>:<reward>}}"
                     )
-                if len(rewardlist) != nr:
+                if rewarddict.keys() != initial_state_rewards.keys():
                     raise ValueError(
-                        "Make sure that the rewards function returns a list with the same length on each return"
+                        "Make sure that the rewards function returns a dictionary with the same keys on each return"
                     )
 
     # we check for the labels when the function does not return a list object
@@ -309,38 +307,36 @@ def build_pgc(
         if model.supports_actions():
             # we first create the right number of reward models
             assert available_actions is not None
-            nr = len(
-                rewards(initial_state_pgc, available_actions(initial_state_pgc)[0])
-            )
-            for i in range(nr):
-                model.add_rewards("rewardmodel: " + str(i))
+            for reward in rewards(
+                initial_state_pgc, available_actions(initial_state_pgc)[0]
+            ).items():
+                model.add_rewards(reward[0])
 
             for state in states_seen:
                 assert available_actions is not None
                 for action in available_actions(state):
-                    rewardlist = rewards(state, action)
+                    rewarddict = rewards(state, action)
                     s = model.get_states_with_label(str(state))[0]
                     assert s is not None
-                    for index, reward in enumerate(rewardlist):
+                    for index, reward in enumerate(rewarddict.items()):
                         a = model.get_action_with_labels(frozenset(action.labels))
                         assert a is not None
                         model.rewards[index].set_state_action_reward(
                             s,
                             a,
-                            reward,
+                            reward[1],
                         )
         else:
             # we first create the right number of reward models
-            nr = len(rewards(initial_state_pgc))
-            for i in range(nr):
-                model.add_rewards("rewardmodel: " + str(i))
+            for reward in rewards(initial_state_pgc).items():
+                model.add_rewards(reward[0])
 
             for state in states_seen:
-                rewardlist = rewards(state)
+                rewarddict = rewards(state)
                 s = model.get_states_with_label(str(state))[0]
                 assert s is not None
-                for index, reward in enumerate(rewardlist):
-                    model.rewards[index].set_state_reward(s, reward)
+                for index, reward in enumerate(rewarddict.items()):
+                    model.rewards[index].set_state_reward(s, reward[1])
 
     # we add the labels
     if labels is not None:
