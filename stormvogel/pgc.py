@@ -1,6 +1,7 @@
 import stormvogel.model
 from dataclasses import dataclass
 from collections.abc import Callable
+import inspect
 
 
 @dataclass
@@ -31,23 +32,18 @@ class State:
 
 
 def valid_input(
-    delta,
+    delta: Callable,
     initial_state_pgc,
-    rewards,
-    labels,
-    available_actions,
-    modeltype,
-    max_size=2000,
+    rewards: Callable | None = None,
+    labels: Callable | None = None,
+    available_actions: Callable | None = None,
+    modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
+    max_size: int = 2000,
 ):
     """
     function that checks if the input for the pgc model builder is valid
     it will give a runtime error if it isn't.
     """
-
-    if modeltype == stormvogel.model.ModelType.MDP and available_actions is None:
-        raise RuntimeError(
-            "You have to provide an available actions function for models that support actions"
-        )
 
     supports_actions = modeltype in (
         stormvogel.model.ModelType.MDP,
@@ -55,7 +51,59 @@ def valid_input(
         stormvogel.model.ModelType.MA,
     )
 
+    # we first check if we have an available_actions function in case our model supports actions
+    if supports_actions and available_actions is None:
+        raise ValueError(
+            "You have to provide an available actions function for models that support actions"
+        )
+
+    # we check if the provided functions have the right number of parameters
+    if supports_actions:
+        assert available_actions is not None
+        sig = inspect.signature(available_actions)
+        num_params = len(sig.parameters)
+        if num_params != 1:
+            raise ValueError(
+                f"The available_actions function must take exactly one argument (state), but it takes {num_params} arguments"
+            )
+
+    sig = inspect.signature(delta)
+    num_params = len(sig.parameters)
+    if supports_actions:
+        if num_params != 2:
+            raise ValueError(
+                f"Your delta function must take exactly two arguments (state and action), but it takes {num_params} arguments"
+            )
+    else:
+        if num_params != 1:
+            raise ValueError(
+                f"Your delta function must take exactly one argument (state), but it takes {num_params} arguments"
+            )
+
+    if rewards is not None:
+        sig = inspect.signature(rewards)
+        num_params = len(sig.parameters)
+        if supports_actions:
+            if num_params != 2:
+                raise ValueError(
+                    f"The rewards function must take exactly two arguments (state, action), but it takes {num_params} arguments"
+                )
+        else:
+            if num_params != 1:
+                raise ValueError(
+                    f"The rewards function must take exactly one argument (state), but it takes {num_params} arguments"
+                )
+
+    if labels is not None:
+        sig = inspect.signature(labels)
+        num_params = len(sig.parameters)
+        if num_params != 1:
+            raise ValueError(
+                f"The labels function must take exactly one argument (state), but it takes {num_params} arguments"
+            )
+
     # now we simulate the behaviour of the pgc model builder and provide the necessary errors
+    # for example when a function does not return a list object
     states_seen = []
     states_to_be_visited = [initial_state_pgc]
     state = initial_state_pgc
@@ -66,14 +114,14 @@ def valid_input(
             assert available_actions is not None
             actionslist = available_actions(state)
             if not isinstance(actionslist, list):
-                raise RuntimeError(
+                raise ValueError(
                     f"On input {state}, the available actions function does not return a list. Make sure to change it to [<your output>]"
                 )
             for action in actionslist:
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list):
-                    raise RuntimeError(
+                    raise ValueError(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change it to [<your output>]"
                     )
 
@@ -84,7 +132,7 @@ def valid_input(
         else:
             tuples = delta(state)
             if not isinstance(tuples, list):
-                raise RuntimeError(
+                raise ValueError(
                     f"On input {state}, the delta function does not return a list. Make sure to change it to [<your output>]"
                 )
 
@@ -99,7 +147,8 @@ def valid_input(
                 f"The model you want te create has a very large amount of states (at least {max_size}), if you wish to proceed, set max_size to some larger number."
             )
 
-    # we check for the rewards
+    # we check for the rewards when the function does not return a list object
+    # or the length is not always the same
     if rewards is not None:
         if supports_actions:
             assert available_actions is not None
@@ -112,11 +161,11 @@ def valid_input(
                 for action in available_actions(state):
                     rewardlist = rewards(state, action)
                     if not isinstance(rewardlist, list):
-                        raise RuntimeError(
+                        raise ValueError(
                             f"On input pair {state} {action}, the rewards function does not return a list. Make sure to change it to [<your output>]"
                         )
                     if len(rewardlist) != nr:
-                        raise RuntimeError(
+                        raise ValueError(
                             "Make sure that the rewards function returns a list with the same length on each return"
                         )
 
@@ -126,20 +175,21 @@ def valid_input(
             for state in states_seen:
                 rewardlist = rewards(state)
                 if not isinstance(rewardlist, list):
-                    raise RuntimeError(
+                    raise ValueError(
                         f"On input {state}, the rewards function does not return a list. Make sure to change it to [<your output>]"
                     )
                 if len(rewardlist) != nr:
-                    raise RuntimeError(
+                    raise ValueError(
                         "Make sure that the rewards function returns a list with the same length on each return"
                     )
 
-    # we check for the labels
+    # we check for the labels when the function does not return a list object
+    # or the length is not always the same
     if labels is not None:
         for state in states_seen:
             labellist = labels(state)
             if not isinstance(labellist, list):
-                raise RuntimeError(
+                raise ValueError(
                     f"On input {state}, the labels function does not return a list. Make sure to change it to [<your output>]"
                 )
 
