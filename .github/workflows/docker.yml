@@ -9,11 +9,9 @@
 
 name: Publish Docker image
 
-on: [push]
-# TODO
-# on:
-#   push:
-#     branches: [main]
+on:
+  push:
+    branches: [main]
 
 jobs:
   push_to_registry:
