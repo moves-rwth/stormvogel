@@ -2,7 +2,7 @@ FROM movesrwth/stormpy:stable
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get -y install curl git
+    apt-get -y install curl git vim nano
 
 # Set environment variables for Python and Poetry versions
 ARG PYTHON_VERSION
@@ -41,7 +41,7 @@ RUN echo "echo -e '\033[44;37mWelcome to the stormvogel container! Run this cont
 # Print the Jupyter Lab URL, including the password
 RUN echo "echo -e '\033[44;37mJupyter Lab will be running at http://localhost:8080/?token=$(cat /root/jupyter_password.txt) in a minute or so.\033[0m'" >> /root/.bashrc
 # Print how to restart this docker instance after leaving it
-RUN echo "echo -e '\033[44;37mTo restart this container, run docker start -i $(cat /etc/hostname)\033[0m'" >> /root/.bashrc
+RUN echo "echo -e '\033[44;37mTo restart this container, run docker start -i $(hostname)\033[0m'" >> /root/.bashrc
 
 # Start a bash shell, but run Jupyter Lab inside Poetry in the background on port 8080
 CMD ["bash", "-c", "cd /app && poetry run jupyter lab --ip 0.0.0.0 --port=8080 --no-browser --allow-root > /app/jupyter_lab.log 2>&1 & exec bash"]
