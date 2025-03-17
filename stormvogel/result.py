@@ -76,6 +76,7 @@ class Result:
         for index, val in enumerate(values):
             self.values[index] = val
 
+    # TODO move function out of class
     def add_scheduler(self, stormpy_scheduler: stormpy.storage.Scheduler):
         """adds a scheduler to the result"""
         if self.scheduler is None:
@@ -88,6 +89,14 @@ class Result:
                 av_act = state.available_actions()
                 choice = stormpy_scheduler.get_choice(state.id)
                 action_index = choice.get_deterministic_choice()
+
+                if len(av_act) == action_index:
+                    print(len(self.model.states))
+                    print(state)
+                    print(av_act)
+                    print(action_index)
+                    print(dir(stormpy_scheduler))
+
                 taken_actions[state.id] = av_act[action_index]
 
             self.scheduler = Scheduler(self.model, taken_actions)
