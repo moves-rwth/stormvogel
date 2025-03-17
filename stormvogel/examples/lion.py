@@ -4,8 +4,8 @@ from stormvogel.model import Model, ModelType, Branch, Transition
 def create_lion_mdp():
     lion = Model(name="lion", model_type=ModelType.MDP)
     init = lion.get_initial_state()
-    full = lion.new_state("full :D")
-    satisfied = lion.new_state("satisfied :)")
+    full = lion.new_state("full")
+    satisfied = init
     hungry = lion.new_state("hungry :(")
     starving = lion.new_state("starving :((")
     dead = lion.new_state("dead")
@@ -60,4 +60,8 @@ def create_lion_mdp():
         )
     )
     lion.add_self_loops()
+
+    reward_model = lion.add_rewards("R")
+    reward_model.set_state_action_reward(full, rawr, 100)
+    reward_model.set_unset_rewards(0)
     return lion
