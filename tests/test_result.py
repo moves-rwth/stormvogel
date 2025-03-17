@@ -1,5 +1,6 @@
 import stormvogel.result
 import pytest
+import stormvogel.examples.monty_hall
 
 try:
     import stormpy
@@ -941,3 +942,29 @@ def test_convert_model_checker_results_mdp_qualitative():
         False,
         False,
     ]
+
+
+def test_induced_dtmc():
+    assert stormpy is not None
+    path = stormpy.examples.files.prism_mdp_coin_2_2
+
+    prism_program = stormpy.parse_prism_program(path)
+    formula_str = 'Pmin=? [F "finished" & "all_coins_equal_1"]'
+    properties = stormpy.parse_properties(formula_str, prism_program)
+
+    model = stormpy.build_model(prism_program, properties)
+
+    result = stormpy.model_checking(model, properties[0], extract_scheduler=True)
+
+    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
+
+    assert stormvogel_model is not None
+    stormvogel_result = stormvogel.result.convert_model_checking_result(
+        stormvogel_model, result
+    )
+    assert stormvogel_result is not None
+    induced_dtmc = stormvogel_result.generate_induced_dtmc()
+
+    assert induced_dtmc
+
+    # TODO better test (where we also precisely know the induced dtmc)
