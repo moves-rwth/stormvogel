@@ -1,8 +1,8 @@
 
           <iframe
-                id="modelIrWAvtmgpv"
-                width="820"
-                height="620"
+                id="modelVZarYoGrum"
+                width="707"
+                height="539"
                 frameborder="0"
                 srcdoc="
 &lt;!DOCTYPE html&gt;
@@ -16,8 +16,8 @@
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
 
-        width: 800px;
-        height: 600px;
+        width: 687px;
+        height: 519px;
         border: 1px solid lightgray;
 
       }
@@ -27,14 +27,52 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot; },
-{ id: 1, label: `satisfied :)`, group: &quot;states&quot; },
-{ id: 2, label: `full :D`, group: &quot;states&quot; },
-{ id: 3, label: `hungry :(`, group: &quot;states&quot; },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -311, y: -306 },
+{ id: 1, label: `full :D`, group: &quot;states&quot;, x: -111, y: 167 },
+{ id: 2, label: `satisfied :)`, group: &quot;states&quot;, x: -122, y: -117 },
+{ id: 3, label: `hungry :(`, group: &quot;states&quot;, x: 185, y: -110 },
+{ id: 4, label: `starving :((`, group: &quot;states&quot;, x: 295, y: 152 },
+{ id: 5, label: `dead...`, group: &quot;dead...&quot;, x: 137, y: 286 },
+{ id: 10000000000, label: `hunt &gt;:D`, group: &quot;actions&quot;, x: -178, y: 35 },
+{ id: 10000000001, label: `rawr`, group: &quot;actions&quot;, x: -246, y: 85 },
+{ id: 10000000002, label: `hunt &gt;:D`, group: &quot;actions&quot;, x: -14, y: -27 },
+{ id: 10000000003, label: `rawr`, group: &quot;actions&quot;, x: 17, y: -216 },
+{ id: 10000000004, label: `hunt &gt;:D`, group: &quot;actions&quot;, x: 84, y: 19 },
+{ id: 10000000005, label: `rawr`, group: &quot;actions&quot;, x: 328, y: -37 },
+{ id: 10000000006, label: `hunt &gt;:D`, group: &quot;actions&quot;, x: 78, y: 109 },
+{ id: 10000000007, label: `rawr`, group: &quot;actions&quot;, x: 277, y: 305 },
 ]);
-        var edges = new vis.DataSet([{ from: 0, to: 1, label: &quot;1&quot; },
-{ from: 1, to: 2, label: &quot;3/10&quot; },
-{ from: 2, to: 3, label: &quot;0&quot; },
+        var edges = new vis.DataSet([{ from: 0, to: 2, label: &quot;1&quot; },
+{ from: 1, to: 10000000000 },
+{ from: 10000000000, to: 2, label: &quot;1/2&quot; },
+{ from: 10000000000, to: 1, label: &quot;1/2&quot; },
+{ from: 1, to: 10000000001 },
+{ from: 10000000001, to: 1, label: &quot;9/10&quot; },
+{ from: 10000000001, to: 2, label: &quot;1/10&quot; },
+{ from: 2, to: 10000000002 },
+{ from: 10000000002, to: 2, label: &quot;1/2&quot; },
+{ from: 10000000002, to: 1, label: &quot;3/10&quot; },
+{ from: 10000000002, to: 3, label: &quot;1/5&quot; },
+{ from: 2, to: 10000000003 },
+{ from: 10000000003, to: 2, label: &quot;9/10&quot; },
+{ from: 10000000003, to: 3, label: &quot;1/10&quot; },
+{ from: 3, to: 10000000004 },
+{ from: 10000000004, to: 1, label: &quot;1/5&quot; },
+{ from: 10000000004, to: 2, label: &quot;1/2&quot; },
+{ from: 10000000004, to: 3, label: &quot;1/10&quot; },
+{ from: 10000000004, to: 4, label: &quot;1/5&quot; },
+{ from: 3, to: 10000000005 },
+{ from: 10000000005, to: 3, label: &quot;9/10&quot; },
+{ from: 10000000005, to: 4, label: &quot;1/10&quot; },
+{ from: 4, to: 10000000006 },
+{ from: 10000000006, to: 1, label: &quot;1/10&quot; },
+{ from: 10000000006, to: 2, label: &quot;1/2&quot; },
+{ from: 10000000006, to: 3, label: &quot;1/5&quot; },
+{ from: 10000000006, to: 5, label: &quot;1/5&quot; },
+{ from: 4, to: 10000000007 },
+{ from: 10000000007, to: 4, label: &quot;9/10&quot; },
+{ from: 10000000007, to: 5, label: &quot;1/10&quot; },
+{ from: 5, to: 5, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -58,6 +96,7 @@
   },
   &quot;edit_groups&quot;: {
     &quot;groups&quot;: [
+      &quot;dead...&quot;,
       &quot;states&quot;,
       &quot;actions&quot;
     ]
@@ -84,10 +123,106 @@
       &quot;shape&quot;: &quot;box&quot;,
       &quot;color&quot;: {
         &quot;background&quot;: &quot;pink&quot;,
-        &quot;border&quot;: &quot;red&quot;
-      }
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;borderWidth&quot;: 1,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      },
+      &quot;schedColor&quot;: false
     },
     &quot;states&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#f5c211&quot;,
+        &quot;border&quot;: &quot;#c64600&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 5,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;dead...&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#c0bfbc&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;hunt_&gt;:D&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#2ec27e&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;desparate_hunt!&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;#ff7800&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;starving_:((&quot;: {
+      &quot;borderWidth&quot;: 1,
+      &quot;color&quot;: {
+        &quot;background&quot;: &quot;white&quot;,
+        &quot;border&quot;: &quot;black&quot;,
+        &quot;highlight&quot;: {
+          &quot;background&quot;: &quot;white&quot;,
+          &quot;border&quot;: &quot;red&quot;
+        }
+      },
+      &quot;shape&quot;: &quot;ellipse&quot;,
+      &quot;mass&quot;: 1,
+      &quot;font&quot;: {
+        &quot;color&quot;: &quot;black&quot;,
+        &quot;size&quot;: 14
+      }
+    },
+    &quot;satisfied_:)&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
         &quot;background&quot;: &quot;white&quot;,
@@ -134,19 +269,83 @@
   },
   &quot;misc&quot;: {
     &quot;enable_physics&quot;: true,
-    &quot;width&quot;: 800,
-    &quot;height&quot;: 600,
+    &quot;width&quot;: 687,
+    &quot;height&quot;: 519,
     &quot;explore&quot;: false
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;filename&quot;: &quot;layouts/lion.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {},
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: -311,
+      &quot;y&quot;: -306
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: -111,
+      &quot;y&quot;: 167
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: -122,
+      &quot;y&quot;: -117
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 185,
+      &quot;y&quot;: -110
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: 295,
+      &quot;y&quot;: 152
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: 137,
+      &quot;y&quot;: 286
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: -178,
+      &quot;y&quot;: 35
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: -246,
+      &quot;y&quot;: 85
+    },
+    &quot;10000000002&quot;: {
+      &quot;x&quot;: -14,
+      &quot;y&quot;: -27
+    },
+    &quot;10000000003&quot;: {
+      &quot;x&quot;: 17,
+      &quot;y&quot;: -216
+    },
+    &quot;10000000004&quot;: {
+      &quot;x&quot;: 84,
+      &quot;y&quot;: 19
+    },
+    &quot;10000000005&quot;: {
+      &quot;x&quot;: 328,
+      &quot;y&quot;: -37
+    },
+    &quot;10000000006&quot;: {
+      &quot;x&quot;: 78,
+      &quot;y&quot;: 109
+    },
+    &quot;10000000007&quot;: {
+      &quot;x&quot;: 277,
+      &quot;y&quot;: 305
+    }
+  },
   &quot;physics&quot;: true,
-  &quot;autoResize&quot;: true
+  &quot;autoResize&quot;: true,
+  &quot;results_and_rewards&quot;: {
+    &quot;show_results&quot;: true,
+    &quot;resultSymbol&quot;: &quot;\u2606&quot;,
+    &quot;show_rewards&quot;: true
+  },
+  &quot;width&quot;: 687,
+  &quot;height&quot;: 519
 };
         //js
 var container = document.getElementById(&quot;mynetwork&quot;);

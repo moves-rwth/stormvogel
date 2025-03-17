@@ -1,5 +1,7 @@
 from stormvogel import pgc, model
 import math
+import pytest
+import re
 
 
 def test_pgc_mdp():
@@ -344,3 +346,44 @@ def test_pgc_mdp_empty_action():
     )
 
     assert pgc_model == regular_model
+
+
+def test_pgc_endless():
+    init = pgc.State(x="")
+
+    def available_actions(s: pgc.State):
+        if s == init:  # If we are in the initial state, we have a choice.
+            return [pgc.Action(["study"]), pgc.Action(["don't study"])]
+        else:  # Otherwise, we don't have any choice, we are just a Markov chain.
+            return [pgc.Action([])]
+
+    def delta(s: pgc.State, a: pgc.Action):
+        if "study" in a.labels:
+            return [(1, pgc.State(x=["studied"]))]
+        elif "don't study" in a.labels:
+            return [(1, pgc.State(x=["didn't study"]))]
+        elif "studied" in s.x:
+            return [
+                (9 / 10, pgc.State(x=["pass test"])),
+                (1 / 10, pgc.State(x=["fail test"])),
+            ]
+        elif "didn't study" in s.x:
+            return [
+                (2 / 5, pgc.State(x=["pass test"])),
+                (3 / 5, pgc.State(x=["fail test"])),
+            ]
+        else:
+            return [(1, pgc.State(x=[f"{s.x[0]}0"]))]
+
+    with pytest.raises(
+        RuntimeError,
+        match=re.escape(
+            "The model you want te create has a very large amount of states (at least 2000), if you wish to proceed, set max_size to some larger number."
+        ),
+    ):
+        pgc.build_pgc(
+            delta=delta,
+            initial_state_pgc=init,
+            available_actions=available_actions,
+            modeltype=model.ModelType.MDP,
+        )
