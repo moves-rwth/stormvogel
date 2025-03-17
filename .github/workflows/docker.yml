@@ -45,7 +45,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: stormvogel/stormvogel:latest
+          tags: stormvogel/stormvogel:latest,stormvogel/stormvogel:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
