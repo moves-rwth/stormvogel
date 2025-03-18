@@ -68,26 +68,22 @@ class Result:
         self,
         model: stormvogel.model.Model,
         values: list[stormvogel.model.Number],
-        scheduler: Scheduler | None = None,
+        scheduler: Scheduler | stormpy.storage.Scheduler | None = None,
     ):
         self.model = model
-        self.scheduler = scheduler
         self.values = {}
+
+        assert stormpy is not None
+        if isinstance(scheduler, stormpy.storage.Scheduler):
+            self.scheduler = convert_scheduler_to_stormvogel(self.model, scheduler)
+            self.stormpy_scheduler = scheduler
+        elif isinstance(scheduler, Scheduler):
+            self.scheduler = scheduler
+        else:
+            self.scheduler = None
+
         for index, val in enumerate(values):
             self.values[index] = val
-
-    def add_scheduler(self, stormpy_scheduler: stormpy.storage.Scheduler):
-        """adds a scheduler to the result"""
-        if self.scheduler is None:
-            self.stormpy_scheduler = stormpy_scheduler
-            taken_actions = {}
-            for state in self.model.states.values():
-                taken_actions[state.id] = stormvogel.model.Action.create(
-                    str(stormpy_scheduler.get_choice(state.id))
-                )
-            self.scheduler = Scheduler(self.model, taken_actions)
-        else:
-            raise RuntimeError("This result already has a scheduler")
 
     def get_result_of_state(
         self, state: stormvogel.model.State
@@ -136,6 +132,20 @@ class Result:
         return False
 
 
+def convert_scheduler_to_stormvogel(
+    model: stormvogel.model.Model, stormpy_scheduler: stormpy.storage.Scheduler
+):
+    """Converts a stormpy scheduler to a stormvogel scheduler"""
+    taken_actions = {}
+    for state in model.states.values():
+        av_act = state.available_actions()
+        choice = stormpy_scheduler.get_choice(state.id)
+        action_index = choice.get_deterministic_choice()
+        taken_actions[state.id] = av_act[action_index]
+
+    return Scheduler(model, taken_actions)
+
+
 def convert_model_checking_result(
     model: stormvogel.model.Model,
     stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
@@ -153,14 +163,21 @@ def convert_model_checking_result(
         or type(stormpy_result)
         == stormpy.core.ExplicitParametricQuantitativeCheckResult
     ):
-        stormvogel_result = Result(model, stormpy_result.get_values())
+        if stormpy_result.has_scheduler and with_scheduler:
+            stormvogel_result = Result(
+                model, stormpy_result.get_values(), scheduler=stormpy_result.scheduler
+            )
+        else:
+            stormvogel_result = Result(model, stormpy_result.get_values())
     elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
         values = [stormpy_result.at(i) for i in range(0, len(model.states))]
-        stormvogel_result = Result(model, values)
+        if stormpy_result.has_scheduler and with_scheduler:
+            stormvogel_result = Result(
+                model, values, scheduler=stormpy_result.scheduler
+            )
+        else:
+            stormvogel_result = Result(model, values)
     else:
         raise RuntimeError("Unsupported result type")
-
-    if stormpy_result.has_scheduler and with_scheduler:
-        stormvogel_result.add_scheduler(stormpy_result.scheduler)
 
     return stormvogel_result

@@ -58,7 +58,8 @@ def show(
         ipd.display(box)
         vis.update()
     else:  # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
-        iframe = vis.nt.generate_iframe()
+        # iframe = vis.nt.generate_iframe()
+        iframe = vis.generate_html()
         with open(name + ".html", "w") as f:
             f.write(iframe)
         ipd.display(ipd.HTML(filename=name + ".html"))

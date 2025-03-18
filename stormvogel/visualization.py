@@ -312,11 +312,8 @@ class Visualization(stormvogel.displayable.Displayable):
         self, path: stormvogel.simulator.Path
     ) -> list[stormvogel.model.Action | stormvogel.model.State]:
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
-            self.model.get_initial_state(),
-            self.model.get_initial_state(),
+            self.model.get_initial_state()
         ]
-        # For some reason, it will skip the first one so if you start with the initial state twice it will work properly
-        # Don't ask me why
         for _, v in path.path.items():
             if isinstance(v, tuple):
                 res += list(v)
@@ -342,7 +339,6 @@ class Visualization(stormvogel.displayable.Displayable):
         seq = self.__to_state_action_sequence(path)
         for i, v in enumerate(seq):
             if isinstance(v, stormvogel.model.State):
-                print(v)
                 self.nt.set_node_color(v.id, color)
                 sleep(delay)
                 if clear:

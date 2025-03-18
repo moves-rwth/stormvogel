@@ -426,8 +426,8 @@ def stormpy_to_stormvogel(
                         sparsemdp.choice_labeling.get_labels_of_choice(i)
                     )
                 else:
-                    actionlabels = frozenset()
-                # TODO assign the correct action name and not only an index
+                    actionlabels = frozenset({str(i)})
+
                 action = model.new_action(actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
@@ -504,9 +504,8 @@ def stormpy_to_stormvogel(
                         sparsepomdp.choice_labeling.get_labels_of_choice(i)
                     )
                 else:
-                    actionlabels = frozenset()
+                    actionlabels = frozenset({str(i)})
 
-                # TODO assign the correct action name and not only an index
                 action = model.new_action(actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
@@ -552,9 +551,8 @@ def stormpy_to_stormvogel(
                         sparsema.choice_labeling.get_labels_of_choice(i)
                     )
                 else:
-                    actionlabels = frozenset()
+                    actionlabels = frozenset({str(i)})
 
-                # TODO assign the correct action name and not only an index
                 action = model.new_action(actionlabels)
                 branch = [(x.value(), model.get_state_by_id(x.column)) for x in row]
                 transition[action] = stormvogel.model.Branch(branch)
