@@ -43,7 +43,7 @@ class Network(stormvogel.displayable.Displayable):
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
         else:
             self.name: str = name
-        self.content_window = f"document.getElementById('{self.name}').contentWindow"
+        self.network_wrapper = f"nw_{self.name}"
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""
@@ -78,7 +78,7 @@ class Network(stormvogel.displayable.Displayable):
         try:
             positions: dict = json.loads(
                 self.server.result(
-                    f"""RETURN({self.content_window}.network.getPositions())"""
+                    f"""RETURN({self.network_wrapper}.network.getPositions())"""
                 )
             )
             return positions
@@ -156,10 +156,10 @@ class Network(stormvogel.displayable.Displayable):
 
     def show(self) -> None:
         """Display the network on the output that was specified at initialization, otherwise simply display it."""
-        iframe = self.generate_iframe()
+        iframe = self.generate_html()
         with self.output:  # Display the iframe within the Output.
             ipd.clear_output()
-            ipd.display(widgets.HTML(iframe))
+            ipd.display(ipd.HTML(iframe))
         self.maybe_display_output()
         with self.debug_output:
             logging.info("Called Network.show")
@@ -176,7 +176,7 @@ class Network(stormvogel.displayable.Displayable):
     def update_options(self, options: str):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
-        js = f"""{self.content_window}.network.setOptions({options});"""
+        js = f"""{self.network_wrapper}.network.setOptions({options});"""
         with self.spam:
             ipd.display(ipd.Javascript(js))
         self.spam_side_effects()
@@ -198,6 +198,6 @@ class Network(stormvogel.displayable.Displayable):
         else:
             color = f'"{color}"'
 
-        js = f"""{self.content_window}.setNodeColor({node_id}, {color});"""
+        js = f"""{self.network_wrapper}.setNodeColor({node_id}, {color});"""
         ipd.display(ipd.Javascript(js))
         ipd.clear_output()
