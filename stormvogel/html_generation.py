@@ -1,13 +1,13 @@
 """Javascript code generation functions, used in visjs.py."""
 
 
-def generate_js(nodes_js: str, edges_js: str, options_js: str, name: str) -> str:
+def generate_init_js(nodes_js: str, edges_js: str, options_js: str, name: str) -> str:
     return f"""//js
     var nodes_local = new vis.DataSet([{nodes_js}]);
     var edges_local = new vis.DataSet([{edges_js}]);
     var options_local = {options_js};
     var container_local = document.getElementById("{name}");
-    var nw_{name} = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    var nw_{name} = new NetworkWrapper_{name}(nodes_local, edges_local, options_local, container_local)
     """
 
 
@@ -39,20 +39,23 @@ def generate_html(
   <body>
     <div id="{name}"></div>
     <script type="text/javascript">
-        {NETWORK_WRAPPER_JS}
+        {generate_network_wrapper_js(name)}
     </script>
     <script type="text/javascript">
-        {generate_js(nodes_js, edges_js, options_js, name)}
+        {generate_init_js(nodes_js, edges_js, options_js, name)}
     </script>
   </body>
 </html>
 """
 
 
-# Javascript code for finding the container and initializing the network
-# Having a separate NewtorkWrapper object allows us to have multiple networks in one notebook without them interfering.
-NETWORK_WRAPPER_JS = """//js
-class NetworkWrapper {
+def generate_network_wrapper_js(name: str):
+    # Javascript code for finding the container and initializing the network
+    # Having a separate NewtorkWrapper object allows us to have multiple networks in one notebook without them interfering.
+    return (
+        f"""
+class NetworkWrapper_{name}"""
+        + """{//js
   constructor(nodes, edges, options, container) {
     this.nodes = nodes;
     this.edges = edges;
@@ -77,7 +80,9 @@ class NetworkWrapper {
 
   setNodeColor(id, color) {
     var node = this.nodes.get(id);
-    node["color"] = color
+    node["x"] = this.network.getPosition(id)["x"];
+    node["y"] = this.network.getPosition(id)["y"];
+    node["color"] = color;
     this.nodes.update(node);
   }
 
@@ -116,66 +121,4 @@ class NetworkWrapper {
   }
 };
 """
-
-"""
-}
-
-
-var data = {
-    nodes: nodes,
-    edges: edges,
-};
-var network = new vis.Network(container, data, options);
-function makeAllNodesInvisible() {
-    ids = nodes.getIds();
-    for (let i = 0; i < ids.length; i++) {
-        var nodeId = ids[i];
-        var node = nodes.get(nodeId);
-        node["hidden"] = true;
-        node["physics"] = false;
-        nodes.update(node);
-    }
-};
-function makeNeighborsVisible(homeId) {
-    homeNode = nodes.get(homeId);
-
-    // Make outgoing nodes visible
-    var nodeIds = network.getConnectedNodes(homeId, "to");
-    for (let i = 0; i < nodeIds.length; i++) {
-      var toNodeId = nodeIds[i];
-      var toNode = nodes.get(toNodeId);
-      if (toNode["hidden"]) {
-        toNode["hidden"] = false;
-        toNode["physics"] = true;
-        toNode["x"] = network.getPosition(homeId)["x"];
-        toNode["y"] = network.getPosition(homeId)["y"];
-        nodes.update(toNode);
-      }
-    }
-    // Make edges visible, if both of the nodes are also visible
-    var edgeIds = network.getConnectedEdges(homeId);
-    for (let i = 0; i < edgeIds.length; i++) {
-        var edgeId = edgeIds[i];
-        var edge = edges.get(edgeId);
-        var fromNode = nodes.get(edge.from);
-        var toNode = nodes.get(edge.to);
-        if ((! fromNode["hidden"]) && (! toNode["hidden"])) {
-          edge["hidden"] = false;
-          edge["physics"] = true;
-          edges.update(edge);
-        }
-    }
-};
-network.on( 'click', function(properties) {
-    var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
-    makeNeighborsVisible(nodeId);
-});
-network.on( 'doubleClick', function(properties) {
-    network.setData(data);
-});
-function setNodeColor(id, color) {
-  var node = nodes.get(id);
-  node["color"] = color
-  nodes.update(node);
-}
-"""
+    )

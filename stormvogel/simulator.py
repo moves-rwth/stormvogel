@@ -246,15 +246,19 @@ def simulate(
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
-                r = model.rewards[index].get_state_action_reward(
-                    model.get_initial_state(), EmptyAction
-                )
-                assert r is not None
-                reward_model.set_state_action_reward(
-                    partial_model.get_initial_state(),
-                    EmptyAction,
-                    r,
-                )
+                try:
+                    r = model.rewards[index].get_state_action_reward(
+                        model.get_initial_state(), EmptyAction
+                    )
+                    assert r is not None
+                    reward_model.set_state_action_reward(
+                        partial_model.get_initial_state(),
+                        EmptyAction,
+                        r,
+                    )
+                except RuntimeError:
+                    pass
+
             else:
                 r = model.rewards[index].get_state_reward(model.get_initial_state())
                 assert r is not None
