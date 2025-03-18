@@ -4,7 +4,7 @@ import IPython.display as ipd
 import ipywidgets as widgets
 import html
 import stormvogel.displayable
-import stormvogel.html_templates
+import stormvogel.html_generation
 import stormvogel.communication_server
 import json
 import random
@@ -131,26 +131,14 @@ class Network(stormvogel.displayable.Displayable):
         self.options_js = options
 
     def generate_html(self) -> str:
-        """Generate the html for the network."""
-        js = (
-            f"""
-        var nodes = new vis.DataSet([{self.nodes_js}]);
-        var edges = new vis.DataSet([{self.edges_js}]);
-        var options = {self.options_js};
-        """
-            + stormvogel.html_templates.NETWORK_JS
+        return stormvogel.html_generation.generate_html(
+            self.nodes_js,
+            self.edges_js,
+            self.options_js,
+            self.name,
+            self.width,
+            self.height,
         )
-
-        sizes = f"""
-        width: {self.width}px;
-        height: {self.height}px;
-        border: 1px solid lightgray;
-        """
-
-        html = stormvogel.html_templates.START_HTML.replace(
-            "__JAVASCRIPT__", js
-        ).replace("__SIZES__", sizes)
-        return html
 
     def generate_iframe(self) -> str:
         """Generate an iframe for the network, using the html."""
