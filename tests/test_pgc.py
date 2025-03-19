@@ -387,3 +387,95 @@ def test_pgc_endless():
             available_actions=available_actions,
             modeltype=model.ModelType.MDP,
         )
+
+
+def test_pgc_pomdp():
+    # here we test if the observations function works
+    # we build the pomdp model with pgc:
+    N = 2
+    p = 0.5
+    initial_state = pgc.State(x=math.floor(N / 2))
+
+    left = pgc.Action(["left"])
+    right = pgc.Action(["right"])
+
+    def available_actions(s: pgc.State):
+        if s.x == N:
+            return [right]
+        elif s.x == 0:
+            return [left]
+        else:
+            return [left, right]
+
+    def rewards(s: pgc.State, a: pgc.Action):
+        return {"r1": 1, "r2": 2}
+
+    def labels(s: pgc.State):
+        return [str(s.x)]
+
+    def observations(s: pgc.State):
+        return 5
+
+    def delta(s: pgc.State, action: pgc.Action):
+        if action == left:
+            return (
+                [
+                    (p, pgc.State(x=s.x + 1)),
+                    (1 - p, pgc.State(x=s.x)),
+                ]
+                if s.x < N
+                else []
+            )
+        elif action == right:
+            return (
+                [
+                    (p, pgc.State(x=s.x - 1)),
+                    (1 - p, pgc.State(x=s.x)),
+                ]
+                if s.x > 0
+                else []
+            )
+
+    pgc_model = pgc.build_pgc(
+        delta=delta,
+        available_actions=available_actions,
+        initial_state_pgc=initial_state,
+        labels=labels,
+        rewards=rewards,
+        observations=observations,
+        modeltype=model.ModelType.POMDP,
+    )
+
+    # we build the pomdp model in the regular way:
+    regular_model = model.new_pomdp(create_initial_state=False)
+    state1 = regular_model.new_state(labels=["init", "1"])
+    state2 = regular_model.new_state(labels=["2"])
+    state0 = regular_model.new_state(labels=["0"])
+    left = regular_model.new_action(frozenset({"left"}))
+    right = regular_model.new_action(frozenset({"right"}))
+    branch12 = model.Branch([(0.5, state1), (0.5, state2)])
+    branch10 = model.Branch([(0.5, state1), (0.5, state0)])
+    branch01 = model.Branch([(0.5, state0), (0.5, state1)])
+    branch21 = model.Branch([(0.5, state2), (0.5, state1)])
+
+    regular_model.add_transitions(
+        state1, model.Transition({left: branch12, right: branch10})
+    )
+    regular_model.add_transitions(state2, model.Transition({right: branch21}))
+    regular_model.add_transitions(state0, model.Transition({left: branch01}))
+
+    rewardmodel = regular_model.add_rewards("r1")
+    for i in range(2 * N):
+        pair = regular_model.get_state_action_pair(i)
+        assert pair is not None
+        rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
+    rewardmodel = regular_model.add_rewards("r2")
+    for i in range(2 * N):
+        pair = regular_model.get_state_action_pair(i)
+        assert pair is not None
+        rewardmodel.set_state_action_reward(pair[0], pair[1], 2)
+
+    for state in regular_model.states.values():
+        state.set_observation(5)
+
+    assert regular_model == pgc_model

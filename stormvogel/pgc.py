@@ -37,6 +37,7 @@ def valid_input(
     rewards: Callable | None = None,
     labels: Callable | None = None,
     available_actions: Callable | None = None,
+    observations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
 ):
@@ -56,6 +57,10 @@ def valid_input(
         raise ValueError(
             "You have to provide an available actions function for models that support actions"
         )
+
+    # and we check if we have an observations function in case our model is a POMDP
+    if modeltype == stormvogel.model.ModelType.POMDP and observations is None:
+        raise ValueError("You have to provide an observations function for pomdps")
 
     # we check if the provided functions have the right number of parameters
     if supports_actions:
@@ -100,6 +105,14 @@ def valid_input(
         if num_params != 1:
             raise ValueError(
                 f"The labels function must take exactly one argument (state), but it takes {num_params} arguments"
+            )
+
+    if observations is not None:
+        sig = inspect.signature(observations)
+        num_params = len(sig.parameters)
+        if num_params != 1:
+            raise ValueError(
+                f"The observations function must take exactly one argument (state), but it takes {num_params} arguments"
             )
 
     # now we simulate the behaviour of the pgc model builder and provide the necessary errors
@@ -181,6 +194,15 @@ def valid_input(
                         "Make sure that the rewards function returns a dictionary with the same keys on each return"
                     )
 
+    # we check for the observations when it does not return an integer
+    if observations is not None:
+        for state in states_seen:
+            o = observations(state)
+            if not isinstance(o, int):
+                raise ValueError(
+                    f"On input {state}, the observations function does not return an integer"
+                )
+
     # we check for the labels when the function does not return a list object
     # or the length is not always the same
     if labels is not None:
@@ -198,6 +220,7 @@ def build_pgc(
     rewards: Callable | None = None,
     labels: Callable | None = None,
     available_actions: Callable | None = None,
+    observations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
     check_validity: bool = True,
@@ -218,6 +241,7 @@ def build_pgc(
             rewards,
             labels,
             available_actions,
+            observations,
             modeltype,
             max_size,
         )
@@ -337,6 +361,12 @@ def build_pgc(
                 assert s is not None
                 for index, reward in enumerate(rewarddict.items()):
                     model.rewards[index].set_state_reward(s, reward[1])
+
+    # we add the observations
+    if observations is not None:
+        for state in states_seen:
+            s = model.get_states_with_label(str(state))[0]
+            s.set_observation(observations(state))
 
     # we add the labels
     if labels is not None:
