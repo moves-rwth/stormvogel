@@ -48,6 +48,7 @@ class Visualization(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
+        use_iframe: bool = False,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
         Args:
@@ -74,13 +75,22 @@ class Visualization(stormvogel.displayable.Displayable):
         self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
+        self.use_iframe: bool = use_iframe
         # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
             if self.result is not None:
                 self.scheduler = self.result.scheduler
+
+        edit_groups: list = self.layout.layout["edit_groups"][
+            "groups"
+        ]  # We modify it by reference.
         if self.scheduler is not None:  # Enable scheduled_actions as a default.
-            self.layout.set_active_groups(["states", "actions", "scheduled_actions"])
+            if "scheduled_actions" not in edit_groups:
+                edit_groups.append("scheduled_actions")
+        else:  # Otherwise, disable it
+            if "scheduled_actions" in edit_groups:
+                edit_groups.remove("scheduled_actions")
 
         self.do_init_server: bool = do_init_server
         self.__create_nt()
@@ -98,6 +108,7 @@ class Visualization(stormvogel.displayable.Displayable):
             do_display=False,
             do_init_server=self.do_init_server,
             positions=self.layout.layout["positions"],
+            use_iframe=self.use_iframe,
         )
 
     def show(self) -> None:
@@ -112,9 +123,9 @@ class Visualization(stormvogel.displayable.Displayable):
 
         # Set the (possibly updated) possible edit groups
         underscored_labels = set(map(und, self.model.get_labels()))
-        possible_groups = underscored_labels.union({"states", "actions"})
-        if self.scheduler is not None:
-            possible_groups.add("scheduled_actions")
+        possible_groups = underscored_labels.union(
+            {"states", "actions", "scheduled_actions"}
+        )
         self.layout.set_possible_groups(possible_groups)
 
         self.__add_states()

@@ -944,6 +944,13 @@ class Model:
         """Gets the initial state (id=0)."""
         return self.states[0]
 
+    def get_ordered_labels(self) -> list[list[str]]:
+        """Get all the labels of this model, ordered by id.
+        IMPORTANT: If a state has no label, then a value '' is inserted!"""
+        return [
+            (s.labels if len(s.labels) > 0 else []) for s in self.get_states().values()
+        ]
+
     def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
         collected_labels: set[str] = set()

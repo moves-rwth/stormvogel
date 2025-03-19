@@ -49,12 +49,11 @@ def naive_value_iteration(
 
 
 def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float]]:
-    """Run naive value iteration. The result is a 2D list where result[n][m] is the probability to be in state m at step n.
+    """Run DTMC evolution. The result is a 2D list where result[n][m] is the probability to be in state m at step n.
 
     Args:
         model (stormvogel.model.Model): Target model.
         steps (int): Amount of steps.
-        starting_state (stormvogel.model.State): Starting state.
 
     Returns:
         list[list[float]]: The result is a 2D list where result[n][m] is the probability to be in state m at step n.

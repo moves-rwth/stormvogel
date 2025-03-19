@@ -13,7 +13,8 @@ Get started here:
    :maxdepth: 2
    :glob:
 
-   introduction/*
+   1-introduction/*
+   2-extensions/*
 
 Package documentation:
 

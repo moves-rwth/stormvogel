@@ -67,11 +67,11 @@ class Result:
     def __init__(
         self,
         model: stormvogel.model.Model,
-        values: list[stormvogel.model.Number],
+        values: dict[int, stormvogel.model.Number],
         scheduler: Scheduler | stormpy.storage.Scheduler | None = None,
     ):
         self.model = model
-        self.values = {}
+        self.values = values
 
         assert stormpy is not None
         if isinstance(scheduler, stormpy.storage.Scheduler):
@@ -81,9 +81,6 @@ class Result:
             self.scheduler = scheduler
         else:
             self.scheduler = None
-
-        for index, val in enumerate(values):
-            self.values[index] = val
 
     def get_result_of_state(
         self, state: stormvogel.model.State
@@ -165,12 +162,23 @@ def convert_model_checking_result(
     ):
         if stormpy_result.has_scheduler and with_scheduler:
             stormvogel_result = Result(
-                model, stormpy_result.get_values(), scheduler=stormpy_result.scheduler
+                model,
+                {
+                    index: value
+                    for (index, value) in enumerate(stormpy_result.get_values())
+                },
+                scheduler=stormpy_result.scheduler,
             )
         else:
-            stormvogel_result = Result(model, stormpy_result.get_values())
+            stormvogel_result = Result(
+                model,
+                {
+                    index: value
+                    for (index, value) in enumerate(stormpy_result.get_values())
+                },
+            )
     elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
-        values = [stormpy_result.at(i) for i in range(0, len(model.states))]
+        values = {i: stormpy_result.at(i) for i in range(0, len(model.states))}
         if stormpy_result.has_scheduler and with_scheduler:
             stormvogel_result = Result(
                 model, values, scheduler=stormpy_result.scheduler

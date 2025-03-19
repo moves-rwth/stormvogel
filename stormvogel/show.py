@@ -19,7 +19,7 @@ def show(
     layout: stormvogel.layout.Layout | None = None,
     show_editor: bool = False,
     debug_output: widgets.Output = widgets.Output(),
-    use_iframe: bool = True,
+    use_iframe: bool = False,
 ) -> stormvogel.visualization.Visualization:
     """Create and show a visualization of a Model using a visjs Network
 
@@ -48,6 +48,7 @@ def show(
         do_display=False,
         debug_output=debug_output,
         do_init_server=do_init_server,
+        use_iframe=use_iframe,
     )
     vis.show()
     if show_editor:
