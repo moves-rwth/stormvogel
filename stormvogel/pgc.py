@@ -38,6 +38,7 @@ def valid_input(
     labels: Callable | None = None,
     available_actions: Callable | None = None,
     observations: Callable | None = None,
+    rates: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
 ):
@@ -203,6 +204,15 @@ def valid_input(
                     f"On input {state}, the observations function does not return an integer"
                 )
 
+    # we check for the reates when it does not return a number
+    if rates is not None:
+        for state in states_seen:
+            r = rates(state)
+            if not isinstance(r, stormvogel.model.Number):
+                raise ValueError(
+                    f"On input {state}, the rates function does not return a number"
+                )
+
     # we check for the labels when the function does not return a list object
     # or the length is not always the same
     if labels is not None:
@@ -221,6 +231,7 @@ def build_pgc(
     labels: Callable | None = None,
     available_actions: Callable | None = None,
     observations: Callable | None = None,
+    rates: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
     check_validity: bool = True,
@@ -242,6 +253,7 @@ def build_pgc(
             labels,
             available_actions,
             observations,
+            rates,
             modeltype,
             max_size,
         )
@@ -367,6 +379,12 @@ def build_pgc(
         for state in states_seen:
             s = model.get_states_with_label(str(state))[0]
             s.set_observation(observations(state))
+
+    # we add the exit rates
+    if rates is not None:
+        for state in states_seen:
+            s = model.get_states_with_label(str(state))[0]
+            model.set_rate(s, rates(state))
 
     # we add the labels
     if labels is not None:

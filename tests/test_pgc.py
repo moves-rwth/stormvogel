@@ -479,3 +479,35 @@ def test_pgc_pomdp():
         state.set_observation(5)
 
     assert regular_model == pgc_model
+
+
+def test_pgc_ctmc():
+    def delta(current_state):
+        match current_state:
+            case "hungry":
+                return [(5.0, "eating")]
+            case "eating":
+                return [(3.0, "hungry")]
+
+    def rates(s):
+        match s:
+            case "hungry":
+                return 5
+            case "eating":
+                return 3
+
+    pgc_model = pgc.build_pgc(
+        delta, initial_state_pgc="hungry", rates=rates, modeltype=model.ModelType.CTMC
+    )
+
+    regular_model = model.new_ctmc()
+    regular_model.set_transitions(
+        regular_model.get_initial_state(), [(5, regular_model.new_state())]
+    )
+    regular_model.set_transitions(
+        regular_model.get_state_by_id(1), [(3, regular_model.get_initial_state())]
+    )
+    regular_model.set_rate(regular_model.get_initial_state(), 5)
+    regular_model.set_rate(list(regular_model.states.values())[1], 3)
+
+    assert pgc_model == regular_model
