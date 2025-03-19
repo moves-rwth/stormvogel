@@ -22,8 +22,6 @@ Package documentation:
    :template: custom-module-template.rst
    :recursive:
 
-   stormvogel/*
-
 Search for a specific page:
 ===========================
 

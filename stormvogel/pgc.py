@@ -9,6 +9,9 @@ class Action:
     labels: list[str]
 
 
+PgcEmpytAction = Action([])
+
+
 @dataclass
 class State:
     """pgc state object. Can contain any number of any type of arguments"""
