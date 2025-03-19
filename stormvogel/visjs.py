@@ -28,6 +28,7 @@ class Network(stormvogel.displayable.Displayable):
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
         positions: dict[str, dict[str, int]] | None = None,
+        use_iframe: bool = False,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -43,7 +44,12 @@ class Network(stormvogel.displayable.Displayable):
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
         else:
             self.name: str = name
-        self.network_wrapper = f"nw_{self.name}"
+        if use_iframe:
+            self.network_wrapper = (
+                f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
+            )
+        else:
+            self.network_wrapper = f"nw_{self.name}"
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""

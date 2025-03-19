@@ -40,6 +40,7 @@ def test_show(mocker):
         do_display=False,
         do_init_server=vis.do_init_server,
         positions=vis.layout.layout["positions"],
+        use_iframe=False,
     )
     MockNetwork.add_node.assert_any_call(0, label="init", group="states")  # type: ignore
     MockNetwork.add_node.assert_any_call(1, label="one", group="states")  # type: ignore
