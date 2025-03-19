@@ -70,7 +70,7 @@ def test_rewards(mocker):
 def test_results_count(mocker):
     MockNetwork = boilerplate(mocker)
     model, one, init = simple_model()
-    result = Result(model, [69, 12])
+    result = Result(model, {0: 69, 1: 12})
 
     vis = Visualization(model=model, result=result)
     vis.show()
@@ -93,7 +93,7 @@ def test_results_scheduler(mocker):
     end = model.new_state("end")
     model.set_transitions(init, [(good, end), (bad, end)])
     scheduler = Scheduler(model, {0: good})
-    result = Result(model, [1, 2], scheduler)
+    result = Result(model, {0: 1, 1: 2}, scheduler)
     vis = Visualization(model=model, result=result)
     vis.show()
     MockNetwork.add_node.assert_any_call(id=10000000001, label="BAD", group="actions")
