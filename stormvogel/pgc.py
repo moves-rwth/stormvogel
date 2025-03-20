@@ -136,7 +136,7 @@ def valid_input(
 
                 if not isinstance(tuples, list):
                     raise ValueError(
-                        f"On input pair {state} {action}, the delta function does not return a list. Make sure to change it to [<your output>]"
+                        f"On input pair {state} {action}, the delta function does not return a list. Make sure to change it to [(<value>,<state>)]"
                     )
 
                 for tuple in tuples:
