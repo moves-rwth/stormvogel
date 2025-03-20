@@ -396,11 +396,9 @@ class RewardModel:
             )
 
     def set_state_reward(self, state: State, value: Number):
-        """Sets the reward at said state."""
+        """Sets the reward at said state. If the model has actions, try to use the empty state."""
         if self.model.supports_actions():
-            raise RuntimeError(
-                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
-            )
+            self.set_state_action_reward(state, EmptyAction, value)
         else:
             self.rewards[state.id, EmptyAction] = value
 
@@ -946,6 +944,13 @@ class Model:
         """Gets the initial state (id=0)."""
         return self.states[0]
 
+    def get_ordered_labels(self) -> list[list[str]]:
+        """Get all the labels of this model, ordered by id.
+        IMPORTANT: If a state has no label, then a value '' is inserted!"""
+        return [
+            (s.labels if len(s.labels) > 0 else []) for s in self.get_states().values()
+        ]
+
     def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
         collected_labels: set[str] = set()
@@ -1029,7 +1034,7 @@ class Model:
         res = [f"{self.type} with name {self.name}"]
         res += ["", "States:"] + [f"{state}" for (_id, state) in self.states.items()]
         res += ["", "Transitions:"] + [
-            f"{transition}" for (_id, transition) in self.transitions.items()
+            f"{id}: {transition}" for (id, transition) in self.transitions.items()
         ]
 
         if self.supports_rates() and self.exit_rates is not None:

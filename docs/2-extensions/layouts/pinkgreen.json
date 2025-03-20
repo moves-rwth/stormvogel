@@ -26,9 +26,20 @@
   },
   "groups": {
     "actions": {
-      "shape": "box",
+      "borderWidth": 1,
       "color": {
-        "background": "lightblue"
+        "background": "#fbd0f5",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
       }
     },
     "scheduled_actions": {
@@ -36,6 +47,23 @@
       "color": {
         "background": "pink",
         "border": "red"
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#c9f9a9",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
       }
     }
   },
@@ -71,20 +99,50 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 800,
-    "height": 600,
+    "width": 461,
+    "height": 358,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/pinkgreen.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {},
+  "positions": {
+    "0": {
+      "x": -200,
+      "y": -25
+    },
+    "1": {
+      "x": 3,
+      "y": -112
+    },
+    "2": {
+      "x": -17,
+      "y": 119
+    },
+    "3": {
+      "x": 92,
+      "y": 27
+    },
+    "4": {
+      "x": 8,
+      "y": -1
+    },
+    "5": {
+      "x": 140,
+      "y": -58
+    },
+    "10000000000": {
+      "x": -124,
+      "y": -138
+    },
+    "10000000001": {
+      "x": -154,
+      "y": 103
+    }
+  },
   "physics": true,
-  "autoResize": true,
-  "init": {
-    "color": "TEST_COLOR"
-  }
+  "autoResize": true
 }

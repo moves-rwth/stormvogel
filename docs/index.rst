@@ -13,7 +13,8 @@ Get started here:
    :maxdepth: 2
    :glob:
 
-   introduction/*
+   1-introduction/*
+   2-extensions/*
 
 Package documentation:
 
@@ -21,8 +22,6 @@ Package documentation:
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
-
-   stormvogel/*
 
 Search for a specific page:
 ===========================

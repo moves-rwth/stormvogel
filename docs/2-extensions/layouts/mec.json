@@ -26,9 +26,20 @@
   },
   "groups": {
     "actions": {
-      "shape": "box",
+      "borderWidth": 1,
       "color": {
-        "background": "lightblue"
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 0,
+      "font": {
+        "color": "black",
+        "size": 14
       }
     },
     "scheduled_actions": {
@@ -36,6 +47,23 @@
       "color": {
         "background": "pink",
         "border": "red"
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 2,
+      "font": {
+        "color": "black",
+        "size": 14
       }
     }
   },
@@ -77,14 +105,48 @@
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/mec.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {},
+  "positions": {
+    "0": {
+      "x": -180,
+      "y": 104
+    },
+    "1": {
+      "x": -76,
+      "y": -67
+    },
+    "2": {
+      "x": 87,
+      "y": -39
+    },
+    "10000000000": {
+      "x": 5,
+      "y": 121
+    },
+    "10000000001": {
+      "x": -271,
+      "y": -5
+    },
+    "10000000002": {
+      "x": 30,
+      "y": -172
+    },
+    "10000000003": {
+      "x": -23,
+      "y": -175
+    },
+    "10000000004": {
+      "x": -6,
+      "y": 25
+    },
+    "10000000005": {
+      "x": -1,
+      "y": -42
+    }
+  },
   "physics": true,
-  "autoResize": true,
-  "init": {
-    "color": "TEST_COLOR"
-  }
+  "autoResize": true
 }

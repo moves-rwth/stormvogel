@@ -40,6 +40,7 @@ def test_show(mocker):
         do_display=False,
         do_init_server=vis.do_init_server,
         positions=vis.layout.layout["positions"],
+        use_iframe=False,
     )
     MockNetwork.add_node.assert_any_call(0, label="init", group="states")  # type: ignore
     MockNetwork.add_node.assert_any_call(1, label="one", group="states")  # type: ignore
@@ -70,7 +71,7 @@ def test_rewards(mocker):
 def test_results_count(mocker):
     MockNetwork = boilerplate(mocker)
     model, one, init = simple_model()
-    result = Result(model, [69, 12])
+    result = Result(model, {0: 69, 1: 12})
 
     vis = Visualization(model=model, result=result)
     vis.show()
@@ -93,7 +94,7 @@ def test_results_scheduler(mocker):
     end = model.new_state("end")
     model.set_transitions(init, [(good, end), (bad, end)])
     scheduler = Scheduler(model, {0: good})
-    result = Result(model, [1, 2], scheduler)
+    result = Result(model, {0: 1, 1: 2}, scheduler)
     vis = Visualization(model=model, result=result)
     vis.show()
     MockNetwork.add_node.assert_any_call(id=10000000001, label="BAD", group="actions")

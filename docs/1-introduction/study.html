@@ -1,8 +1,9 @@
 
           <iframe
-                id="modelPIozahTdwc"
-                width="820"
-                height="620"
+                id="studyNUTBKGQogs"
+                width="481"
+                height="378"
+                sandbox="allow-scripts allow-same-origin"
                 frameborder="0"
                 srcdoc="
 &lt;!DOCTYPE html&gt;
@@ -16,8 +17,8 @@
     &lt;style type=&quot;text/css&quot;&gt;
       #mynetwork {
 
-        width: 800px;
-        height: 600px;
+        width: 461px;
+        height: 358px;
         border: 1px solid lightgray;
 
       }
@@ -27,37 +28,32 @@
     &lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
     &lt;script type=&quot;text/javascript&quot;&gt;
 
-        var nodes = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: &quot;states&quot; },
-{ id: 1, label: `red light,still`, group: &quot;states&quot; },
-{ id: 2, label: `green light,moving`, group: &quot;states&quot; },
-{ id: 3, label: `red light,moving`, group: &quot;states&quot; },
-{ id: 4, label: `accident`, group: &quot;states&quot; },
-{ id: 10000000000, label: `accelerate`, group: &quot;actions&quot; },
-{ id: 10000000001, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000002, label: `accelerate`, group: &quot;actions&quot; },
-{ id: 10000000003, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000004, label: `brake`, group: &quot;actions&quot; },
-{ id: 10000000005, label: `wait`, group: &quot;actions&quot; },
-{ id: 10000000006, label: `brake`, group: &quot;actions&quot; },
-{ id: 10000000007, label: `wait`, group: &quot;actions&quot; },
+        var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -200, y: -25 },
+{ id: 1, label: `studied
+€	R: 0`, group: &quot;states&quot;, x: 3, y: -112 },
+{ id: 2, label: `didn&#x27;t study
+€	R: 15`, group: &quot;states&quot;, x: -17, y: 119 },
+{ id: 3, label: `pass test
+€	R: 100`, group: &quot;states&quot;, x: 92, y: 27 },
+{ id: 4, label: `fail test
+€	R: 0`, group: &quot;states&quot;, x: 8, y: -1 },
+{ id: 5, label: `end
+€	R: 0`, group: &quot;states&quot;, x: 140, y: -58 },
+{ id: 10000000000, label: `study
+€	R: 0`, group: &quot;actions&quot;, x: -124, y: -138 },
+{ id: 10000000001, label: `don&#x27;t study
+€	R: 0`, group: &quot;actions&quot;, x: -154, y: 103 },
 ]);
         var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 2, label: &quot;1&quot; },
+{ from: 10000000000, to: 1, label: &quot;1&quot; },
 { from: 0, to: 10000000001 },
-{ from: 10000000001, to: 1, label: &quot;1&quot; },
-{ from: 1, to: 10000000002 },
-{ from: 10000000002, to: 3, label: &quot;1&quot; },
-{ from: 1, to: 10000000003 },
-{ from: 10000000003, to: 0, label: &quot;1&quot; },
-{ from: 2, to: 10000000004 },
-{ from: 10000000004, to: 0, label: &quot;1&quot; },
-{ from: 2, to: 10000000005 },
-{ from: 10000000005, to: 3, label: &quot;1&quot; },
-{ from: 3, to: 10000000006 },
-{ from: 10000000006, to: 1, label: &quot;1&quot; },
-{ from: 3, to: 10000000007 },
-{ from: 10000000007, to: 4, label: &quot;1&quot; },
-{ from: 4, to: 4, label: &quot;1&quot; },
+{ from: 10000000001, to: 2, label: &quot;1&quot; },
+{ from: 1, to: 3, label: &quot;9/10&quot; },
+{ from: 1, to: 4, label: &quot;1/10&quot; },
+{ from: 2, to: 3, label: &quot;2/5&quot; },
+{ from: 2, to: 4, label: &quot;3/5&quot; },
+{ from: 3, to: 5, label: &quot;1&quot; },
+{ from: 4, to: 5, label: &quot;1&quot; },
 ]);
         var options = {
   &quot;__fake_macros&quot;: {
@@ -89,7 +85,7 @@
     &quot;actions&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;lightblue&quot;,
+        &quot;background&quot;: &quot;#fbd0f5&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -113,7 +109,7 @@
     &quot;states&quot;: {
       &quot;borderWidth&quot;: 1,
       &quot;color&quot;: {
-        &quot;background&quot;: &quot;white&quot;,
+        &quot;background&quot;: &quot;#c9f9a9&quot;,
         &quot;border&quot;: &quot;black&quot;,
         &quot;highlight&quot;: {
           &quot;background&quot;: &quot;white&quot;,
@@ -133,11 +129,14 @@
     &quot;arrows&quot;: &quot;to&quot;,
     &quot;font&quot;: {
       &quot;color&quot;: &quot;black&quot;,
-      &quot;size&quot;: 14
+      &quot;size&quot;: 14,
+      &quot;strokeColor&quot;: &quot;white&quot;,
+      &quot;strokeWidth&quot;: 2
     },
     &quot;color&quot;: {
       &quot;color&quot;: &quot;black&quot;
-    }
+    },
+    &quot;width&quot;: 1
   },
   &quot;numbers&quot;: {
     &quot;fractions&quot;: true,
@@ -157,17 +156,50 @@
   },
   &quot;misc&quot;: {
     &quot;enable_physics&quot;: true,
-    &quot;width&quot;: 800,
-    &quot;height&quot;: 600,
+    &quot;width&quot;: 461,
+    &quot;height&quot;: 358,
     &quot;explore&quot;: false
   },
   &quot;saving&quot;: {
     &quot;relative_path&quot;: true,
-    &quot;filename&quot;: &quot;layouts/NAME.json&quot;,
+    &quot;filename&quot;: &quot;layouts/pinkgreen.json&quot;,
     &quot;save_button&quot;: false,
     &quot;load_button&quot;: false
   },
-  &quot;positions&quot;: {},
+  &quot;positions&quot;: {
+    &quot;0&quot;: {
+      &quot;x&quot;: -200,
+      &quot;y&quot;: -25
+    },
+    &quot;1&quot;: {
+      &quot;x&quot;: 3,
+      &quot;y&quot;: -112
+    },
+    &quot;2&quot;: {
+      &quot;x&quot;: -17,
+      &quot;y&quot;: 119
+    },
+    &quot;3&quot;: {
+      &quot;x&quot;: 92,
+      &quot;y&quot;: 27
+    },
+    &quot;4&quot;: {
+      &quot;x&quot;: 8,
+      &quot;y&quot;: -1
+    },
+    &quot;5&quot;: {
+      &quot;x&quot;: 140,
+      &quot;y&quot;: -58
+    },
+    &quot;10000000000&quot;: {
+      &quot;x&quot;: -124,
+      &quot;y&quot;: -138
+    },
+    &quot;10000000001&quot;: {
+      &quot;x&quot;: -154,
+      &quot;y&quot;: 103
+    }
+  },
   &quot;physics&quot;: true,
   &quot;autoResize&quot;: true
 };

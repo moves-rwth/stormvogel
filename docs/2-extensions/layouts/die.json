@@ -22,7 +22,7 @@
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "#8ff0a4",
+        "background": "white",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -39,7 +39,7 @@
     "actions": {
       "borderWidth": 1,
       "color": {
-        "background": "#ffc0cb",
+        "background": "lightblue",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -101,56 +101,47 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 800,
-    "height": 600,
+    "width": 381,
+    "height": 374,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/pinkgreen.json",
+    "filename": "layouts/die.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": -27,
-      "y": -203
+      "x": 0,
+      "y": -3
     },
     "1": {
-      "x": -84,
-      "y": -6
+      "x": 3,
+      "y": -146
     },
     "2": {
-      "x": 57,
-      "y": -10
+      "x": 128,
+      "y": -67
     },
     "3": {
-      "x": -56,
-      "y": 102
+      "x": 120,
+      "y": 77
     },
     "4": {
-      "x": 58,
-      "y": 61
+      "x": -6,
+      "y": 135
     },
     "5": {
-      "x": 24,
-      "y": 187
+      "x": -124,
+      "y": 70
     },
-    "10000000000": {
-      "x": -136,
-      "y": -127
-    },
-    "10000000001": {
-      "x": 77,
-      "y": -144
+    "6": {
+      "x": -124,
+      "y": -73
     }
   },
-  "width": 800,
-  "height": 600,
-  "physics": true,
-  "results_and_rewards": {
-    "show_results": true,
-    "resultSymbol": "\u2606",
-    "show_rewards": true
-  }
+  "width": 381,
+  "height": 374,
+  "physics": true
 }

@@ -17,7 +17,7 @@ def create_monty_hall_mdp():
             [
                 (
                     mdp.action(f"open{i}"),
-                    mdp.new_state("open", s.features | {"chosen_pos": i}),
+                    mdp.new_state(["open", f"o_{i}"], s.features | {"chosen_pos": i}),
                 )
                 for i in range(3)
             ]
@@ -32,14 +32,22 @@ def create_monty_hall_mdp():
             [
                 (
                     1 / len(other_pos),
-                    mdp.new_state("goatrevealed", s.features | {"reveal_pos": i}),
+                    mdp.new_state(
+                        ["gr"]
+                        + (
+                            ["should_stay"]
+                            if chosen_pos == car_pos
+                            else ["should_switch"]
+                        ),
+                        s.features | {"reveal_pos": i},
+                    ),
                 )
                 for i in other_pos
             ]
         )
 
     # we must choose whether we want to switch
-    for s in mdp.get_states_with_label("goatrevealed"):
+    for s in mdp.get_states_with_label("gr"):
         car_pos = s.features["car_pos"]
         chosen_pos = s.features["chosen_pos"]
         reveal_pos = s.features["reveal_pos"]

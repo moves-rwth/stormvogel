@@ -19,6 +19,7 @@ def show(
     layout: stormvogel.layout.Layout | None = None,
     show_editor: bool = False,
     debug_output: widgets.Output = widgets.Output(),
+    use_iframe: bool = False,
 ) -> stormvogel.visualization.Visualization:
     """Create and show a visualization of a Model using a visjs Network
 
@@ -28,8 +29,8 @@ def show(
         name (str, optional): Internally used name. Will be randomly generated if left as None.
         result (Result, optional): Result corresponding to the model.
         layout (Layout, optional): Layout used for the visualization.
-        separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
-        save_and_embed: Save the html to an external file and embed. Does not support editor.
+        show_editor (list[str], optional): Show an interactive layout editor.
+        use_iframe: In some environments, the visualization works better with this enabled. Only takes effect when show_editor is disabled.
     Returns: Visualization object.
     """
     if layout is None:
@@ -47,6 +48,7 @@ def show(
         do_display=False,
         debug_output=debug_output,
         do_init_server=do_init_server,
+        use_iframe=use_iframe,
     )
     vis.show()
     if show_editor:
@@ -58,7 +60,10 @@ def show(
         ipd.display(box)
         vis.update()
     else:  # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
-        iframe = vis.nt.generate_iframe()
+        if use_iframe:
+            iframe = vis.nt.generate_iframe()
+        else:
+            iframe = vis.generate_html()
         with open(name + ".html", "w") as f:
             f.write(iframe)
         ipd.display(ipd.HTML(filename=name + ".html"))

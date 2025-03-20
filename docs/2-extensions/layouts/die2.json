@@ -28,7 +28,7 @@
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "#ff6666",
+        "background": "white",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -45,19 +45,37 @@
     "actions": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "lightblue",
         "border": "black",
         "highlight": {
           "background": "white",
           "border": "red"
         }
       },
-      "shape": "ellipse",
+      "shape": "box",
       "mass": 1,
       "font": {
         "color": "black",
         "size": 14
       }
+    },
+    "scheduled_actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "pink",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
     }
   },
   "reload_button": false,
@@ -89,100 +107,47 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 800,
-    "height": 600,
+    "width": 381,
+    "height": 374,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "layouts/die2.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": 7,
-      "y": -131
+      "x": -8,
+      "y": 8
     },
     "1": {
-      "x": 140,
-      "y": -35
+      "x": -54,
+      "y": -124
     },
     "2": {
-      "x": -120,
-      "y": -14
+      "x": 130,
+      "y": 24
     },
     "3": {
-      "x": 18,
-      "y": 136
+      "x": 82,
+      "y": -104
     },
     "4": {
-      "x": 239,
-      "y": -268
+      "x": 49,
+      "y": 141
     },
     "5": {
-      "x": 383,
-      "y": -49
+      "x": -98,
+      "y": 125
     },
     "6": {
-      "x": -329,
-      "y": -5
-    },
-    "7": {
-      "x": -194,
-      "y": -252
-    },
-    "8": {
-      "x": -74,
-      "y": 358
-    },
-    "9": {
-      "x": 185,
-      "y": 321
-    },
-    "10000000000": {
-      "x": 7,
-      "y": 1
-    },
-    "10000000001": {
-      "x": 253,
-      "y": -120
-    },
-    "10000000002": {
-      "x": -223,
-      "y": -105
-    },
-    "10000000003": {
-      "x": 45,
-      "y": 272
-    },
-    "10000000004": {
-      "x": 237,
-      "y": -373
-    },
-    "10000000005": {
-      "x": 478,
-      "y": -3
-    },
-    "10000000006": {
-      "x": -399,
-      "y": 71
-    },
-    "10000000007": {
-      "x": -226,
-      "y": -321
-    },
-    "10000000008": {
-      "x": -154,
-      "y": 425
-    },
-    "10000000009": {
-      "x": 282,
-      "y": 363
+      "x": -151,
+      "y": -16
     }
   },
-  "width": 800,
-  "height": 600,
-  "physics": true,
-  "autoResize": true
+  "width": 381,
+  "height": 374,
+  "physics": true
 }

@@ -20,12 +20,30 @@
   },
   "edit_groups": {
     "groups": [
-      "dead...",
+      "green_light",
+      "red_light",
       "states",
       "actions"
     ]
   },
   "groups": {
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#000000",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "#ffffff",
+        "size": 20
+      }
+    },
     "actions": {
       "borderWidth": 1,
       "color": {
@@ -40,11 +58,11 @@
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 20
       }
     },
     "scheduled_actions": {
-      "shape": "box",
+      "borderWidth": 1,
       "color": {
         "background": "pink",
         "border": "black",
@@ -53,7 +71,7 @@
           "border": "red"
         }
       },
-      "borderWidth": 1,
+      "shape": "box",
       "mass": 1,
       "font": {
         "color": "black",
@@ -61,27 +79,10 @@
       },
       "schedColor": false
     },
-    "states": {
+    "red_light": {
       "borderWidth": 1,
       "color": {
-        "background": "#f5c211",
-        "border": "#c64600",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 5,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "dead...": {
-      "borderWidth": 1,
-      "color": {
-        "background": "#c0bfbc",
+        "background": "#ec9393",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -92,13 +93,13 @@
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 20
       }
     },
-    "hunt_>:D": {
+    "green_light": {
       "borderWidth": 1,
       "color": {
-        "background": "#2ec27e",
+        "background": "#bcfe58",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -109,13 +110,13 @@
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 20
       }
     },
-    "desparate_hunt!": {
+    "init": {
       "borderWidth": 1,
       "color": {
-        "background": "#ff7800",
+        "background": "#bcfe58",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -126,41 +127,7 @@
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
-      }
-    },
-    "starving_:((": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "satisfied_:)": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
+        "size": 20
       }
     }
   },
@@ -193,81 +160,71 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 687,
-    "height": 519,
+    "width": 655,
+    "height": 375,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/lion.json",
+    "filename": "layouts/car.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": -311,
-      "y": -306
+      "x": 194,
+      "y": -96
     },
     "1": {
-      "x": -111,
-      "y": 167
+      "x": -51,
+      "y": -142
     },
     "2": {
-      "x": -122,
-      "y": -117
+      "x": 186,
+      "y": 153
     },
     "3": {
-      "x": 185,
-      "y": -110
+      "x": -108,
+      "y": 98
     },
     "4": {
-      "x": 295,
-      "y": 152
-    },
-    "5": {
-      "x": 137,
-      "y": 286
+      "x": -367,
+      "y": 177
     },
     "10000000000": {
-      "x": -178,
+      "x": 144,
       "y": 35
     },
     "10000000001": {
-      "x": -246,
-      "y": 85
+      "x": 68,
+      "y": -99
     },
     "10000000002": {
-      "x": -14,
-      "y": -27
+      "x": -158,
+      "y": -50
     },
     "10000000003": {
-      "x": 17,
-      "y": -216
+      "x": 87,
+      "y": -212
     },
     "10000000004": {
-      "x": 84,
-      "y": 19
+      "x": 275,
+      "y": 33
     },
     "10000000005": {
-      "x": 328,
-      "y": -37
+      "x": 33,
+      "y": 176
     },
     "10000000006": {
-      "x": 78,
-      "y": 109
+      "x": -25,
+      "y": -3
     },
     "10000000007": {
-      "x": 277,
-      "y": 305
+      "x": -238,
+      "y": 163
     }
   },
-  "physics": true,
-  "autoResize": true,
-  "results_and_rewards": {
-    "show_results": true,
-    "resultSymbol": "\u2606",
-    "show_rewards": true
-  },
-  "width": 687,
-  "height": 519
+  "width": 655,
+  "height": 375,
+  "physics": true
 }
