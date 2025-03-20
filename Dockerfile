@@ -64,4 +64,4 @@ RUN echo "echo -e '\033[44;37mJupyter Lab will be running at http://localhost:80
 RUN echo "echo -e \"\033[44;37mTo restart this container, run docker start -i \$(hostname)\033[0m\"" >> /root/.bashrc
 
 # Start a bash shell, but run Jupyter Lab inside Poetry in the background on port 8080
-CMD ["bash", "-c", "trap '' INT; (poetry run nohup jupyter lab --ip 0.0.0.0 --port=8080 --no-browser --allow-root > /app/jupyter_lab.log 2>&1 &) && exec bash"]
+CMD ["bash", "-c", "poetry run jupyter lab --ip 0.0.0.0 --port=8080 --no-browser --allow-root > /dev/null 2>&1 & disown && exec bash"]
