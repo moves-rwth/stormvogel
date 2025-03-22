@@ -1,286 +1,271 @@
 
-<iframe
-id="studyzFpPaPRovG"
-width="820"
-height="620"
-frameborder="0"
-srcdoc="
-&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;title&gt;Network&lt;/title&gt;
-&lt;script
-type=&quot;text/javascript&quot;
-src=&quot;https://unpkg.com/vis-network/standalone/umd/vis-network.min.js&quot;
-&gt;&lt;/script&gt;
-&lt;style type=&quot;text/css&quot;&gt;
-#mynetwork {
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Network</title>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+    <style type="text/css">
+      #studydsYhjKVhLd {
+        width: 461px;
+        height: 358px;
+        border: 1px solid lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="studydsYhjKVhLd"></div>
+    <script type="text/javascript">
 
-width: 800px;
-height: 600px;
-border: 1px solid lightgray;
+class NetworkWrapper_studydsYhjKVhLd{//js
+  constructor(nodes, edges, options, container) {
+    this.nodes = nodes;
+    this.edges = edges;
+    this.options = options;
+    this.container = container;
+    this.data = {
+      nodes: nodes,
+      edges: edges,
+    };
+    this.network = new vis.Network(container, this.data, options);
+    var this_ = this; // Events will not work if you use 'this' directly :))))) No idea why.
 
-}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;mynetwork&quot;&gt;&lt;/div&gt;
-&lt;script type=&quot;text/javascript&quot;&gt;
+    // Set user-triggered events.
+    this.network.on( 'click', function(properties) {
+      var nodeId = this_.network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+      this_.makeNeighborsVisible(nodeId);
+    });
+    this.network.on( 'doubleClick', function(properties) {
+        this_.network.setData(this_.data);
+    });
+  }
 
-var nodes = new vis.DataSet([{ id: 0, label: `init`, group: &quot;states&quot;, x: -27, y: -203 },
+  setNodeColor(id, color) {
+    var node = this.nodes.get(id);
+    node["x"] = this.network.getPosition(id)["x"];
+    node["y"] = this.network.getPosition(id)["y"];
+    node["color"] = color;
+    this.nodes.update(node);
+  }
+
+  makeNeighborsVisible(homeId) {
+    if (homeId === undefined) {
+      return;
+    }
+    var homeNode = this.nodes.get(homeId);
+
+    // Make outgoing nodes visible
+    var nodeIds = this.network.getConnectedNodes(homeId, "to");
+    for (let i = 0; i < nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = this.nodes.get(toNodeId);
+      if (toNode["hidden"]) {
+        toNode["hidden"] = false;
+        toNode["physics"] = true;
+        toNode["x"] = this.network.getPosition(homeId)["x"];
+        toNode["y"] = this.network.getPosition(homeId)["y"];
+        this.nodes.update(toNode);
+      }
+    }
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = this.network.getConnectedEdges(homeId);
+    for (let i = 0; i < edgeIds.length; i++) {
+      var edgeId = edgeIds[i];
+      var edge = this.edges.get(edgeId);
+      var fromNode = this.nodes.get(edge.from);
+      var toNode = this.nodes.get(edge.to);
+      if ((! fromNode["hidden"]) && (! toNode["hidden"])) {
+        edge["hidden"] = false;
+        edge["physics"] = true;
+        this.edges.update(edge);
+      }
+    }
+  }
+};
+
+    </script>
+    <script type="text/javascript">
+        //js
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states", x: -200, y: -25 },
 { id: 1, label: `studied
-€	R: 0`, group: &quot;states&quot;, x: -84, y: -6 },
-{ id: 2, label: `didn&#x27;t study
-€	R: 15`, group: &quot;states&quot;, x: 57, y: -10 },
+€	R: 0`, group: "states", x: 3, y: -112 },
+{ id: 2, label: `didn't study
+€	R: 15`, group: "states", x: -17, y: 119 },
 { id: 3, label: `pass test
-€	R: 100`, group: &quot;states&quot;, x: -56, y: 102 },
+€	R: 100`, group: "states", x: 92, y: 27 },
 { id: 4, label: `fail test
-€	R: 0`, group: &quot;states&quot;, x: 58, y: 61 },
+€	R: 0`, group: "states", x: 8, y: -1 },
 { id: 5, label: `end
-€	R: 0`, group: &quot;states&quot;, x: 24, y: 187 },
+€	R: 0`, group: "states", x: 140, y: -58 },
 { id: 10000000000, label: `study
-€	R: 0`, group: &quot;actions&quot;, x: -136, y: -127 },
-{ id: 10000000001, label: `don&#x27;t study
-€	R: 0`, group: &quot;actions&quot;, x: 77, y: -144 },
+€	R: 0`, group: "actions", x: -124, y: -138 },
+{ id: 10000000001, label: `don't study
+€	R: 0`, group: "actions", x: -154, y: 103 },
 ]);
-var edges = new vis.DataSet([{ from: 0, to: 10000000000 },
-{ from: 10000000000, to: 1, label: &quot;1&quot; },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: "1" },
 { from: 0, to: 10000000001 },
-{ from: 10000000001, to: 2, label: &quot;1&quot; },
-{ from: 1, to: 3, label: &quot;9/10&quot; },
-{ from: 1, to: 4, label: &quot;1/10&quot; },
-{ from: 2, to: 3, label: &quot;2/5&quot; },
-{ from: 2, to: 4, label: &quot;3/5&quot; },
-{ from: 3, to: 5, label: &quot;1&quot; },
-{ from: 4, to: 5, label: &quot;1&quot; },
+{ from: 10000000001, to: 2, label: "1" },
+{ from: 1, to: 3, label: "9/10" },
+{ from: 1, to: 4, label: "1/10" },
+{ from: 2, to: 3, label: "2/5" },
+{ from: 2, to: 4, label: "3/5" },
+{ from: 3, to: 5, label: "1" },
+{ from: 4, to: 5, label: "1" },
 ]);
-var options = {
-&quot;__fake_macros&quot;: {
-&quot;__group_macro&quot;: {
-&quot;borderWidth&quot;: 1,
-&quot;color&quot;: {
-&quot;background&quot;: &quot;white&quot;,
-&quot;border&quot;: &quot;black&quot;,
-&quot;highlight&quot;: {
-&quot;background&quot;: &quot;white&quot;,
-&quot;border&quot;: &quot;red&quot;
-}
-},
-&quot;shape&quot;: &quot;ellipse&quot;,
-&quot;mass&quot;: 1,
-&quot;font&quot;: {
-&quot;color&quot;: &quot;black&quot;,
-&quot;size&quot;: 14
-}
-}
-},
-&quot;edit_groups&quot;: {
-&quot;groups&quot;: [
-&quot;states&quot;,
-&quot;actions&quot;
-]
-},
-&quot;groups&quot;: {
-&quot;actions&quot;: {
-&quot;borderWidth&quot;: 1,
-&quot;color&quot;: {
-&quot;background&quot;: &quot;#ffc0cb&quot;,
-&quot;border&quot;: &quot;black&quot;,
-&quot;highlight&quot;: {
-&quot;background&quot;: &quot;white&quot;,
-&quot;border&quot;: &quot;red&quot;
-}
-},
-&quot;shape&quot;: &quot;box&quot;,
-&quot;mass&quot;: 1,
-&quot;font&quot;: {
-&quot;color&quot;: &quot;black&quot;,
-&quot;size&quot;: 14
-}
-},
-&quot;scheduled_actions&quot;: {
-&quot;shape&quot;: &quot;box&quot;,
-&quot;color&quot;: {
-&quot;background&quot;: &quot;pink&quot;,
-&quot;border&quot;: &quot;black&quot;,
-&quot;highlight&quot;: {
-&quot;background&quot;: &quot;white&quot;,
-&quot;border&quot;: &quot;red&quot;
-}
-},
-&quot;borderWidth&quot;: 1,
-&quot;mass&quot;: 1,
-&quot;font&quot;: {
-&quot;color&quot;: &quot;black&quot;,
-&quot;size&quot;: 14
-},
-&quot;schedColor&quot;: false
-},
-&quot;states&quot;: {
-&quot;borderWidth&quot;: 1,
-&quot;color&quot;: {
-&quot;background&quot;: &quot;#8ff0a4&quot;,
-&quot;border&quot;: &quot;black&quot;,
-&quot;highlight&quot;: {
-&quot;background&quot;: &quot;white&quot;,
-&quot;border&quot;: &quot;red&quot;
-}
-},
-&quot;shape&quot;: &quot;ellipse&quot;,
-&quot;mass&quot;: 1,
-&quot;font&quot;: {
-&quot;color&quot;: &quot;black&quot;,
-&quot;size&quot;: 14
-}
-}
-},
-&quot;reload_button&quot;: false,
-&quot;edges&quot;: {
-&quot;arrows&quot;: &quot;to&quot;,
-&quot;font&quot;: {
-&quot;color&quot;: &quot;black&quot;,
-&quot;size&quot;: 14
-},
-&quot;color&quot;: {
-&quot;color&quot;: &quot;black&quot;
-}
-},
-&quot;numbers&quot;: {
-&quot;fractions&quot;: true,
-&quot;digits&quot;: 5
-},
-&quot;state_properties&quot;: {
-&quot;show_results&quot;: true,
-&quot;result_symbol&quot;: &quot;\u2606&quot;,
-&quot;show_rewards&quot;: true,
-&quot;reward_symbol&quot;: &quot;\u20ac&quot;,
-&quot;show_zero_rewards&quot;: true,
-&quot;show_observations&quot;: true,
-&quot;observation_symbol&quot;: &quot;\u0298&quot;
-},
-&quot;layout&quot;: {
-&quot;randomSeed&quot;: 5
-},
-&quot;misc&quot;: {
-&quot;enable_physics&quot;: true,
-&quot;width&quot;: 800,
-&quot;height&quot;: 600,
-&quot;explore&quot;: false
-},
-&quot;saving&quot;: {
-&quot;relative_path&quot;: true,
-&quot;filename&quot;: &quot;layouts/pinkgreen.json&quot;,
-&quot;save_button&quot;: false,
-&quot;load_button&quot;: false
-},
-&quot;positions&quot;: {
-&quot;0&quot;: {
-&quot;x&quot;: -27,
-&quot;y&quot;: -203
-},
-&quot;1&quot;: {
-&quot;x&quot;: -84,
-&quot;y&quot;: -6
-},
-&quot;2&quot;: {
-&quot;x&quot;: 57,
-&quot;y&quot;: -10
-},
-&quot;3&quot;: {
-&quot;x&quot;: -56,
-&quot;y&quot;: 102
-},
-&quot;4&quot;: {
-&quot;x&quot;: 58,
-&quot;y&quot;: 61
-},
-&quot;5&quot;: {
-&quot;x&quot;: 24,
-&quot;y&quot;: 187
-},
-&quot;10000000000&quot;: {
-&quot;x&quot;: -136,
-&quot;y&quot;: -127
-},
-&quot;10000000001&quot;: {
-&quot;x&quot;: 77,
-&quot;y&quot;: -144
-}
-},
-&quot;physics&quot;: true,
-&quot;autoResize&quot;: true,
-&quot;width&quot;: 800,
-&quot;height&quot;: 600,
-&quot;results_and_rewards&quot;: {
-&quot;show_results&quot;: true,
-&quot;resultSymbol&quot;: &quot;\u2606&quot;,
-&quot;show_rewards&quot;: true
-}
+    var options_local = {
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edit_groups": {
+    "groups": [
+      "states",
+      "actions"
+    ]
+  },
+  "groups": {
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#fbd0f5",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "red"
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#c9f9a9",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14,
+      "strokeColor": "white",
+      "strokeWidth": 2
+    },
+    "color": {
+      "color": "black"
+    },
+    "width": 1
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 461,
+    "height": 358,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/pinkgreen.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": -200,
+      "y": -25
+    },
+    "1": {
+      "x": 3,
+      "y": -112
+    },
+    "2": {
+      "x": -17,
+      "y": 119
+    },
+    "3": {
+      "x": 92,
+      "y": 27
+    },
+    "4": {
+      "x": 8,
+      "y": -1
+    },
+    "5": {
+      "x": 140,
+      "y": -58
+    },
+    "10000000000": {
+      "x": -124,
+      "y": -138
+    },
+    "10000000001": {
+      "x": -154,
+      "y": 103
+    }
+  },
+  "physics": true,
+  "autoResize": true
 };
-//js
-var container = document.getElementById(&quot;mynetwork&quot;);
-var data = {
-nodes: nodes,
-edges: edges,
-};
-var network = new vis.Network(container, data, options);
-function makeAllNodesInvisible() {
-ids = nodes.getIds();
-for (let i = 0; i &lt; ids.length; i++) {
-var nodeId = ids[i];
-var node = nodes.get(nodeId);
-node[&quot;hidden&quot;] = true;
-node[&quot;physics&quot;] = false;
-nodes.update(node);
-}
-};
-function makeNeighborsVisible(homeId) {
-homeNode = nodes.get(homeId);
+    var container_local = document.getElementById("studydsYhjKVhLd");
+    var nw_studydsYhjKVhLd = new NetworkWrapper_studydsYhjKVhLd(nodes_local, edges_local, options_local, container_local)
 
-// Make outgoing nodes visible
-var nodeIds = network.getConnectedNodes(homeId, &quot;to&quot;);
-for (let i = 0; i &lt; nodeIds.length; i++) {
-var toNodeId = nodeIds[i];
-var toNode = nodes.get(toNodeId);
-if (toNode[&quot;hidden&quot;]) {
-toNode[&quot;hidden&quot;] = false;
-toNode[&quot;physics&quot;] = true;
-toNode[&quot;x&quot;] = network.getPosition(homeId)[&quot;x&quot;];
-toNode[&quot;y&quot;] = network.getPosition(homeId)[&quot;y&quot;];
-nodes.update(toNode);
-}
-}
-// Make edges visible, if both of the nodes are also visible
-var edgeIds = network.getConnectedEdges(homeId);
-for (let i = 0; i &lt; edgeIds.length; i++) {
-var edgeId = edgeIds[i];
-var edge = edges.get(edgeId);
-var fromNode = nodes.get(edge.from);
-var toNode = nodes.get(edge.to);
-if ((! fromNode[&quot;hidden&quot;]) &amp;&amp; (! toNode[&quot;hidden&quot;])) {
-edge[&quot;hidden&quot;] = false;
-edge[&quot;physics&quot;] = true;
-edges.update(edge);
-}
-}
-};
-network.on( &#x27;click&#x27;, function(properties) {
-var nodeId = network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
-makeNeighborsVisible(nodeId);
-});
-network.on( &#x27;doubleClick&#x27;, function(properties) {
-network.setData(data);
-});
-function setNodeColor(id, color) {
-var node = nodes.get(id);
-node[&quot;color&quot;] = color
-nodes.update(node);
-}
-
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"
-border:none !important;
-allowfullscreen webkitallowfullscreen mozallowfullscreen
-></iframe>
+    </script>
+  </body>
+</html>
