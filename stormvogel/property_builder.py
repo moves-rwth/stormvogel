@@ -3,6 +3,7 @@ import ipywidgets as widgets
 from stormvogel.dict_editor import DictEditor
 import IPython.display as ipd
 
+
 def build_property_string(model: stormvogel.model.Model):
     """Lets the user build a property string using a widget"""
 

@@ -44,7 +44,9 @@ def model_checking(
 
         return stormvogel_result
     else:
-        print("You have not proved a property string. You can create a simple one using this widget.")
+        print(
+            "You have not proved a property string. You can create a simple one using this widget."
+        )
         stormvogel.property_builder.build_property_string(model)
         return None
 
