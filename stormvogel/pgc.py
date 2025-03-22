@@ -130,7 +130,9 @@ def valid_input(
             actionslist = available_actions(state)
 
             if actionslist is None:
-                raise ValueError(f"On input {state}, the available actions function does not have a return value")
+                raise ValueError(
+                    f"On input {state}, the available actions function does not have a return value"
+                )
 
             if not isinstance(actionslist, list):
                 raise ValueError(
@@ -141,14 +143,20 @@ def valid_input(
                 tuples = delta(state, action)
 
                 if tuples is None:
-                    raise ValueError(f"On input pair {state} {action}, the delta function does not have a return value")
+                    raise ValueError(
+                        f"On input pair {state} {action}, the delta function does not have a return value"
+                    )
 
                 if not isinstance(tuples, list):
-                    raise ValueError(f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]")
+                    raise ValueError(
+                        f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
+                    )
                 else:
                     for t in tuples:
                         if not isinstance(t, tuple):
-                            raise ValueError(f"On input pair {state} {action}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]")
+                            raise ValueError(
+                                f"On input pair {state} {action}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]"
+                            )
 
                 for t in tuples:
                     if t[1] not in states_seen:
@@ -158,14 +166,20 @@ def valid_input(
             # we check for the delta function in models without actions
             tuples = delta(state)
             if tuples is None:
-                raise ValueError(f"On input {state}, the delta function does not have a return value")
+                raise ValueError(
+                    f"On input {state}, the delta function does not have a return value"
+                )
 
             if not isinstance(tuples, list):
-                raise ValueError(f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]")
+                raise ValueError(
+                    f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
+                )
             else:
                 for t in tuples:
                     if not isinstance(t, tuple):
-                        raise ValueError(f"On input {state}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]")
+                        raise ValueError(
+                            f"On input {state}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]"
+                        )
 
             for t in tuples:
                 if t[1] not in states_seen:
@@ -191,7 +205,9 @@ def valid_input(
                     rewarddict = rewards(state, action)
 
                     if rewarddict is None:
-                        raise ValueError(f"On input pair {state} {action}, the rewards function does not have a return value")
+                        raise ValueError(
+                            f"On input pair {state} {action}, the rewards function does not have a return value"
+                        )
 
                     if not isinstance(rewarddict, dict):
                         raise ValueError(
@@ -208,7 +224,9 @@ def valid_input(
             for state in states_seen:
                 rewarddict = rewards(state)
                 if rewarddict is None:
-                    raise ValueError(f"On input {state}, the rewards function does not have a return value")
+                    raise ValueError(
+                        f"On input {state}, the rewards function does not have a return value"
+                    )
 
                 if not isinstance(rewarddict, dict):
                     raise ValueError(
@@ -224,7 +242,9 @@ def valid_input(
         for state in states_seen:
             o = observations(state)
             if o is None:
-                raise ValueError(f"On input {state}, the observations function does not have a return value")
+                raise ValueError(
+                    f"On input {state}, the observations function does not have a return value"
+                )
 
             if not isinstance(o, int):
                 raise ValueError(
@@ -246,7 +266,9 @@ def valid_input(
         for state in states_seen:
             labellist = labels(state)
             if labellist is None:
-                raise ValueError(f"On input {state}, the labels function does not have a return value")
+                raise ValueError(
+                    f"On input {state}, the labels function does not have a return value"
+                )
 
             if not isinstance(labellist, list):
                 raise ValueError(
