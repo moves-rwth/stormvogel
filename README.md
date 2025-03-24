@@ -4,6 +4,13 @@ An interactive approach to probabilistic model checking
 
 Take a look at [the stormvogel documentation!](https://moves-rwth.github.io/stormvogel/)
 
+## Use With Docker
+
+Install `docker`. Run:
+```
+docker run -it -p 8080:8080 stormvogel/stormvogel
+```
+
 ## Setup
 
 Install `poetry`. Install dependencies:

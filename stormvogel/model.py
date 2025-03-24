@@ -189,16 +189,15 @@ class State:
                 return (
                     sorted(self.labels) == sorted(other.labels) and observations_equal
                 )
-            return False
         return False
 
     def __lt__(self, other):
         if not isinstance(other, State):
             return NotImplemented
-        return str(self.id) < str(other.id)
+        return str(self.labels) < str(other.labels)
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class Action:
     """Represents an action, e.g., in MDPs.
         Note that this action object is completely independent of its corresponding branch.
@@ -219,6 +218,11 @@ class Action:
             return Action(frozenset())
 
     labels: frozenset[str]
+
+    def __lt__(self, other):
+        if not isinstance(other, Action):
+            return NotImplemented
+        return str(self.labels) < str(other.labels)
 
     def __str__(self):
         return f"Action with labels {self.labels}"
@@ -290,11 +294,13 @@ class Transition:
         if isinstance(other, Transition):
             if len(self.transition) != len(other.transition):
                 return False
-            for item, other_item in zip(
-                sorted(self.transition.items()), sorted(other.transition.items())
+            for action, other_action in zip(
+                sorted(self.transition.keys()), sorted(other.transition.keys())
             ):
-                if not (item[0] == other_item[0] and item[1] == other_item[1]):
-                    print(item, "\n", other_item)
+                if not (
+                    action == other_action
+                    and self.transition[action] == other.transition[action]
+                ):
                     return False
             return True
         return False
