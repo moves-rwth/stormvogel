@@ -21,39 +21,40 @@ def model_checking(
     assert stormpy is not None
     if prop:
         prop = stormpy.parse_properties(prop)
-    else:
-        interactive_prop = (
-            stormvogel.property_builder.build_property_string_interactive(model)
+
+        stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+
+        assert prop is not None
+        if model.supports_actions() and scheduler:
+            stormpy_result = stormpy.model_checking(
+                stormpy_model, prop[0], extract_scheduler=True
+            )
+        else:
+            stormpy_result = stormpy.model_checking(stormpy_model, prop[0])
+
+        # to get the correct action labels, we need to convert the model back to stormvogel instead of
+        # using the initial one for now. (otherwise schedulers won't work)
+        stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
+
+        assert stormvogel_model is not None
+
+        stormvogel_result = stormvogel.result.convert_model_checking_result(
+            stormvogel_model, stormpy_result
         )
-        prop = stormpy.parse_properties(interactive_prop)
 
-    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
-
-    assert prop is not None
-    if model.supports_actions() and scheduler:
-        stormpy_result = stormpy.model_checking(
-            stormpy_model, prop[0], extract_scheduler=True
-        )
+        return stormvogel_result
     else:
-        stormpy_result = stormpy.model_checking(stormpy_model, prop[0])
-
-    # to get the correct action labels, we need to convert the model back to stormvogel instead of
-    # using the initial one for now. (otherwise schedulers won't work)
-    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
-
-    assert stormvogel_model is not None
-
-    stormvogel_result = stormvogel.result.convert_model_checking_result(
-        stormvogel_model, stormpy_result
-    )
-
-    return stormvogel_result
+        print(
+            "You have not proved a property string. You can create a simple one using this widget."
+        )
+        stormvogel.property_builder.build_property_string(model)
+        return None
 
 
 if __name__ == "__main__":
-    import stormvogel.examples.monty_hall
+    import examples.monty_hall
 
-    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    mdp = examples.monty_hall.create_monty_hall_mdp()
 
     rewardmodel = mdp.add_rewards("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))

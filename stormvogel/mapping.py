@@ -447,7 +447,7 @@ def stormpy_to_stormvogel(
         Takes a ctmc stormpy representation as input and outputs a simple stormvogel representation
         """
 
-        # we create the model (it seems names are not stored in sparsectmcs)
+        # we create the model
         model = stormvogel.model.new_ctmc(name=None, create_initial_state=False)
 
         # we add the states
