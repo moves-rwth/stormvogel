@@ -8,7 +8,7 @@
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
-      #modelydlRWUmrKg {
+      #modelhjuaBWkFEE {
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
@@ -16,10 +16,10 @@
     </style>
   </head>
   <body>
-    <div id="modelydlRWUmrKg"></div>
+    <div id="modelhjuaBWkFEE"></div>
     <script type="text/javascript">
 
-class NetworkWrapper_modelydlRWUmrKg{//js
+class NetworkWrapper_modelhjuaBWkFEE{//js
   constructor(nodes, edges, options, container) {
     this.nodes = nodes;
     this.edges = edges;
@@ -88,40 +88,45 @@ class NetworkWrapper_modelydlRWUmrKg{//js
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `init,flip
-€	r1: 0
-ʘ 0`, group: "states" },
-{ id: 1, label: `heads
-ʘ 0`, group: "states" },
-{ id: 2, label: `tails
-ʘ 0`, group: "states" },
-{ id: 3, label: `correct,done
-€	r1: 100
-ʘ 0`, group: "states" },
-{ id: 4, label: `wrong,done
-€	r1: 0
-ʘ 0`, group: "states" },
-{ id: 10000000000, label: `guess,heads
-€	r1: 0`, group: "actions" },
-{ id: 10000000001, label: `guess,tails
-€	r1: 0`, group: "actions" },
-{ id: 10000000002, label: `guess,heads
-€	r1: 0`, group: "actions" },
-{ id: 10000000003, label: `guess,tails
-€	r1: 0`, group: "actions" },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init
+☆ 275/2`, group: "states" },
+{ id: 1, label: `studied
+€	rewardmodel: 0: 0
+☆ 415/4`, group: "states" },
+{ id: 2, label: `didn't study
+€	rewardmodel: 0: 15
+☆ 275/2`, group: "states" },
+{ id: 3, label: `pass test
+€	rewardmodel: 0: 100
+☆ 100`, group: "states" },
+{ id: 4, label: `fail test
+☆ 275/2`, group: "states" },
+{ id: 5, label: `end
+€	rewardmodel: 0: 0
+☆ 0`, group: "states" },
+{ id: 10000000000, label: `study
+€	rewardmodel: 0: 0`, group: "actions" },
+{ id: 10000000001, label: `don't study
+€	rewardmodel: 0: 0`, group: "scheduled_actions" },
+{ id: 10000000002, label: `retry
+€	rewardmodel: 0: 0`, group: "scheduled_actions" },
+{ id: 10000000003, label: `give up
+€	rewardmodel: 0: 0`, group: "actions" },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 1, label: "1/2" },
-{ from: 0, to: 2, label: "1/2" },
-{ from: 1, to: 10000000000 },
-{ from: 10000000000, to: 3, label: "1" },
-{ from: 1, to: 10000000001 },
-{ from: 10000000001, to: 4, label: "1" },
-{ from: 2, to: 10000000002 },
-{ from: 10000000002, to: 4, label: "1" },
-{ from: 2, to: 10000000003 },
-{ from: 10000000003, to: 3, label: "1" },
-{ from: 3, to: 3, label: "1" },
-{ from: 4, to: 4, label: "1" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: "1" },
+{ from: 0, to: 10000000001, color: "red" },
+{ from: 10000000001, to: 2, label: "1", color: "red" },
+{ from: 1, to: 3, label: "9/10" },
+{ from: 1, to: 4, label: "1/10" },
+{ from: 2, to: 3, label: "2/5" },
+{ from: 2, to: 4, label: "3/5" },
+{ from: 3, to: 5, label: "1" },
+{ from: 4, to: 10000000002, color: "red" },
+{ from: 10000000002, to: 0, label: "1", color: "red" },
+{ from: 4, to: 10000000003 },
+{ from: 10000000003, to: 5, label: "1" },
+{ from: 5, to: 5, label: "1" },
 ]);
     var options_local = {
   "__fake_macros": {
@@ -146,7 +151,8 @@ class NetworkWrapper_modelydlRWUmrKg{//js
   "edit_groups": {
     "groups": [
       "states",
-      "actions"
+      "actions",
+      "scheduled_actions"
     ]
   },
   "groups": {
@@ -168,10 +174,20 @@ class NetworkWrapper_modelydlRWUmrKg{//js
       }
     },
     "scheduled_actions": {
-      "shape": "box",
+      "borderWidth": 1,
       "color": {
         "background": "pink",
-        "border": "red"
+        "border": "red",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
       }
     },
     "states": {
@@ -238,8 +254,8 @@ class NetworkWrapper_modelydlRWUmrKg{//js
   "physics": true,
   "autoResize": true
 };
-    var container_local = document.getElementById("modelydlRWUmrKg");
-    var nw_modelydlRWUmrKg = new NetworkWrapper_modelydlRWUmrKg(nodes_local, edges_local, options_local, container_local)
+    var container_local = document.getElementById("modelhjuaBWkFEE");
+    var nw_modelhjuaBWkFEE = new NetworkWrapper_modelhjuaBWkFEE(nodes_local, edges_local, options_local, container_local)
 
     </script>
   </body>
