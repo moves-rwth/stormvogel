@@ -267,8 +267,9 @@ def simulate(
                     r,
                 )
 
-    # now we start stepping through the model
+    # now we start stepping through the model for the given number of runs
     discovered_states = {0}
+    discovered_transitions = set()
     if not partial_model.supports_actions():
         for i in range(runs):
             simulator.restart()
@@ -281,25 +282,30 @@ def simulate(
                 # we add to the partial model what we discovered (if new)
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
-
-                    # we also add the transitions that we travelled through, so we need to keep track of the last state
-                    probability = 0
-                    transitions = model.get_transitions(last_state_id)
-                    for tuple in transitions.transition[
-                        stormvogel.model.EmptyAction
-                    ].branch:
-                        if tuple[1].id == state_id:
-                            probability += float(tuple[0])
-                    new_state = partial_model.new_state(list(labels))
-                    partial_model.get_state_by_id(last_state_id).add_transitions(
-                        [(probability, new_state)]
-                    )
+                    new_state = partial_model.new_state(list(labels),name=str(state_id))
 
                     # we add the rewards
                     for index, rewardmodel in enumerate(partial_model.rewards):
                         rewardmodel.set_state_reward(new_state, reward[index])
+                else:
+                    new_state = model.get_state_by_name(str(state_id))
 
-                    last_state_id = state_id
+                # we also add the transitions that we travelled through, so we need to keep track of the last state
+                # and of the discovered transitions so that we don't add duplicates
+                if (last_state_id,state_id) not in discovered_transitions:
+                    probability = 0
+                    transitions = model.get_transitions(last_state_id)
+                    discovered_transitions.add((last_state_id,state_id))
+                    for tuple in transitions.transition[
+                        stormvogel.model.EmptyAction
+                    ].branch:
+                        if tuple[1].id == state_id:
+                            probability += float(tuple[0]) #if there are multiple transitions between the same pair of states, they collapse
+                    partial_model.get_state_by_id(last_state_id).add_transitions(
+                        [(probability, new_state)]
+                    )
+
+                last_state_id = state_id
                 if simulator.is_done():
                     break
     else:
@@ -334,18 +340,24 @@ def simulate(
                 state_id, labels = discovery[0], discovery[2]
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
+                    new_state = partial_model.new_state(list(labels),name=str(state_id))
+                else:
+                    new_state = model.get_state_by_name(str(state_id))
 
-                    # we also add the transitions that we travelled through, so we need to keep track of the last state
+                # we also add the transitions that we travelled through, so we need to keep track of the last state
+                # and of the discovered transitions so that we don't add duplicates
+                if (last_state_id,state_id) not in discovered_transitions:
                     probability = 0
                     transitions = model.get_transitions(last_state_id)
                     for tuple in transitions.transition[action].branch:
                         if tuple[1].id == state_id:
-                            probability += float(tuple[0])
-                    new_state = partial_model.new_state(list(labels))
-                    last_state_partial.add_transitions([(probability, new_state)])
+                            probability += float(tuple[0]) #if there are multiple transitions between the same pair of action with next state, they collapse
+                    branch = stormvogel.model.Branch([(probability, new_state)])
+                    trans = stormvogel.model.Transition({action:branch})
+                    last_state_partial.add_transitions(trans)
 
-                    last_state_partial = new_state
-                    last_state_id = state_id
+                last_state_partial = new_state
+                last_state_id = state_id
                 if simulator.is_done():
                     break
 

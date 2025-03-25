@@ -2,6 +2,7 @@ import stormvogel.examples.die
 import stormvogel.examples.monty_hall
 import stormvogel.examples.nuclear_fusion_ctmc
 import stormvogel.examples.monty_hall_pomdp
+from stormvogel.examples.lion import create_lion_mdp
 from stormvogel.model import EmptyAction
 import stormvogel.model
 import stormvogel.simulator
@@ -64,18 +65,16 @@ def test_simulate():
     other_mdp.get_initial_state().set_transitions(
         [(1 / 3, other_mdp.new_state("carchosen"))]
     )
-    other_mdp.get_state_by_id(1).set_transitions([(1, other_mdp.new_state("open"))])
-    other_mdp.get_state_by_id(2).set_transitions(
-        [(1, other_mdp.new_state("goatrevealed"))]
-    )
-    action0 = other_mdp.new_action()
+    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
     action1 = other_mdp.new_action("open0")
-    action2 = other_mdp.new_action()
+    transition = stormvogel.model.Transition({action1:branch})
+    other_mdp.get_state_by_id(1).set_transitions(transition)
+    other_mdp.get_state_by_id(2).add_transitions([(1, other_mdp.new_state("goatrevealed"))])
 
     rewardmodel = other_mdp.add_rewards("rewardmodel")
-    rewardmodel.rewards = {(0, action0): 0, (3, action1): 7, (10, action2): 16}
+    rewardmodel.rewards = {(0, stormvogel.model.EmptyAction): 0, (3, action1): 7, (10, stormvogel.model.EmptyAction): 16}
     rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
-    rewardmodel2.rewards = {(0, action0): 0, (3, action1): 7, (10, action2): 16}
+    rewardmodel2.rewards = {(0, stormvogel.model.EmptyAction): 0, (3, action1): 7, (10, stormvogel.model.EmptyAction): 16}
 
     assert partial_model == other_mdp
     ######################################################################################################################
@@ -97,12 +96,20 @@ def test_simulate():
     other_mdp.get_initial_state().set_transitions(
         [(1 / 3, other_mdp.new_state("carchosen"))]
     )
-    other_mdp.get_state_by_id(1).set_transitions([(1, other_mdp.new_state("open"))])
-    other_mdp.get_state_by_id(2).set_transitions(
-        [(1, other_mdp.new_state("goatrevealed"))]
-    )
+    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
+    action1 = other_mdp.new_action("open0")
+    transition = stormvogel.model.Transition({action1:branch})
+    other_mdp.get_state_by_id(1).set_transitions(transition)
+    other_mdp.get_state_by_id(2).set_transitions([(1, other_mdp.new_state("goatrevealed"))])
 
     assert partial_model == other_mdp
+
+
+    # we do a more complicated mdp test to check if partial model transitions are properly added:
+    lion = create_lion_mdp()
+    partial_model = stormvogel.simulator.simulate(lion, steps=100, seed=1234)
+
+    print(partial_model)
 
 
 def test_simulate_path():
