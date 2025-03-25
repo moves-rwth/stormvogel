@@ -166,3 +166,6 @@ cython_debug/
 
 # Sphinx build folder
 doc/_build
+
+# Exported gymnasium videos
+**/video/**

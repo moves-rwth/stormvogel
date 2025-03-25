@@ -35,9 +35,6 @@ def show(
     """
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
-    do_init_server = (  # We only need to start the server if we want to have the layout editor.
-        show_editor and stormvogel.communication_server.enable_server
-    )
     # do_display = not show_editor
     vis = stormvogel.visualization.Visualization(
         model=model,
@@ -47,7 +44,7 @@ def show(
         layout=layout,
         do_display=False,
         debug_output=debug_output,
-        do_init_server=do_init_server,
+        do_init_server=True,
         use_iframe=use_iframe,
     )
     vis.show()
