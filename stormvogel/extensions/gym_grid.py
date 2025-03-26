@@ -2,8 +2,8 @@
 # https://medium.com/@coldstart_coder/visually-rendering-python-gymnasium-in-jupyter-notebooks-4413e4087a0f
 
 from pyvirtualdisplay import Display  # type: ignore
-
-from stormvogel import pgc  # type: ignore
+import warnings
+from stormvogel import pgc
 
 # Do not move these, it will break
 display = Display(visible=False, size=(1400, 900))  # type: ignore
@@ -51,7 +51,10 @@ def create_video(
 
     Returns: (relative) path to video.
     """
-    env = RecordVideo(env, location)
+    with warnings.catch_warnings(
+        action="ignore"
+    ):  # Remove annoying warning that we are overwriting; this is intened.
+        env = RecordVideo(env, location)
     state, inf = env.reset()
     while limit > 0:
         # render the frame, this will save it to the video file
@@ -99,19 +102,26 @@ def create_video_scheduler(
     scheduler: stormvogel.result.Scheduler
     | Callable[[stormvogel.model.State], stormvogel.model.Action]
     | None = None,
+    limit: int = 20,
 ) -> str:
     """Create a video of the current environment using the scheduler to choose an action.
     Args:
+        model: A stormvogel model.
         env: The gymnasium env
         location: Path where the video should be stored
-        scheduler: A function that chooses the action, or None
+        scheduler: A stormvogel scheduler or a function that chooses the action.
+            In create_video, the function works on gymnasium environment state ids,
+            however this function works on stormvogel model ids (in the specified model).
+            A random action is chosen if None.
+        limit: limits the amount of steps. Defaults to 20
 
-    Returns: (relative) path to video.
+    Return: (relative) path to video.
     """
     if scheduler is None:
-        return create_video(env, location, None)
+        return create_video(env, location, None, limit)
 
     def choose_action(env_sid: int):
+        print(env_sid)
         # TODO change this once pgc API features are a thing.
         model_state = model.get_states_with_label(str(env_sid))[0]
         if isinstance(scheduler, stormvogel.result.Scheduler):
@@ -120,7 +130,7 @@ def create_video_scheduler(
             choice = scheduler(model_state)  # type: ignore
         return DIR_MAP[list(choice.labels)[0]]
 
-    return create_video(env, location, choose_action)
+    return create_video(env, location, choose_action, limit)
 
 
 def gymnasium_to_stormvogel(env):
@@ -131,22 +141,26 @@ def gymnasium_to_stormvogel(env):
     def action_numer_map(a):
         return DIR_MAP[a.labels[0]]
 
-    init = 0
+    init = pgc.State(n=0, done=False)
 
     def available_actions(_):
         return ALL_ACTIONS[:no_actions]
 
     def delta(s, a):
-        return list(map(lambda x: x[:2], transitions[s][action_numer_map(a)]))
+        trans = transitions[s.n][action_numer_map(a)]
+        return list(map(lambda x: (x[0], pgc.State(n=int(x[1]), done=x[3])), trans))
 
     def rewards(s, a):
-        reward = list(map(lambda x: x[2], transitions[s][action_numer_map(a)]))[0]
+        reward = list(map(lambda x: x[2], transitions[s.n][action_numer_map(a)]))[0]
         return {"R": reward}
 
     def labels(s):
-        labels = [str(s), str(to_coordinate(s, env))]
-        if s == get_target_state(env):
+        labels = [str(s.n), str(to_coordinate(s.n, env))]
+        if s.n == get_target_state(env):
             labels.append("target")
+        if s.done:
+            labels.append("done")
+        # labels.append("always")
         return labels
 
     return pgc.build_pgc(

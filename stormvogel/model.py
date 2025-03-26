@@ -523,6 +523,21 @@ class Model:
         if create_initial_state:
             self.new_state(["init"])
 
+    def summary(self):
+        """Give a short summary of the model."""
+        actions_bit = (
+            f"{len(self.actions)} actions, " if self.actions is not None else ""
+        )
+        return (
+            f"{self.type} model with name {self.name}, {len(self.get_states())} states, "
+            + actions_bit
+            + f"and {len(self.get_labels())} distinct labels."
+        )
+
+    def get_actions(self):
+        """Return the actions of the model. Returns None if actions are not supported."""
+        return self.actions
+
     def supports_actions(self):
         """Returns whether this model supports actions."""
         return self.get_type() in (ModelType.MDP, ModelType.POMDP, ModelType.MA)
