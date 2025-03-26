@@ -40,7 +40,11 @@ def embed_video(video_file):
 
 
 def create_video(
-    env, location, choose_action: Callable | None = None, limit: int = 20
+    env,
+    location,
+    choose_action: Callable | None = None,
+    limit: int = 20,
+    initial_state: int = 0,
 ) -> str:
     """Create a video of the current environment using the choose_action function to choose an action.
     Args:
@@ -53,13 +57,14 @@ def create_video(
     """
     with warnings.catch_warnings(
         action="ignore"
-    ):  # Remove annoying warning that we are overwriting; this is intened.
+    ):  # Remove annoying warning that we are overwriting; this is intended.
         env = RecordVideo(env, location)
-    state, inf = env.reset()
+    state, _ = env.reset()
+    env.unwrapped.s = initial_state
+    state = initial_state
     while limit > 0:
         # render the frame, this will save it to the video file
         env.render()
-        # pick a random action
         if choose_action is None:
             action = env.action_space.sample()
         else:
@@ -103,6 +108,7 @@ def create_video_scheduler(
     | Callable[[stormvogel.model.State], stormvogel.model.Action]
     | None = None,
     limit: int = 20,
+    initial_state: int = 0,
 ) -> str:
     """Create a video of the current environment using the scheduler to choose an action.
     Args:
@@ -118,22 +124,21 @@ def create_video_scheduler(
     Return: (relative) path to video.
     """
     if scheduler is None:
-        return create_video(env, location, None, limit)
+        return create_video(env, location, None, limit, initial_state)
 
     def choose_action(env_sid: int):
-        print(env_sid)
         # TODO change this once pgc API features are a thing.
-        model_state = model.get_states_with_label(str(env_sid))[0]
+        model_state = model.get_states_with_label(str(int(env_sid)))[0]
         if isinstance(scheduler, stormvogel.result.Scheduler):
             choice = scheduler.get_choice_of_state(model_state)
         elif callable(scheduler):
             choice = scheduler(model_state)  # type: ignore
         return DIR_MAP[list(choice.labels)[0]]
 
-    return create_video(env, location, choose_action, limit)
+    return create_video(env, location, choose_action, limit, initial_state)
 
 
-def gymnasium_to_stormvogel(env):
+def gymnasium_to_stormvogel(env, initial_state: int = 0):
     """Convert a FrozenLake, Taxi, or Cliffwalking gymnasium environment to an explicit stormvogel model."""
     transitions = env.unwrapped.P
     no_actions = env.action_space.n
@@ -141,7 +146,7 @@ def gymnasium_to_stormvogel(env):
     def action_numer_map(a):
         return DIR_MAP[a.labels[0]]
 
-    init = pgc.State(n=0, done=False)
+    init = pgc.State(n=initial_state, done=False)
 
     def available_actions(_):
         return ALL_ACTIONS[:no_actions]
