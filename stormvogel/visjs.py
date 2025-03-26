@@ -44,7 +44,8 @@ class Network(stormvogel.displayable.Displayable):
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
         else:
             self.name: str = name
-        if use_iframe:
+        self.use_iframe: bool = use_iframe
+        if self.use_iframe:
             self.network_wrapper = (
                 f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
             )
@@ -162,7 +163,10 @@ class Network(stormvogel.displayable.Displayable):
 
     def show(self) -> None:
         """Display the network on the output that was specified at initialization, otherwise simply display it."""
-        iframe = self.generate_html()
+        if self.use_iframe:
+            iframe = self.generate_iframe()
+        else:
+            iframe = self.generate_html()
         with self.output:  # Display the iframe within the Output.
             ipd.clear_output()
             ipd.display(ipd.HTML(iframe))
