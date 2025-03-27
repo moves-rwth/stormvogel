@@ -228,7 +228,6 @@ class Action:
         return f"Action with labels {self.labels}"
 
 
-
 # The empty action. Used for DTMCs and empty action transitions in mdps.
 EmptyAction = Action(frozenset())
 

@@ -363,10 +363,7 @@ def stormpy_to_stormvogel(
                 else rewards.state_rewards
             )
 
-            if model.supports_actions():
-                rewardmodel.set_from_rewards_vector(reward_vector)
-            else:
-                rewardmodel.set_from_rewards_vector(reward_vector)
+            rewardmodel.set_from_rewards_vector(reward_vector)
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """

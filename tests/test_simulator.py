@@ -107,9 +107,64 @@ def test_simulate():
 
     # we do a more complicated mdp test to check if partial model transitions are properly added:
     lion = create_lion_mdp()
-    partial_model = stormvogel.simulator.simulate(lion, steps=100, seed=1234)
+    partial_model = stormvogel.simulator.simulate(lion, steps=100, seed=2, scheduler=scheduler)
 
-    print(partial_model)
+    lion = stormvogel.model.new_mdp(name="lion")
+    init = lion.get_initial_state()
+    hungry = lion.new_state("hungry :(")
+    satisfied = init
+    starving = lion.new_state("starving :((")
+    full = lion.new_state("full")
+
+    hunt = lion.new_action("hunt >:D")
+
+    full.set_transitions(
+        stormvogel.model.Transition(
+            {
+                hunt: stormvogel.model.Branch(
+                    [
+                        (0.5, satisfied),
+                        (0.5, full),
+                    ]
+                ),
+            }
+        )
+    )
+
+    satisfied.set_transitions(
+        stormvogel.model.Transition(
+            {
+                hunt: stormvogel.model.Branch([(0.5, satisfied), (0.3, full), (0.2, hungry)]),
+            }
+        )
+    )
+
+    hungry.set_transitions(
+        stormvogel.model.Transition(
+            {
+                hunt: stormvogel.model.Branch(
+                    [(0.2, full), (0.5, satisfied), (0.2, starving)]
+                ),
+            }
+        )
+    )
+
+    starving.set_transitions(
+        stormvogel.model.Transition(
+            {
+                hunt: stormvogel.model.Branch(
+                    [(0.1, full), (0.5, satisfied)]
+                ),
+            }
+        )
+    )
+    lion.add_self_loops()
+
+    reward_model = lion.add_rewards("R")
+    reward_model.set_unset_rewards(0)
+
+    assert lion == partial_model
+    
 
 
 def test_simulate_path():
