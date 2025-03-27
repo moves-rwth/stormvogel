@@ -271,6 +271,7 @@ def simulate(
     discovered_states = {0}
     discovered_transitions = set()
     if not partial_model.supports_actions():
+        discovered_states_before_transitions = set()
         for i in range(runs):
             simulator.restart()
             last_state_id = 0
@@ -306,15 +307,24 @@ def simulate(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of states, they collapse
                     assert new_state is not None
-                    partial_model.get_state_by_name(str(last_state_id)).add_transitions(
-                        [(probability, new_state)]
-                    )
+                    #if the starting state of the transition is known, we append the existing branch
+                    #otherwise we make a new branch
+                    if last_state_id in discovered_states_before_transitions:
+                        discovered_states_before_transitions.add(last_state_id)
+                        i = partial_model.get_state_by_name(str(last_state_id)).id
+                        branch = partial_model.transitions[i].transition[stormvogel.modle.EmptyAction]
+                        branch.branch.append((probability, new_state))
+                    else:
+                        partial_model.get_state_by_name(str(last_state_id)).add_transitions(
+                            [(probability, new_state)]
+                        )
 
                 last_state_id = state_id
                 if simulator.is_done():
                     break
     else:
         discovered_actions = set()
+        random.seed(seed)
         for i in range(runs):
             state_id = 0
             last_state_id = 0
@@ -364,6 +374,8 @@ def simulate(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of action with next state, they collapse
 
+                    #if the starting state of the transition action pair is known, we append the existing branch
+                    #otherwise we make a new branch
                     assert new_state is not None
                     if (last_state_id, action) in discovered_actions:
                         i = partial_model.get_state_by_name(str(last_state_id)).id
