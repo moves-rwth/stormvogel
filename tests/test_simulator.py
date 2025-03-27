@@ -67,14 +67,24 @@ def test_simulate():
     )
     branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
     action1 = other_mdp.new_action("open0")
-    transition = stormvogel.model.Transition({action1:branch})
+    transition = stormvogel.model.Transition({action1: branch})
     other_mdp.get_state_by_id(1).set_transitions(transition)
-    other_mdp.get_state_by_id(2).add_transitions([(1, other_mdp.new_state("goatrevealed"))])
+    other_mdp.get_state_by_id(2).add_transitions(
+        [(1, other_mdp.new_state("goatrevealed"))]
+    )
 
     rewardmodel = other_mdp.add_rewards("rewardmodel")
-    rewardmodel.rewards = {(0, stormvogel.model.EmptyAction): 0, (3, action1): 7, (10, stormvogel.model.EmptyAction): 16}
+    rewardmodel.rewards = {
+        (0, stormvogel.model.EmptyAction): 0,
+        (3, action1): 7,
+        (10, stormvogel.model.EmptyAction): 16,
+    }
     rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
-    rewardmodel2.rewards = {(0, stormvogel.model.EmptyAction): 0, (3, action1): 7, (10, stormvogel.model.EmptyAction): 16}
+    rewardmodel2.rewards = {
+        (0, stormvogel.model.EmptyAction): 0,
+        (3, action1): 7,
+        (10, stormvogel.model.EmptyAction): 16,
+    }
 
     assert partial_model == other_mdp
     ######################################################################################################################
@@ -98,16 +108,19 @@ def test_simulate():
     )
     branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
     action1 = other_mdp.new_action("open0")
-    transition = stormvogel.model.Transition({action1:branch})
+    transition = stormvogel.model.Transition({action1: branch})
     other_mdp.get_state_by_id(1).set_transitions(transition)
-    other_mdp.get_state_by_id(2).set_transitions([(1, other_mdp.new_state("goatrevealed"))])
+    other_mdp.get_state_by_id(2).set_transitions(
+        [(1, other_mdp.new_state("goatrevealed"))]
+    )
 
     assert partial_model == other_mdp
 
-
     # we do a more complicated mdp test to check if partial model transitions are properly added:
     lion = create_lion_mdp()
-    partial_model = stormvogel.simulator.simulate(lion, steps=100, seed=2, scheduler=scheduler)
+    partial_model = stormvogel.simulator.simulate(
+        lion, steps=100, seed=2, scheduler=scheduler
+    )
 
     lion = stormvogel.model.new_mdp(name="lion")
     init = lion.get_initial_state()
@@ -134,7 +147,9 @@ def test_simulate():
     satisfied.set_transitions(
         stormvogel.model.Transition(
             {
-                hunt: stormvogel.model.Branch([(0.5, satisfied), (0.3, full), (0.2, hungry)]),
+                hunt: stormvogel.model.Branch(
+                    [(0.5, satisfied), (0.3, full), (0.2, hungry)]
+                ),
             }
         )
     )
@@ -152,9 +167,7 @@ def test_simulate():
     starving.set_transitions(
         stormvogel.model.Transition(
             {
-                hunt: stormvogel.model.Branch(
-                    [(0.1, full), (0.5, satisfied)]
-                ),
+                hunt: stormvogel.model.Branch([(0.1, full), (0.5, satisfied)]),
             }
         )
     )
@@ -164,7 +177,6 @@ def test_simulate():
     reward_model.set_unset_rewards(0)
 
     assert lion == partial_model
-    
 
 
 def test_simulate_path():

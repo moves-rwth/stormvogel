@@ -307,17 +307,20 @@ def simulate(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of states, they collapse
                     assert new_state is not None
-                    #if the starting state of the transition is known, we append the existing branch
-                    #otherwise we make a new branch
+                    # if the starting state of the transition is known, we append the existing branch
+                    # otherwise we make a new branch
                     if last_state_id in discovered_states_before_transitions:
                         discovered_states_before_transitions.add(last_state_id)
-                        i = partial_model.get_state_by_name(str(last_state_id)).id
-                        branch = partial_model.transitions[i].transition[stormvogel.modle.EmptyAction]
+                        s = partial_model.get_state_by_name(str(last_state_id))
+                        assert s is not None
+                        branch = partial_model.transitions[s.id].transition[
+                            stormvogel.modle.EmptyAction
+                        ]
                         branch.branch.append((probability, new_state))
                     else:
-                        partial_model.get_state_by_name(str(last_state_id)).add_transitions(
-                            [(probability, new_state)]
-                        )
+                        s = partial_model.get_state_by_name(str(last_state_id))
+                        assert s is not None
+                        s.add_transitions([(probability, new_state)])
 
                 last_state_id = state_id
                 if simulator.is_done():
@@ -366,27 +369,33 @@ def simulate(
                 # and of the discovered transitions so that we don't add duplicates
                 if (last_state_id, state_id, action) not in discovered_transitions:
                     probability = 0
-                    transitions = model.get_state_by_id(last_state_id).get_outgoing_transitions(action)
+                    transitions = model.get_state_by_id(
+                        last_state_id
+                    ).get_outgoing_transitions(action)
                     discovered_transitions.add((last_state_id, state_id, action))
+                    assert transitions is not None
                     for tuple in transitions:
                         if tuple[1].id == state_id:
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of action with next state, they collapse
 
-                    #if the starting state of the transition action pair is known, we append the existing branch
-                    #otherwise we make a new branch
+                    # if the starting state of the transition action pair is known, we append the existing branch
+                    # otherwise we make a new branch
                     assert new_state is not None
                     if (last_state_id, action) in discovered_actions:
-                        i = partial_model.get_state_by_name(str(last_state_id)).id
-                        branch = partial_model.transitions[i].transition[action]
+                        s = partial_model.get_state_by_name(str(last_state_id))
+                        assert s is not None
+                        branch = partial_model.transitions[s.id].transition[action]
                         branch.branch.append((probability, new_state))
                     else:
-                        discovered_actions.add((last_state_id,action))
+                        discovered_actions.add((last_state_id, action))
                         branch = stormvogel.model.Branch([(probability, new_state)])
                         trans = stormvogel.model.Transition({action: branch})
                         assert trans is not None
-                        partial_model.get_state_by_name(str(last_state_id)).add_transitions(trans)
+                        s = partial_model.get_state_by_name(str(last_state_id))
+                        assert s is not None
+                        s.add_transitions(trans)
 
                 last_state_id = state_id
                 if simulator.is_done():
