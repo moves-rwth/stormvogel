@@ -6,10 +6,11 @@ def create_die_dtmc():
     dtmc = stormvogel.model.new_dtmc("Die")
 
     init = dtmc.get_initial_state()
+    init.features = {"rolled" : 0}
 
     # From the initial state, add the transition to 6 new states with probability 1/6th.
     init.set_transitions(
-        [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]
+        [(1 / 6, dtmc.new_state(labels=f"rolled{i+1}", features={"rolled": i+1})) for i in range(6)]
     )
 
     # we add self loops to all states with no outgoing transitions

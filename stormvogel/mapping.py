@@ -1,4 +1,6 @@
 import stormvogel.model
+import pycarl
+import re
 
 try:
     import stormpy
@@ -92,6 +94,36 @@ def stormvogel_to_stormpy(
 
         return reward_models
 
+    def add_valuations(model: stormvogel.model.Model) -> stormpy.storage.StateValuation:
+
+        assert stormpy is not None
+
+        manager = stormpy.ExpressionManager()
+        valuations = stormpy.storage.StateValuationsBuilder()
+
+        #we create all the variable names
+        created_vars = set()
+        for state in model.states.values():
+            for var in state.features.items():
+                name = str(var[0])
+                if name not in created_vars:
+                    storm_var = manager.create_integer_variable(name)
+                    valuations.add_variable(storm_var)
+                    created_vars.add(name)
+        
+        print(created_vars)
+
+        #we assign the values to the variables in the states
+        for state in model.states.values():
+            integer_values = list(state.features.values())
+            if integer_values != []:
+                valuations.add_state(state.id, integer_values=list(state.features.values()))
+            else:
+                raise RuntimeError(f"State: {state} does not have a value for each variable")
+
+        return valuations.build()
+
+
     def map_dtmc(model: stormvogel.model.Model) -> stormpy.storage.SparseDtmc:
         """
         Takes a simple representation of a dtmc as input and outputs a dtmc how it is represented in stormpy
@@ -107,12 +139,16 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
+        # we add the valuations
+        valuations = add_valuations(model)
+
         # then we build the dtmc
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
+        components.state_valuations = valuations
         dtmc = stormpy.storage.SparseDtmc(components)
 
         return dtmc
@@ -147,6 +183,9 @@ def stormvogel_to_stormpy(
         # then we add the rewards
         reward_models = add_rewards(model)
 
+        # we add the valuations
+        valuations = add_valuations(model)
+
         # then we build the mdp
         components = stormpy.SparseModelComponents(
             transition_matrix=matrix,
@@ -172,6 +211,9 @@ def stormvogel_to_stormpy(
 
         # then we add the rewards
         reward_models = add_rewards(model)
+
+        # we add the valuations
+        valuations = add_valuations(model)
 
         # then we build the ctmc and we add the exit rates if necessary
         components = stormpy.SparseModelComponents(
@@ -216,6 +258,9 @@ def stormvogel_to_stormpy(
 
         # then we add the rewards
         reward_models = add_rewards(model)
+
+        # we add the valuations
+        valuations = add_valuations(model)
 
         # then we build the pomdp
         components = stormpy.SparseModelComponents(
@@ -267,6 +312,9 @@ def stormvogel_to_stormpy(
 
         # then we add the rewards
         reward_models = add_rewards(model)
+
+        # we add the valuations
+        valuations = add_valuations(model)
 
         # we create the list of markovian state ids
         assert model.markovian_states is not None
@@ -332,6 +380,7 @@ def stormpy_to_stormvogel(
     | stormpy.storage.SparsePomdp
     | stormpy.storage.SparseMA,
 ) -> stormvogel.model.Model | None:
+
     def add_states(
         model: stormvogel.model.Model,
         sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
@@ -365,6 +414,18 @@ def stormpy_to_stormvogel(
 
             rewardmodel.set_from_rewards_vector(reward_vector)
 
+    def add_valuations(model: stormvogel.model.Model, sparsemodel):
+
+        if sparsemodel.has_state_valuations():
+            valuations = sparsemodel.state_valuations
+        
+            for state_id, state in model.states.items():
+                s = valuations.get_string(state_id)
+                match = re.findall(r"(\w+)=([^\]]+)", s)
+                result = {key: int(value) for key, value in match}
+                state.features = result
+
+
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """
         Takes a dtmc stormpy representation as input and outputs a simple stormvogel representation
@@ -387,6 +448,9 @@ def stormpy_to_stormvogel(
                 transitionshorthand
             )
             model.set_transitions(model.get_state_by_id(state.id), transitions)
+
+        # we add the valuations
+        add_valuations(model, sparsedtmc)
 
         # we add self loops to all states with no outgoing transition
         model.add_self_loops()
@@ -437,6 +501,9 @@ def stormpy_to_stormvogel(
         # we add the reward models to the state action pairs
         add_rewards(model, sparsemdp)
 
+        # we add the valuations
+        add_valuations(model, sparsemdp)
+
         return model
 
     def map_ctmc(sparsectmc: stormpy.storage.SparseCtmc) -> stormvogel.model.Model:
@@ -467,6 +534,9 @@ def stormpy_to_stormvogel(
 
         # we add the reward models to the states
         add_rewards(model, sparsectmc)
+
+        # we add the valuations
+        add_valuations(model, sparsectmc)
 
         # we set the correct exit rates
         for state in model.states.items():
@@ -515,6 +585,9 @@ def stormpy_to_stormvogel(
         # we add the reward models to the state action pairs
         add_rewards(model, sparsepomdp)
 
+        # we add the valuations
+        add_valuations(model, sparsepomdp)
+
         # we add the observations:
         for state in model.states.values():
             state.set_observation(sparsepomdp.get_observation(state.id))
@@ -561,6 +634,9 @@ def stormpy_to_stormvogel(
 
         # we add the reward models to the state action pairs
         add_rewards(model, sparsema)
+
+        # we add the valuations
+        add_valuations(model, sparsema)
 
         # we set the correct exit rates
         for state in model.states.items():

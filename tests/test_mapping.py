@@ -179,6 +179,9 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     # print(new_stormvogel_mdp == stormvogel_mdp)
     # quit()
 
+    for id, state in new_stormvogel_mdp.states.items():
+        print(state.features, stormvogel_mdp.get_state_by_id(id).features)
+
     assert new_stormvogel_mdp == stormvogel_mdp
 
 

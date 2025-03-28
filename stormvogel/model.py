@@ -186,8 +186,10 @@ class State:
                         observations_equal = True
                 else:
                     observations_equal = True
+                if not self.features == other.features:
+                    print(self.features, other.features)
                 return (
-                    sorted(self.labels) == sorted(other.labels) and observations_equal
+                    sorted(self.labels) == sorted(other.labels) and observations_equal and self.features == other.features
                 )
         return False
 
@@ -226,6 +228,7 @@ class Action:
 
     def __str__(self):
         return f"Action with labels {self.labels}"
+
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
