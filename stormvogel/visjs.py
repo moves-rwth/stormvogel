@@ -210,4 +210,3 @@ class Network(stormvogel.displayable.Displayable):
 
         js = f"""{self.network_wrapper}.setNodeColor({node_id}, {color});"""
         ipd.display(ipd.Javascript(js))
-        ipd.clear_output()
