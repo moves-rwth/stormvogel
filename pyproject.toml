@@ -24,6 +24,7 @@ anyio = "^4.6.0"
 nbmake = "^1.5.4"
 mock = "^5.1.0"
 jupyter = "^1.1.1"
+bidict = "^0.23.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.2"
