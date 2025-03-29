@@ -170,6 +170,10 @@ class State:
                     return False
         return True
 
+    def is_initial(self):
+        """Returns whether this state is initial."""
+        return self == self.model.get_initial_state()
+
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
         if self.model.supports_observations() and self.observation is not None:

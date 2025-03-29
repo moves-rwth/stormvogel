@@ -112,6 +112,9 @@ class Path:
         else:
             return False
 
+    def __len__(self):
+        return len(self.path)
+
 
 def get_range_index(
     state: stormvogel.model.State,
