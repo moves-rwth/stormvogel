@@ -32,6 +32,9 @@ def render_model_gif(
 
     # Save frames as a GIF
     imageio.mimsave(
-        filename + ".gif", frames, fps=fps, loop=loop
-    )  # Adjust FPS as needed
+        filename + ".gif",
+        frames,
+        fps=fps,
+        loop=loop,  # type: ignore
+    )  # type: ignore
     return filename + ".gif"
