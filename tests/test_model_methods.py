@@ -200,6 +200,10 @@ def test_remove_state():
     new_mdp.new_state()
     new_mdp.new_state()
     new_mdp.add_self_loops()
+    new_mdp.new_action("0")
+    new_mdp.new_action(
+        "1"
+    )  # TODO are the models the same? the transitions don't look the same
 
     assert mdp == new_mdp
 

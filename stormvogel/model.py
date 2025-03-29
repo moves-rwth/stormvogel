@@ -1073,15 +1073,9 @@ class Model:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Model):
-            if self.supports_actions():
-                assert self.actions is not None and other.actions is not None
-                for action, other_action in zip(
-                    sorted(self.actions), sorted(other.actions)
-                ):
-                    if not action == other_action:
-                        return False
             return (
-                self.type == other.type
+                self.actions == other.actions
+                and self.type == other.type
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and sorted(self.rewards) == sorted(other.rewards)
