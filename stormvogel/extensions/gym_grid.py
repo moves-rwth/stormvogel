@@ -89,44 +89,6 @@ def get_target_state(env):
     return env.observation_space.n - 1
 
 
-def gymnasium_render_model_gif(
-    env,
-    gymnasium_scheduler: Callable[[int], int] | None = None,
-    filename: str = "my_gif",
-    max_length: int = 50,
-    fps: int = 2,
-    loop: bool = True,
-) -> str:
-    """Render a gymnasium model to a gif, using the gymnasium_scheduler (A map from state numbers to action numbers) to pick an action.
-    Leave as None for a random action."""
-    frames = []  # List to store frames
-
-    state, info = env.reset()
-    for _ in range(max_length):
-        frame = env.render()
-        frames.append(frame)  # Store the frame
-
-        action = (
-            env.action_space.sample()
-            if gymnasium_scheduler is None
-            else gymnasium_scheduler(state)
-        )
-        state, reward, done, truncated, info = env.step(action)
-
-        if done:
-            frame = env.render()
-            frames.append(frame)  # Render the last frame
-            break  # Stop if the episode ends
-
-    env.close()
-
-    # Save frames as a GIF
-    imageio.mimsave(
-        filename + ".gif", frames, fps=fps, loop=loop
-    )  # Adjust FPS as needed
-    return filename + ".gif"
-
-
 def to_gymnasium_scheduler(
     model: stormvogel.model.Model,
     scheduler: stormvogel.result.Scheduler
@@ -151,3 +113,40 @@ def to_gymnasium_scheduler(
         return inv_map[list(choice.labels)[0]]
 
     return gymnasium_scheduler
+
+
+def gymnasium_render_model_gif(
+    env,
+    gymnasium_scheduler: Callable[[int], int] | None = None,
+    filename: str = "my_gif",
+    max_length: int = 50,
+    fps: int = 2,
+    loop: int = 0,
+) -> str:
+    """Render a gymnasium model to a gif, using the gymnasium_scheduler (A map from state numbers to action numbers) to pick an action.
+    Leave as None for a random action."""
+    frames = []  # List to store frames
+
+    state, info = env.reset()
+    for _ in range(max_length):
+        frame = env.render()
+        frames.append(frame)  # Store the frame
+
+        action = (
+            env.action_space.sample()
+            if gymnasium_scheduler is None
+            else gymnasium_scheduler(state)
+        )
+        state, reward, done, truncated, info = env.step(action)
+
+        if done:
+            frame = env.render()
+            frames.append(frame)  # Render the last frame
+            break  # Stop if the episode ends
+
+    env.close()
+    # Save frames as a GIF
+    imageio.mimsave(
+        filename + ".gif", frames, fps=fps, loop=loop
+    )  # Adjust FPS as needed
+    return filename + ".gif"
