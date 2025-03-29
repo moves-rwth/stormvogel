@@ -29,9 +29,11 @@ class Scheduler:
         self.taken_actions = taken_actions
 
     def get_choice_of_state(
-        self, state: stormvogel.model.State
-    ) -> stormvogel.model.Action | None:
+        self, state: stormvogel.model.State | int
+    ) -> stormvogel.model.Action:
         """returns the choice in the scheduler for the given state if present in the model"""
+        if isinstance(state, int):
+            state = self.model.get_state_by_id(state)
         if state in self.model.states.values():
             return self.taken_actions[state.id]
         else:

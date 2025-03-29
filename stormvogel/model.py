@@ -170,6 +170,10 @@ class State:
                     return False
         return True
 
+    def is_initial(self):
+        """Returns whether this state is initial."""
+        return self == self.model.get_initial_state()
+
     def __str__(self):
         res = f"State {self.id} with labels {self.labels} and features {self.features}"
         if self.model.supports_observations() and self.observation is not None:
@@ -522,6 +526,21 @@ class Model:
         # Add the initial state if specified to do so
         if create_initial_state:
             self.new_state(["init"])
+
+    def summary(self):
+        """Give a short summary of the model."""
+        actions_bit = (
+            f"{len(self.actions)} actions, " if self.actions is not None else ""
+        )
+        return (
+            f"{self.type} model with name {self.name}, {len(self.get_states())} states, "
+            + actions_bit
+            + f"and {len(self.get_labels())} distinct labels."
+        )
+
+    def get_actions(self):
+        """Return the actions of the model. Returns None if actions are not supported."""
+        return self.actions
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
@@ -1068,6 +1087,9 @@ class Model:
                 and self.markovian_states == other.markovian_states
             )
         return False
+
+    def __getitem__(self, state_id: int):
+        return self.states[state_id]
 
 
 def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):

@@ -26,9 +26,9 @@ def test_simulate():
     other_dtmc = stormvogel.model.new_dtmc()
     other_dtmc.get_initial_state().set_transitions(
         [
-            (1 / 6, other_dtmc.new_state("rolled5")),
-            (1 / 6, other_dtmc.new_state("rolled0")),
+            (1 / 6, other_dtmc.new_state("rolled6")),
             (1 / 6, other_dtmc.new_state("rolled1")),
+            (1 / 6, other_dtmc.new_state("rolled2")),
         ]
     )
 

@@ -343,7 +343,10 @@ def test_get_sub_model():
     new_dtmc = stormvogel.model.new_dtmc("Die")
     init = new_dtmc.get_initial_state()
     init.set_transitions(
-        [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
+        [
+            (1 / 6, new_dtmc.new_state(f"rolled{i+1}", {"rolled": i + 1}))
+            for i in range(2)
+        ]
     )
     new_dtmc.normalize()
     assert sub_model == new_dtmc
