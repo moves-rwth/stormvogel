@@ -1090,6 +1090,9 @@ class Model:
             )
         return False
 
+    def __getitem__(self, state_id: int):
+        return self.states[state_id]
+
 
 def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
     """Create a model from prism. Requires stormpy."""

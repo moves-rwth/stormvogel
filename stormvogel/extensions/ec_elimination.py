@@ -1,4 +1,8 @@
+from typing import Tuple
 import stormpy
+import stormvogel.model
+import stormvogel.mapping as mapping
+from stormvogel.extensions.helpers import choice_mapping
 
 
 def map_state_labels(m, res):
@@ -46,7 +50,7 @@ def map_choice_labels(m_old, m_new, res):
 
 
 def simple_ec_elimination(m):
-    """Perform EC elimination on a stormpy model while preserving labels.
+    """Perform End Component elimination on a stormpy model while preserving labels.
     Label sets of merged states are unified.
     Action labels are preserved when possible.
     Args:
@@ -70,3 +74,22 @@ def simple_ec_elimination(m):
     components.choice_labeling = map_choice_labels(m, m_new, res)
     m_updated = stormpy.storage.SparseMdp(components)
     return m_updated
+
+
+def stormvogel_get_maximal_end_components(
+    sv_model: stormvogel.model.Model,
+) -> list[Tuple[set[int], set[stormvogel.model.Action]]]:
+    """Get the maximal end components of this model.
+    They are returned as a list of tuples where the first element is a set of state ids, and the second a set of actions."""
+    sp_model = mapping.stormvogel_to_stormpy(sv_model)
+    f = choice_mapping(sv_model, sp_model)
+    decomposition = stormpy.get_maximal_end_components(sp_model)
+    res = []
+    for mec in decomposition:
+        states = set()
+        actions = set()
+        for s_id, choices in mec:
+            states.add(s_id)
+            actions = actions | set(map(lambda x: f.inverse[x], choices))
+        res.append((frozenset(states), frozenset(actions)))
+    return res
