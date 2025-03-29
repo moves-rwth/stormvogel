@@ -26,6 +26,7 @@ mock = "^5.1.0"
 jupyter = "^1.1.1"
 bidict = "^0.23.1"
 gymnasium = "^1.1.1"
+imageio = "^2.37.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.2"
