@@ -1,7 +1,7 @@
 import stormvogel.model
-from PIL.Image import Image
-from PIL.ImageDraw import ImageDraw
-from PIL.ImageFont import ImageFont
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 
 def create_die_dtmc():
