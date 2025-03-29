@@ -13,7 +13,6 @@ import logging
 from time import sleep
 import ipywidgets as widgets
 import socket
-import warnings
 import json
 
 
@@ -165,33 +164,21 @@ server: CommunicationServer | None = None
 
 
 def __warn_request():
-    warnings.warn(f"""Stormvogel succesfully started the internal communication server, but could not receive the result of a test request.
-Stormvogel is still usable without this, but you will not be able to save node positions in a layout json file.
-1) Restart the kernel and re-run.
-2) Is the port {localhost_address}:{server_port} (from the machine where jupyterlab runs) available?
-If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {server_port}:{localhost_address}:{server_port} YOUR_SSH_CONFIG_NAME'.
-3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
-If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel and ignore this message.
-Please contact the stormvogel developpers if you keep running into issues.""")
+    print(
+        "Test request failed. See 'Communication server remark' in docs. Disable warning by use_server=False."
+    )
 
 
 def __warn_server():
-    warnings.warn(f"""Stormvogel could not run an internal server to communicate between local processes on {localhost_address}:{server_port}.
-Stormvogel is still usable without this, but you will not be able to save node positions in a layout json file.
-This might be solved as such:
-1) Restart the kernel and re-run.
-2) Port {server_port} might already be used by another process, or even another jupyter lab kernel. Try changing stormvogel.communication_server.server_port and running again.
-3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
-If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run. This will speed up stormvogel and ignore this message.
-Please contact the stormvogel developpers if you keep running into issues.""")
+    print(
+        "Could not start server. See 'Communication server remark' in docs. Disable warning by use_server=False."
+    )
 
 
 def __warn_no_free_port():
-    warnings.warn(f"""Stormvogel could not find a free port in the range [{min_port, max_port}) to host a local process.
-Stormvogel can still function without this, but you will not be able to save node positions in a layout json file.
-If you have a lot of notebooks open, it might help to restart jupyter lab or close some kernels from other notebooks.
-If the default range of ports does not work for you, feel free to edit stormvogel.communication_server.min_port and stormvogel.communication_server.max_port.
-Please contact the stormvogel developpers if you keep running into issues.""")
+    print(
+        f"""No free port [{min_port, max_port}). See 'Communication server remark' in docs. Disable warning by use_server=False."""
+    )
 
 
 def is_port_free(port: int) -> bool:

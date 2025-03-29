@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Network</title>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+    <style type="text/css">
+      #modelJFVocwLfpl {
+        width: 687px;
+        height: 519px;
+        border: 1px solid lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="modelJFVocwLfpl"></div>
+    <script type="text/javascript">
+
+class NetworkWrapper_modelJFVocwLfpl{//js
+  constructor(nodes, edges, options, container) {
+    this.nodes = nodes;
+    this.edges = edges;
+    this.options = options;
+    this.container = container;
+    this.data = {
+      nodes: nodes,
+      edges: edges,
+    };
+    this.network = new vis.Network(container, this.data, options);
+    var this_ = this; // Events will not work if you use 'this' directly :))))) No idea why.
+
+    // Set user-triggered events.
+    this.network.on( 'click', function(properties) {
+      var nodeId = this_.network.getNodeAt({x:properties.event.srcEvent.offsetX, y:properties.event.srcEvent.offsetY});
+      this_.makeNeighborsVisible(nodeId);
+    });
+    this.network.on( 'doubleClick', function(properties) {
+        this_.network.setData(this_.data);
+    });
+  }
+
+  setNodeColor(id, color) {
+    var node = this.nodes.get(id);
+    node["x"] = this.network.getPosition(id)["x"];
+    node["y"] = this.network.getPosition(id)["y"];
+    node["color"] = color;
+    this.nodes.update(node);
+  }
+
+  makeNeighborsVisible(homeId) {
+    if (homeId === undefined) {
+      return;
+    }
+    var homeNode = this.nodes.get(homeId);
+
+    // Make outgoing nodes visible
+    var nodeIds = this.network.getConnectedNodes(homeId, "to");
+    for (let i = 0; i < nodeIds.length; i++) {
+      var toNodeId = nodeIds[i];
+      var toNode = this.nodes.get(toNodeId);
+      if (toNode["hidden"]) {
+        toNode["hidden"] = false;
+        toNode["physics"] = true;
+        toNode["x"] = this.network.getPosition(homeId)["x"];
+        toNode["y"] = this.network.getPosition(homeId)["y"];
+        this.nodes.update(toNode);
+      }
+    }
+    // Make edges visible, if both of the nodes are also visible
+    var edgeIds = this.network.getConnectedEdges(homeId);
+    for (let i = 0; i < edgeIds.length; i++) {
+      var edgeId = edgeIds[i];
+      var edge = this.edges.get(edgeId);
+      var fromNode = this.nodes.get(edge.from);
+      var toNode = this.nodes.get(edge.to);
+      if ((! fromNode["hidden"]) && (! toNode["hidden"])) {
+        edge["hidden"] = false;
+        edge["physics"] = true;
+        this.edges.update(edge);
+      }
+    }
+  }
+};
+
+    </script>
+    <script type="text/javascript">
+        //js
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states", x: -278, y: -336 },
+{ id: 1, label: `full`, group: "states", x: -125, y: 158 },
+{ id: 2, label: `hungry :(`, group: "states", x: -112, y: -124 },
+{ id: 3, label: `starving :((`, group: "states", x: 188, y: -93 },
+{ id: 4, label: `dead
+€	R: 0`, group: "states", x: 290, y: 166 },
+{ id: 10000000000, label: `hunt >:D
+€	R: 0`, group: "actions", x: -184, y: 21 },
+{ id: 10000000001, label: `rawr
+€	R: 0`, group: "actions", x: -254, y: 67 },
+{ id: 10000000002, label: `hunt >:D
+€	R: 0`, group: "actions", x: -19, y: -25 },
+{ id: 10000000003, label: `rawr
+€	R: 100`, group: "actions", x: 31, y: -213 },
+{ id: 10000000004, label: `hunt >:D
+€	R: 0`, group: "actions", x: 81, y: 29 },
+{ id: 10000000005, label: `rawr
+€	R: 0`, group: "actions", x: 331, y: -22 },
+{ id: 10000000006, label: `hunt >:D
+€	R: 0`, group: "actions", x: 75, y: 134 },
+{ id: 10000000007, label: `rawr
+€	R: 0`, group: "actions", x: 288, y: 323 },
+]);
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 0, label: "1/2" },
+{ from: 10000000000, to: 1, label: "3/10" },
+{ from: 10000000000, to: 2, label: "1/5" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 0, label: "9/10" },
+{ from: 10000000001, to: 2, label: "1/10" },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 0, label: "1/2" },
+{ from: 10000000002, to: 1, label: "1/2" },
+{ from: 1, to: 10000000003 },
+{ from: 10000000003, to: 1, label: "9/10" },
+{ from: 10000000003, to: 0, label: "1/10" },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 1, label: "1/5" },
+{ from: 10000000004, to: 0, label: "1/2" },
+{ from: 10000000004, to: 2, label: "1/10" },
+{ from: 10000000004, to: 3, label: "1/5" },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 2, label: "9/10" },
+{ from: 10000000005, to: 3, label: "1/10" },
+{ from: 3, to: 10000000006 },
+{ from: 10000000006, to: 1, label: "1/10" },
+{ from: 10000000006, to: 0, label: "1/2" },
+{ from: 10000000006, to: 2, label: "1/5" },
+{ from: 10000000006, to: 4, label: "1/5" },
+{ from: 3, to: 10000000007 },
+{ from: 10000000007, to: 3, label: "9/10" },
+{ from: 10000000007, to: 4, label: "1/10" },
+{ from: 4, to: 4, label: "1" },
+]);
+    var options_local = {
+  "__fake_macros": {
+    "__group_macro": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "edit_groups": {
+    "groups": [
+      "states",
+      "actions"
+    ]
+  },
+  "groups": {
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "box",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "#ff0000",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "borderWidth": 1,
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      },
+      "schedColor": false
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#f5c211",
+        "border": "#c64600",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 5,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "dead...": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#c0bfbc",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "hunt_>:D": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#2ec27e",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "desparate_hunt!": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ff7800",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "starving_:((": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "satisfied_:)": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    }
+  },
+  "reload_button": false,
+  "edges": {
+    "arrows": "to",
+    "font": {
+      "color": "black",
+      "size": 14,
+      "strokeColor": "white",
+      "strokeWidth": 2
+    },
+    "color": {
+      "color": "black"
+    },
+    "width": 1
+  },
+  "numbers": {
+    "fractions": true,
+    "digits": 5
+  },
+  "state_properties": {
+    "show_results": true,
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": true,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
+  },
+  "layout": {
+    "randomSeed": 5
+  },
+  "misc": {
+    "enable_physics": true,
+    "width": 687,
+    "height": 519,
+    "explore": false
+  },
+  "saving": {
+    "relative_path": true,
+    "filename": "layouts/lion.json",
+    "save_button": false,
+    "load_button": false
+  },
+  "positions": {
+    "0": {
+      "x": -278,
+      "y": -336
+    },
+    "1": {
+      "x": -125,
+      "y": 158
+    },
+    "2": {
+      "x": -112,
+      "y": -124
+    },
+    "3": {
+      "x": 188,
+      "y": -93
+    },
+    "4": {
+      "x": 290,
+      "y": 166
+    },
+    "5": {
+      "x": 127,
+      "y": 397
+    },
+    "10000000000": {
+      "x": -184,
+      "y": 21
+    },
+    "10000000001": {
+      "x": -254,
+      "y": 67
+    },
+    "10000000002": {
+      "x": -19,
+      "y": -25
+    },
+    "10000000003": {
+      "x": 31,
+      "y": -213
+    },
+    "10000000004": {
+      "x": 81,
+      "y": 29
+    },
+    "10000000005": {
+      "x": 331,
+      "y": -22
+    },
+    "10000000006": {
+      "x": 75,
+      "y": 134
+    },
+    "10000000007": {
+      "x": 288,
+      "y": 323
+    }
+  },
+  "physics": true,
+  "autoResize": true,
+  "results_and_rewards": {
+    "show_results": true,
+    "resultSymbol": "\u2606",
+    "show_rewards": true
+  },
+  "width": 687,
+  "height": 519
+};
+    var container_local = document.getElementById("modelJFVocwLfpl");
+    var nw_modelJFVocwLfpl = new NetworkWrapper_modelJFVocwLfpl(nodes_local, edges_local, options_local, container_local)
+
+    </script>
+  </body>
+</html>

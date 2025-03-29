@@ -1,7 +1,7 @@
 import stormvogel.model
 
 
-def create_monty_hall_mdp():
+def create_monty_hall_mdp2():
     mdp = stormvogel.model.new_mdp("Monty Hall")
 
     init = mdp.get_initial_state()
@@ -80,4 +80,4 @@ def create_monty_hall_mdp():
 if __name__ == "__main__":
     # Print the resulting model in dot format.
 
-    print(create_monty_hall_mdp().to_dot())
+    print(create_monty_hall_mdp2().to_dot())

@@ -14,7 +14,7 @@ def render_model_gif(
     filename: str = "my_gif",
     max_length: int = 50,
     fps: int = 2,
-    loop: bool = True,
+    loop: int = 0,
 ) -> str:
     """Render a gymnasium model to a gif, using the gymnasium_scheduler (A map from state numbers to action numbers) to pick an action.
     Leave as None for a random action."""
