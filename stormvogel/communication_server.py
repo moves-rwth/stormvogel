@@ -214,7 +214,6 @@ def initialize_server() -> CommunicationServer | None:
         if server is None:
             server_port = find_free_port()
             if server_port == -1:
-                logging.warning("Could not find free port.")
                 __warn_no_free_port()
                 with output:
                     ipd.clear_output()

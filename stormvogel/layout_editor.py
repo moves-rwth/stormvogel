@@ -9,7 +9,6 @@ import stormvogel.visualization
 import IPython.display as ipd
 import ipywidgets as widgets
 import logging
-import warnings
 
 
 class LayoutEditor(stormvogel.displayable.Displayable):
@@ -158,12 +157,5 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.loaded = True
 
     def __warn_failed_positions_save(self):
-        warnings.warn(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
-Sorry for the inconvenience. Here are some possible fixes.
-1) Restart the kernel and re-run.
-2) Is the port {stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} (from the machine where jupyterlab runs) available?
-If you are working remotely, it might help to forward this port. For example: 'ssh -N -L {stormvogel.communication_server.server_port}:{stormvogel.communication_server.localhost_address}:{stormvogel.communication_server.server_port} YOUR_SSH_CONFIG_NAME'.
-3) You might also want to consider changing stormvogel.communication_server.localhost_address to the IPv6 loopback address if you are using IPv6.
-If you cannot get the server to work, set stormvogel.communication_server.enable_server to false and re-run.
-This will speed up stormvogel and ignore this message, but it means that you cannot store positions in layout files.
-Please contact the stormvogel developpers if you keep running into issues.""")
+        print(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
+Sorry for the inconvenience. See 'Communication server remark' in docs.""")
