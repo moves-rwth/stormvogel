@@ -51,7 +51,7 @@ class State:
 
     Args:
         labels: The labels of this state. Corresponds to Storm labels.
-        features: The features of this state. Corresponds to Storm features.
+        valuations: The valuations of this state. Corresponds to Storm valuations.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
         observation: the observation of this state in case the model is a pomdp.
@@ -59,7 +59,7 @@ class State:
     """
 
     labels: list[str]
-    features: dict[str, int]
+    valuations: dict[str, int]
     id: int
     model: "Model"
     observation: Observation | None
@@ -68,7 +68,7 @@ class State:
     def __init__(
         self,
         labels: list[str],
-        features: dict[str, int],
+        valuations: dict[str, int],
         id: int,
         model,
         name: str | None = None,
@@ -87,7 +87,7 @@ class State:
             )
 
         self.labels = labels
-        self.features = features
+        self.valuations = valuations
         self.id = id
         self.observation = None
 
@@ -171,7 +171,7 @@ class State:
         return True
 
     def __str__(self):
-        res = f"State {self.id} with labels {self.labels} and features {self.features}"
+        res = f"State {self.id} with labels {self.labels} and valuations {self.valuations}"
         if self.model.supports_observations() and self.observation is not None:
             res += f" and observation {self.observation.get_observation()}"
         return res
@@ -186,10 +186,10 @@ class State:
                         observations_equal = True
                 else:
                     observations_equal = True
-                if not self.features == other.features:
-                    print(self.features, other.features)
+                if not self.valuations == other.valuations:
+                    print(self.valuations, other.valuations)
                 return (
-                    sorted(self.labels) == sorted(other.labels) and observations_equal and self.features == other.features
+                    sorted(self.labels) == sorted(other.labels) and observations_equal and self.valuations == other.valuations
                 )
         return False
 
@@ -661,6 +661,33 @@ class Model:
                     state, [(float(0) if self.supports_rates() else float(1), state)]
                 )
 
+    def get_variables(self) -> set[str]:
+        """gets the set of all variables present in this model"""
+        variables = set()
+        for state in self.states.values():
+            for variable in state.valuations.keys():
+                variables.add(variable)
+        return variables
+
+    def set_valuation_at_remaining_states(self, variables: list[str] | None = None, value: int | bool | float = 0):
+        """sets value to variables in all states where they don't have a value yet"""
+        if variables is None:
+            variables = self.get_variables()
+        for state in self.states.values():
+            if variable not in state.valuations.keys():
+                state.valuations[variable] = value
+
+    def unassigned_variables(self) -> bool:
+        #TODO return list of pairs of variables and states where it is undefined
+        variables = self.get_variables()
+        if variables == set():
+            return True
+        for state in self.states.values():
+            for variable in variables:
+                if variable not in state.valuations.keys():
+                    return False
+        return True
+
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
         for state in self.states.items():
@@ -908,17 +935,17 @@ class Model:
     def new_state(
         self,
         labels: list[str] | str | None = None,
-        features: dict[str, int] | None = None,
+        valuations: dict[str, int] | None = None,
         name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self, name=name)
+            state = State(labels, valuations or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self, name=name)
+            state = State([labels], valuations or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self, name=name)
+            state = State([], valuations or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 

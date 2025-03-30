@@ -104,22 +104,17 @@ def stormvogel_to_stormpy(
         #we create all the variable names
         created_vars = set()
         for state in model.states.values():
-            for var in state.features.items():
+            for var in state.valuations.items():
                 name = str(var[0])
                 if name not in created_vars:
                     storm_var = manager.create_integer_variable(name)
                     valuations.add_variable(storm_var)
                     created_vars.add(name)
-        
-        print(created_vars)
 
         #we assign the values to the variables in the states
         for state in model.states.values():
-            integer_values = list(state.features.values())
-            if integer_values != []:
-                valuations.add_state(state.id, integer_values=list(state.features.values()))
-            else:
-                raise RuntimeError(f"State: {state} does not have a value for each variable")
+            integer_values = list(state.valuations.values())
+            valuations.add_state(state.id, integer_values=list(state.valuations.values()))
 
         return valuations.build()
 
@@ -343,33 +338,36 @@ def stormvogel_to_stormpy(
 
         return ma
 
-    if model.all_states_outgoing_transition():
-        assert stormpy is not None
-
-        # we make a mapping between stormvogel and stormpy ids in case they are out of order.
-        stormpy_id = {}
-        for index, stormvogel_id in enumerate(model.states.keys()):
-            stormpy_id[stormvogel_id] = index
-        model.stormpy_id = stormpy_id
-
-        # we check the type to handle the model correctly
-        if model.get_type() == stormvogel.model.ModelType.DTMC:
-            return map_dtmc(model)
-        elif model.get_type() == stormvogel.model.ModelType.MDP:
-            return map_mdp(model)
-        elif model.get_type() == stormvogel.model.ModelType.CTMC:
-            return map_ctmc(model)
-        elif model.get_type() == stormvogel.model.ModelType.POMDP:
-            return map_pomdp(model)
-        elif model.get_type() == stormvogel.model.ModelType.MA:
-            return map_ma(model)
-        else:
-            raise RuntimeError(
-                "This type of model is not yet supported for this action"
-            )
-    else:
+    if not model.all_states_outgoing_transition():
         raise RuntimeError(
             "This model has states with no outgoing transitions.\nUse the add_self_loops() function to add self loops to all states with no outgoing transition."
+        )
+    
+    if model.unassigned_variables():
+        raise RuntimeError(f"State: {state} does not have a value for each variable")
+
+    assert stormpy is not None
+
+    # we make a mapping between stormvogel and stormpy ids in case they are out of order.
+    stormpy_id = {}
+    for index, stormvogel_id in enumerate(model.states.keys()):
+        stormpy_id[stormvogel_id] = index
+    model.stormpy_id = stormpy_id
+
+    # we check the type to handle the model correctly
+    if model.get_type() == stormvogel.model.ModelType.DTMC:
+        return map_dtmc(model)
+    elif model.get_type() == stormvogel.model.ModelType.MDP:
+        return map_mdp(model)
+    elif model.get_type() == stormvogel.model.ModelType.CTMC:
+        return map_ctmc(model)
+    elif model.get_type() == stormvogel.model.ModelType.POMDP:
+        return map_pomdp(model)
+    elif model.get_type() == stormvogel.model.ModelType.MA:
+        return map_ma(model)
+    else:
+        raise RuntimeError(
+            "This type of model is not yet supported for this action"
         )
 
 
@@ -423,7 +421,7 @@ def stormpy_to_stormvogel(
                 s = valuations.get_string(state_id)
                 match = re.findall(r"(\w+)=([^\]]+)", s)
                 result = {key: int(value) for key, value in match}
-                state.features = result
+                state.valuations = result
 
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:

@@ -8,7 +8,7 @@
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
-      #modelhjuaBWkFEE {
+      #modeldgYaWiKvfD {
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
@@ -16,10 +16,10 @@
     </style>
   </head>
   <body>
-    <div id="modelhjuaBWkFEE"></div>
+    <div id="modeldgYaWiKvfD"></div>
     <script type="text/javascript">
-
-class NetworkWrapper_modelhjuaBWkFEE{//js
+        
+class NetworkWrapper_modeldgYaWiKvfD{//js
   constructor(nodes, edges, options, container) {
     this.nodes = nodes;
     this.edges = edges;
@@ -88,44 +88,32 @@ class NetworkWrapper_modelhjuaBWkFEE{//js
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `init
-☆ 275/2`, group: "states" },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states" },
 { id: 1, label: `studied
-€	rewardmodel: 0: 0
-☆ 415/4`, group: "states" },
+€	r1: 0`, group: "states" },
 { id: 2, label: `didn't study
-€	rewardmodel: 0: 15
-☆ 275/2`, group: "states" },
+€	r1: 15`, group: "states" },
 { id: 3, label: `pass test
-€	rewardmodel: 0: 100
-☆ 100`, group: "states" },
+€	r1: 100`, group: "states" },
 { id: 4, label: `fail test
-☆ 275/2`, group: "states" },
+€	r1: 0`, group: "states" },
 { id: 5, label: `end
-€	rewardmodel: 0: 0
-☆ 0`, group: "states" },
+€	r1: 0`, group: "states" },
 { id: 10000000000, label: `study
-€	rewardmodel: 0: 0`, group: "actions" },
+€	r1: 0`, group: "actions" },
 { id: 10000000001, label: `don't study
-€	rewardmodel: 0: 0`, group: "scheduled_actions" },
-{ id: 10000000002, label: `retry
-€	rewardmodel: 0: 0`, group: "scheduled_actions" },
-{ id: 10000000003, label: `give up
-€	rewardmodel: 0: 0`, group: "actions" },
+€	r1: 0`, group: "actions" },
 ]);
     var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
 { from: 10000000000, to: 1, label: "1" },
-{ from: 0, to: 10000000001, color: "red" },
-{ from: 10000000001, to: 2, label: "1", color: "red" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 2, label: "1" },
 { from: 1, to: 3, label: "9/10" },
 { from: 1, to: 4, label: "1/10" },
 { from: 2, to: 3, label: "2/5" },
 { from: 2, to: 4, label: "3/5" },
 { from: 3, to: 5, label: "1" },
-{ from: 4, to: 10000000002, color: "red" },
-{ from: 10000000002, to: 0, label: "1", color: "red" },
-{ from: 4, to: 10000000003 },
-{ from: 10000000003, to: 5, label: "1" },
+{ from: 4, to: 5, label: "1" },
 { from: 5, to: 5, label: "1" },
 ]);
     var options_local = {
@@ -151,8 +139,7 @@ class NetworkWrapper_modelhjuaBWkFEE{//js
   "edit_groups": {
     "groups": [
       "states",
-      "actions",
-      "scheduled_actions"
+      "actions"
     ]
   },
   "groups": {
@@ -174,20 +161,10 @@ class NetworkWrapper_modelhjuaBWkFEE{//js
       }
     },
     "scheduled_actions": {
-      "borderWidth": 1,
+      "shape": "box",
       "color": {
         "background": "pink",
-        "border": "red",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
+        "border": "red"
       }
     },
     "states": {
@@ -254,9 +231,9 @@ class NetworkWrapper_modelhjuaBWkFEE{//js
   "physics": true,
   "autoResize": true
 };
-    var container_local = document.getElementById("modelhjuaBWkFEE");
-    var nw_modelhjuaBWkFEE = new NetworkWrapper_modelhjuaBWkFEE(nodes_local, edges_local, options_local, container_local)
-
+    var container_local = document.getElementById("modeldgYaWiKvfD");
+    var nw_modeldgYaWiKvfD = new NetworkWrapper_modeldgYaWiKvfD(nodes_local, edges_local, options_local, container_local)
+    
     </script>
   </body>
 </html>

@@ -149,6 +149,8 @@ def test_normalize():
     )
     dtmc1.add_self_loops()
 
+    #TODO test for mdps as well
+
     assert dtmc0 == dtmc1
 
 

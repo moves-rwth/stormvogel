@@ -17,7 +17,7 @@ def create_monty_hall_mdp():
             [
                 (
                     mdp.action(f"open{i}"),
-                    mdp.new_state(["open", f"o_{i}"], s.features | {"chosen_pos": i}),
+                    mdp.new_state(["open", f"o_{i}"], s.valuations | {"chosen_pos": i}),
                 )
                 for i in range(3)
             ]
@@ -25,8 +25,8 @@ def create_monty_hall_mdp():
 
     # the other goat is revealed
     for s in mdp.get_states_with_label("open"):
-        car_pos = s.features["car_pos"]
-        chosen_pos = s.features["chosen_pos"]
+        car_pos = s.valuations["car_pos"]
+        chosen_pos = s.valuations["chosen_pos"]
         other_pos = {0, 1, 2} - {car_pos, chosen_pos}
         s.set_transitions(
             [
@@ -39,7 +39,7 @@ def create_monty_hall_mdp():
                             if chosen_pos == car_pos
                             else ["should_switch"]
                         ),
-                        s.features | {"reveal_pos": i},
+                        s.valuations | {"reveal_pos": i},
                     ),
                 )
                 for i in other_pos
@@ -48,9 +48,9 @@ def create_monty_hall_mdp():
 
     # we must choose whether we want to switch
     for s in mdp.get_states_with_label("gr"):
-        car_pos = s.features["car_pos"]
-        chosen_pos = s.features["chosen_pos"]
-        reveal_pos = s.features["reveal_pos"]
+        car_pos = s.valuations["car_pos"]
+        chosen_pos = s.valuations["chosen_pos"]
+        reveal_pos = s.valuations["reveal_pos"]
         other_pos = list({0, 1, 2} - {reveal_pos, chosen_pos})[0]
         s.set_transitions(
             [
@@ -58,14 +58,14 @@ def create_monty_hall_mdp():
                     mdp.action("stay"),
                     mdp.new_state(
                         ["done"] + (["target"] if chosen_pos == car_pos else ["lost"]),
-                        s.features | {"chosen_pos": chosen_pos},
+                        s.valuations | {"chosen_pos": chosen_pos},
                     ),
                 ),
                 (
                     mdp.action("switch"),
                     mdp.new_state(
                         ["done"] + (["target"] if other_pos == car_pos else ["lost"]),
-                        s.features | {"chosen_pos": other_pos},
+                        s.valuations | {"chosen_pos": other_pos},
                     ),
                 ),
             ]
@@ -73,6 +73,9 @@ def create_monty_hall_mdp():
 
     # we add self loops to all states with no outgoing transitions
     mdp.add_self_loops()
+
+    # we set the value -1 to all unassigned variables in the states
+    mdp.set_valuation_at_remaining_states(value=-1)
 
     return mdp
 
