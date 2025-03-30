@@ -4,6 +4,7 @@ import stormvogel.result
 import stormvogel.model
 import math
 import imageio
+import os
 
 GRID_ACTION_LABEL_MAP = {0: "←", 1: "↓", 2: "→", 3: "↑", 4: "pickup", 5: "dropoff"}
 
@@ -145,8 +146,9 @@ def gymnasium_render_model_gif(
             break  # Stop if the episode ends
 
     env.close()
+    os.makedirs("gifs", exist_ok=True)
     # Save frames as a GIF
     imageio.mimsave(
-        filename + ".gif", frames, fps=fps, loop=loop
+        "gifs/" + filename + ".gif", frames, fps=fps, loop=loop
     )  # Adjust FPS as needed
-    return filename + ".gif"
+    return "gifs/" + filename + ".gif"
