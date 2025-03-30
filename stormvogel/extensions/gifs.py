@@ -3,6 +3,7 @@ import stormvogel.model
 from typing import Callable
 import imageio
 from PIL.Image import Image
+import IPython.display as ipd
 
 
 def render_model_gif(
@@ -38,3 +39,10 @@ def render_model_gif(
         loop=loop,
     )  # type: ignore
     return filename + ".gif"
+
+
+def embed_gif(filename: str):
+    with open("GIF" + ".html", "w") as f:
+        f.write(f'<img src="{filename}">')
+    ipd.display(ipd.HTML(filename="GIF" + ".html"))
+    # ipd.display(ipd.HTML(f""" <img src="{filename}" onerror="this.onerror=null; this.src='docs/_build/html/_static/my_gif.gif';"> """))
