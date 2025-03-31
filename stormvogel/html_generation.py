@@ -26,7 +26,7 @@ def generate_html(
     <title>Network</title>
     <script
       type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/peer/umd/vis-network.min.js"
+      src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
       #{name} {{
