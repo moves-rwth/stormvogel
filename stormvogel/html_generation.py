@@ -26,7 +26,7 @@ def generate_html(
     <title>Network</title>
     <script
       type="text/javascript"
-      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+      src="https://gist.githubusercontent.com/linusheck/5ad93fee71b095fef587965cfeb98f95/raw/b1b759dfc99843087a8e6d36306608dc4deced93/vis.js"
     ></script>
     <style type="text/css">
       #{name} {{
