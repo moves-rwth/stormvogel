@@ -1,5 +1,7 @@
 """Javascript code generation functions, used in visjs.py."""
 
+from stormvogel.layout import PACKAGE_ROOT_DIR
+
 
 def generate_init_js(nodes_js: str, edges_js: str, options_js: str, name: str) -> str:
     return f"""//js
@@ -18,6 +20,8 @@ def generate_html(
     """Generate HTML that renders the network.
     You should be able to locate the NetworkWrapper object as nw_{name},
     and nw_{name} has a field that is the visjs network itself."""
+    with open(PACKAGE_ROOT_DIR + "/vis-network.min.js") as f:
+        visjs_library = f.read()
     # Note that double brackets {{ }} are used to escape characters '{' and '}'
     return f"""
 <!DOCTYPE html>
@@ -25,9 +29,9 @@ def generate_html(
   <head>
     <title>Network</title>
     <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"
-    ></script>
+      type="text/javascript">
+      {visjs_library}
+    </script>
     <style type="text/css">
       #{name} {{
         width: {width}px;
