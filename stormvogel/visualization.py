@@ -56,6 +56,7 @@ class Visualization(stormvogel.displayable.Displayable):
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
         use_iframe: bool = False,
+        local_visjs: bool = True,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
         Args:
@@ -83,6 +84,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
+        self.local_visjs: bool = local_visjs
         # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
@@ -116,6 +118,7 @@ class Visualization(stormvogel.displayable.Displayable):
             do_init_server=self.do_init_server,
             positions=self.layout.layout["positions"],
             use_iframe=self.use_iframe,
+            local_visjs=self.local_visjs,
         )
 
     def show(self) -> None:
