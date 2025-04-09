@@ -35,6 +35,7 @@ def test_show(mocker):
         name=vis.name,
         width=vis.layout.layout["misc"]["width"],
         height=vis.layout.layout["misc"]["height"],
+        local_visjs=True,
         output=vis.output,
         debug_output=vis.debug_output,
         do_display=False,
