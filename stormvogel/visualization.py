@@ -320,6 +320,9 @@ class Visualization(stormvogel.displayable.Displayable):
         """Get HTML code that can be used to export this visualization."""
         return self.nt.generate_html() if self.nt is not None else ""
 
+    def generate_iframe(self) -> str:
+        return self.nt.generate_iframe() if self.nt is not None else ""
+
     def save_html(self, name: str) -> None:
         with open(name + ".html", "w") as f:
             f.write(self.generate_html())

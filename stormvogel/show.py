@@ -61,7 +61,7 @@ def show(
         vis.update()
     else:  # Unfortunately, the sphinx docs only work if we save the html as a file and embed.
         if use_iframe:
-            iframe = vis.nt.generate_iframe()
+            iframe = vis.generate_iframe()
         else:
             iframe = vis.generate_html()
         with open(name + ".html", "w") as f:
