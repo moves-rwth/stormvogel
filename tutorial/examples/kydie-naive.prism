@@ -1,0 +1,22 @@
+// Not what you should do!
+dtmc
+
+module main
+    s : [0..12] init 0;
+    [] s=0 -> 0.5:(s'=1) + 0.5:(s'=2);
+    [] s=1 -> 0.5:(s'=3) + 0.5:(s'=4);
+    [] s=2 -> 0.5:(s'=5) + 0.5:(s'=6);
+    [] s=3 -> 0.5:(s'=1) + 0.5:(s'=7);
+    [] s=4 -> 0.5:(s'=8) + 0.5:(s'=9);
+    [] s=5 -> 0.5:(s'=2) + 0.5:(s'=10);
+    [] s=6 -> 0.5:(s'=11) + 0.5:(s'=12);
+    [] s>6 -> 1:(s'=s);
+endmodule
+
+label "out1" = s=7;
+label "out2" = s=8;
+label "out3" = s=9;
+label "out4" = s=10;
+label "out5" = s=11;
+label "out6" = s=12;
+label "done" = s>=7;

@@ -1,0 +1,30 @@
+// Find music track on shuffle player
+
+dtmc
+
+// constants
+const int N=20; // Number of tracks
+const int K=12; // Track to find
+const int R=10; // Reset song
+const double p; // Choose next
+
+module search
+
+	initial : bool init false;
+	cur : [0..N-1] init 0;
+
+	[] (!initial) -> 1 : (cur'=R) & (initial'=true);
+	[] (initial) & cur >= 2 -> p : (cur'=((cur+1) % N)) + (1-p) : (cur'=cur-2);
+	[] (initial) & cur = 1 -> p : (cur'=((cur+1) % N)) + (1-p) : (cur'=N-1);
+	[] (initial) & cur = 0 -> p : (cur'=((cur+1) % N)) + (1-p) : (cur'=N-2);
+
+endmodule
+
+// labels
+label "found" = initial & cur=K-1;
+label "found2" = initial & cur=3-1;
+
+// rewards
+rewards "steps"
+	initial : 1;
+endrewards

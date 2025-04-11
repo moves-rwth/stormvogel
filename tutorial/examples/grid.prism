@@ -1,0 +1,13 @@
+mdp
+
+const int N;
+
+module main
+   x : [0..N] init 3;
+   y : [0..N] init 3;
+
+   [north] x > 1 -> 0.9:(x'=x-1) + 0.1:(x'=x);
+   [south] x < N -> 0.9:(x'=x+1) + 0.1:(x'=x);
+   [west] y > 1 -> 0.8:(y'=y-1) + 0.2:(y'=y);
+   [east] y < N -> 0.8:(y'=y+1) + 0.2:(y'=y);
+endmodule

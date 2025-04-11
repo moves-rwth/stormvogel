@@ -1,0 +1,58 @@
+// Exported by storm
+// Original model type: DTMC
+@type: DTMC
+@parameters
+
+@reward_models
+
+@nr_states
+13
+@nr_choices
+13
+@model
+state 0 init
+	action 0
+		1 : 0.5
+		2 : 0.5
+state 1
+	action 0
+		3 : 0.5
+		4 : 0.5
+state 2
+	action 0
+		5 : 0.5
+		6 : 0.5
+state 3
+	action 0
+		1 : 0.5
+		7 : 0.5
+state 4
+	action 0
+		8 : 0.5
+		9 : 0.5
+state 5
+	action 0
+		2 : 0.5
+		10 : 0.5
+state 6
+	action 0
+		11 : 0.5
+		12 : 0.5
+state 7 out1 done
+	action 0
+		7 : 1
+state 8 out2 done
+	action 0
+		8 : 1
+state 9 out3 done
+	action 0
+		9 : 1
+state 10 out4 done
+	action 0
+		10 : 1
+state 11 out5 done
+	action 0
+		11 : 1
+state 12 out6 done
+	action 0
+		12 : 1
