@@ -10,7 +10,6 @@ import stormvogel.examples.nuclear_fusion_ctmc
 import stormvogel.examples.monty_hall_pomdp
 import stormvogel.examples.stormpy_ma
 import stormvogel.examples.simple_ma
-from stormvogel.model import EmptyAction
 
 try:
     import stormpy
@@ -97,6 +96,7 @@ def sparse_equal(
         and markovian_states_equal
     )
 
+
 """
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
@@ -145,6 +145,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
 """
 
+
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
     stormvogel_mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
@@ -180,6 +181,7 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     # quit()
 
     assert new_stormvogel_mdp == stormvogel_mdp
+
 
 """
 def test_stormvogel_to_stormpy_and_back_ctmc():
@@ -224,6 +226,7 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
 
     assert new_stormvogel_pomdp == stormvogel_pomdp
 """
+
 
 def test_stormpy_to_stormvogel_and_back_pomdp():
     # we create a stormpy representation of an example pomdp

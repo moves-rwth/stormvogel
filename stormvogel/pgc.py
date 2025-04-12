@@ -279,7 +279,7 @@ def valid_input(
                     f"On input {state}, the labels function does not return a list. Make sure to change it to [{labellist}]"
                 )
 
-    #TODO check validity of valuations
+    # TODO check validity of valuations
 
 
 def build_pgc(
@@ -294,7 +294,6 @@ def build_pgc(
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
     check_validity: bool = True,
-
 ) -> stormvogel.model.Model:
     """
     function that converts a delta function, an available_actions function an initial state and a model type
@@ -471,6 +470,5 @@ def build_pgc(
                 s.labels = ["init"]
             else:
                 s.labels = []
-            
 
     return model

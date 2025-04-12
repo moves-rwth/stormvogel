@@ -149,7 +149,7 @@ def test_normalize():
     )
     dtmc1.add_self_loops()
 
-    #TODO test for mdps as well
+    # TODO test for mdps as well
 
     assert dtmc0 == dtmc1
 
@@ -344,9 +344,12 @@ def test_get_sub_model():
     # we build what the submodel should look like
     new_dtmc = stormvogel.model.new_dtmc("Die")
     init = new_dtmc.get_initial_state()
-    init.valuations = {"rolled" : 0}
+    init.valuations = {"rolled": 0}
     init.set_transitions(
-        [(1 / 6, new_dtmc.new_state(f"rolled{i+1}", {"rolled": i+1})) for i in range(2)]
+        [
+            (1 / 6, new_dtmc.new_state(f"rolled{i+1}", {"rolled": i + 1}))
+            for i in range(2)
+        ]
     )
     new_dtmc.normalize()
     assert sub_model == new_dtmc

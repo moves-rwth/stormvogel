@@ -28,6 +28,7 @@ def create_monty_hall_pomdp():
     for s in pomdp.get_states_with_label("open"):
         car_pos = s.valuations["car_pos"]
         chosen_pos = s.valuations["chosen_pos"]
+        assert isinstance(car_pos, int) and isinstance(chosen_pos, int)
         other_pos = {0, 1, 2} - {car_pos, chosen_pos}
         s.set_transitions(
             [
@@ -44,6 +45,7 @@ def create_monty_hall_pomdp():
         car_pos = s.valuations["car_pos"]
         chosen_pos = s.valuations["chosen_pos"]
         reveal_pos = s.valuations["reveal_pos"]
+        assert isinstance(reveal_pos, int) and isinstance(chosen_pos, int)
         other_pos = list({0, 1, 2} - {reveal_pos, chosen_pos})[0]
         s.set_transitions(
             [
@@ -69,7 +71,6 @@ def create_monty_hall_pomdp():
 
     # we set the value -1 to all unassigned variables in the states
     pomdp.set_valuation_at_remaining_states(value=-1)
-
 
     # we add the observations TODO: let it make sense
     for state in pomdp.states.values():

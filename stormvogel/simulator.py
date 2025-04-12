@@ -286,7 +286,9 @@ def simulate(
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
                     new_state = partial_model.new_state(
-                        list(labels), name=str(state_id), valuations=model.get_state_by_id(state_id).valuations
+                        list(labels),
+                        name=str(state_id),
+                        valuations=model.get_state_by_id(state_id).valuations,
                     )
 
                     # we add the rewards
@@ -362,7 +364,9 @@ def simulate(
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
                     new_state = partial_model.new_state(
-                        list(labels), name=str(state_id), valuations=model.get_state_by_id(state_id).valuations
+                        list(labels),
+                        name=str(state_id),
+                        valuations=model.get_state_by_id(state_id).valuations,
                     )
                 else:
                     new_state = partial_model.get_state_by_name(str(state_id))

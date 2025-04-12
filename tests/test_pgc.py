@@ -227,24 +227,24 @@ def test_pgc_dtmc():
                     case 0:
                         return {"s": 7}
                     case 1:
-                        return {"s": 7,"d":1}
+                        return {"s": 7, "d": 1}
                     case 2:
-                        return {"s": 7,"d":2}
+                        return {"s": 7, "d": 2}
                     case 3:
-                        return {"s": 7,"d":3}
+                        return {"s": 7, "d": 3}
                     case 4:
-                        return {"s": 7,"d":4}
+                        return {"s": 7, "d": 4}
                     case 5:
-                        return {"s": 7,"d":5}
+                        return {"s": 7, "d": 5}
                     case 6:
-                        return {"s": 7,"d":6}
+                        return {"s": 7, "d": 6}
 
     pgc_model = pgc.build_pgc(
         delta=delta,
         initial_state_pgc=initial_state,
         rewards=rewards,
         modeltype=model.ModelType.DTMC,
-        valuations=valuations
+        valuations=valuations,
     )
 
     # we build the model in the regular way:

@@ -59,7 +59,7 @@ class State:
     """
 
     labels: list[str]
-    valuations: dict[str, int]
+    valuations: dict[str, int | float | bool]
     id: int
     model: "Model"
     observation: Observation | None
@@ -68,7 +68,7 @@ class State:
     def __init__(
         self,
         labels: list[str],
-        valuations: dict[str, int],
+        valuations: dict[str, int | float | bool],
         id: int,
         model,
         name: str | None = None,
@@ -187,7 +187,9 @@ class State:
                 else:
                     observations_equal = True
                 return (
-                    sorted(self.labels) == sorted(other.labels) and observations_equal and self.valuations == other.valuations
+                    sorted(self.labels) == sorted(other.labels)
+                    and observations_equal
+                    and self.valuations == other.valuations
                 )
         return False
 
@@ -226,7 +228,6 @@ class Action:
 
     def __str__(self):
         return f"Action with labels {self.labels}"
-
 
 
 # The empty action. Used for DTMCs and empty action transitions in mdps.
@@ -667,17 +668,21 @@ class Model:
                 variables.add(variable)
         return variables
 
-    def set_valuation_at_remaining_states(self, variables: list[str] | None = None, value: int | bool | float = 0):
+    def set_valuation_at_remaining_states(
+        self, variables: list[str] | None = None, value: int | bool | float = 0
+    ):
         """sets value to variables in all states where they don't have a value yet"""
         if variables is None:
-            variables = self.get_variables()
+            v = self.get_variables()
+        else:
+            v = variables
         for state in self.states.values():
-            for var in variables:
+            for var in v:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
 
     def unassigned_variables(self) -> bool:
-        #TODO return list of pairs of variables and states where it is undefined
+        # TODO return list of pairs of variables and states where it is undefined
         variables = self.get_variables()
         if variables == set():
             return False
@@ -934,7 +939,7 @@ class Model:
     def new_state(
         self,
         labels: list[str] | str | None = None,
-        valuations: dict[str, int] | None = None,
+        valuations: dict[str, int | bool | float] | None = None,
         name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""

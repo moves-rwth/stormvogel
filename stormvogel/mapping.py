@@ -1,5 +1,4 @@
 import stormvogel.model
-import pycarl
 import re
 
 try:
@@ -95,13 +94,12 @@ def stormvogel_to_stormpy(
         return reward_models
 
     def add_valuations(model: stormvogel.model.Model) -> stormpy.storage.StateValuation:
-
         assert stormpy is not None
 
         manager = stormpy.ExpressionManager()
         valuations = stormpy.storage.StateValuationsBuilder()
 
-        #we create all the variable names
+        # we create all the variable names
         created_vars = set()
         for state in model.states.values():
             for var in sorted(state.valuations.items()):
@@ -111,13 +109,13 @@ def stormvogel_to_stormpy(
                     valuations.add_variable(storm_var)
                     created_vars.add(name)
 
-        #we assign the values to the variables in the states
+        # we assign the values to the variables in the states
         for state in model.states.values():
-            integer_values = list(state.valuations.values())
-            valuations.add_state(state.id, integer_values=list(state.valuations.values()))
+            valuations.add_state(
+                state.id, integer_values=list(state.valuations.values())
+            )
 
         return valuations.build()
-
 
     def map_dtmc(model: stormvogel.model.Model) -> stormpy.storage.SparseDtmc:
         """
@@ -346,9 +344,9 @@ def stormvogel_to_stormpy(
         raise RuntimeError(
             "This model has states with no outgoing transitions.\nUse the add_self_loops() function to add self loops to all states with no outgoing transition."
         )
-    
+
     if model.unassigned_variables():
-        raise RuntimeError(f"Each state should have a value for each variable")
+        raise RuntimeError("Each state should have a value for each variable")
 
     assert stormpy is not None
 
@@ -370,9 +368,7 @@ def stormvogel_to_stormpy(
     elif model.get_type() == stormvogel.model.ModelType.MA:
         return map_ma(model)
     else:
-        raise RuntimeError(
-            "This type of model is not yet supported for this action"
-        )
+        raise RuntimeError("This type of model is not yet supported for this action")
 
 
 def stormpy_to_stormvogel(
@@ -382,7 +378,6 @@ def stormpy_to_stormvogel(
     | stormpy.storage.SparsePomdp
     | stormpy.storage.SparseMA,
 ) -> stormvogel.model.Model | None:
-
     def add_states(
         model: stormvogel.model.Model,
         sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
@@ -417,17 +412,15 @@ def stormpy_to_stormvogel(
             rewardmodel.set_from_rewards_vector(reward_vector)
 
     def add_valuations(model: stormvogel.model.Model, sparsemodel):
-
         if sparsemodel.has_state_valuations():
             valuations = sparsemodel.state_valuations
-        
+
             for state_id, state in model.states.items():
                 s = valuations.get_string(state_id)
                 s = s.strip("[]")
                 matches = re.findall(r"(\w+)=(\S+)", s)
                 result = {match[0]: int(match[1]) for match in matches}
                 state.valuations = result
-
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """

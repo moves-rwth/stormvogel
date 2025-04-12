@@ -27,6 +27,7 @@ def create_monty_hall_mdp():
     for s in mdp.get_states_with_label("open"):
         car_pos = s.valuations["car_pos"]
         chosen_pos = s.valuations["chosen_pos"]
+        assert isinstance(car_pos, int) and isinstance(chosen_pos, int)
         other_pos = {0, 1, 2} - {car_pos, chosen_pos}
         s.set_transitions(
             [
@@ -51,6 +52,7 @@ def create_monty_hall_mdp():
         car_pos = s.valuations["car_pos"]
         chosen_pos = s.valuations["chosen_pos"]
         reveal_pos = s.valuations["reveal_pos"]
+        assert isinstance(reveal_pos, int) and isinstance(chosen_pos, int)
         other_pos = list({0, 1, 2} - {reveal_pos, chosen_pos})[0]
         s.set_transitions(
             [
