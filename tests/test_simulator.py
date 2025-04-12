@@ -24,11 +24,13 @@ def test_simulate():
 
     # we make the partial model that should be created by the simulator
     other_dtmc = stormvogel.model.new_dtmc()
-    other_dtmc.get_initial_state().set_transitions(
+    init = other_dtmc.get_initial_state()
+    init.valuations = {"rolled": 0}
+    init.set_transitions(
         [
-            (1 / 6, other_dtmc.new_state("rolled5")),
-            (1 / 6, other_dtmc.new_state("rolled0")),
-            (1 / 6, other_dtmc.new_state("rolled1")),
+            (1 / 6, other_dtmc.new_state("rolled6",valuations={"rolled":6})),
+            (1 / 6, other_dtmc.new_state("rolled1",valuations={"rolled":1})),
+            (1 / 6, other_dtmc.new_state("rolled2",valuations={"rolled":2})),
         ]
     )
 
@@ -62,15 +64,17 @@ def test_simulate():
 
     # we make the partial model that should be created by the simulator
     other_mdp = stormvogel.model.new_mdp()
-    other_mdp.get_initial_state().set_transitions(
-        [(1 / 3, other_mdp.new_state("carchosen"))]
+    init = other_mdp.get_initial_state()
+    init.valuations = {'reveal_pos': -1, 'car_pos': -1, 'chosen_pos': -1}
+    init.set_transitions(
+        [(1 / 3, other_mdp.new_state("carchosen", valuations={'car_pos': 2, 'reveal_pos': -1, 'chosen_pos': -1}))]
     )
-    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
+    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open",valuations={'car_pos': 2, 'chosen_pos': 0, 'reveal_pos': -1}))])
     action1 = other_mdp.new_action("open0")
     transition = stormvogel.model.Transition({action1: branch})
     other_mdp.get_state_by_id(1).set_transitions(transition)
     other_mdp.get_state_by_id(2).add_transitions(
-        [(1, other_mdp.new_state("goatrevealed"))]
+        [(1, other_mdp.new_state("goatrevealed",valuations={'car_pos': 2, 'chosen_pos': 0, 'reveal_pos': 1}))]
     )
 
     rewardmodel = other_mdp.add_rewards("rewardmodel")
@@ -103,15 +107,17 @@ def test_simulate():
 
     # we make the partial model that should be created by the simulator
     other_mdp = stormvogel.model.new_mdp()
+    init = other_mdp.get_initial_state()
+    init.valuations = {'reveal_pos': -1, 'chosen_pos': -1, 'car_pos': -1}
     other_mdp.get_initial_state().set_transitions(
-        [(1 / 3, other_mdp.new_state("carchosen"))]
+        [(1 / 3, other_mdp.new_state("carchosen",valuations={'car_pos': 2, 'reveal_pos': -1, 'chosen_pos': -1}))]
     )
-    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open"))])
+    branch = stormvogel.model.Branch([(1, other_mdp.new_state("open",valuations={'car_pos': 2, 'chosen_pos': 0, 'reveal_pos': -1}))])
     action1 = other_mdp.new_action("open0")
     transition = stormvogel.model.Transition({action1: branch})
     other_mdp.get_state_by_id(1).set_transitions(transition)
     other_mdp.get_state_by_id(2).set_transitions(
-        [(1, other_mdp.new_state("goatrevealed"))]
+        [(1, other_mdp.new_state("goatrevealed",valuations={'car_pos': 2, 'chosen_pos': 0, 'reveal_pos': 1}))]
     )
 
     assert partial_model == other_mdp

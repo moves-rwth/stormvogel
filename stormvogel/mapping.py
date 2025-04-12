@@ -104,7 +104,7 @@ def stormvogel_to_stormpy(
         #we create all the variable names
         created_vars = set()
         for state in model.states.values():
-            for var in state.valuations.items():
+            for var in sorted(state.valuations.items()):
                 name = str(var[0])
                 if name not in created_vars:
                     storm_var = manager.create_integer_variable(name)
@@ -187,6 +187,7 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
+        components.state_valuations = valuations
         components.choice_labeling = choice_labeling
         mdp = stormpy.storage.SparseMdp(components)
 
@@ -217,6 +218,7 @@ def stormvogel_to_stormpy(
             reward_models=reward_models,
             rate_transitions=True,
         )
+        components.state_valuations = valuations
         if not model.exit_rates == {} and model.exit_rates is not None:
             components.exit_rates = list(model.exit_rates.values())
 
@@ -263,6 +265,7 @@ def stormvogel_to_stormpy(
             state_labeling=state_labeling,
             reward_models=reward_models,
         )
+        components.state_valuations = valuations
         observations = []
         for state in model.states.values():
             if state.get_observation() is not None:
@@ -329,6 +332,7 @@ def stormvogel_to_stormpy(
             reward_models=reward_models,
             markovian_states=markovian_states_bitvector,
         )
+        components.state_valuations = valuations
         if not model.exit_rates == {} and model.exit_rates is not None:
             components.exit_rates = list(model.exit_rates.values())
         else:
@@ -344,7 +348,7 @@ def stormvogel_to_stormpy(
         )
     
     if model.unassigned_variables():
-        raise RuntimeError(f"State: {state} does not have a value for each variable")
+        raise RuntimeError(f"Each state should have a value for each variable")
 
     assert stormpy is not None
 
@@ -419,8 +423,9 @@ def stormpy_to_stormvogel(
         
             for state_id, state in model.states.items():
                 s = valuations.get_string(state_id)
-                match = re.findall(r"(\w+)=([^\]]+)", s)
-                result = {key: int(value) for key, value in match}
+                s = s.strip("[]")
+                matches = re.findall(r"(\w+)=(\S+)", s)
+                result = {match[0]: int(match[1]) for match in matches}
                 state.valuations = result
 
 

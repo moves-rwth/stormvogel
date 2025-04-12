@@ -42,6 +42,7 @@ def valid_input(
     available_actions: Callable | None = None,
     observations: Callable | None = None,
     rates: Callable | None = None,
+    valuations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
 ):
@@ -278,6 +279,8 @@ def valid_input(
                     f"On input {state}, the labels function does not return a list. Make sure to change it to [{labellist}]"
                 )
 
+    #TODO check validity of valuations
+
 
 def build_pgc(
     delta: Callable,
@@ -287,9 +290,11 @@ def build_pgc(
     available_actions: Callable | None = None,
     observations: Callable | None = None,
     rates: Callable | None = None,
+    valuations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
     check_validity: bool = True,
+
 ) -> stormvogel.model.Model:
     """
     function that converts a delta function, an available_actions function an initial state and a model type
@@ -309,6 +314,7 @@ def build_pgc(
             available_actions,
             observations,
             rates,
+            valuations,
             modeltype,
             max_size,
         )
@@ -441,6 +447,12 @@ def build_pgc(
             s = model.get_states_with_label(str(state))[0]
             model.set_rate(s, rates(state))
 
+    # we add the valuations
+    if valuations is not None:
+        for state in states_seen:
+            s = model.get_states_with_label(str(state))[0]
+            s.valuations = valuations(state)
+
     # we add the labels
     if labels is not None:
         for state in states_seen:
@@ -459,5 +471,6 @@ def build_pgc(
                 s.labels = ["init"]
             else:
                 s.labels = []
+            
 
     return model

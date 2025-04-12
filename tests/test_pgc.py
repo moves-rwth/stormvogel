@@ -204,13 +204,47 @@ def test_pgc_dtmc():
             case 6:
                 return [(p, pgc.State(s=2)), (1 - p, pgc.State(s=7, d=6))]
             case 7:
-                return [(1, pgc.State(s=7))]
+                return [(1, pgc.State(s=7, d=0))]
+
+    def valuations(s: pgc.State):
+        match s.s:
+            case 0:
+                return {"s": 0}
+            case 1:
+                return {"s": 1}
+            case 2:
+                return {"s": 2}
+            case 3:
+                return {"s": 3}
+            case 4:
+                return {"s": 4}
+            case 5:
+                return {"s": 5}
+            case 6:
+                return {"s": 6}
+            case 7:
+                match s.d:
+                    case 0:
+                        return {"s": 7}
+                    case 1:
+                        return {"s": 7,"d":1}
+                    case 2:
+                        return {"s": 7,"d":2}
+                    case 3:
+                        return {"s": 7,"d":3}
+                    case 4:
+                        return {"s": 7,"d":4}
+                    case 5:
+                        return {"s": 7,"d":5}
+                    case 6:
+                        return {"s": 7,"d":6}
 
     pgc_model = pgc.build_pgc(
         delta=delta,
         initial_state_pgc=initial_state,
         rewards=rewards,
         modeltype=model.ModelType.DTMC,
+        valuations=valuations
     )
 
     # we build the model in the regular way:
@@ -220,7 +254,7 @@ def test_pgc_dtmc():
         regular_model.get_initial_state(),
         [
             (1 / 2, regular_model.new_state(valuations={"s": 1})),
-            (1 / 2, regular_model.new_state(valuationss={"s": 2})),
+            (1 / 2, regular_model.new_state(valuations={"s": 2})),
         ],
     )
     regular_model.set_transitions(

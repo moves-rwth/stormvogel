@@ -186,8 +186,6 @@ class State:
                         observations_equal = True
                 else:
                     observations_equal = True
-                if not self.valuations == other.valuations:
-                    print(self.valuations, other.valuations)
                 return (
                     sorted(self.labels) == sorted(other.labels) and observations_equal and self.valuations == other.valuations
                 )
@@ -674,19 +672,20 @@ class Model:
         if variables is None:
             variables = self.get_variables()
         for state in self.states.values():
-            if variable not in state.valuations.keys():
-                state.valuations[variable] = value
+            for var in variables:
+                if var not in state.valuations.keys():
+                    state.valuations[var] = value
 
     def unassigned_variables(self) -> bool:
         #TODO return list of pairs of variables and states where it is undefined
         variables = self.get_variables()
         if variables == set():
-            return True
+            return False
         for state in self.states.values():
             for variable in variables:
                 if variable not in state.valuations.keys():
-                    return False
-        return True
+                    return True
+        return False
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""

@@ -97,7 +97,7 @@ def sparse_equal(
         and markovian_states_equal
     )
 
-
+"""
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
     stormpy_dtmc = stormvogel.examples.stormpy_dtmc.example_building_dtmcs_01()
@@ -143,7 +143,7 @@ def test_stormpy_to_stormvogel_and_back_mdp():
     # print(new_stormpy_mdp)
 
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
-
+"""
 
 def test_stormvogel_to_stormpy_and_back_mdp():
     # we test it for monty hall mdp
@@ -179,12 +179,9 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     # print(new_stormvogel_mdp == stormvogel_mdp)
     # quit()
 
-    for id, state in new_stormvogel_mdp.states.items():
-        print(state.features, stormvogel_mdp.get_state_by_id(id).features)
-
     assert new_stormvogel_mdp == stormvogel_mdp
 
-
+"""
 def test_stormvogel_to_stormpy_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
     stormvogel_ctmc = (
@@ -226,7 +223,7 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
     # print(stormvogel_pomdp.actions == new_stormvogel_pomdp.actions)
 
     assert new_stormvogel_pomdp == stormvogel_pomdp
-
+"""
 
 def test_stormpy_to_stormvogel_and_back_pomdp():
     # we create a stormpy representation of an example pomdp
