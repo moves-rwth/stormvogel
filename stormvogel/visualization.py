@@ -4,6 +4,8 @@
 # If you remove a with output: statement, everything might just break, be prepared.
 
 from time import sleep
+from typing import Tuple
+import warnings
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -30,6 +32,11 @@ def random_word(k: int) -> str:
     return "".join(random.choices(string.ascii_letters, k=k))
 
 
+def random_color() -> str:
+    """Return a random HEX color."""
+    return "#" + "".join([random.choice("0123456789ABCDEF") for j in range(6)])
+
+
 class Visualization(stormvogel.displayable.Displayable):
     """Handles visualization of a Model using a Network from stormvogel.visjs."""
 
@@ -49,6 +56,7 @@ class Visualization(stormvogel.displayable.Displayable):
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
         use_iframe: bool = False,
+        local_visjs: bool = True,
     ) -> None:
         """Create visualization of a Model using a pyvis Network
         Args:
@@ -76,6 +84,7 @@ class Visualization(stormvogel.displayable.Displayable):
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
+        self.local_visjs: bool = local_visjs
         # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
@@ -109,6 +118,7 @@ class Visualization(stormvogel.displayable.Displayable):
             do_init_server=self.do_init_server,
             positions=self.layout.layout["positions"],
             use_iframe=self.use_iframe,
+            local_visjs=self.local_visjs,
         )
 
     def show(self) -> None:
@@ -331,6 +341,60 @@ class Visualization(stormvogel.displayable.Displayable):
             else:
                 res.append(v)
         return res
+
+    def highlight_state(self, s_id: int, color: str | None = "red"):
+        """Highlight a state in the model by changing its color. You can clear the current color by setting it to None."""
+        self.nt.set_node_color(s_id, color)
+
+    def highlilght_action(
+        self, s_id: int, action: stormvogel.model.Action, color: str | None = "red"
+    ):
+        """Highlight an action in the model by changing its color. You can clear the current color by setting it to None."""
+        try:
+            nt_id = self.network_action_map_id[s_id, action]
+            self.nt.set_node_color(nt_id, color)
+        except KeyError:
+            warnings.warn(
+                "Tried to highlight an action that is not present in this model."
+            )
+
+    def highlight_state_set(self, state_ids: set[int], color: str | None = "blue"):
+        """Highlight a set of states in the model by changing their color. You can clear the current color by setting it to None."""
+        for s_id in state_ids:
+            self.nt.set_node_color(s_id, color)
+
+    def highlight_action_set(
+        self,
+        state_action_set: set[Tuple[int, stormvogel.model.Action]],
+        color: str = "red",
+    ):
+        """Highlight a set of actions in the model by changing their color. You can clear the current color by setting it to None."""
+        for s_id, a in state_action_set:
+            self.highlilght_action(s_id, a, color)
+
+    def highlight_decomposition(
+        self,
+        decomp: list[Tuple[set[int], set[Tuple[int, stormvogel.model.Action]]]],
+        colors: list[str] | None = None,
+    ):
+        """Highlight a set of actions in the model by changing their color.
+        Args:
+            decomp: A list of tuples (states, actions)
+            colors (optional): A list of colors for the decompossitions. Random colors are picked by default."""
+        for n, v in enumerate(decomp):
+            if colors is None:
+                color = random_color()
+            else:
+                color = colors[n]
+            self.highlight_state_set(v[0], color)
+            self.highlight_action_set(v[1], color)
+
+    def clear_highlighting(self):
+        """Clear all highlighting that is currently active, returing all states to their original colors."""
+        for s_id in self.model.get_states():
+            self.nt.set_node_color(s_id, None)
+        for a_id in self.network_action_map_id.values():
+            self.nt.set_node_color(a_id, None)
 
     def highlight_path(
         self,

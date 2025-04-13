@@ -13,7 +13,12 @@ PACKAGE_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 class Layout:
     """Responsible for loading/saving layout jsons."""
 
-    def __init__(self, path: str | None = None, path_relative: bool = True) -> None:
+    def __init__(
+        self,
+        path: str | None = None,
+        path_relative: bool = True,
+        layout_dict: dict | None = None,
+    ) -> None:
         """Load a new Layout from a json file.
         Whenever keys are not present in the provided json file, their default values are used instead
         as specified in DEFAULTS (=layouts/default.json).
@@ -27,7 +32,20 @@ class Layout:
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json")) as f:
             default_str = f.read()
         self.default_dict: dict = json.loads(default_str)
-        self.load(path, path_relative)
+
+        if layout_dict is None:
+            self.load(path, path_relative)
+        else:
+            self.layout: dict = stormvogel.rdict.merge_dict(
+                self.default_dict, layout_dict
+            )
+            self.load_schema()
+
+    def load_schema(self):
+        # Load in schema for the dict_editor.
+        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
+            schema_str = f.read()
+        self.schema = json.loads(schema_str)
 
     def load(self, path: str | None = None, path_relative: bool = True):
         if path is None:
@@ -44,11 +62,7 @@ class Layout:
             self.layout: dict = stormvogel.rdict.merge_dict(
                 self.default_dict, parsed_dict
             )
-
-        # Load in schema for the dict_editor.
-        with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
-            schema_str = f.read()
-        self.schema = json.loads(schema_str)
+        self.load_schema()
 
     def set_active_groups(self, groups: list[str]):
         self.layout["edit_groups"]["groups"] = groups

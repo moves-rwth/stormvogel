@@ -18,11 +18,42 @@
       }
     }
   },
+  "edit_groups": {
+    "groups": [
+      "pass_test",
+      "states",
+      "actions"
+    ]
+  },
   "groups": {
+    "actions": {
+      "borderWidth": 1,
+      "color": {
+        "background": "lightblue",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "database",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 14
+      }
+    },
+    "scheduled_actions": {
+      "shape": "box",
+      "color": {
+        "background": "pink",
+        "border": "red"
+      }
+    },
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "#fe8686",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -36,45 +67,10 @@
         "size": 14
       }
     },
-    "actions": {
+    "pass_test": {
       "borderWidth": 1,
       "color": {
-        "background": "lightblue",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
-    "scheduled_actions": {
-      "borderWidth": 1,
-      "color": {
-        "background": "pink",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      },
-      "schedColor": false
-    },
-    "init": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
+        "background": "#54ff3d",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -93,21 +89,28 @@
   "edges": {
     "arrows": "to",
     "font": {
-      "color": "#e5a50a",
-      "size": 14
+      "color": "black",
+      "size": 14,
+      "strokeColor": "#ffb8b8",
+      "strokeWidth": 2
     },
     "color": {
-      "color": "#a51d2d"
-    }
+      "color": "#9a90e4"
+    },
+    "width": 6
   },
   "numbers": {
-    "fractions": true,
+    "fractions": false,
     "digits": 5
   },
-  "results_and_rewards": {
+  "state_properties": {
     "show_results": true,
-    "resultSymbol": "\u2606",
-    "show_rewards": true
+    "result_symbol": "\u2606",
+    "show_rewards": true,
+    "reward_symbol": "\u20ac",
+    "show_zero_rewards": false,
+    "show_observations": true,
+    "observation_symbol": "\u0298"
   },
   "layout": {
     "randomSeed": 5
@@ -116,49 +119,48 @@
     "enable_physics": true,
     "width": 800,
     "height": 600,
-    "explore": true
+    "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/NAME.json",
+    "filename": "stormdays.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": 226,
-      "y": -68
+      "x": 166,
+      "y": -87
     },
     "1": {
-      "x": -4,
-      "y": -65
+      "x": 57,
+      "y": 113
     },
     "2": {
-      "x": 63,
-      "y": 66
+      "x": -49,
+      "y": -81
     },
     "3": {
-      "x": -47,
-      "y": 89
+      "x": -32,
+      "y": 20
     },
     "4": {
-      "x": -68,
-      "y": -26
+      "x": -72,
+      "y": 77
     },
     "5": {
-      "x": -163,
-      "y": 64
+      "x": -175,
+      "y": 69
     },
     "10000000000": {
-      "x": 114,
-      "y": -137
+      "x": 175,
+      "y": 44
     },
     "10000000001": {
-      "x": 195,
-      "y": 57
+      "x": 54,
+      "y": -161
     }
   },
-  "width": 800,
-  "height": 600,
-  "physics": true
+  "physics": true,
+  "autoResize": true
 }

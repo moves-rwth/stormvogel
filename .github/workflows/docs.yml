@@ -63,6 +63,9 @@ jobs:
         working-directory: docs/
         run: make html
 
+      - name: Copy gifs
+        run: cp -r docs/2-extensions/gifs docs/_build/html/2-extensions/
+
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5

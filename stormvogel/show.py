@@ -20,6 +20,8 @@ def show(
     show_editor: bool = False,
     debug_output: widgets.Output = widgets.Output(),
     use_iframe: bool = False,
+    do_init_server: bool = True,
+    local_visjs: bool = True,
 ) -> stormvogel.visualization.Visualization:
     """Create and show a visualization of a Model using a visjs Network
 
@@ -35,9 +37,6 @@ def show(
     """
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
-    do_init_server = (  # We only need to start the server if we want to have the layout editor.
-        show_editor and stormvogel.communication_server.enable_server
-    )
     # do_display = not show_editor
     vis = stormvogel.visualization.Visualization(
         model=model,
@@ -49,6 +48,7 @@ def show(
         debug_output=debug_output,
         do_init_server=do_init_server,
         use_iframe=use_iframe,
+        local_visjs=local_visjs,
     )
     vis.show()
     if show_editor:

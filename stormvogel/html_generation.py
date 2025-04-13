@@ -1,4 +1,6 @@
-"""Javascript code generation functions, used in visjs.py."""
+"""Javascript code generation functions, used in visjs.py. Depends on having vis-network.min.js in the stormvogel foder."""
+
+from stormvogel.layout import PACKAGE_ROOT_DIR
 
 
 def generate_init_js(nodes_js: str, edges_js: str, options_js: str, name: str) -> str:
@@ -7,27 +9,39 @@ def generate_init_js(nodes_js: str, edges_js: str, options_js: str, name: str) -
     var edges_local = new vis.DataSet([{edges_js}]);
     var options_local = {options_js};
     var container_local = document.getElementById("{name}");
-    var nw_{name} = new NetworkWrapper_{name}(nodes_local, edges_local, options_local, container_local)
+    var nw_{name} = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
     """
 
 
 # An html template on which a Network is based.
 def generate_html(
-    nodes_js: str, edges_js: str, options_js: str, name: str, width: int, height: int
+    nodes_js: str,
+    edges_js: str,
+    options_js: str,
+    name: str,
+    width: int,
+    height: int,
+    local: bool,
 ):
     """Generate HTML that renders the network.
     You should be able to locate the NetworkWrapper object as nw_{name},
     and nw_{name} has a field that is the visjs network itself."""
+    if local:
+        with open(PACKAGE_ROOT_DIR + "/vis-network.min.js") as f:
+            visjs_library = f.read()
+        visjs_library_script = (
+            f"""<script type="text/javascript"> {visjs_library} </script>"""
+        )
+    else:
+        visjs_library_script = """<script type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>"""
     # Note that double brackets {{ }} are used to escape characters '{' and '}'
     return f"""
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <title>Network</title>
-    <script
-      type="text/javascript"
-      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
-    ></script>
+    {visjs_library_script}
     <style type="text/css">
       #{name} {{
         width: {width}px;
@@ -39,7 +53,7 @@ def generate_html(
   <body>
     <div id="{name}"></div>
     <script type="text/javascript">
-        {generate_network_wrapper_js(name)}
+        {generate_network_wrapper_js()}
     </script>
     <script type="text/javascript">
         {generate_init_js(nodes_js, edges_js, options_js, name)}
@@ -49,13 +63,11 @@ def generate_html(
 """
 
 
-def generate_network_wrapper_js(name: str):
+def generate_network_wrapper_js():
     # Javascript code for finding the container and initializing the network
     # Having a separate NewtorkWrapper object allows us to have multiple networks in one notebook without them interfering.
-    return (
-        f"""
-class NetworkWrapper_{name}"""
-        + """{//js
+    return """//js
+class NetworkWrapper {
   constructor(nodes, edges, options, container) {
     this.nodes = nodes;
     this.edges = edges;
@@ -121,4 +133,3 @@ class NetworkWrapper_{name}"""
   }
 };
 """
-    )
