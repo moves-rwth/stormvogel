@@ -412,3 +412,26 @@ def test_get_state_action_reward():
 #     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(5, EmptyAction): 3})
 
 #     assert rewardmodel == other_rewardmodel
+
+
+def test_valuation_methods():
+    # first we test the get_variables function
+    dtmc = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    assert dtmc.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
+
+    # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
+    dtmc = stormvogel.model.new_dtmc("Die")
+    init = dtmc.get_initial_state()
+    init.set_transitions(
+        [
+            (1 / 6, dtmc.new_state(labels=f"rolled{i+1}", valuations={"rolled": i + 1}))
+            for i in range(6)
+        ]
+    )
+    dtmc.add_self_loops()
+
+    assert dtmc.unassigned_variables()
+
+    dtmc.set_valuation_at_remaining_states()  # TODO more elaborate test, especially when unassigned_variables() returns more information
+
+    assert not dtmc.unassigned_variables()

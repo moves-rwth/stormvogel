@@ -209,23 +209,23 @@ def test_pgc_dtmc():
     def valuations(s: pgc.State):
         match s.s:
             case 0:
-                return {"s": 0}
+                return {"s": 0, "d": -1}
             case 1:
-                return {"s": 1}
+                return {"s": 1, "d": -1}
             case 2:
-                return {"s": 2}
+                return {"s": 2, "d": -1}
             case 3:
-                return {"s": 3}
+                return {"s": 3, "d": -1}
             case 4:
-                return {"s": 4}
+                return {"s": 4, "d": -1}
             case 5:
-                return {"s": 5}
+                return {"s": 5, "d": -1}
             case 6:
-                return {"s": 6}
+                return {"s": 6, "d": -1}
             case 7:
                 match s.d:
                     case 0:
-                        return {"s": 7}
+                        return {"s": 7, "d": 0}
                     case 1:
                         return {"s": 7, "d": 1}
                     case 2:
@@ -250,25 +250,27 @@ def test_pgc_dtmc():
     # we build the model in the regular way:
     regular_model = model.new_dtmc()
     regular_model.states[0].valuations = {"s": 0}
+    init = regular_model.get_initial_state()
+    init.valuations = {"s": 0, "d": -1}
     regular_model.set_transitions(
-        regular_model.get_initial_state(),
+        init,
         [
-            (1 / 2, regular_model.new_state(valuations={"s": 1})),
-            (1 / 2, regular_model.new_state(valuations={"s": 2})),
+            (1 / 2, regular_model.new_state(valuations={"s": 1, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 2, "d": -1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(1),
         [
-            (1 / 2, regular_model.new_state(valuations={"s": 3})),
-            (1 / 2, regular_model.new_state(valuations={"s": 4})),
+            (1 / 2, regular_model.new_state(valuations={"s": 3, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 4, "d": -1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(2),
         [
-            (1 / 2, regular_model.new_state(valuations={"s": 5})),
-            (1 / 2, regular_model.new_state(valuations={"s": 6})),
+            (1 / 2, regular_model.new_state(valuations={"s": 5, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 6, "d": -1})),
         ],
     )
     regular_model.set_transitions(
@@ -301,7 +303,7 @@ def test_pgc_dtmc():
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(7),
-        [(1, regular_model.new_state(valuations={"s": 7}))],
+        [(1, regular_model.new_state(valuations={"s": 7, "d": 0}))],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(8), [(1, regular_model.get_state_by_id(13))]
