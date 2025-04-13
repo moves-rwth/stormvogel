@@ -10,7 +10,6 @@ import stormvogel.examples.nuclear_fusion_ctmc
 import stormvogel.examples.monty_hall_pomdp
 import stormvogel.examples.stormpy_ma
 import stormvogel.examples.simple_ma
-from stormvogel.model import EmptyAction
 
 try:
     import stormpy
@@ -118,10 +117,10 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
     # we test if rewardmodels work:
     rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
     for stateid in stormvogel_dtmc.states.keys():
-        rewardmodel.rewards[(stateid, EmptyAction)] = 1
+        rewardmodel.rewards[(stateid, stormvogel.model.EmptyAction)] = 1
     rewardmodel2 = stormvogel_dtmc.add_rewards("rewardmodel2")
     for stateid in stormvogel_dtmc.states.keys():
-        rewardmodel2.rewards[(stateid, EmptyAction)] = 2
+        rewardmodel2.rewards[(stateid, stormvogel.model.EmptyAction)] = 2
 
     # print(stormvogel_dtmc)
     stormpy_dtmc = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_dtmc)
