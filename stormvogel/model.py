@@ -135,6 +135,10 @@ class State:
         """Add transitions from this state."""
         self.model.add_transitions(self, transitions)
 
+    def add_valuation(self, variable: str, value: int | bool | float):
+        """Adds a valuation to the state."""
+        self.valuations[variable] = value
+
     def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
         if self.model.supports_actions() and self.id in self.model.transitions.keys():
