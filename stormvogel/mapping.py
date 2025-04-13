@@ -94,6 +94,9 @@ def stormvogel_to_stormpy(
         return reward_models
 
     def add_valuations(model: stormvogel.model.Model) -> stormpy.storage.StateValuation:
+        """
+        Helps to add the valuations to the sparsemodel using a statevaluation object
+        """
         assert stormpy is not None
 
         manager = stormpy.ExpressionManager()
@@ -412,6 +415,9 @@ def stormpy_to_stormvogel(
             rewardmodel.set_from_rewards_vector(reward_vector)
 
     def add_valuations(model: stormvogel.model.Model, sparsemodel):
+        """
+        adds the valuations from the sparsemodel to the states of the model
+        """
         if sparsemodel.has_state_valuations():
             valuations = sparsemodel.state_valuations
 

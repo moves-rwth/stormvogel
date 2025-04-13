@@ -97,7 +97,6 @@ def sparse_equal(
     )
 
 
-"""
 def test_stormpy_to_stormvogel_and_back_dtmc():
     # we test it for an example stormpy representation of a dtmc
     stormpy_dtmc = stormvogel.examples.stormpy_dtmc.example_building_dtmcs_01()
@@ -118,10 +117,10 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
     # we test if rewardmodels work:
     rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
     for stateid in stormvogel_dtmc.states.keys():
-        rewardmodel.rewards[(stateid, EmptyAction)] = 1
+        rewardmodel.rewards[(stateid, stormvogel.model.EmptyAction)] = 1
     rewardmodel2 = stormvogel_dtmc.add_rewards("rewardmodel2")
     for stateid in stormvogel_dtmc.states.keys():
-        rewardmodel2.rewards[(stateid, EmptyAction)] = 2
+        rewardmodel2.rewards[(stateid, stormvogel.model.EmptyAction)] = 2
 
     # print(stormvogel_dtmc)
     stormpy_dtmc = stormvogel.mapping.stormvogel_to_stormpy(stormvogel_dtmc)
@@ -143,7 +142,6 @@ def test_stormpy_to_stormvogel_and_back_mdp():
     # print(new_stormpy_mdp)
 
     assert sparse_equal(stormpy_mdp, new_stormpy_mdp)
-"""
 
 
 def test_stormvogel_to_stormpy_and_back_mdp():
@@ -183,7 +181,6 @@ def test_stormvogel_to_stormpy_and_back_mdp():
     assert new_stormvogel_mdp == stormvogel_mdp
 
 
-"""
 def test_stormvogel_to_stormpy_and_back_ctmc():
     # we create a stormpy representation of an example ctmc
     stormvogel_ctmc = (
@@ -225,7 +222,6 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
     # print(stormvogel_pomdp.actions == new_stormvogel_pomdp.actions)
 
     assert new_stormvogel_pomdp == stormvogel_pomdp
-"""
 
 
 def test_stormpy_to_stormvogel_and_back_pomdp():
