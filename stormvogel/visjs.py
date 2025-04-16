@@ -3,6 +3,7 @@
 import IPython.display as ipd
 import ipywidgets as widgets
 import html
+from stormvogel.autoscale_svg import autoscale_svg
 import stormvogel.displayable
 import stormvogel.html_generation
 import stormvogel.communication_server
@@ -162,6 +163,14 @@ class Network(stormvogel.displayable.Displayable):
                 border:none !important;
                 allowfullscreen webkitallowfullscreen mozallowfullscreen
           ></iframe>"""
+
+    def generate_svg(self) -> str:
+        """Generate an svg rendering for the network."""
+        js = f"RETURN({self.network_wrapper}.getSvg());"
+        res = self.server.result(js)[1:-1]
+        unescaped = res.encode("utf-8").decode("unicode_escape")
+        scaled = autoscale_svg(unescaped, 800)
+        return scaled
 
     def show(self) -> None:
         """Display the network on the output that was specified at initialization, otherwise simply display it."""

@@ -3,9 +3,6 @@
 # Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
 # If you remove a with output: statement, everything might just break, be prepared.
 
-from time import sleep
-from typing import Tuple
-import warnings
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -13,6 +10,10 @@ import stormvogel.simulator
 import stormvogel.visjs
 import stormvogel.displayable
 
+import pathlib
+from time import sleep
+from typing import Tuple
+import warnings
 import math
 import fractions
 import ipywidgets as widgets
@@ -20,6 +21,7 @@ import IPython.display as ipd
 import random
 import string
 import logging
+import cairosvg
 
 
 def und(x: str) -> str:
@@ -318,14 +320,83 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def generate_html(self) -> str:
         """Get HTML code that can be used to export this visualization."""
-        return self.nt.generate_html() if self.nt is not None else ""
+        return self.nt.generate_html()
 
     def generate_iframe(self) -> str:
-        return self.nt.generate_iframe() if self.nt is not None else ""
+        return self.nt.generate_iframe()
 
-    def save_html(self, name: str) -> None:
-        with open(name + ".html", "w") as f:
-            f.write(self.generate_html())
+    def generate_svg(self) -> str:
+        return self.nt.generate_svg()
+
+    def export(self, output_format: str, filename: str = "export") -> None:
+        """
+        Export the visualization to your preferred output format.
+        The appropriate file extension will be added automatically.
+
+        Parameters:
+            output_format (str): Desired export format.
+            filename (str): Base name for the exported file.
+
+        Supported output formats (not case-sensitive):
+
+            "HTML"    → An interactive .html file (e.g., draggable nodes)
+            "IFrame"  → Exports as an <iframe> wrapped HTML in a .html file
+            "PDF"     → Exports to .pdf (via conversion from SVG)
+            "SVG"     → Exports to .svg vector image
+        """
+        output_format = output_format.lower()
+        filename_base = pathlib.Path(filename).with_suffix(
+            ""
+        )  # remove extension if present
+
+        if output_format == "html":
+            html = self.generate_html()
+            (filename_base.with_suffix(".html")).write_text(html, encoding="utf-8")
+
+        elif output_format == "iframe":
+            iframe = self.generate_iframe()
+            (filename_base.with_suffix(".html")).write_text(iframe, encoding="utf-8")
+
+        elif output_format == "svg":
+            svg = self.generate_svg()
+            (filename_base.with_suffix(".svg")).write_text(svg, encoding="utf-8")
+
+        elif output_format == "pdf":
+            svg = self.generate_svg()
+            cairosvg.svg2pdf(bytestring=svg.encode("utf-8"), write_to="output.pdf")
+
+        elif output_format == "latex":
+            svg = self.generate_svg()
+            # Create the 'export' folder if it doesn't exist
+            export_folder = pathlib.Path(filename_base)
+            export_folder.mkdir(parents=True, exist_ok=True)
+            pdf_filename = filename_base.with_suffix(".pdf")
+            # Convert SVG to PDF
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"),
+                write_to=str(export_folder / pdf_filename),
+            )
+
+            # Create the LaTeX file
+            latex_content = f"""
+            \\documentclass{{article}}
+            \\usepackage{{graphicx}}
+            \\begin{{document}}
+            \\begin{{figure}}[h!]
+            \\centering
+            \\includegraphics[width=\\textwidth]{{{pdf_filename.name}}}
+            \\caption{{Generated using Stormvogel. TODO insert citing instructions}}
+            \\end{{figure}}
+            \\end{{document}}
+            """
+
+            # Write the LaTeX code to a .tex file
+            (export_folder / filename_base.with_suffix(".tex")).write_text(
+                latex_content, encoding="utf-8"
+            )
+
+        else:
+            raise RuntimeError(f"Export format not supported: {output_format}")
 
     def get_positions(self) -> dict:
         """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously).

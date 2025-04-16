@@ -21,27 +21,23 @@ def generate_html(
     name: str,
     width: int,
     height: int,
-    local: bool,
+    local: bool,  # TODO depricated, remove.
 ):
     """Generate HTML that renders the network.
     You should be able to locate the NetworkWrapper object as nw_{name},
     and nw_{name} has a field that is the visjs network itself."""
-    if local:
-        with open(PACKAGE_ROOT_DIR + "/vis-network.min.js") as f:
-            visjs_library = f.read()
-        visjs_library_script = (
-            f"""<script type="text/javascript"> {visjs_library} </script>"""
-        )
-    else:
-        visjs_library_script = """<script type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>"""
+    with open(PACKAGE_ROOT_DIR + "/vis-network-9.1.9-patched.js") as f:
+        visjs_library = f.read()
+    with open(PACKAGE_ROOT_DIR + "/svgcanvas.js") as f:
+        svg_canvas_library = f.read()
     # Note that double brackets {{ }} are used to escape characters '{' and '}'
     return f"""
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <title>Network</title>
-    {visjs_library_script}
+    <script>{visjs_library}</script>
+    <script>{svg_canvas_library}</script>
     <style type="text/css">
       #{name} {{
         width: {width}px;
@@ -130,6 +126,43 @@ class NetworkWrapper {
         this.edges.update(edge);
       }
     }
+  }
+
+  getSvg() {
+    // Export the network as an svg, return the raw svg file.
+    // Most of this code is from Justin Harrell's vis-svg https://github.com/justinharrell/vis-svg
+    let network = this.network;
+    var networkContainer = network.body.container;
+    try { // For whatever strange reason, if you enable iframe, it only works with Context and it only works with C2S otherwise...
+      var ctx = new C2S({width: networkContainer.clientWidth, height: networkContainer.clientHeight, embedImages: true});
+    } catch(e) {
+      var ctx = new Context({width: networkContainer.clientWidth, height: networkContainer.clientHeight, embedImages: true});
+    }
+
+    var canvasProto = network.canvas.__proto__;
+    var currentGetContext = canvasProto.getContext;
+    canvasProto.getContext = function()
+    {
+        return ctx;
+    }
+    var svgOptions = {
+        nodes: {
+            shapeProperties: {
+                interpolation: false //so images are not scaled svg will get full image
+            },
+            scaling: { label: { drawThreshold : 0} },
+            font:{color:'#000000'}
+        },
+        edges: {
+            scaling: { label: { drawThreshold : 0} }
+        }
+    };
+
+    network.setOptions(svgOptions);
+    network.redraw();
+    canvasProto.getContext = currentGetContext;
+    var svg = ctx.getSerializedSvg();
+    return svg;
   }
 };
 """
