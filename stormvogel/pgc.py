@@ -42,6 +42,7 @@ def valid_input(
     available_actions: Callable | None = None,
     observations: Callable | None = None,
     rates: Callable | None = None,
+    valuations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
 ):
@@ -117,6 +118,14 @@ def valid_input(
         if num_params != 1:
             raise ValueError(
                 f"The observations function must take exactly one argument (state), but it takes {num_params} arguments"
+            )
+
+    if valuations is not None:
+        sig = inspect.signature(valuations)
+        num_params = len(sig.parameters)
+        if num_params != 1:
+            raise ValueError(
+                f"The valuations function must take exactly one argument (state), but it takes {num_params} arguments"
             )
 
     # now we simulate the behaviour of the pgc model builder and provide the necessary errors
@@ -195,7 +204,7 @@ def valid_input(
                 f"The model you want te create has a very large amount of states (at least {max_size}), if you wish to proceed, set max_size to some larger number."
             )
 
-    # we check for the rewards when the function does not return a list object
+    # we check for the rewards when the function does not return a dict object
     # or the length is not always the same
     if rewards is not None:
         if supports_actions:
@@ -254,7 +263,7 @@ def valid_input(
                     f"On input {state}, the observations function does not return an integer"
                 )
 
-    # we check for the reates when it does not return a number
+    # we check for the rates when it does not return a number
     if rates is not None:
         for state in states_seen:
             r = rates(state)
@@ -278,6 +287,37 @@ def valid_input(
                     f"On input {state}, the labels function does not return a list. Make sure to change it to [{labellist}]"
                 )
 
+    # we check for the valuations when it does not return an integer, boolean or a float
+    # we also check if all states have a value for each variable
+    if valuations is not None:
+        initial_state_valuations = valuations(initial_state_pgc)
+        for state in states_seen:
+            valuation_list = valuations(state)
+            if valuation_list is None:
+                raise ValueError(
+                    f"On input {state}, the valuations function does not have a return value"
+                )
+
+            if not isinstance(valuation_list, dict):
+                raise ValueError(
+                    f"On input {state}, the valuations function does not return a dictionary. Make sure to change the format to [<variable>: <value>,...]"
+                )
+
+            if valuation_list.keys() != initial_state_valuations.keys():
+                raise RuntimeError(
+                    "Make sure that you have a value for each variable in each state"
+                )
+
+            for val in valuation_list.values():
+                if not (
+                    isinstance(val, int)
+                    or isinstance(val, bool)
+                    or isinstance(val, float)
+                ):
+                    raise ValueError(
+                        f"On input {state}, the dictionary that the valuations function returns contains a value {val} which is not of type int, float or"
+                    )
+
 
 def build_pgc(
     delta: Callable,
@@ -287,6 +327,7 @@ def build_pgc(
     available_actions: Callable | None = None,
     observations: Callable | None = None,
     rates: Callable | None = None,
+    valuations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 2000,
     check_validity: bool = True,
@@ -309,6 +350,7 @@ def build_pgc(
             available_actions,
             observations,
             rates,
+            valuations,
             modeltype,
             max_size,
         )
@@ -440,6 +482,12 @@ def build_pgc(
         for state in states_seen:
             s = model.get_states_with_label(str(state))[0]
             model.set_rate(s, rates(state))
+
+    # we add the valuations
+    if valuations is not None:
+        for state in states_seen:
+            s = model.get_states_with_label(str(state))[0]
+            s.valuations = valuations(state)
 
     # we add the labels
     if labels is not None:

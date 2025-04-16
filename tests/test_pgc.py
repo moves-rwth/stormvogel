@@ -204,70 +204,106 @@ def test_pgc_dtmc():
             case 6:
                 return [(p, pgc.State(s=2)), (1 - p, pgc.State(s=7, d=6))]
             case 7:
-                return [(1, pgc.State(s=7))]
+                return [(1, pgc.State(s=7, d=0))]
+
+    def valuations(s: pgc.State):
+        match s.s:
+            case 0:
+                return {"s": 0, "d": -1}
+            case 1:
+                return {"s": 1, "d": -1}
+            case 2:
+                return {"s": 2, "d": -1}
+            case 3:
+                return {"s": 3, "d": -1}
+            case 4:
+                return {"s": 4, "d": -1}
+            case 5:
+                return {"s": 5, "d": -1}
+            case 6:
+                return {"s": 6, "d": -1}
+            case 7:
+                match s.d:
+                    case 0:
+                        return {"s": 7, "d": 0}
+                    case 1:
+                        return {"s": 7, "d": 1}
+                    case 2:
+                        return {"s": 7, "d": 2}
+                    case 3:
+                        return {"s": 7, "d": 3}
+                    case 4:
+                        return {"s": 7, "d": 4}
+                    case 5:
+                        return {"s": 7, "d": 5}
+                    case 6:
+                        return {"s": 7, "d": 6}
 
     pgc_model = pgc.build_pgc(
         delta=delta,
         initial_state_pgc=initial_state,
         rewards=rewards,
         modeltype=model.ModelType.DTMC,
+        valuations=valuations,
     )
 
     # we build the model in the regular way:
     regular_model = model.new_dtmc()
-    regular_model.states[0].features = {"s": 0}
+    regular_model.states[0].valuations = {"s": 0}
+    init = regular_model.get_initial_state()
+    init.valuations = {"s": 0, "d": -1}
     regular_model.set_transitions(
-        regular_model.get_initial_state(),
+        init,
         [
-            (1 / 2, regular_model.new_state(features={"s": 1})),
-            (1 / 2, regular_model.new_state(features={"s": 2})),
+            (1 / 2, regular_model.new_state(valuations={"s": 1, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 2, "d": -1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(1),
         [
-            (1 / 2, regular_model.new_state(features={"s": 3})),
-            (1 / 2, regular_model.new_state(features={"s": 4})),
+            (1 / 2, regular_model.new_state(valuations={"s": 3, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 4, "d": -1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(2),
         [
-            (1 / 2, regular_model.new_state(features={"s": 5})),
-            (1 / 2, regular_model.new_state(features={"s": 6})),
+            (1 / 2, regular_model.new_state(valuations={"s": 5, "d": -1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 6, "d": -1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(3),
         [
             (1 / 2, regular_model.get_state_by_id(1)),
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 1})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 1})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(4),
         [
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 2})),
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 3})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 2})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 3})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(5),
         [
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 4})),
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 5})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 4})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 5})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(6),
         [
             (1 / 2, regular_model.get_state_by_id(2)),
-            (1 / 2, regular_model.new_state(features={"s": 7, "d": 6})),
+            (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 6})),
         ],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(7),
-        [(1, regular_model.new_state(features={"s": 7}))],
+        [(1, regular_model.new_state(valuations={"s": 7, "d": 0}))],
     )
     regular_model.set_transitions(
         regular_model.get_state_by_id(8), [(1, regular_model.get_state_by_id(13))]
