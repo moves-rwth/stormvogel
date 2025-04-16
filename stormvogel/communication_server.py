@@ -68,6 +68,7 @@ function return_id_result(url, id, data) {
     }
 """
         ipd.display(ipd.HTML(f"<script>{js}</script>"))
+        ipd.display(ipd.Javascript(js))
         # print(js)
 
         class InnerServer(http.server.BaseHTTPRequestHandler):

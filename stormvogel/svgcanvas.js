@@ -657,7 +657,8 @@ var Context = (function () {
         if (currentElement.nodeName === "path") {
             currentElement.setAttribute("d", this.__currentDefaultPath);
         } else {
-            console.error("Attempted to apply path command to node", currentElement.nodeName);
+            //SVG-PATCH, set this to log in order to continue.
+            console.log("Attempted to apply path command to node", currentElement.nodeName);
         }
     };
 

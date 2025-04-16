@@ -363,7 +363,9 @@ class Visualization(stormvogel.displayable.Displayable):
 
         elif output_format == "pdf":
             svg = self.generate_svg()
-            cairosvg.svg2pdf(bytestring=svg.encode("utf-8"), write_to="output.pdf")
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"), write_to=filename_base.name + ".pdf"
+            )
 
         elif output_format == "latex":
             svg = self.generate_svg()
@@ -378,18 +380,16 @@ class Visualization(stormvogel.displayable.Displayable):
             )
 
             # Create the LaTeX file
-            latex_content = f"""
-            \\documentclass{{article}}
-            \\usepackage{{graphicx}}
-            \\begin{{document}}
-            \\begin{{figure}}[h!]
-            \\centering
-            \\includegraphics[width=\\textwidth]{{{pdf_filename.name}}}
-            \\caption{{Generated using Stormvogel. TODO insert citing instructions}}
-            \\end{{figure}}
-            \\end{{document}}
-            """
-
+            latex_content = f"""\\documentclass{{article}}
+\\usepackage{{graphicx}}
+\\begin{{document}}
+\\begin{{figure}}[h!]
+\\centering
+\\includegraphics[width=\\textwidth]{{{pdf_filename.name}}}
+\\caption{{Generated using Stormvogel. TODO insert citing instructions}}
+\\end{{figure}}
+\\end{{document}}
+"""
             # Write the LaTeX code to a .tex file
             (export_folder / filename_base.with_suffix(".tex")).write_text(
                 latex_content, encoding="utf-8"
