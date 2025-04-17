@@ -3,6 +3,8 @@ import IPython.display as ipd
 
 
 class Displayable:
+    """Abstract class for displaying something."""
+
     def __init__(
         self,
         output: widgets.Output | None = None,

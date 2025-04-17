@@ -3,16 +3,17 @@
 # Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
 # If you remove a with output: statement, everything might just break, be prepared.
 
-from time import sleep
-from typing import Tuple
-import warnings
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
 import stormvogel.simulator
-import stormvogel.visjs
+import stormvogel.network
 import stormvogel.displayable
 
+import pathlib
+from time import sleep
+from typing import Tuple
+import warnings
 import math
 import fractions
 import ipywidgets as widgets
@@ -20,6 +21,7 @@ import IPython.display as ipd
 import random
 import string
 import logging
+import cairosvg
 
 
 def und(x: str) -> str:
@@ -38,7 +40,7 @@ def random_color() -> str:
 
 
 class Visualization(stormvogel.displayable.Displayable):
-    """Handles visualization of a Model using a Network from stormvogel.visjs."""
+    """Handles visualization of a Model using a Network from stormvogel.network."""
 
     ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
@@ -47,45 +49,43 @@ class Visualization(stormvogel.displayable.Displayable):
     def __init__(
         self,
         model: stormvogel.model.Model,
-        name: str | None = None,
         result: stormvogel.result.Result | None = None,
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         output: widgets.Output | None = None,
-        do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
-        do_init_server: bool = True,
         use_iframe: bool = False,
-        local_visjs: bool = True,
+        do_init_server: bool = True,
+        do_display: bool = True,
     ) -> None:
-        """Create visualization of a Model using a pyvis Network
+        """Create and show a visualization of a Model using a visjs Network
         Args:
             model (Model): The stormvogel model to be displayed.
-            name (str, optional): Internally used name. Will be randomly generated if left as None.
-            result (Result, optional): Result corresponding to the model.
-            scheduler(Scheduler, optional): Scheduler. The scheduled states can be given a distinct layout.
-                If not set, then the scheduler from the result will be used.
-            layout (Layout, optional): Layout used for the visualization.
-            separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
-            positions (dict[int, dict[str, int]] | None): A dictionary from state ids to positions.
-                Determines where states should be placed in the visualization. Overrides saved positions in a loaded layout.
-                Example: {1: {"x":5, "y":10}, 2: ....}
-            do_display (bool): Set to true iff you want the Visualization to display. Defaults to True.
-            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
-            do_init_server (bool): Enable if you would like to start the server which is required for some visualization features. Defaults to True.
+            result (Result, optional): A result associatied with the model.
+                The results are displayed as numbers on a state. Enable the layout editor for options.
+                If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
+            scheduler (Scheduler, optional): The scheduled actions will have a different color etc. based on the layout
+                If both result and scheduler are set, then scheduler takes precedence.
+            layout (Layout): Layout used for the visualization.
+            show_editor (bool): Show an interactive layout editor.
+            use_iframe (bool): Wrap the generated html inside of an IFrame.
+                In some environments, the visualization works better with this enabled.
+            output (widgets.Output): The output widget in which the network is rendered.
+                Whether this widget is also displayed automatically depends on do_display.
+            debug_output (widgets.Output): Output widget that can be used to debug interactive features.
+            do_init_server (bool): Initialize a local server that is used for communication between Javascript and Python.
+                If this is set to False, then exporting network node positions and svg/pdf/latex is impossible.
+            do_display (bool): The Visualization displays on its own iff this is enabled.
+                This option is useful for situations where you want to manage the displaying externally.
+        Returns: Visualization object.
         """
         super().__init__(output, do_display, debug_output)
-        # Having two visualizations with the same name might break some interactive html stuff. This is why we add a random word to it.
-        if name is None:
-            self.name: str = random_word(10)
-        else:
-            self.name: str = name + random_word(10)
+        self.name: str = random_word(10)
         self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
-        self.local_visjs: bool = local_visjs
-        # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
+        # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
             if self.result is not None:
@@ -108,7 +108,7 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def __create_nt(self) -> None:
         """Reload the node positions and create the network."""
-        self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
+        self.nt: stormvogel.network.Network = stormvogel.network.Network(
             name=self.name,
             width=self.layout.layout["misc"]["width"],
             height=self.layout.layout["misc"]["height"],
@@ -318,11 +318,83 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def generate_html(self) -> str:
         """Get HTML code that can be used to export this visualization."""
-        return self.nt.generate_html() if self.nt is not None else ""
+        return self.nt.generate_html()
 
-    def save_html(self, name: str) -> None:
-        with open(name + ".html", "w") as f:
-            f.write(self.generate_html())
+    def generate_iframe(self) -> str:
+        return self.nt.generate_iframe()
+
+    def generate_svg(self) -> str:
+        return self.nt.generate_svg()
+
+    def export(self, output_format: str, filename: str = "export") -> None:
+        """
+        Export the visualization to your preferred output format.
+        The appropriate file extension will be added automatically.
+
+        Parameters:
+            output_format (str): Desired export format.
+            filename (str): Base name for the exported file.
+
+        Supported output formats (not case-sensitive):
+
+            "HTML"    → An interactive .html file (e.g., draggable nodes)
+            "IFrame"  → Exports as an <iframe> wrapped HTML in a .html file
+            "PDF"     → Exports to .pdf (via conversion from SVG)
+            "SVG"     → Exports to .svg vector image
+        """
+        output_format = output_format.lower()
+        filename_base = pathlib.Path(filename).with_suffix(
+            ""
+        )  # remove extension if present
+
+        if output_format == "html":
+            html = self.generate_html()
+            (filename_base.with_suffix(".html")).write_text(html, encoding="utf-8")
+
+        elif output_format == "iframe":
+            iframe = self.generate_iframe()
+            (filename_base.with_suffix(".html")).write_text(iframe, encoding="utf-8")
+
+        elif output_format == "svg":
+            svg = self.generate_svg()
+            (filename_base.with_suffix(".svg")).write_text(svg, encoding="utf-8")
+
+        elif output_format == "pdf":
+            svg = self.generate_svg()
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"), write_to=filename_base.name + ".pdf"
+            )
+
+        elif output_format == "latex":
+            svg = self.generate_svg()
+            # Create the 'export' folder if it doesn't exist
+            export_folder = pathlib.Path(filename_base)
+            export_folder.mkdir(parents=True, exist_ok=True)
+            pdf_filename = filename_base.with_suffix(".pdf")
+            # Convert SVG to PDF
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"),
+                write_to=str(export_folder / pdf_filename),
+            )
+
+            # Create the LaTeX file
+            latex_content = f"""\\documentclass{{article}}
+\\usepackage{{graphicx}}
+\\begin{{document}}
+\\begin{{figure}}[h!]
+\\centering
+\\includegraphics[width=\\textwidth]{{{pdf_filename.name}}}
+\\caption{{Generated using Stormvogel. TODO insert citing instructions}}
+\\end{{figure}}
+\\end{{document}}
+"""
+            # Write the LaTeX code to a .tex file
+            (export_folder / filename_base.with_suffix(".tex")).write_text(
+                latex_content, encoding="utf-8"
+            )
+
+        else:
+            raise RuntimeError(f"Export format not supported: {output_format}")
 
     def get_positions(self) -> dict:
         """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously).
@@ -377,7 +449,7 @@ class Visualization(stormvogel.displayable.Displayable):
         decomp: list[Tuple[set[int], set[Tuple[int, stormvogel.model.Action]]]],
         colors: list[str] | None = None,
     ):
-        """Highlight a set of actions in the model by changing their color.
+        """Highlight a set of tuples of (states and actions) in the model by changing their color.
         Args:
             decomp: A list of tuples (states, actions)
             colors (optional): A list of colors for the decompossitions. Random colors are picked by default."""

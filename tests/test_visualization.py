@@ -14,7 +14,7 @@ def boilerplate(mocker):
         set_options = mocker.stub(name="set_options_stub")
         show = mocker.stub(name="show_stub")
 
-    mocker.patch("stormvogel.visjs.Network", MockNetwork)
+    mocker.patch("stormvogel.network.Network", MockNetwork)
     return MockNetwork
 
 
