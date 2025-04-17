@@ -7,7 +7,7 @@ import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
 import stormvogel.simulator
-import stormvogel.visjs
+import stormvogel.network
 import stormvogel.displayable
 
 import pathlib
@@ -40,7 +40,7 @@ def random_color() -> str:
 
 
 class Visualization(stormvogel.displayable.Displayable):
-    """Handles visualization of a Model using a Network from stormvogel.visjs."""
+    """Handles visualization of a Model using a Network from stormvogel.network."""
 
     ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
@@ -110,7 +110,7 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def __create_nt(self) -> None:
         """Reload the node positions and create the network."""
-        self.nt: stormvogel.visjs.Network = stormvogel.visjs.Network(
+        self.nt: stormvogel.network.Network = stormvogel.network.Network(
             name=self.name,
             width=self.layout.layout["misc"]["width"],
             height=self.layout.layout["misc"]["height"],

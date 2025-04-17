@@ -1,4 +1,4 @@
-"""Javascript code generation functions, used in visjs.py. Depends on having vis-network.min.js in the stormvogel foder."""
+"""Javascript code generation functions, used in network.py. Depends on having vis-network.min.js in the stormvogel foder."""
 
 from stormvogel.layout import PACKAGE_ROOT_DIR
 
