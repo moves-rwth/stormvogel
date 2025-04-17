@@ -3,6 +3,8 @@ from svgpathtools import svg2paths2
 import io
 import re
 
+"""Used to autoscale an svg to remove unused space from the image."""
+
 
 def remove_invalid_paths(svg_string):
     # Remove <path> elements that have no 'd' attribute

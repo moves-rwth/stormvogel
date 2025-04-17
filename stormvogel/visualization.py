@@ -49,45 +49,43 @@ class Visualization(stormvogel.displayable.Displayable):
     def __init__(
         self,
         model: stormvogel.model.Model,
-        name: str | None = None,
         result: stormvogel.result.Result | None = None,
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         output: widgets.Output | None = None,
-        do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
-        do_init_server: bool = True,
         use_iframe: bool = False,
-        local_visjs: bool = True,
+        do_init_server: bool = True,
+        do_display: bool = True,
     ) -> None:
-        """Create visualization of a Model using a pyvis Network
+        """Create and show a visualization of a Model using a visjs Network
         Args:
             model (Model): The stormvogel model to be displayed.
-            name (str, optional): Internally used name. Will be randomly generated if left as None.
-            result (Result, optional): Result corresponding to the model.
-            scheduler(Scheduler, optional): Scheduler. The scheduled states can be given a distinct layout.
-                If not set, then the scheduler from the result will be used.
-            layout (Layout, optional): Layout used for the visualization.
-            separate_labels (list[str], optional): Labels that should be edited separately according to the layout.
-            positions (dict[int, dict[str, int]] | None): A dictionary from state ids to positions.
-                Determines where states should be placed in the visualization. Overrides saved positions in a loaded layout.
-                Example: {1: {"x":5, "y":10}, 2: ....}
-            do_display (bool): Set to true iff you want the Visualization to display. Defaults to True.
-            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
-            do_init_server (bool): Enable if you would like to start the server which is required for some visualization features. Defaults to True.
+            result (Result, optional): A result associatied with the model.
+                The results are displayed as numbers on a state. Enable the layout editor for options.
+                If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
+            scheduler (Scheduler, optional): The scheduled actions will have a different color etc. based on the layout
+                If both result and scheduler are set, then scheduler takes precedence.
+            layout (Layout): Layout used for the visualization.
+            show_editor (bool): Show an interactive layout editor.
+            use_iframe (bool): Wrap the generated html inside of an IFrame.
+                In some environments, the visualization works better with this enabled.
+            output (widgets.Output): The output widget in which the network is rendered.
+                Whether this widget is also displayed automatically depends on do_display.
+            debug_output (widgets.Output): Output widget that can be used to debug interactive features.
+            do_init_server (bool): Initialize a local server that is used for communication between Javascript and Python.
+                If this is set to False, then exporting network node positions and svg/pdf/latex is impossible.
+            do_display (bool): The Visualization displays on its own iff this is enabled.
+                This option is useful for situations where you want to manage the displaying externally.
+        Returns: Visualization object.
         """
         super().__init__(output, do_display, debug_output)
-        # Having two visualizations with the same name might break some interactive html stuff. This is why we add a random word to it.
-        if name is None:
-            self.name: str = random_word(10)
-        else:
-            self.name: str = name + random_word(10)
+        self.name: str = random_word(10)
         self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
-        self.local_visjs: bool = local_visjs
-        # If a scheduler was not set explictely, but a result was set, then take the scheduler from the results.
+        # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
             if self.result is not None:
@@ -451,7 +449,7 @@ class Visualization(stormvogel.displayable.Displayable):
         decomp: list[Tuple[set[int], set[Tuple[int, stormvogel.model.Action]]]],
         colors: list[str] | None = None,
     ):
-        """Highlight a set of actions in the model by changing their color.
+        """Highlight a set of tuples of (states and actions) in the model by changing their color.
         Args:
             decomp: A list of tuples (states, actions)
             colors (optional): A list of colors for the decompossitions. Random colors are picked by default."""

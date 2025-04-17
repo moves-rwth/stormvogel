@@ -4,7 +4,6 @@ import stormvogel.model
 import stormvogel.layout
 import stormvogel.visualization
 import stormvogel.layout_editor
-import stormvogel.communication_server
 import stormvogel.result
 
 import ipywidgets as widgets
@@ -32,6 +31,7 @@ def show(
             If both result and scheduler are set, then scheduler takes precedence.
         layout (Layout): Layout used for the visualization.
         show_editor (bool): Show an interactive layout editor.
+        debug_output (widgets.Output): Output widget that can be used to debug interactive features.
         use_iframe(bool): Wrap the generated html inside of an IFrame.
             In some environments, the visualization works better with this enabled.
         do_init_server(bool): Initialize a local server that is used for communication between Javascript and Python.
