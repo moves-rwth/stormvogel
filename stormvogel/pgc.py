@@ -26,7 +26,7 @@ class State:
         return f"State({self.__dict__})"
 
     def __hash__(self):
-        return hash(self.__dict__)
+        return hash(str(self.__dict__))
 
     def __eq__(self, other):
         if isinstance(other, State):
@@ -357,12 +357,13 @@ def build_pgc(
 
     # we create the model with the given type and initial state
     model = stormvogel.model.new_model(modeltype=modeltype, create_initial_state=False)
-    model.new_state(labels=["init", str(initial_state_pgc)])
+    init = model.new_state(labels=["init"])
 
     # we continue calling delta and adding new states until no states are
     # left to be checked
     states_seen = []
     states_to_be_visited = [initial_state_pgc]
+    state_lookup = {initial_state_pgc: init}
     while len(states_to_be_visited) > 0:
         state = states_to_be_visited[0]
         states_to_be_visited.remove(state)
@@ -398,15 +399,15 @@ def build_pgc(
                 # we add all the newly found transitions to the model
                 branch = []
                 for tuple in tuples:
-                    if tuple[1] not in states_seen:
-                        states_seen.append(tuple[1])
-                        new_state = model.new_state(labels=str(tuple[1]))
+                    key = tuple[1]
+                    if key not in states_seen:
+                        states_seen.append(key)
+                        new_state = model.new_state()
+                        state_lookup[key] = new_state
                         branch.append((tuple[0], new_state))
-                        states_to_be_visited.append(tuple[1])
+                        states_to_be_visited.append(key)
                     else:
-                        branch.append(
-                            (tuple[0], model.get_states_with_label(str(tuple[1]))[0])
-                        )
+                        branch.append((tuple[0], state_lookup[key]))
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
@@ -414,21 +415,20 @@ def build_pgc(
             # we add all the newly found transitions to the model
             branch = []
             for tuple in tuples:
-                if tuple[1] not in states_seen:
-                    states_seen.append(tuple[1])
-                    new_state = model.new_state(labels=str(tuple[1]))
-
+                key = tuple[1]
+                if key not in states_seen:
+                    states_seen.append(key)
+                    new_state = model.new_state()
+                    state_lookup[key] = new_state
                     branch.append((tuple[0], new_state))
-                    states_to_be_visited.append(tuple[1])
+                    states_to_be_visited.append(key)
                 else:
-                    branch.append(
-                        (tuple[0], model.get_states_with_label(str(tuple[1]))[0])
-                    )
+                    branch.append((tuple[0], state_lookup[key]))
                 if branch != []:
                     transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                         branch
                     )
-        s = model.get_states_with_label(str(state))[0]
+        s = state_lookup[state]
         assert s is not None
         model.add_transitions(
             s,
@@ -449,7 +449,7 @@ def build_pgc(
                 assert available_actions is not None
                 for action in available_actions(state):
                     rewarddict = rewards(state, action)
-                    s = model.get_states_with_label(str(state))[0]
+                    s = state_lookup[state]
                     assert s is not None
                     for index, reward in enumerate(rewarddict.items()):
                         a = model.get_action_with_labels(frozenset(action.labels))
@@ -466,7 +466,7 @@ def build_pgc(
 
             for state in states_seen:
                 rewarddict = rewards(state)
-                s = model.get_states_with_label(str(state))[0]
+                s = state_lookup[state]
                 assert s is not None
                 for index, reward in enumerate(rewarddict.items()):
                     model.rewards[index].set_state_reward(s, reward[1])
@@ -474,38 +474,27 @@ def build_pgc(
     # we add the observations
     if observations is not None:
         for state in states_seen:
-            s = model.get_states_with_label(str(state))[0]
+            s = state_lookup[state]
             s.set_observation(observations(state))
 
     # we add the exit rates
     if rates is not None:
         for state in states_seen:
-            s = model.get_states_with_label(str(state))[0]
+            s = state_lookup[state]
             model.set_rate(s, rates(state))
 
     # we add the valuations
     if valuations is not None:
         for state in states_seen:
-            s = model.get_states_with_label(str(state))[0]
+            s = state_lookup[state]
             s.valuations = valuations(state)
 
     # we add the labels
     if labels is not None:
         for state in states_seen:
-            s = model.get_states_with_label(str(state))[0]
-            if "init" in s.labels:
-                s.labels = ["init"]
-            else:
-                s.labels = []
+            s = state_lookup[state]
             assert s is not None
             for label in labels(state):
                 s.add_label(label)
-    else:
-        for state in states_seen:
-            s = model.get_states_with_label(str(state))[0]
-            if "init" in s.labels:
-                s.labels = ["init"]
-            else:
-                s.labels = []
 
     return model
