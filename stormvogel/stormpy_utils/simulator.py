@@ -1,5 +1,5 @@
 import stormvogel.result
-import stormvogel.mapping
+import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.model
 from typing import Callable
 import random
@@ -158,7 +158,7 @@ def simulate_path(
     assert stormpy is not None
 
     # we initialize the simulator
-    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+    stormpy_model = mapping.stormvogel_to_stormpy(model)
     if seed:
         simulator = stormpy.simulator.create_simulator(stormpy_model, seed)
     else:
@@ -230,7 +230,7 @@ def simulate(
     assert stormpy is not None
 
     # we initialize the simulator
-    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+    stormpy_model = mapping.stormvogel_to_stormpy(model)
     assert stormpy_model is not None
     if seed:
         simulator = stormpy.simulator.create_simulator(stormpy_model, seed)

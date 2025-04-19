@@ -9,7 +9,7 @@ import warnings
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
-import stormvogel.simulator
+import stormvogel.stormpy_utils.simulator as simulator
 import stormvogel.visjs
 import stormvogel.displayable
 
@@ -330,7 +330,7 @@ class Visualization(stormvogel.displayable.Displayable):
         return self.nt.get_positions() if self.nt is not None else {}
 
     def __to_state_action_sequence(
-        self, path: stormvogel.simulator.Path
+        self, path: simulator.Path
     ) -> list[stormvogel.model.Action | stormvogel.model.State]:
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
             self.model.get_initial_state()
@@ -398,14 +398,14 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def highlight_path(
         self,
-        path: stormvogel.simulator.Path,
+        path: simulator.Path,
         color: str,
         delay: float = 1,
         clear: bool = True,
     ) -> None:
         """Highlight the path that is provided as an argument in the model.
         Args:
-            path (stormvogel.simulator.Path): The path to highlight.
+            path (simulator.Path): The path to highlight.
             color (str | None): The color that the highlighted states should get (in HTML color standard).
                 Set to None, in order to clear existing highlights on this path.
             delay (float): If not None, there will be a pause of a specified time before highlighting the next state in the path.

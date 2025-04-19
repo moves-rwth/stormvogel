@@ -94,7 +94,7 @@ class State:
         if name is None:
             if str(id) in used_names:
                 raise RuntimeError(
-                    "You need to choose a state name because of a conflict caused by removal of states."
+                    "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
             self.name = str(id)
         else:

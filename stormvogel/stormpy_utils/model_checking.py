@@ -1,4 +1,4 @@
-import stormvogel.mapping
+import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.result
 import stormvogel.model
 import stormvogel.property_builder
@@ -22,7 +22,7 @@ def model_checking(
     if prop:
         prop = stormpy.parse_properties(prop)
 
-        stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(model)
+        stormpy_model = mapping.stormvogel_to_stormpy(model)
 
         assert prop is not None
         if model.supports_actions() and scheduler:
@@ -34,7 +34,7 @@ def model_checking(
 
         # to get the correct action labels, we need to convert the model back to stormvogel instead of
         # using the initial one for now. (otherwise schedulers won't work)
-        stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
+        stormvogel_model = mapping.stormpy_to_stormvogel(stormpy_model)
 
         assert stormvogel_model is not None
 

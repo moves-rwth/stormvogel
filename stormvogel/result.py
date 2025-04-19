@@ -1,4 +1,4 @@
-import stormvogel.mapping
+import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.model
 
 try:
@@ -99,10 +99,10 @@ class Result:
             self.model.get_type() == stormvogel.model.ModelType.MDP
             and self.scheduler is not None
         ):
-            stormpy_mdp = stormvogel.mapping.stormvogel_to_stormpy(self.model)
+            stormpy_mdp = mapping.stormvogel_to_stormpy(self.model)
             if stormpy_mdp is not None:
                 stormpy_dtmc = stormpy_mdp.apply_scheduler(self.stormpy_scheduler)
-                stormvogel_dtmc = stormvogel.mapping.stormpy_to_stormvogel(stormpy_dtmc)
+                stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
                 return stormvogel_dtmc
             else:
                 raise RuntimeError("Something went wrong")
