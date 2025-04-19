@@ -21,12 +21,14 @@ class State:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-        
+
     def __repr__(self):
         return f"State({self.__dict__})"
 
     def __hash__(self):
-        return hash(tuple(sorted(self.__dict__.items()))) #slow if state has a lot of values
+        return hash(
+            tuple(sorted(self.__dict__.items()))
+        )  # might be slow if state has a lot of values
 
     def __eq__(self, other):
         if isinstance(other, State):
@@ -365,7 +367,7 @@ def build_pgc(
     # left to be checked
     states_seen = []
     states_to_be_visited = [initial_state_pgc]
-    state_lookup = {initial_state_pgc:init}
+    state_lookup = {initial_state_pgc: init}
     while len(states_to_be_visited) > 0:
         state = states_to_be_visited[0]
         states_to_be_visited.remove(state)
@@ -405,13 +407,11 @@ def build_pgc(
                     if key not in states_seen:
                         states_seen.append(key)
                         new_state = model.new_state()
-                        state_lookup[key] = new_state 
+                        state_lookup[key] = new_state
                         branch.append((tuple[0], new_state))
                         states_to_be_visited.append(key)
                     else:
-                        branch.append(
-                            (tuple[0], state_lookup[key])
-                        )
+                        branch.append((tuple[0], state_lookup[key]))
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
@@ -427,9 +427,7 @@ def build_pgc(
                     branch.append((tuple[0], new_state))
                     states_to_be_visited.append(key)
                 else:
-                    branch.append(
-                        (tuple[0], state_lookup[key])
-                    )
+                    branch.append((tuple[0], state_lookup[key]))
                 if branch != []:
                     transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                         branch
