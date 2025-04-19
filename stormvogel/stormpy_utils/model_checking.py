@@ -1,5 +1,5 @@
 import stormvogel.stormpy_utils.mapping as mapping
-import stormvogel.result
+import stormvogel.stormpy_utils.convert_results as convert_results
 import stormvogel.model
 import stormvogel.property_builder
 
@@ -38,7 +38,7 @@ def model_checking(
 
         assert stormvogel_model is not None
 
-        stormvogel_result = stormvogel.result.convert_model_checking_result(
+        stormvogel_result = convert_results.convert_model_checking_result(
             stormvogel_model, stormpy_result
         )
 

@@ -1,10 +1,4 @@
-import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.model
-
-try:
-    import stormpy
-except ImportError:
-    stormpy = None
 
 
 class Scheduler:
@@ -70,16 +64,12 @@ class Result:
         self,
         model: stormvogel.model.Model,
         values: dict[int, stormvogel.model.Number],
-        scheduler: Scheduler | stormpy.storage.Scheduler | None = None,
+        scheduler: Scheduler | None = None,
     ):
         self.model = model
         self.values = values
 
-        assert stormpy is not None
-        if isinstance(scheduler, stormpy.storage.Scheduler):
-            self.scheduler = convert_scheduler_to_stormvogel(self.model, scheduler)
-            self.stormpy_scheduler = scheduler
-        elif isinstance(scheduler, Scheduler):
+        if isinstance(scheduler, Scheduler):
             self.scheduler = scheduler
         else:
             self.scheduler = None
@@ -92,25 +82,6 @@ class Result:
             return self.values[state.id]
         else:
             raise RuntimeError("This state is not a part of the model")
-
-    def generate_induced_dtmc(self) -> stormvogel.model.Model | None:
-        """Given an mdp that has a scheduler, this function creates and returns the scheduler induced markov chain"""
-        if (
-            self.model.get_type() == stormvogel.model.ModelType.MDP
-            and self.scheduler is not None
-        ):
-            stormpy_mdp = mapping.stormvogel_to_stormpy(self.model)
-            if stormpy_mdp is not None:
-                stormpy_dtmc = stormpy_mdp.apply_scheduler(self.stormpy_scheduler)
-                stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
-                return stormvogel_dtmc
-            else:
-                raise RuntimeError("Something went wrong")
-        else:
-            if self.scheduler is not None:
-                raise RuntimeError("This model is not an mdp")
-            else:
-                raise RuntimeError("This result does not have a scheduler")
 
     def __str__(self) -> str:
         add = ""
@@ -129,65 +100,3 @@ class Result:
         if isinstance(other, Result):
             return self.values == other.values and self.scheduler == other.scheduler
         return False
-
-
-def convert_scheduler_to_stormvogel(
-    model: stormvogel.model.Model, stormpy_scheduler: stormpy.storage.Scheduler
-):
-    """Converts a stormpy scheduler to a stormvogel scheduler"""
-    taken_actions = {}
-    for state in model.states.values():
-        av_act = state.available_actions()
-        choice = stormpy_scheduler.get_choice(state.id)
-        action_index = choice.get_deterministic_choice()
-        taken_actions[state.id] = av_act[action_index]
-
-    return Scheduler(model, taken_actions)
-
-
-def convert_model_checking_result(
-    model: stormvogel.model.Model,
-    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
-    | stormpy.core.ExplicitQualitativeCheckResult
-    | stormpy.core.ExplicitParametricQuantitativeCheckResult,
-    with_scheduler: bool = True,
-) -> Result | None:
-    """
-    Takes a model checking result from stormpy and its associated model and converts it to a stormvogel representation
-    """
-    assert stormpy is not None
-
-    if (
-        type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult
-        or type(stormpy_result)
-        == stormpy.core.ExplicitParametricQuantitativeCheckResult
-    ):
-        if stormpy_result.has_scheduler and with_scheduler:
-            stormvogel_result = Result(
-                model,
-                {
-                    index: value
-                    for (index, value) in enumerate(stormpy_result.get_values())
-                },
-                scheduler=stormpy_result.scheduler,
-            )
-        else:
-            stormvogel_result = Result(
-                model,
-                {
-                    index: value
-                    for (index, value) in enumerate(stormpy_result.get_values())
-                },
-            )
-    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
-        values = {i: stormpy_result.at(i) for i in range(0, len(model.states))}
-        if stormpy_result.has_scheduler and with_scheduler:
-            stormvogel_result = Result(
-                model, values, scheduler=stormpy_result.scheduler
-            )
-        else:
-            stormvogel_result = Result(model, values)
-    else:
-        raise RuntimeError("Unsupported result type")
-
-    return stormvogel_result
