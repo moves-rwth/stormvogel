@@ -26,9 +26,7 @@ class State:
         return f"State({self.__dict__})"
 
     def __hash__(self):
-        return hash(
-            tuple(sorted(self.__dict__.items()))
-        )  # might be slow if state has a lot of values
+        return hash(str(self.__dict__)) 
 
     def __eq__(self, other):
         if isinstance(other, State):
@@ -202,8 +200,6 @@ def valid_input(
 
         # if at some point we discovered more than max_size states, we complain
         if len(states_seen) > max_size:
-            print("nu zit ik hier")
-            print(len(states_seen))
             raise RuntimeError(
                 f"The model you want te create has a very large amount of states (at least {max_size}), if you wish to proceed, set max_size to some larger number."
             )
