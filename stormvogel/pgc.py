@@ -26,7 +26,7 @@ class State:
         return f"State({self.__dict__})"
 
     def __hash__(self):
-        return hash(str(self.__dict__)) 
+        return hash(str(self.__dict__))
 
     def __eq__(self, other):
         if isinstance(other, State):
