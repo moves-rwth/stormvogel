@@ -15,13 +15,7 @@ def generate_init_js(nodes_js: str, edges_js: str, options_js: str, name: str) -
 
 # An html template on which a Network is based.
 def generate_html(
-    nodes_js: str,
-    edges_js: str,
-    options_js: str,
-    name: str,
-    width: int,
-    height: int,
-    local: bool,  # TODO depricated, remove.
+    nodes_js: str, edges_js: str, options_js: str, name: str, width: int, height: int
 ):
     """Generate HTML that renders the network.
     You should be able to locate the NetworkWrapper object as nw_{name},

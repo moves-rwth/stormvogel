@@ -118,7 +118,6 @@ class Visualization(stormvogel.displayable.Displayable):
             do_init_server=self.do_init_server,
             positions=self.layout.layout["positions"],
             use_iframe=self.use_iframe,
-            local_visjs=self.local_visjs,
         )
 
     def show(self) -> None:

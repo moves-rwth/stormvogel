@@ -30,7 +30,6 @@ class Network(stormvogel.displayable.Displayable):
         do_init_server: bool = True,
         positions: dict[str, dict[str, int]] | None = None,
         use_iframe: bool = False,
-        local_visjs: bool = True,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -68,7 +67,6 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = {}
         else:
             self.positions = positions
-        self.local_visjs: bool = local_visjs
 
     def enable_exploration_mode(self, initial_node_id: int):
         """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
@@ -147,7 +145,6 @@ class Network(stormvogel.displayable.Displayable):
             self.name,
             self.width,
             self.height,
-            self.local_visjs,
         )
 
     def generate_iframe(self) -> str:
