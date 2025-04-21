@@ -169,3 +169,9 @@ doc/_build
 
 # Exported gymnasium videos
 **/video/**
+
+# Script that opens two virtual python environments at once
+start.sh
+
+# Script for running nbconvert on all notebooks
+nbconvert.sh
