@@ -944,7 +944,7 @@ def test_convert_model_checker_results_mdp_qualitative():
     ]
 
 
-"""
+
 def test_induced_dtmc():
     assert stormpy is not None
     path = stormpy.examples.files.prism_mdp_coin_2_2
@@ -964,9 +964,7 @@ def test_induced_dtmc():
         stormvogel_model, result
     )
     assert stormvogel_result is not None
-    induced_dtmc = convert_results.generate_induced_dtmc()
+    induced_dtmc = convert_results.generate_induced_dtmc(stormvogel_model, stormvogel_result.scheduler)
 
     assert induced_dtmc
 
-    # TODO better test (where we also precisely know the induced dtmc)
-"""

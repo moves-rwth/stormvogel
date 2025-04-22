@@ -8,24 +8,32 @@ except ImportError:
     stormpy = None
 
 
-def generate_induced_dtmc(self) -> stormvogel.model.Model | None:
+
+def generate_induced_dtmc(model: stormvogel.model.Model, scheduler: stormvogel.result.Scheduler) -> stormvogel.model.Model | None:
     """Given an mdp that has a scheduler, this function creates and returns the scheduler induced markov chain"""
     if (
-        self.model.get_type() == stormvogel.model.ModelType.MDP
-        and self.scheduler is not None
+        model.get_type() == stormvogel.model.ModelType.MDP
+        and scheduler is not None
     ):
-        stormpy_mdp = mapping.stormvogel_to_stormpy(self.model)
-        if stormpy_mdp is not None:
-            stormpy_dtmc = stormpy_mdp.apply_scheduler(self.stormpy_scheduler)
-            stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
-            return stormvogel_dtmc
-        else:
-            raise RuntimeError("Something went wrong")
+        stormpy_mdp = mapping.stormvogel_to_stormpy(model)
+        stormpy_scheduler = convert_scheduler_to_stormpy(model, scheduler)
+        stormpy_dtmc = stormpy_mdp.apply_scheduler(stormpy_scheduler)
+        stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
+        return stormvogel_dtmc
     else:
         if self.scheduler is not None:
             raise RuntimeError("This model is not an mdp")
         else:
             raise RuntimeError("This result does not have a scheduler")
+
+
+def convert_scheduler_to_stormpy(model: stormvogel.model.Model, scheduler: stormvogel.result.Scheduler):
+    #print(dir(stormpy.storage.Scheduler))
+
+    stormpy_model = mapping.stormvogel_to_stormpy(model)
+    stormpy_scheduler = stormpy.storage.Scheduler(stormpy_model) #this does not work yet because there is no constructor
+
+    return stormpy_scheduler
 
 
 def convert_scheduler_to_stormvogel(
