@@ -377,7 +377,7 @@ class RewardModel:
             self.state_action_pair = None
 
     def set_from_rewards_vector(self, vector: list[Number]) -> None:
-        """Set the rewards of this model according to a stormpy rewards vector."""
+        """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
         for s in self.model.states.values():
@@ -438,7 +438,7 @@ class RewardModel:
             )
 
     def reward_vector(self) -> list[Number]:
-        """Return the rewards in a stormpy format."""
+        """Return the rewards in a (stormpy) vector format."""
         vector = []
         for s in self.model.states.values():
             for a in s.available_actions():
@@ -452,7 +452,7 @@ class RewardModel:
 
     def set_unset_rewards(self, value: Number):
         """Fills up rewards that were not set yet with the specified value.
-        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
+        Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
         for s in self.model.states.values():
             for a in s.available_actions():
                 if (s.id, a) not in self.rewards:

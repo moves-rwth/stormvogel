@@ -31,4 +31,4 @@ def is_in_notebook():
 
 if is_in_notebook():
     # Import and init magic
-    from stormvogel import magic as magic
+    from stormvogel.stormpy_utils import magic as magic
