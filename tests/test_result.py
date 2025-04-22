@@ -1,6 +1,7 @@
 import stormvogel.stormpy_utils.convert_results as convert_results
 import pytest
 import stormvogel.examples.monty_hall
+from typing import cast
 
 try:
     import stormpy
@@ -944,27 +945,39 @@ def test_convert_model_checker_results_mdp_qualitative():
     ]
 
 
-
 def test_induced_dtmc():
-    assert stormpy is not None
-    path = stormpy.examples.files.prism_mdp_coin_2_2
+    # we create a simple mdp
+    mdp = stormvogel.model.new_mdp()
+    state1 = mdp.new_state()
+    state2 = mdp.new_state()
+    action0 = mdp.new_action("0")
+    action1 = mdp.new_action("1")
+    branch0 = stormvogel.model.Branch([(1 / 2, state1), (1 / 2, state2)])
+    branch1 = stormvogel.model.Branch([(1 / 4, state1), (3 / 4, state2)])
+    transition = stormvogel.model.Transition({action0: branch0, action1: branch1})
+    mdp.set_transitions(mdp.get_initial_state(), transition)
+    mdp.add_self_loops()
 
-    prism_program = stormpy.parse_prism_program(path)
-    formula_str = 'Pmin=? [F "finished" & "all_coins_equal_1"]'
-    properties = stormpy.parse_properties(formula_str, prism_program)
+    # we create the induced dtmc
+    chosen_actions = dict()
+    for state_id, state in mdp.states.items():
+        chosen_actions[state_id] = state.available_actions()[0]
+    scheduler = stormvogel.result.Scheduler(mdp, chosen_actions)
 
-    model = stormpy.build_model(prism_program, properties)
+    dtmc = scheduler.generate_induced_dtmc()
 
-    result = stormpy.model_checking(model, properties[0], extract_scheduler=True)
-
-    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(model)
-
-    assert stormvogel_model is not None
-    stormvogel_result = convert_results.convert_model_checking_result(
-        stormvogel_model, result
+    # we create what the induced dtmc should look like
+    other_dtmc = stormvogel.model.new_dtmc()
+    state1 = other_dtmc.new_state()
+    state2 = other_dtmc.new_state()
+    branch0 = stormvogel.model.Branch(
+        cast(
+            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            [(1 / 2, state1), (1 / 2, state2)],  # TODO why do we need to cast in dtmcs
+        )
     )
-    assert stormvogel_result is not None
-    induced_dtmc = convert_results.generate_induced_dtmc(stormvogel_model, stormvogel_result.scheduler)
+    transition = stormvogel.model.Transition({stormvogel.model.EmptyAction: branch0})
+    other_dtmc.set_transitions(other_dtmc.get_initial_state(), transition)
+    other_dtmc.add_self_loops()
 
-    assert induced_dtmc
-
+    assert dtmc == other_dtmc

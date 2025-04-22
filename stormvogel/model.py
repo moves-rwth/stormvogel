@@ -1130,17 +1130,6 @@ class Model:
         return self.states[state_id]
 
 
-def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
-    """Create a model from prism. Requires stormpy."""
-    try:
-        import stormpy
-        import stormvogel.stormpy_utils.mapping
-
-        return stormvogel.mapping.stormpy_to_stormvogel(stormpy.build_model(prism_code))
-    except ImportError:
-        RuntimeError("Using PRISM requires stormpy.")
-
-
 def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:
     """Creates a DTMC."""
     return Model(name, ModelType.DTMC, create_initial_state)

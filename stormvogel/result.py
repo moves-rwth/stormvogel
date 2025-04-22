@@ -3,10 +3,10 @@ import stormvogel.model
 
 class Scheduler:
     """
-    Scheduler object specifiec what action to take in each state
+    Scheduler object specifies what action to take in each state
 
     Args:
-        model: stormvogel representation of the model associated with the scheduler
+        model: mdp model associated with the scheduler
         taken_actions: for each state an action to take in that state
     """
 
@@ -32,6 +32,19 @@ class Scheduler:
             return self.taken_actions[state.id]
         else:
             raise RuntimeError("This state is not a part of the model")
+
+    def generate_induced_dtmc(self) -> stormvogel.model.Model | None:
+        """This function resolves the nondeterminacy of the mdp and returns the scheduler induced dtmc"""
+        if self.model.get_type() == stormvogel.model.ModelType.MDP:
+            induced_dtmc = stormvogel.model.new_dtmc(create_initial_state=False)
+            for state in self.model.states.values():
+                induced_dtmc.new_state(labels=state.labels, valuations=state.valuations)
+                action = self.get_choice_of_state(state)
+                transitions = state.get_outgoing_transitions(action)
+                assert transitions is not None
+                induced_dtmc.add_transitions(s=state, transitions=transitions)
+
+            return induced_dtmc
 
     def __str__(self) -> str:
         if self.model.name is not None:
