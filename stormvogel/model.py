@@ -94,7 +94,7 @@ class State:
         if name is None:
             if str(id) in used_names:
                 raise RuntimeError(
-                    "You need to choose a state name because of a conflict caused by removal of states."
+                    "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
             self.name = str(id)
         else:
@@ -377,7 +377,7 @@ class RewardModel:
             self.state_action_pair = None
 
     def set_from_rewards_vector(self, vector: list[Number]) -> None:
-        """Set the rewards of this model according to a stormpy rewards vector."""
+        """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
         for s in self.model.states.values():
@@ -438,7 +438,7 @@ class RewardModel:
             )
 
     def reward_vector(self) -> list[Number]:
-        """Return the rewards in a stormpy format."""
+        """Return the rewards in a (stormpy) vector format."""
         vector = []
         for s in self.model.states.values():
             for a in s.available_actions():
@@ -452,7 +452,7 @@ class RewardModel:
 
     def set_unset_rewards(self, value: Number):
         """Fills up rewards that were not set yet with the specified value.
-        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
+        Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
         for s in self.model.states.values():
             for a in s.available_actions():
                 if (s.id, a) not in self.rewards:
@@ -1128,17 +1128,6 @@ class Model:
 
     def __getitem__(self, state_id: int):
         return self.states[state_id]
-
-
-def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
-    """Create a model from prism. Requires stormpy."""
-    try:
-        import stormpy
-        import stormvogel.mapping
-
-        return stormvogel.mapping.stormpy_to_stormvogel(stormpy.build_model(prism_code))
-    except ImportError:
-        RuntimeError("Using PRISM requires stormpy.")
 
 
 def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:

@@ -2,13 +2,13 @@
 
 from stormvogel import layout  # NOQA
 from stormvogel.layout import Layout  # NOQA
-from stormvogel.mapping import *  # NOQA
-from stormvogel.model_checking import model_checking  # NOQA
+from stormvogel.stormpy_utils.mapping import *  # NOQA
+from stormvogel.stormpy_utils.model_checking import model_checking  # NOQA
 from stormvogel.model import *  # NOQA
 from stormvogel.property_builder import build_property_string  # NOQA
 from stormvogel.result import *  # NOQA
 from stormvogel.show import *  # NOQA
-from stormvogel.simulator import *  # NOQA
+from stormvogel.stormpy_utils.simulator import *  # NOQA
 from stormvogel import pgc  # NOQA
 from stormvogel import examples  # NOQA
 from stormvogel import extensions  # NOQA
@@ -31,4 +31,4 @@ def is_in_notebook():
 
 if is_in_notebook():
     # Import and init magic
-    from stormvogel import magic as magic
+    from stormvogel.stormpy_utils import magic as magic
