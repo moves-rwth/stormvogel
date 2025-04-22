@@ -7,7 +7,7 @@ class Scheduler:
 
     Args:
         model: mdp model associated with the scheduler
-        taken_actions: for each state an action to take in that state
+        taken_actions: for each state the action we choose in that state
     """
 
     model: stormvogel.model.Model
@@ -21,6 +21,8 @@ class Scheduler:
     ):
         self.model = model
         self.taken_actions = taken_actions
+
+        # TODO functionality to convert a lambda scheduler to this object
 
     def get_choice_of_state(
         self, state: stormvogel.model.State | int
@@ -90,7 +92,7 @@ class Result:
     def get_result_of_state(
         self, state: stormvogel.model.State
     ) -> stormvogel.model.Number | None:
-        """returns the model checking result for a given state if present in the model"""
+        """returns the model checking result for a given state"""
         if state in self.model.states.values():
             return self.values[state.id]
         else:
