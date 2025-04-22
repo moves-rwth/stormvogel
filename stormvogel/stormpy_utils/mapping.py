@@ -665,6 +665,13 @@ def stormpy_to_stormvogel(
         raise RuntimeError("This type of model is not yet supported for this action")
 
 
+def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
+    """Create a model from prism."""
+
+    assert stormpy is not None
+    return stormpy_to_stormvogel(stormpy.build_model(prism_code))
+
+
 if __name__ == "__main__":
     dtmc = stormvogel.model.new_dtmc("Die")
     init = dtmc.get_initial_state()
