@@ -1134,7 +1134,7 @@ def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
     """Create a model from prism. Requires stormpy."""
     try:
         import stormpy
-        import stormvogel.mapping
+        import stormvogel.stormpy_utils.mapping
 
         return stormvogel.mapping.stormpy_to_stormvogel(stormpy.build_model(prism_code))
     except ImportError:
