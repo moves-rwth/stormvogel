@@ -339,9 +339,9 @@ def test_pgc_dtmc_arbitrary():
     def delta(current_state):
         match current_state:
             case "hungry":
-                return [(1.0, "eating")]
+                return ["eating"]
             case "eating":
-                return [(1.0, "hungry")]
+                return ["hungry"]
 
     pgc_model = pgc.build_pgc(
         delta, initial_state_pgc="hungry", modeltype=model.ModelType.DTMC
@@ -366,9 +366,9 @@ def test_pgc_mdp_empty_action():
     def delta(current_state, action):
         match current_state:
             case "hungry":
-                return [(1.0, "eating")]
+                return ["eating"]
             case "eating":
-                return [(1.0, "hungry")]
+                return ["hungry"]
 
     pgc_model = pgc.build_pgc(
         delta,

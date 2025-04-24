@@ -163,17 +163,16 @@ def valid_input(
                     raise ValueError(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                     )
-                else:
-                    for t in tuples:
-                        if not isinstance(t, tuple):
-                            raise ValueError(
-                                f"On input pair {state} {action}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]"
-                            )
 
                 for t in tuples:
-                    if t[1] not in states_seen:
-                        states_seen.append(t[1])
-                        states_to_be_visited.append(t[1])
+                    if isinstance(t, tuple):
+                        key = t[1]
+                    else:
+                        key = t
+
+                    if key not in states_seen:
+                        states_seen.append(key)
+                        states_to_be_visited.append(key)
         else:
             # we check for the delta function in models without actions
             tuples = delta(state)
@@ -186,17 +185,16 @@ def valid_input(
                 raise ValueError(
                     f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                 )
-            else:
-                for t in tuples:
-                    if not isinstance(t, tuple):
-                        raise ValueError(
-                            f"On input {state}, the delta function does not return a list consisting of tuples everywhere. Make sure to change the format to [(<value>,<state>),...]"
-                        )
 
             for t in tuples:
-                if t[1] not in states_seen:
-                    states_seen.append(t[1])
-                    states_to_be_visited.append(t[1])
+                if isinstance(t, tuple):
+                    key = t[1]
+                else:
+                    key = t
+
+                if key not in states_seen:
+                    states_seen.append(key)
+                    states_to_be_visited.append(key)
 
         # if at some point we discovered more than max_size states, we complain
         if len(states_seen) > max_size:
@@ -398,32 +396,46 @@ def build_pgc(
 
                 # we add all the newly found transitions to the model
                 branch = []
-                for tuple in tuples:
-                    key = tuple[1]
+                for tup in tuples:
+                    # in case only a state is provided, we assume the probability is 1
+                    if not isinstance(tup, tuple):
+                        key = tup
+                        val = 1
+                    else:
+                        key = tup[1]
+                        val = tup[0]
+
                     if key not in states_seen:
                         states_seen.append(key)
                         new_state = model.new_state()
                         state_lookup[key] = new_state
-                        branch.append((tuple[0], new_state))
+                        branch.append((val, new_state))
                         states_to_be_visited.append(key)
                     else:
-                        branch.append((tuple[0], state_lookup[key]))
+                        branch.append((val, state_lookup[key]))
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
             tuples = delta(state)
             # we add all the newly found transitions to the model
             branch = []
-            for tuple in tuples:
-                key = tuple[1]
+            for tup in tuples:
+                # in case only a state is provided, we assume the probability is 1
+                if not isinstance(tup, tuple):
+                    key = tup
+                    val = 1
+                else:
+                    key = tup[1]
+                    val = tup[0]
+
                 if key not in states_seen:
                     states_seen.append(key)
                     new_state = model.new_state()
                     state_lookup[key] = new_state
-                    branch.append((tuple[0], new_state))
+                    branch.append((val, new_state))
                     states_to_be_visited.append(key)
                 else:
-                    branch.append((tuple[0], state_lookup[key]))
+                    branch.append((val, state_lookup[key]))
                 if branch != []:
                     transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                         branch
