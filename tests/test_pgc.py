@@ -53,7 +53,6 @@ def test_pgc_mdp():
         initial_state_pgc=initial_state,
         labels=labels,
         rewards=rewards,
-        check_validity=False,
     )
 
     # we build the model in the regular way:
