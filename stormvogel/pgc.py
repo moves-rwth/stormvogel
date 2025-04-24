@@ -149,6 +149,34 @@ def build_pgc(
     (this function uses the pgc classes State and Action instead of the ones from stormvogel.model)
     """
 
+    def add_new_transitions(tuples, states_seen, state):
+        """
+        helper function to add all the newly found transitions to the model
+        """
+        branch = []
+        if tuples is not None:
+            for tup in tuples:
+                # in case only a state is provided, we assume the probability is 1
+                if not isinstance(tup, tuple):
+                    s = tup
+                    val = 1
+                else:
+                    s = tup[1]
+                    val = tup[0]
+
+                if s not in states_seen:
+                    states_seen.append(s)
+                    new_state = model.new_state()
+                    state_lookup[s] = new_state
+                    branch.append((val, new_state))
+                    states_to_be_visited.append(s)
+                else:
+                    branch.append((val, state_lookup[s]))
+        else:
+            # if we have no return value, we add a self loop
+            branch.append((1, state_lookup[state]))
+        return branch
+
     valid_input(
         delta,
         initial_state_pgc,
@@ -218,29 +246,8 @@ def build_pgc(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                     )
 
-                # we add all the newly found transitions to the model
-                branch = []
-                if tuples is not None:
-                    for tup in tuples:
-                        # in case only a state is provided, we assume the probability is 1
-                        if not isinstance(tup, tuple):
-                            key = tup
-                            val = 1
-                        else:
-                            key = tup[1]
-                            val = tup[0]
+                branch = add_new_transitions(tuples, states_seen, state)
 
-                        if key not in states_seen:
-                            states_seen.append(key)
-                            new_state = model.new_state()
-                            state_lookup[key] = new_state
-                            branch.append((val, new_state))
-                            states_to_be_visited.append(key)
-                        else:
-                            branch.append((val, state_lookup[key]))
-                else:
-                    # if we have no return value, we add a self loop
-                    branch.append((1, state_lookup[state]))
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
@@ -251,33 +258,13 @@ def build_pgc(
                     f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                 )
 
-            # we add all the newly found transitions to the model
-            branch = []
-            if tuples is not None:
-                for tup in tuples:
-                    # in case only a state is provided, we assume the probability is 1
-                    if not isinstance(tup, tuple):
-                        key = tup
-                        val = 1
-                    else:
-                        key = tup[1]
-                        val = tup[0]
+            branch = add_new_transitions(tuples, states_seen, state)
 
-                    if key not in states_seen:
-                        states_seen.append(key)
-                        new_state = model.new_state()
-                        state_lookup[key] = new_state
-                        branch.append((val, new_state))
-                        states_to_be_visited.append(key)
-                    else:
-                        branch.append((val, state_lookup[key]))
-            else:
-                # if we have no return value, we add a self loop
-                branch.append((1, state_lookup[state]))
             if branch != []:
                 transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
                     branch
                 )
+
         s = state_lookup[state]
         assert s is not None
         model.add_transitions(
