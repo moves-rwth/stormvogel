@@ -154,16 +154,31 @@ def valid_input(
             for action in actionslist:
                 tuples = delta(state, action)
 
-                if tuples is None:
-                    raise ValueError(
-                        f"On input pair {state} {action}, the delta function does not have a return value"
-                    )
-
-                if not isinstance(tuples, list):
+                if not isinstance(tuples, list) and tuples is not None:
                     raise ValueError(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                     )
 
+                if tuples is not None:
+                    for t in tuples:
+                        if isinstance(t, tuple):
+                            key = t[1]
+                        else:
+                            key = t
+
+                        if key not in states_seen:
+                            states_seen.append(key)
+                            states_to_be_visited.append(key)
+        else:
+            # we check for the delta function in models without actions
+            tuples = delta(state)
+
+            if not isinstance(tuples, list) and tuples is not None:
+                raise ValueError(
+                    f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
+                )
+
+            if tuples is not None:
                 for t in tuples:
                     if isinstance(t, tuple):
                         key = t[1]
@@ -173,28 +188,6 @@ def valid_input(
                     if key not in states_seen:
                         states_seen.append(key)
                         states_to_be_visited.append(key)
-        else:
-            # we check for the delta function in models without actions
-            tuples = delta(state)
-            if tuples is None:
-                raise ValueError(
-                    f"On input {state}, the delta function does not have a return value"
-                )
-
-            if not isinstance(tuples, list):
-                raise ValueError(
-                    f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
-                )
-
-            for t in tuples:
-                if isinstance(t, tuple):
-                    key = t[1]
-                else:
-                    key = t
-
-                if key not in states_seen:
-                    states_seen.append(key)
-                    states_to_be_visited.append(key)
 
         # if at some point we discovered more than max_size states, we complain
         if len(states_seen) > max_size:
@@ -396,6 +389,34 @@ def build_pgc(
 
                 # we add all the newly found transitions to the model
                 branch = []
+                if tuples is not None:
+                    for tup in tuples:
+                        # in case only a state is provided, we assume the probability is 1
+                        if not isinstance(tup, tuple):
+                            key = tup
+                            val = 1
+                        else:
+                            key = tup[1]
+                            val = tup[0]
+
+                        if key not in states_seen:
+                            states_seen.append(key)
+                            new_state = model.new_state()
+                            state_lookup[key] = new_state
+                            branch.append((val, new_state))
+                            states_to_be_visited.append(key)
+                        else:
+                            branch.append((val, state_lookup[key]))
+                else:
+                    # if we have no return value, we add a self loop
+                    branch.append((1, state_lookup[state]))
+                if branch != []:
+                    transition[stormvogel_action] = stormvogel.model.Branch(branch)
+        else:
+            tuples = delta(state)
+            # we add all the newly found transitions to the model
+            branch = []
+            if tuples is not None:
                 for tup in tuples:
                     # in case only a state is provided, we assume the probability is 1
                     if not isinstance(tup, tuple):
@@ -413,33 +434,13 @@ def build_pgc(
                         states_to_be_visited.append(key)
                     else:
                         branch.append((val, state_lookup[key]))
-                if branch != []:
-                    transition[stormvogel_action] = stormvogel.model.Branch(branch)
-        else:
-            tuples = delta(state)
-            # we add all the newly found transitions to the model
-            branch = []
-            for tup in tuples:
-                # in case only a state is provided, we assume the probability is 1
-                if not isinstance(tup, tuple):
-                    key = tup
-                    val = 1
-                else:
-                    key = tup[1]
-                    val = tup[0]
-
-                if key not in states_seen:
-                    states_seen.append(key)
-                    new_state = model.new_state()
-                    state_lookup[key] = new_state
-                    branch.append((val, new_state))
-                    states_to_be_visited.append(key)
-                else:
-                    branch.append((val, state_lookup[key]))
-                if branch != []:
-                    transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
-                        branch
-                    )
+            else:
+                # if we have no return value, we add a self loop
+                branch.append((1, state_lookup[state]))
+            if branch != []:
+                transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
+                    branch
+                )
         s = state_lookup[state]
         assert s is not None
         model.add_transitions(
