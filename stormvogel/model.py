@@ -56,7 +56,7 @@ class State:
 
     Args:
         labels: The labels of this state. Corresponds to Storm labels.
-        features: The features of this state. Corresponds to Storm features.
+        valuations: The valuations of this state. Corresponds to Storm valuations.
         id: The number of this state in the matrix.
         model: The model this state belongs to.
         observation: the observation of this state in case the model is a pomdp.
@@ -64,7 +64,7 @@ class State:
     """
 
     labels: list[str]
-    features: dict[str, int]
+    valuations: dict[str, int | float | bool]
     id: int
     model: "Model"
     observation: Observation | None
@@ -73,7 +73,7 @@ class State:
     def __init__(
         self,
         labels: list[str],
-        features: dict[str, int],
+        valuations: dict[str, int | float | bool],
         id: int,
         model,
         name: str | None = None,
@@ -92,14 +92,14 @@ class State:
             )
 
         self.labels = labels
-        self.features = features
+        self.valuations = valuations
         self.id = id
         self.observation = None
 
         if name is None:
             if str(id) in used_names:
                 raise RuntimeError(
-                    "You need to choose a state name because of a conflict caused by removal of states."
+                    "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
             self.name = str(id)
         else:
@@ -140,6 +140,10 @@ class State:
         """Add transitions from this state."""
         self.model.add_transitions(self, transitions)
 
+    def add_valuation(self, variable: str, value: int | bool | float):
+        """Adds a valuation to the state."""
+        self.valuations[variable] = value
+
     def available_actions(self) -> list["Action"]:
         """returns the list of all available actions in this state"""
         if self.model.supports_actions() and self.id in self.model.transitions.keys():
@@ -176,8 +180,12 @@ class State:
                     return False
         return True
 
+    def is_initial(self):
+        """Returns whether this state is initial."""
+        return self == self.model.get_initial_state()
+
     def __str__(self):
-        res = f"State {self.id} with labels {self.labels} and features {self.features}"
+        res = f"State {self.id} with labels {self.labels} and valuations {self.valuations}"
         if self.model.supports_observations() and self.observation is not None:
             res += f" and observation {self.observation.get_observation()}"
         return res
@@ -193,18 +201,19 @@ class State:
                 else:
                     observations_equal = True
                 return (
-                    sorted(self.labels) == sorted(other.labels) and observations_equal
+                    sorted(self.labels) == sorted(other.labels)
+                    and observations_equal
+                    and self.valuations == other.valuations
                 )
-            return False
         return False
 
     def __lt__(self, other):
         if not isinstance(other, State):
             return NotImplemented
-        return str(self.id) < str(other.id)
+        return str(self.labels) < str(other.labels)
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class Action:
     """Represents an action, e.g., in MDPs.
         Note that this action object is completely independent of its corresponding branch.
@@ -225,6 +234,11 @@ class Action:
             return Action(frozenset())
 
     labels: frozenset[str]
+
+    def __lt__(self, other):
+        if not isinstance(other, Action):
+            return NotImplemented
+        return str(self.labels) < str(other.labels)
 
     def __str__(self):
         return f"Action with labels {self.labels}"
@@ -296,11 +310,13 @@ class Transition:
         if isinstance(other, Transition):
             if len(self.transition) != len(other.transition):
                 return False
-            for item, other_item in zip(
-                sorted(self.transition.items()), sorted(other.transition.items())
+            for action, other_action in zip(
+                sorted(self.transition.keys()), sorted(other.transition.keys())
             ):
-                if not (item[0] == other_item[0] and item[1] == other_item[1]):
-                    print(item, "\n", other_item)
+                if not (
+                    action == other_action
+                    and self.transition[action] == other.transition[action]
+                ):
                     return False
             return True
         return False
@@ -369,7 +385,7 @@ class RewardModel:
             self.state_action_pair = None
 
     def set_from_rewards_vector(self, vector: list[Number]) -> None:
-        """Set the rewards of this model according to a stormpy rewards vector."""
+        """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
         for s in self.model.states.values():
@@ -404,11 +420,9 @@ class RewardModel:
             )
 
     def set_state_reward(self, state: State, value: Number):
-        """Sets the reward at said state."""
+        """Sets the reward at said state. If the model has actions, try to use the empty state."""
         if self.model.supports_actions():
-            raise RuntimeError(
-                "This is a model with actions. Please call the set_action_state_reward(_at_id) function instead"
-            )
+            self.set_state_action_reward(state, EmptyAction, value)
         else:
             self.rewards[state.id, EmptyAction] = value
 
@@ -432,7 +446,7 @@ class RewardModel:
             )
 
     def reward_vector(self) -> list[Number]:
-        """Return the rewards in a stormpy format."""
+        """Return the rewards in a (stormpy) vector format."""
         vector = []
         for s in self.model.states.values():
             for a in s.available_actions():
@@ -446,7 +460,7 @@ class RewardModel:
 
     def set_unset_rewards(self, value: Number):
         """Fills up rewards that were not set yet with the specified value.
-        Use this if converting to stormpy doesn't work because the reward vector does not have the expected length."""
+        Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
         for s in self.model.states.values():
             for a in s.available_actions():
                 if (s.id, a) not in self.rewards:
@@ -526,6 +540,21 @@ class Model:
         # Add the initial state if specified to do so
         if create_initial_state:
             self.new_state(["init"])
+
+    def summary(self):
+        """Give a short summary of the model."""
+        actions_bit = (
+            f"{len(self.actions)} actions, " if self.actions is not None else ""
+        )
+        return (
+            f"{self.type} model with name {self.name}, {len(self.get_states())} states, "
+            + actions_bit
+            + f"and {len(self.get_labels())} distinct labels."
+        )
+
+    def get_actions(self):
+        """Return the actions of the model. Returns None if actions are not supported."""
+        return self.actions
 
     def supports_actions(self):
         """Returns whether this model supports actions."""
@@ -664,6 +693,38 @@ class Model:
                 self.set_transitions(
                     state, [(float(0) if self.supports_rates() else float(1), state)]
                 )
+
+    def get_variables(self) -> set[str]:
+        """gets the set of all variables present in this model"""
+        variables = set()
+        for state in self.states.values():
+            for variable in state.valuations.keys():
+                variables.add(variable)
+        return variables
+
+    def set_valuation_at_remaining_states(
+        self, variables: list[str] | None = None, value: int | bool | float = 0
+    ):
+        """sets value to variables in all states where they don't have a value yet"""
+        if variables is None:
+            v = self.get_variables()
+        else:
+            v = variables
+        for state in self.states.values():
+            for var in v:
+                if var not in state.valuations.keys():
+                    state.valuations[var] = value
+
+    def unassigned_variables(self) -> bool:
+        # TODO return list of pairs of variables and states where it is undefined
+        variables = self.get_variables()
+        if variables == set():
+            return False
+        for state in self.states.values():
+            for variable in variables:
+                if variable not in state.valuations.keys():
+                    return True
+        return False
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
@@ -912,17 +973,17 @@ class Model:
     def new_state(
         self,
         labels: list[str] | str | None = None,
-        features: dict[str, int] | None = None,
+        valuations: dict[str, int | bool | float] | None = None,
         name: str | None = None,
     ) -> State:
         """Creates a new state and returns it."""
         state_id = self.__free_state_id()
         if isinstance(labels, list):
-            state = State(labels, features or {}, state_id, self, name=name)
+            state = State(labels, valuations or {}, state_id, self, name=name)
         elif isinstance(labels, str):
-            state = State([labels], features or {}, state_id, self, name=name)
+            state = State([labels], valuations or {}, state_id, self, name=name)
         elif labels is None:
-            state = State([], features or {}, state_id, self, name=name)
+            state = State([], valuations or {}, state_id, self, name=name)
 
         self.states[state_id] = state
 
@@ -956,6 +1017,13 @@ class Model:
     def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
         return self.states[0]
+
+    def get_ordered_labels(self) -> list[list[str]]:
+        """Get all the labels of this model, ordered by id.
+        IMPORTANT: If a state has no label, then a value '' is inserted!"""
+        return [
+            (s.labels if len(s.labels) > 0 else []) for s in self.get_states().values()
+        ]
 
     def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
@@ -1040,7 +1108,7 @@ class Model:
         res = [f"{self.type} with name {self.name}"]
         res += ["", "States:"] + [f"{state}" for (_id, state) in self.states.items()]
         res += ["", "Transitions:"] + [
-            f"{transition}" for (_id, transition) in self.transitions.items()
+            f"{id}: {transition}" for (id, transition) in self.transitions.items()
         ]
 
         if self.supports_rates() and self.exit_rates is not None:
@@ -1058,15 +1126,9 @@ class Model:
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Model):
-            if self.supports_actions():
-                assert self.actions is not None and other.actions is not None
-                for action, other_action in zip(
-                    sorted(self.actions), sorted(other.actions)
-                ):
-                    if not action == other_action:
-                        return False
             return (
-                self.type == other.type
+                self.actions == other.actions
+                and self.type == other.type
                 and self.states == other.states
                 and self.transitions == other.transitions
                 and sorted(self.rewards) == sorted(other.rewards)
@@ -1075,16 +1137,8 @@ class Model:
             )
         return False
 
-
-def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
-    """Create a model from prism. Requires stormpy."""
-    try:
-        import stormpy
-        import stormvogel.mapping
-
-        return stormvogel.mapping.stormpy_to_stormvogel(stormpy.build_model(prism_code))
-    except ImportError:
-        RuntimeError("Using PRISM requires stormpy.")
+    def __getitem__(self, state_id: int):
+        return self.states[state_id]
 
 
 def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:

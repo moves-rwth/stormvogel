@@ -4,7 +4,7 @@ import IPython.display as ipd
 import ipywidgets as widgets
 import html
 import stormvogel.displayable
-import stormvogel.html_templates
+import stormvogel.html_generation
 import stormvogel.communication_server
 import json
 import random
@@ -28,6 +28,8 @@ class Network(stormvogel.displayable.Displayable):
         debug_output: widgets.Output = widgets.Output(),
         do_init_server: bool = True,
         positions: dict[str, dict[str, int]] | None = None,
+        use_iframe: bool = False,
+        local_visjs: bool = True,
     ) -> None:
         """Display a visjs network using IPython. The network can display by itself or you can specify an Output widget in which it should be displayed.
 
@@ -43,7 +45,13 @@ class Network(stormvogel.displayable.Displayable):
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
         else:
             self.name: str = name
-        self.content_window = f"document.getElementById('{self.name}').contentWindow"
+        self.use_iframe: bool = use_iframe
+        if self.use_iframe:
+            self.network_wrapper = (
+                f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
+            )
+        else:
+            self.network_wrapper = f"nw_{self.name}"
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""
@@ -59,7 +67,7 @@ class Network(stormvogel.displayable.Displayable):
             self.positions = {}
         else:
             self.positions = positions
-        # Note that this refers to the same server as the global variable in stormvogel.communication_server.
+        self.local_visjs: bool = local_visjs
 
     def enable_exploration_mode(self, initial_node_id: int):
         """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
@@ -78,7 +86,7 @@ class Network(stormvogel.displayable.Displayable):
         try:
             positions: dict = json.loads(
                 self.server.result(
-                    f"""RETURN({self.content_window}.network.getPositions())"""
+                    f"""RETURN({self.network_wrapper}.network.getPositions())"""
                 )
             )
             return positions
@@ -112,11 +120,14 @@ class Network(stormvogel.displayable.Displayable):
         from_: int,
         to: int,
         label: str | None = None,
+        color: str | None = None,
     ) -> None:
         """Add an edge. Only use before calling show."""
         current = "{ from: " + str(from_) + ", to: " + str(to)
         if label is not None:
             current += f', label: "{label}"'
+        if color is not None:
+            current += f', color: "{color}"'
         if self.new_nodes_hidden:
             current += ", hidden: true"
             current += ", physics: false"
@@ -128,26 +139,15 @@ class Network(stormvogel.displayable.Displayable):
         self.options_js = options
 
     def generate_html(self) -> str:
-        """Generate the html for the network."""
-        js = (
-            f"""
-        var nodes = new vis.DataSet([{self.nodes_js}]);
-        var edges = new vis.DataSet([{self.edges_js}]);
-        var options = {self.options_js};
-        """
-            + stormvogel.html_templates.NETWORK_JS
+        return stormvogel.html_generation.generate_html(
+            self.nodes_js,
+            self.edges_js,
+            self.options_js,
+            self.name,
+            self.width,
+            self.height,
+            self.local_visjs,
         )
-
-        sizes = f"""
-        width: {self.width}px;
-        height: {self.height}px;
-        border: 1px solid lightgray;
-        """
-
-        html = stormvogel.html_templates.START_HTML.replace(
-            "__JAVASCRIPT__", js
-        ).replace("__SIZES__", sizes)
-        return html
 
     def generate_iframe(self) -> str:
         """Generate an iframe for the network, using the html."""
@@ -156,6 +156,7 @@ class Network(stormvogel.displayable.Displayable):
                 id="{self.name}"
                 width="{self.width + self.EXTRA_PIXELS}"
                 height="{self.height + self.EXTRA_PIXELS}"
+                sandbox="allow-scripts allow-same-origin"
                 frameborder="0"
                 srcdoc="{html.escape(self.generate_html())}"
                 border:none !important;
@@ -164,10 +165,13 @@ class Network(stormvogel.displayable.Displayable):
 
     def show(self) -> None:
         """Display the network on the output that was specified at initialization, otherwise simply display it."""
-        iframe = self.generate_iframe()
+        if self.use_iframe:
+            iframe = self.generate_iframe()
+        else:
+            iframe = self.generate_html()
         with self.output:  # Display the iframe within the Output.
             ipd.clear_output()
-            ipd.display(widgets.HTML(iframe))
+            ipd.display(ipd.HTML(iframe))
         self.maybe_display_output()
         with self.debug_output:
             logging.info("Called Network.show")
@@ -184,7 +188,7 @@ class Network(stormvogel.displayable.Displayable):
     def update_options(self, options: str):
         """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
         self.set_options(options)
-        js = f"""{self.content_window}.network.setOptions({options});"""
+        js = f"""{self.network_wrapper}.network.setOptions({options});"""
         with self.spam:
             ipd.display(ipd.Javascript(js))
         self.spam_side_effects()
@@ -198,3 +202,14 @@ class Network(stormvogel.displayable.Displayable):
         """Clear the output."""
         with self.output:
             ipd.clear_output()
+
+    def set_node_color(self, node_id: int, color: str | None) -> None:
+        """Set the color of the node with this node id. Only works once the network is properly loaded."""
+        if color is None:
+            color = "null"
+        else:
+            color = f'"{color}"'
+
+        js = f"""{self.network_wrapper}.setNodeColor({node_id}, {color});"""
+        ipd.display(ipd.Javascript(js))
+        ipd.clear_output()

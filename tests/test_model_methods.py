@@ -149,6 +149,8 @@ def test_normalize():
     )
     dtmc1.add_self_loops()
 
+    # TODO test for mdps as well
+
     assert dtmc0 == dtmc1
 
 
@@ -200,6 +202,10 @@ def test_remove_state():
     new_mdp.new_state()
     new_mdp.new_state()
     new_mdp.add_self_loops()
+    new_mdp.new_action("0")
+    new_mdp.new_action(
+        "1"
+    )  # TODO are the models the same? the transitions don't look the same
 
     assert mdp == new_mdp
 
@@ -338,8 +344,12 @@ def test_get_sub_model():
     # we build what the submodel should look like
     new_dtmc = stormvogel.model.new_dtmc("Die")
     init = new_dtmc.get_initial_state()
+    init.valuations = {"rolled": 0}
     init.set_transitions(
-        [(1 / 6, new_dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(2)]
+        [
+            (1 / 6, new_dtmc.new_state(f"rolled{i+1}", {"rolled": i + 1}))
+            for i in range(2)
+        ]
     )
     new_dtmc.normalize()
     assert sub_model == new_dtmc
@@ -402,3 +412,26 @@ def test_get_state_action_reward():
 #     other_rewardmodel = stormvogel.model.RewardModel("rewardmodel", mdp, {(5, EmptyAction): 3})
 
 #     assert rewardmodel == other_rewardmodel
+
+
+def test_valuation_methods():
+    # first we test the get_variables function
+    dtmc = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    assert dtmc.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
+
+    # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
+    dtmc = stormvogel.model.new_dtmc("Die")
+    init = dtmc.get_initial_state()
+    init.set_transitions(
+        [
+            (1 / 6, dtmc.new_state(labels=f"rolled{i+1}", valuations={"rolled": i + 1}))
+            for i in range(6)
+        ]
+    )
+    dtmc.add_self_loops()
+
+    assert dtmc.unassigned_variables()
+
+    dtmc.set_valuation_at_remaining_states()  # TODO more elaborate test, especially when unassigned_variables() returns more information
+
+    assert not dtmc.unassigned_variables()

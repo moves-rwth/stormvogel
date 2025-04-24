@@ -55,13 +55,16 @@ jobs:
           files: |
             docs/**/*.ipynb
 
-      # - name: Run documentation notebooks
-      #   run: |
-      #    poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
+      - name: Run documentation notebooks
+        run: |
+         poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
 
       - name: Generate docs
         working-directory: docs/
         run: make html
+
+      - name: Copy gifs
+        run: cp -r docs/2-extensions/gifs docs/_build/html/2-extensions/
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'

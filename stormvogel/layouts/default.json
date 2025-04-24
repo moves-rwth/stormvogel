@@ -18,58 +18,25 @@
       }
     }
   },
+  "edit_groups": {
+    "groups": [
+      "states",
+      "actions"
+    ]
+  },
   "groups": {
-    "states": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
     "actions": {
-      "borderWidth": 1,
-      "color": {
-        "background": "lightblue",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
       "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
+      "color": {
+        "background": "lightblue"
       }
     },
     "scheduled_actions": {
-      "borderWidth": 1,
+      "shape": "box",
       "color": {
         "background": "pink",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      },
-      "schedColor": false
+        "border": "red"
+      }
     }
   },
   "reload_button": false,
@@ -77,11 +44,14 @@
     "arrows": "to",
     "font": {
       "color": "black",
-      "size": 14
+      "size": 14,
+      "strokeColor": "white",
+      "strokeWidth": 2
     },
     "color": {
       "color": "black"
-    }
+    },
+    "width": 1
   },
   "numbers": {
     "fractions": true,
@@ -112,7 +82,6 @@
     "load_button": false
   },
   "positions": {},
-  "width": 800,
-  "height": 600,
-  "physics": true
+  "physics": true,
+  "autoResize": true
 }
