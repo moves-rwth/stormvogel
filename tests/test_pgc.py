@@ -53,7 +53,6 @@ def test_pgc_mdp():
         initial_state_pgc=initial_state,
         labels=labels,
         rewards=rewards,
-        check_validity=False,
     )
 
     # we build the model in the regular way:
@@ -339,9 +338,9 @@ def test_pgc_dtmc_arbitrary():
     def delta(current_state):
         match current_state:
             case "hungry":
-                return [(1.0, "eating")]
+                return ["eating"]
             case "eating":
-                return [(1.0, "hungry")]
+                return ["hungry"]
 
     pgc_model = pgc.build_pgc(
         delta, initial_state_pgc="hungry", modeltype=model.ModelType.DTMC
@@ -366,9 +365,9 @@ def test_pgc_mdp_empty_action():
     def delta(current_state, action):
         match current_state:
             case "hungry":
-                return [(1.0, "eating")]
+                return ["eating"]
             case "eating":
-                return [(1.0, "hungry")]
+                return ["hungry"]
 
     pgc_model = pgc.build_pgc(
         delta,
@@ -549,5 +548,22 @@ def test_pgc_ctmc():
     )
     regular_model.set_rate(regular_model.get_initial_state(), 5)
     regular_model.set_rate(list(regular_model.states.values())[1], 3)
+
+    assert pgc_model == regular_model
+
+
+def test_self_loops():
+    # we test if self loops automatically get added if delta returns None
+    def delta(current_state):
+        match current_state:
+            case "nonexistent":
+                return ["also nonexistent"]
+
+    pgc_model = pgc.build_pgc(
+        delta, initial_state_pgc="hungry", modeltype=model.ModelType.DTMC
+    )
+
+    regular_model = model.new_dtmc()
+    regular_model.add_self_loops()
 
     assert pgc_model == regular_model
