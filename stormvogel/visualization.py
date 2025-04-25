@@ -90,15 +90,11 @@ class Visualization(stormvogel.displayable.Displayable):
             if self.result is not None:
                 self.scheduler = self.result.scheduler
 
-        edit_groups: list = self.layout.layout["edit_groups"][
-            "groups"
-        ]  # We modify it by reference.
-        if self.scheduler is not None:  # Enable scheduled_actions as a default.
-            if "scheduled_actions" not in edit_groups:
-                edit_groups.append("scheduled_actions")
+        # Set "scheduler" as an active group iff it is present.
+        if self.scheduler is not None:
+            layout.add_active_group("scheduled_actions")
         else:  # Otherwise, disable it
-            if "scheduled_actions" in edit_groups:
-                edit_groups.remove("scheduled_actions")
+            layout.remove_active_group("scheduled_actions")
 
         self.do_init_server: bool = do_init_server
         self.__create_nt()
