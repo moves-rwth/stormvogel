@@ -26,8 +26,10 @@ def test_model_checking():
 
     stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
 
-    stormvogel_result = stormvogel.result.convert_model_checking_result(
-        stormvogel_model, stormpy_result
+    stormvogel_result = (
+        stormvogel.stormpy_utils.convert_results.convert_model_checking_result(
+            stormvogel_model, stormpy_result
+        )
     )
 
     # now we do it for a dtmc:
@@ -42,8 +44,10 @@ def test_model_checking():
 
     stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
 
-    stormvogel_result = stormvogel.result.convert_model_checking_result(
-        stormvogel_model, stormpy_result
+    stormvogel_result = (
+        stormvogel.stormpy_utils.convert_results.convert_model_checking_result(
+            stormvogel_model, stormpy_result
+        )
     )
 
     assert result == stormvogel_result

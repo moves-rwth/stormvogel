@@ -1,7 +1,7 @@
 from typing import Tuple
 import stormpy
 import stormvogel.model
-import stormvogel.mapping as mapping
+import stormvogel.stormpy_utils.mapping as mapping
 from stormvogel.extensions.helpers import choice_mapping
 
 
