@@ -20,7 +20,6 @@ import ipywidgets as widgets
 import IPython.display as ipd
 import random
 import string
-import logging
 import cairosvg
 
 
@@ -122,9 +121,7 @@ class Visualization(stormvogel.displayable.Displayable):
 
     def show(self) -> None:
         """(Re-)load the Network and display if self.do_display is True."""
-        with self.debug_output:
-            logging.info("Called Visualization.show()")
-        with self.output:
+        with self.output:  ## If there was already a rendered network, clear it.
             ipd.clear_output()
         self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
@@ -173,10 +170,10 @@ class Visualization(stormvogel.displayable.Displayable):
         return "scheduled_actions" if a == choice else default
 
     def __add_states(self) -> None:
-        """For each state in the model, add a node to the graph."""
+        """For each state in the model, add a node to the graph. I"""
         if self.nt is None:
             return
-        for state in self.model.states.values():
+        for state in self.model.get_states().values():
             res = self.__format_result(state)
             observations = self.__format_observations(state)
             rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
@@ -286,6 +283,8 @@ class Visualization(stormvogel.displayable.Displayable):
         return res
 
     def __format_result(self, s: stormvogel.model.State) -> str:
+        """Create a string that shows the result for this state. Starts with newline.
+        If results are not enabled, then it returns the empty string."""
         if (
             self.result is None
             or not self.layout.layout["state_properties"]["show_results"]
@@ -302,6 +301,8 @@ class Visualization(stormvogel.displayable.Displayable):
         )
 
     def __format_observations(self, s: stormvogel.model.State) -> str:
+        """Create a String that shows the observation for this state (FOR POMDPs).
+        Starts with newline."""
         if (
             s.observation is None
             or not self.layout.layout["state_properties"]["show_observations"]
@@ -316,13 +317,15 @@ class Visualization(stormvogel.displayable.Displayable):
             )
 
     def generate_html(self) -> str:
-        """Get HTML code that can be used to export this visualization."""
+        """Get HTML code that can be used to show this visualization."""
         return self.nt.generate_html()
 
     def generate_iframe(self) -> str:
+        """Get the HTML code that can be used to show this visualization, wrapped in an IFrame."""
         return self.nt.generate_iframe()
 
     def generate_svg(self) -> str:
+        """Generate an svg image of the network."""
         return self.nt.generate_svg()
 
     def export(self, output_format: str, filename: str = "export") -> None:
@@ -396,13 +399,14 @@ class Visualization(stormvogel.displayable.Displayable):
             raise RuntimeError(f"Export format not supported: {output_format}")
 
     def get_positions(self) -> dict:
-        """Get Network's current (interactive, dragged) node positions. Only works if show was called before (obviously).
+        """Get Network's current (interactive, dragged) node positions. Only works if show was called before.
         NOTE: This method only works after the network is properly loaded."""
         return self.nt.get_positions() if self.nt is not None else {}
 
     def __to_state_action_sequence(
         self, path: stormvogel.simulator.Path
     ) -> list[stormvogel.model.Action | stormvogel.model.State]:
+        """Convert a Path to a list containing actions and states."""
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
             self.model.get_initial_state()
         ]
