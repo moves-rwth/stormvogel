@@ -288,26 +288,10 @@ def simulate(
                 # we add to the partial model what we discovered (if new)
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
-<<<<<<< HEAD:stormvogel/simulator.py
-
-                    # we also add the transitions that we travelled through, so we need to keep track of the last state
-                    probability = 0
-                    transitions = model.get_transitions(last_state_id)
-                    for tuple in transitions.transition[
-                        stormvogel.model.EmptyAction
-                    ].branch:
-                        if tuple[1].id == state_id:
-                            assert isinstance(tuple[0], (int, float))
-                            probability += float(tuple[0])
-                    new_state = partial_model.new_state(list(labels))
-                    partial_model.get_state_by_id(last_state_id).add_transitions(
-                        [(probability, new_state)]
-=======
                     new_state = partial_model.new_state(
                         list(labels),
                         name=str(state_id),
                         valuations=model.get_state_by_id(state_id).valuations,
->>>>>>> 96fb7a6daee6b25088bed7cbc378f47235ff77b6:stormvogel/stormpy_utils/simulator.py
                     )
 
                     # we add the rewards
@@ -401,16 +385,9 @@ def simulate(
                     assert transitions is not None
                     for tuple in transitions:
                         if tuple[1].id == state_id:
-<<<<<<< HEAD:stormvogel/simulator.py
-                            assert isinstance(tuple[0], (int, float))
-                            probability += float(tuple[0])
-                    new_state = partial_model.new_state(list(labels))
-                    last_state_partial.add_transitions([(probability, new_state)])
-=======
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of action with next state, they collapse
->>>>>>> 96fb7a6daee6b25088bed7cbc378f47235ff77b6:stormvogel/stormpy_utils/simulator.py
 
                     # if the starting state of the transition action pair is known, we append the existing branch
                     # otherwise we make a new branch

@@ -4,15 +4,14 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
-from stormvogel import parametric_representation
+from stormvogel import parametric
 import copy
 
 Number = (
     float
     | Fraction
     | int
-    | parametric_representation.RationalFunction
-    | parametric_representation.Polynomial
+    | parametric.Parametric
 )
 
 
@@ -346,8 +345,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, int)
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
-        or isinstance(first_element, parametric_representation.Polynomial)
-        or isinstance(first_element, parametric_representation.RationalFunction)
+        or isinstance(first_element, parametric.Parametric)
     ):
         return Transition(
             {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
@@ -568,6 +566,15 @@ class Model:
         """Returns whether this model supports observations."""
         return self.get_type() == ModelType.POMDP
 
+    def is_parametric(self):
+        """Returns whether this model contains parametric transition values"""
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0],parametric.Parametric):
+                        return True
+        return False
+
     def is_stochastic(self) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
         For continuous models: Checks if all sums of outgoing rates sum to 0
@@ -605,6 +612,7 @@ class Model:
                         return False
 
         return True
+
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
@@ -1044,6 +1052,17 @@ class Model:
             if model.name == name:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def get_nr_parameters(self) -> int:
+        """Returns the number of parameters of this model"""
+        nr_parameters = 0
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0],parametric.Parametric):
+                        if tup[0].get_dimension() > nr_parameters:
+                            nr_parameters = tup[0].get_dimension()
+        return nr_parameters
 
     def get_states(self) -> dict[int, State]:
         return self.states

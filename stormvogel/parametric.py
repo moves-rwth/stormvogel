@@ -11,12 +11,19 @@ class Polynomial:
     """
 
     coefficients: np.ndarray = np.array([])
+    degree: int
+    dimension: int
 
     def __init__(self, degree: int, dimension: int):
         self.coefficients = np.zeros((degree + 1,) * dimension)
+        self.degree = degree
+        self.dimension = dimension
 
     def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
         self.coefficients[exponents] = coefficient
+
+    def get_dimension(self) -> int:
+        return self.dimension
 
     # TODO valuation function
 
@@ -71,6 +78,13 @@ class RationalFunction:
         else:
             raise RuntimeError("dividing by 0 is not allowed")
 
+
+    def get_dimension(self) -> int:
+        if numerator.dimension > denominator.dimension:
+            return numerator.dimension
+        else:
+            return denominator.dimension
+
     # TODO valuation function
 
     def __str__(self) -> str:
@@ -81,6 +95,8 @@ class RationalFunction:
         s += "\n" + str(self.denominator)
         return s
 
+
+Parametric = Polynomial | RationalFunction
 
 if __name__ == "__main__":
     polynomial1 = Polynomial(3, 3)
