@@ -24,10 +24,12 @@ class Layout:
         as specified in DEFAULTS (=layouts/default.json).
 
         Args:
-            path (str): Path to your custom layout file.
+            path (str, optional): Path to your custom layout file.
                 Leave to None for an empty/default layout. Defaults to None.
-            path_relative (bool, optional): If set to true, then stormvogel will look for a custom layout
+            path_relative (bool, optional): If set to True, then stormvogel will look for a custom layout
                 file relative to the current working directory. Defaults to True.
+            layout_dict (dict, optional): If set, this dictionary is used as the layout instead of the
+                file specified in path.
         """
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/default.json")) as f:
             default_str = f.read()
@@ -42,12 +44,14 @@ class Layout:
             self.load_schema()
 
     def load_schema(self):
-        # Load in schema for the dict_editor.
+        """Load in the schema. Used for the layout editor. Stored as self.schema."""
         with open(os.path.join(PACKAGE_ROOT_DIR, "layouts/schema.json")) as f:
             schema_str = f.read()
         self.schema = json.loads(schema_str)
 
     def load(self, path: str | None = None, path_relative: bool = True):
+        """Load the layout and schema file at the specified path.
+        They are stored as self.layout and self.schema respectively."""
         if path is None:
             self.layout: dict = self.default_dict
         else:
@@ -64,8 +68,15 @@ class Layout:
             )
         self.load_schema()
 
-    def set_active_groups(self, groups: list[str]):
-        self.layout["edit_groups"]["groups"] = groups
+    def add_active_group(self, group: str) -> None:
+        """Make a group active if it is not already."""
+        if group not in self.layout["edit_groups"]["groups"]:
+            self.layout["edit_groups"]["groups"].append(group)
+
+    def remove_active_group(self, group: str) -> None:
+        """Make a group inactive if it is not already."""
+        if group in self.layout["edit_groups"]["groups"]:
+            self.layout["edit_groups"]["groups"].remove(group)
 
     def set_possible_groups(self, groups: set[str]):
         """Set the groups of states that the user can choose from under edit_groups."""

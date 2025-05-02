@@ -1,7 +1,8 @@
 """Communication from Javascript/HTML to IPython/Jupyter lab using a local server and requests.
-Initialization by user is not recommended. It should happen automatically when creating a visjs.Network.
+Initialization by user is not recommended. It should happen automatically when creating a network.Network.
 
-Remember that THE PORT STORED IN GLOBAL VARIABLE server_port NEEDS TO BE OPEN (AND IN SOME CASES FORWARDED) FOR IT TO WORK."""
+Remember that you need AT LEAST ONE AVAILABLE (and sometimes also forwarded)
+PORT BETWEEN min_port AND max_port IN ORDER FOR IT TO WORK."""
 
 import http.server
 import random
@@ -68,6 +69,7 @@ function return_id_result(url, id, data) {
     }
 """
         ipd.display(ipd.HTML(f"<script>{js}</script>"))
+        ipd.display(ipd.Javascript(js))
         # print(js)
 
         class InnerServer(http.server.BaseHTTPRequestHandler):
