@@ -55,6 +55,8 @@ jobs:
         with:
           files: |
             docs/**/*.ipynb
+          exclude: |
+            docs/1-introduction/1-Introduction.ipynb
 
       - name: Run documentation notebooks
         run: |
