@@ -43499,15 +43499,15 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
 // exports.Element = SVGCanvasElement;
 </script>
     <style type="text/css">
-      #ycDvvPpmYU {
-        width: 203px;
-        height: 213px;
+      #RqBbuvWEpf {
+        width: 800px;
+        height: 600px;
         border: 1px solid lightgray;
       }
     </style>
   </head>
   <body>
-    <div id="ycDvvPpmYU"></div>
+    <div id="RqBbuvWEpf"></div>
     <script type="text/javascript">
         //js
 class NetworkWrapper {
@@ -43616,9 +43616,37 @@ class NetworkWrapper {
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `🐦`, group: "states", x: -163, y: 433 },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: "states" },
+{ id: 1, label: `red light,still`, group: "states" },
+{ id: 2, label: `green light,moving`, group: "states" },
+{ id: 3, label: `red light,moving`, group: "states" },
+{ id: 4, label: `accident`, group: "states" },
+{ id: 10000000000, label: `accelerate`, group: "actions" },
+{ id: 10000000001, label: `wait`, group: "actions" },
+{ id: 10000000002, label: `accelerate`, group: "actions" },
+{ id: 10000000003, label: `wait`, group: "actions" },
+{ id: 10000000004, label: `brake`, group: "actions" },
+{ id: 10000000005, label: `wait`, group: "actions" },
+{ id: 10000000006, label: `brake`, group: "actions" },
+{ id: 10000000007, label: `wait`, group: "actions" },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 0, label: "1" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 2, label: "1" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 1, label: "1" },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 3, label: "1" },
+{ from: 1, to: 10000000003 },
+{ from: 10000000003, to: 0, label: "1" },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 0, label: "1" },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 3, label: "1" },
+{ from: 3, to: 10000000006 },
+{ from: 10000000006, to: 1, label: "1" },
+{ from: 3, to: 10000000007 },
+{ from: 10000000007, to: 4, label: "1" },
+{ from: 4, to: 4, label: "1" },
 ]);
     var options_local = {
   "__fake_macros": {
@@ -43668,25 +43696,14 @@ class NetworkWrapper {
       "shape": "box",
       "color": {
         "background": "pink",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "borderWidth": 1,
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      },
-      "schedColor": false
+        "border": "red"
+      }
     },
     "states": {
-      "borderWidth": 7,
+      "borderWidth": 1,
       "color": {
-        "background": "#d1d1d1",
-        "border": "#5b98fb",
+        "background": "white",
+        "border": "black",
         "highlight": {
           "background": "white",
           "border": "red"
@@ -43695,8 +43712,8 @@ class NetworkWrapper {
       "shape": "ellipse",
       "mass": 1,
       "font": {
-        "color": "#000000",
-        "size": 74
+        "color": "black",
+        "size": 14
       }
     }
   },
@@ -43732,33 +43749,22 @@ class NetworkWrapper {
   },
   "misc": {
     "enable_physics": true,
-    "width": 203,
-    "height": 213,
+    "width": 800,
+    "height": 600,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/sv.json",
+    "filename": "layouts/NAME.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {
-    "0": {
-      "x": -163,
-      "y": 433
-    },
-    "1": {
-      "x": -12,
-      "y": -70
-    }
-  },
+  "positions": {},
   "physics": true,
-  "autoResize": true,
-  "width": 203,
-  "height": 213
+  "autoResize": true
 };
-    var container_local = document.getElementById("ycDvvPpmYU");
-    var nw_ycDvvPpmYU = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    var container_local = document.getElementById("RqBbuvWEpf");
+    var nw_RqBbuvWEpf = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
 
     </script>
   </body>

@@ -84,68 +84,72 @@ class LayoutEditor(stormvogel.displayable.Displayable):
     def process_save_button(self):
         """Triggered whenever something is changed in the layout editor,
         but only does something if the save button was pressed."""
-        if self.layout.layout["saving"]["save_button"]:
-            self.layout.layout["saving"]["save_button"] = False
-            # Also save the node positions.
-            self.save_node_positions()
-            try:
-                self.layout.save(
-                    self.layout.layout["saving"]["filename"],
-                    path_relative=self.layout.layout["saving"]["relative_path"],
+        self.layout.layout["saving"]["save_button"] = False
+        # Also save the node positions.
+        self.save_node_positions()
+        try:
+            self.layout.save(
+                self.layout.layout["saving"]["filename"],
+                path_relative=self.layout.layout["saving"]["relative_path"],
+            )
+        except RuntimeError:
+            with self.output:
+                print("Filename should end in .json")
+        except OSError:
+            with self.output:
+                print(
+                    f'Bad or inaccessible path or filename: {self.layout.layout["saving"]["filename"]}'
                 )
-            except RuntimeError:
-                with self.output:
-                    print("Filename should end in .json")
-            except OSError:
-                with self.output:
-                    print(
-                        f'Bad or inaccessible path or filename: {self.layout.layout["saving"]["filename"]}'
-                    )
 
     def process_load_button(self):
         """Triggered whenever something is changed in the layout editor,
         but only does something if the load button was pressed."""
-        if self.layout.layout["saving"]["load_button"]:
-            self.layout.layout["saving"]["load_button"] = False
-            try:
-                self.layout.load(
-                    self.layout.layout["saving"]["filename"],
-                    path_relative=self.layout.layout["saving"]["relative_path"],
+        self.layout.layout["saving"]["load_button"] = False
+        try:
+            self.layout.load(
+                self.layout.layout["saving"]["filename"],
+                path_relative=self.layout.layout["saving"]["relative_path"],
+            )
+        except OSError:
+            logging.warning("Loaded file does not exist.")
+            with self.output:
+                print(
+                    f"Loaded file does not exist. {self.layout.layout['saving']['filename']}"
                 )
-                self.try_show_vis()
-                # TODO: self.show()?
-            except OSError:
-                logging.warning("Loaded file does not exist.")
-                with self.output:
-                    print(
-                        f"Loaded file does not exist. {self.layout.layout['saving']['filename']}"
-                    )
 
     def process_reload_button(self):
         """Triggered whenever something is changed in the layout editor,
         but only does something if the reload button was pressed."""
-        if self.layout.layout["reload_button"] and self.vis is not None:
-            self.layout.layout["reload_button"] = False
-            with self.debug_output:
-                logging.info("Received reload button request.")
-            self.save_node_positions()  # TODO should this be here?
-            self.try_show_vis()
-            self.show()
+        self.layout.layout["reload_button"] = False
+        with self.debug_output:
+            logging.info("Received reload button request.")
+        self.save_node_positions()
 
     def try_update(self):
         """Process the updates from the layout editor where required."""
         self.copy_settings()
         if not self.loaded:
             return
-        self.process_save_button()
-        self.process_load_button()
-        self.process_reload_button()
-        self.try_show_vis()
+        save = self.layout.layout["saving"]["save_button"]
+        load = self.layout.layout["saving"]["load_button"]
+        reload = self.layout.layout["reload_button"]
+        if save:
+            self.process_save_button()
+        if load:
+            self.process_load_button()
+        if reload:
+            self.process_reload_button()
+        # The preceeding methods should never call self.show() or self.try_show_vis() since it's already called here.
+        if load or reload:
+            self.try_show_vis()  # This also updates the edit groups as a side effect, so it should be called first.
+            self.show()
+        elif self.vis is not None:
+            self.vis.update()
 
     def show(self) -> None:
         """Display an interactive layout editor, according to the schema."""
         self.loaded = False
-        with self.editor.output:
+        with self.editor.output:  # Clear existing editor.
             ipd.clear_output()
         self.editor = stormvogel.dict_editor.DictEditor(
             schema=self.layout.schema,
