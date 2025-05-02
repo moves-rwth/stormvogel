@@ -7,18 +7,17 @@ from typing import Any
 
 def rget(d: dict, path: list) -> Any:
     """Recursively get dict value. Throws KeyError if (nested) key not present"""
-    return reduce(
-        lambda c, k: c.__getitem__(k), path, d
-    )  # Throws KeyError if key not present.
+    return reduce(lambda c, k: c.__getitem__(k), path, d)
 
 
 def rset(d: dict, path: list[str], value: Any, create_new_keys: bool = False) -> dict:
     """Recursively set dict value.
+
     Args:
-        d (dict).
-        path (list[str]).
-        value (Any).
-        create_new_keys (bool). If a key that is on the path does not exist yet, create it. Defaults to False"""
+        d (dict):
+        path (list[str]): A list of keys that lead to the value you want to set. The first key is the first key in the path, the second key is the second key in the path, etc.
+        value (Any): Target value.
+        create_new_keys (bool): If a key that is on the path does not exist yet, create it. Defaults to False"""
     if len(path) == 0:
         return d
 
@@ -44,6 +43,8 @@ def merge_dict(dict1: dict, dict2: dict) -> dict:
 
     In general, dict2 gets priority!
     If dict2 has a value that dict1 does not have, then the value in dict2 is chosen.
+    If dict1 and dict2 have the same key, and both are VALUES, then dict2 is chosen.
+    If dict1 and dict2 have the same key, and both are DICTIONARIES, then the two dictionaries are merged recursively.
     If dict1 has a DICTIONARY and dict2 has a VALUE with the same key, then dict1 gets priority.
 
     Taken from StackOverflow user Anatoliy R on July 2 2024.

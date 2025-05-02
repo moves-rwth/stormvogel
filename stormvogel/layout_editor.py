@@ -20,10 +20,18 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
+        """Create an interactive layout editor, according to the schema. Display it using the show() method.
+        Args:
+            layout (Layout): The layout to be edited.
+            visualization (Visualization, optional): A visualization that uses said layout. Defaults to None. Used to update the layout.
+            output (widgets.Output, optional): An output widget within which the layout editor should be displayed. Defaults to None.
+            do_display (bool, optional): Set to true iff you want the LayoutEditor to display. Defaults to True.
+            debug_output (widgets.Output, optional): Debug information is displayed in this output. Leave to default if that doesn't interest you.
+        """
         super().__init__(output, do_display, debug_output)
         self.vis: stormvogel.visualization.Visualization | None = visualization
         self.layout: stormvogel.layout.Layout = layout
-        self.update_possible_groups()
+        self.try_show_vis()
         self.loaded: bool = False  # True iff the layout is done loading.
         self.editor = stormvogel.dict_editor.DictEditor(
             schema=self.layout.schema,
@@ -32,7 +40,8 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             do_display=False,
         )
 
-    def update_possible_groups(self):
+    def try_show_vis(self):
+        """Show the visualization if it was set. Used to apply layout changes."""
         if self.vis is not None:
             self.vis.show()
 
@@ -40,8 +49,9 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         """Copy some settings from one place in the layout to another place in the layout.
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout.layout["physics"] = self.layout.layout["misc"]["enable_physics"]
+        # TODO invesitagate if we also need to move the width and height settings.
 
-    def set_current_vis_node_positions_in_layout(self):
+    def save_node_positions(self):
         """Try to save the positions of the nodes in the graph to the layout.
         The user is informed if this fails."""
         with self.debug_output:
@@ -72,11 +82,12 @@ class LayoutEditor(stormvogel.displayable.Displayable):
                             self.__warn_failed_positions_save()
 
     def process_save_button(self):
+        """Triggered whenever something is changed in the layout editor,
+        but only does something if the save button was pressed."""
         if self.layout.layout["saving"]["save_button"]:
-            # Save iff the save button was pressed.
             self.layout.layout["saving"]["save_button"] = False
             # Also save the node positions.
-            self.set_current_vis_node_positions_in_layout()
+            self.save_node_positions()
             try:
                 self.layout.save(
                     self.layout.layout["saving"]["filename"],
@@ -92,17 +103,17 @@ class LayoutEditor(stormvogel.displayable.Displayable):
                     )
 
     def process_load_button(self):
+        """Triggered whenever something is changed in the layout editor,
+        but only does something if the load button was pressed."""
         if self.layout.layout["saving"]["load_button"]:
-            # Load iff the load button was pressed.
             self.layout.layout["saving"]["load_button"] = False
             try:
                 self.layout.load(
                     self.layout.layout["saving"]["filename"],
                     path_relative=self.layout.layout["saving"]["relative_path"],
                 )
-                self.show()  # TODO replace this with simply setting the button values so that the entire menu doesn't have to reload (looks weird).
-                if self.vis is not None:
-                    self.vis.show()
+                self.try_show_vis()
+                # TODO: self.show()?
             except OSError:
                 logging.warning("Loaded file does not exist.")
                 with self.output:
@@ -111,14 +122,14 @@ class LayoutEditor(stormvogel.displayable.Displayable):
                     )
 
     def process_reload_button(self):
+        """Triggered whenever something is changed in the layout editor,
+        but only does something if the reload button was pressed."""
         if self.layout.layout["reload_button"] and self.vis is not None:
-            # Call show again iff the reload button was pressed.
             self.layout.layout["reload_button"] = False
             with self.debug_output:
                 logging.info("Received reload button request.")
-            self.set_current_vis_node_positions_in_layout()
-            self.update_possible_groups()
-            self.vis.show()
+            self.save_node_positions()  # TODO should this be here?
+            self.try_show_vis()
             self.show()
 
     def try_update(self):
@@ -129,12 +140,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.process_save_button()
         self.process_load_button()
         self.process_reload_button()
-        if self.vis is not None:
-            self.vis.update()
-
-    def try_show(self):
-        if self.vis is not None:
-            self.vis.show()
+        self.try_show_vis()
 
     def show(self) -> None:
         """Display an interactive layout editor, according to the schema."""

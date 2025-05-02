@@ -39,7 +39,10 @@ class Network(stormvogel.displayable.Displayable):
             height (int): Height of the network, in pixels.
             output (widgets.Output): An output widget within which the network should be displayed.
             do_display (bool): Set to true iff you want the Network to display. Defaults to True.
-            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you."""
+            debug_output (widgets.Output): Debug information is displayed in this output. Leave to default if that doesn't interest you.
+            do_init_server (bool): Set to true iff you want to initialize the server. Defaults to True.
+            positions (dict): A dictionary of node positions. The keys are the node ids, and the values are dictionaries with x and y coordinates.
+            use_iframe (bool): Set to true iff you want to use an iframe. Defaults to False."""
         super().__init__(output, do_display, debug_output)
         if name is None:
             self.name: str = "".join(random.choices(string.ascii_letters, k=10))
@@ -192,7 +195,7 @@ class Network(stormvogel.displayable.Displayable):
             logging.info("Called Network.reload")
 
     def update_options(self, options: str):
-        """Update the options. The string DOES NOT WORK if it starts with 'var options = '"""
+        """Update the options. The string DOES NOT WORK if it starts with 'var options = ' like in pyvis."""
         self.set_options(options)
         js = f"""{self.network_wrapper}.network.setOptions({options});"""
         with self.spam:

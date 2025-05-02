@@ -135,18 +135,12 @@ def DEFAULT():
 
 
 def EXPLORE():
-    return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/explore.json"), path_relative=False
-    )
+    default = DEFAULT()
+    default.layout.layout["misc"]["explore"] = True
+    return default
 
 
 def SV():
     return Layout(
         os.path.join(PACKAGE_ROOT_DIR, "layouts/sv.json"), path_relative=False
-    )
-
-
-def CAR():
-    return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/car.json"), path_relative=False
     )

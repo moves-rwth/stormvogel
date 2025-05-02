@@ -36,9 +36,9 @@ class WidgetWrapper:
         """Creates a widget which automatically updates a dictonary value.
 
         Args:
-            title (str): 'description' of the widget.
-            widget (Widget): A str name for a widget.
-            path (list[str]): path to the value in update_dict to be changed.
+            description (str): 'description' of the widget. Will be shown in the UI.
+            widget (str): A str name for a widget.
+            path (list[str]): path to the value in update_dict to be changed if the user changes this widget.
             initial_value (Any): initial value of the widget (aka. 'value')
             update_dict (dict): The dict that should be updated.
             on_update (Callable): A function that is called whenever a value is updated.
@@ -74,12 +74,15 @@ class DictEditor(stormvogel.displayable.Displayable):
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
     ) -> None:
-        """Create an interactive json editor from a schema using ipy widgets.
+        """Create an interactive json editor from a schema using ipy widgets. Display it using the show() method.
 
         Args:
             schema (dict): The dict that specifies the schema.
                 Quite closely follows the structure of the actual dict. Supports macros.
-                See layouts/schema.json for an example. Better docs TODO.
+                Macros are defined as a dict with the key "__macros" and the value is the name of the macro.
+                A macro can be used in the schema by using the key "__use_macro" and the value is the name of the macro.
+
+                See layouts/schema.json for an example.
             update_dict (dict): The dict that will be updated.
             on_update (_type_): Function that is called whenever the dict is updated.
         """

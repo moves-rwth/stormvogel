@@ -116,7 +116,8 @@ class Visualization(stormvogel.displayable.Displayable):
         )
 
     def show(self) -> None:
-        """(Re-)load the Network and display if self.do_display is True."""
+        """(Re-)load the Network and display if self.do_display is True.
+        An important side effect of this is that the network is reloaded, so all changes to the layout are applied."""
         with self.output:  ## If there was already a rendered network, clear it.
             ipd.clear_output()
         self.__create_nt()
