@@ -49,12 +49,13 @@ class Network(stormvogel.displayable.Displayable):
         else:
             self.name: str = name
         self.use_iframe: bool = use_iframe
+        self.network_wrapper: str = ""  # Use this for javascript injection.
         if self.use_iframe:
-            self.network_wrapper = (
+            self.network_wrapper: str = (
                 f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
             )
         else:
-            self.network_wrapper = f"nw_{self.name}"
+            self.network_wrapper: str = f"nw_{self.name}"
         self.width: int = width
         self.height: int = height
         self.nodes_js: str = ""

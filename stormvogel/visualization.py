@@ -56,6 +56,8 @@ class Visualization(stormvogel.displayable.Displayable):
         use_iframe: bool = False,
         do_init_server: bool = True,
         do_display: bool = True,
+        max_states: int = 1000,
+        max_physics_states: int = 500,
     ) -> None:
         """Create and show a visualization of a Model using a visjs Network
         Args:
@@ -76,6 +78,8 @@ class Visualization(stormvogel.displayable.Displayable):
                 If this is set to False, then exporting network node positions and svg/pdf/latex is impossible.
             do_display (bool): The Visualization displays on its own iff this is enabled.
                 This option is useful for situations where you want to manage the displaying externally.
+            max_states (int): If the model has more states, then the network is not displayed.
+            max_physics_states (int): If the model has more states, then physics are disabled.
         Returns: Visualization object.
         """
         super().__init__(output, do_display, debug_output)
@@ -84,6 +88,8 @@ class Visualization(stormvogel.displayable.Displayable):
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
+        self.max_states: int = max_states
+        self.max_physics_states: int = max_physics_states
         # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
         self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
@@ -122,6 +128,21 @@ class Visualization(stormvogel.displayable.Displayable):
         """
         with self.output:  ## If there was already a rendered network, clear it.
             ipd.clear_output()
+        if len(self.model.get_states()) > self.max_states:
+            with self.output:
+                print(
+                    f"This model has more than {self.max_states} states. If you want to proceed, set max_states to a higher value."
+                    f"This is to prevent the browser from crashing, be careful."
+                )
+            return
+        if len(self.model.get_states()) > self.max_physics_states:
+            with self.output:
+                print(
+                    f"This model has more than {self.max_physics_states} states. If you want physics, set max_physics_states to a higher value."
+                    f"Physics are disabled to prevent the browser from crashing, be careful."
+                )
+            self.layout.layout["physics"] = False
+            self.layout.copy_settings()
         self.__create_nt()
         if self.layout.layout["misc"]["explore"]:
             self.nt.enable_exploration_mode(self.model.get_initial_state().id)
@@ -135,7 +156,6 @@ class Visualization(stormvogel.displayable.Displayable):
 
         self.__add_states()
         self.__add_transitions()
-        self.__update_physics_enabled()
         self.nt.set_options(str(self.layout))
         if self.nt is not None:
             self.nt.show()
@@ -236,12 +256,6 @@ class Visualization(stormvogel.displayable.Displayable):
                             color=edge_color,
                         )
                     network_action_id += 1
-
-    def __update_physics_enabled(self) -> None:
-        """Enable physics iff the model has less than 10000 states."""
-        if "physics" not in self.layout.layout:
-            self.layout.layout["physics"] = {}
-        self.layout.layout["misc"]["enable_physics"] = len(self.model.states) < 10000
 
     def __format_probability(self, prob: stormvogel.model.Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.

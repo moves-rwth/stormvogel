@@ -19,6 +19,8 @@ def show(
     debug_output: widgets.Output = widgets.Output(),
     use_iframe: bool = False,
     do_init_server: bool = True,
+    max_states: int = 1000,
+    max_physics_states: int = 500,
 ) -> stormvogel.visualization.Visualization:
     """Create and show a visualization of a Model using a visjs Network
 
@@ -36,6 +38,8 @@ def show(
             In some environments, the visualization works better with this enabled.
         do_init_server(bool): Initialize a local server that is used for communication between Javascript and Python.
             If this is set to False, then exporting network node positions and svg/pdf/latex is impossible.
+        max_states (int): If the model has more states, then the network is not displayed.
+        max_physics_states (int): If the model has more states, then physics are disabled.
     Returns: Visualization object.
     """
     if layout is None:

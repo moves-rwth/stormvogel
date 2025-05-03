@@ -45,12 +45,6 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         if self.vis is not None:
             self.vis.show()
 
-    def copy_settings(self):
-        """Copy some settings from one place in the layout to another place in the layout.
-        They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
-        self.layout.layout["physics"] = self.layout.layout["misc"]["enable_physics"]
-        # TODO invesitagate if we also need to move the width and height settings.
-
     def save_node_positions(self):
         """Try to save the positions of the nodes in the graph to the layout.
         The user is informed if this fails."""
@@ -127,7 +121,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
 
     def try_update(self):
         """Process the updates from the layout editor where required."""
-        self.copy_settings()
+        self.layout.copy_settings()
         if not self.loaded:
             return
         save = self.layout.layout["saving"]["save_button"]
