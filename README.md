@@ -3,6 +3,7 @@
 An interactive approach to probabilistic model checking
 
 Take a look at [the stormvogel documentation!](https://moves-rwth.github.io/stormvogel/)
+For developers/mantainers, see the GitHub Wiki.
 
 ## Use With Docker
 
