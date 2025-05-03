@@ -52,7 +52,7 @@ def autoscale_svg(raw_svg: str, target_width: float) -> str:
     # Return the modified SVG as a string
     return etree.tostring(
         root,
-        pretty_print=True,
-        xml_declaration=True,
+        pretty_print=True,  # type: ignore
+        xml_declaration=True,  # type: ignore
         encoding="utf-8",  # type: ignore
     ).decode()

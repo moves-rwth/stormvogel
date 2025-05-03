@@ -1,5 +1,9 @@
 from typing import Tuple
-import stormpy
+
+try:
+    import stormpy
+finally:
+    pass
 import stormvogel.model
 import stormvogel.stormpy_utils.mapping as mapping
 from stormvogel.extensions.helpers import choice_mapping

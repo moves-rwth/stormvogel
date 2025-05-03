@@ -126,6 +126,11 @@ class Layout:
     def __str__(self) -> str:
         return json.dumps(self.layout, indent=2)
 
+    def copy_settings(self):
+        """Copy some settings from one place in the layout to another place in the layout.
+        They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
+        self.layout["physics"] = self.layout["misc"]["enable_physics"]
+
 
 # Define template layouts.
 def DEFAULT():
@@ -135,18 +140,12 @@ def DEFAULT():
 
 
 def EXPLORE():
-    return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/explore.json"), path_relative=False
-    )
+    default = DEFAULT()
+    default.layout.layout["misc"]["explore"] = True
+    return default
 
 
 def SV():
     return Layout(
         os.path.join(PACKAGE_ROOT_DIR, "layouts/sv.json"), path_relative=False
-    )
-
-
-def CAR():
-    return Layout(
-        os.path.join(PACKAGE_ROOT_DIR, "layouts/car.json"), path_relative=False
     )
