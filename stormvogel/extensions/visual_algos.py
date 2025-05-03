@@ -1,4 +1,5 @@
-"""Some example applications of the stormvogel API!"""
+"""Simple implementations of two model checking algorithms in stormvogel,
+along with a function to display the workings of the algorithms."""
 
 from typing import Any
 import stormvogel.model

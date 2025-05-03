@@ -130,7 +130,6 @@ class Layout:
         """Copy some settings from one place in the layout to another place in the layout.
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout["physics"] = self.layout["misc"]["enable_physics"]
-        # TODO invesitagate if we also need to move the width and height settings.
 
 
 # Define template layouts.

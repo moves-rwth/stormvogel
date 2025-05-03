@@ -69,7 +69,8 @@ function return_id_result(url, id, data) {
     }
 """
         ipd.display(ipd.HTML(f"<script>{js}</script>"))
-        ipd.display(ipd.Javascript(js))  # TODO check which one of these can be removed.
+        ipd.display(ipd.Javascript(js))
+        # These should both do the same thing, but just in case.
 
         class InnerServer(http.server.BaseHTTPRequestHandler):
             def do_POST(self):
