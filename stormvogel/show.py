@@ -54,6 +54,8 @@ def show(
         debug_output=debug_output,
         do_init_server=do_init_server,
         use_iframe=use_iframe,
+        max_states=max_states,
+        max_physics_states=max_physics_states,
     )
     vis.show()
     if show_editor:
