@@ -1,5 +1,4 @@
 import stormvogel.model
-import re
 import json
 
 try:
