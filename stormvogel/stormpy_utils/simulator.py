@@ -136,6 +136,31 @@ def get_range_index(
     return available_actions.index(action)
 
 
+def step(state: stormvogel.model.State, action: stormvogel.model.Action | None = None, seed: int | None = None):
+    """given a state, action and seed we simulate a step and return information on the state we discover"""
+
+    transitions = state.get_outgoing_transitions(action)
+    probability_distribution = [t[0] for t in transitions]
+    states = [t[1] for t in transitions]
+    if seed is not None:
+        rng = random.Random(seed)
+        next_state = rng.choices(states, k=1 , weights=probability_distribution)[0]
+    else:
+        next_state = random.choices(states, k=1 , weights=probability_distribution)[0]
+
+    next_state_id = next_state.id
+
+    rewards = []
+    if not next_state.model.supports_actions():
+        for rewardmodel in next_state.model.rewards:
+            rewards.append(rewardmodel.get_state_reward(next_state))
+    else:
+        for rewardmodel in next_state.model.rewards:
+            rewards.append(rewardmodel.get_state_action_reward(state,action))
+
+    return next_state_id, rewards, next_state.labels
+
+
 def simulate_path(
     model: stormvogel.model.Model,
     steps: int = 1,
@@ -227,16 +252,6 @@ def simulate(
 
     Returns the partial model discovered by all the runs of the simulator together
     """
-    assert stormpy is not None
-
-    # we initialize the simulator
-    stormpy_model = mapping.stormvogel_to_stormpy(model)
-    assert stormpy_model is not None
-    if seed:
-        simulator = stormpy.simulator.create_simulator(stormpy_model, seed)
-    else:
-        simulator = stormpy.simulator.create_simulator(stormpy_model)
-    assert simulator is not None
 
     # we keep track of all discovered states over all runs and add them to the partial model
     # we also add the discovered rewards and actions to the partial model if present
@@ -278,12 +293,9 @@ def simulate(
     if not partial_model.supports_actions():
         discovered_states_before_transitions = set()
         for i in range(runs):
-            simulator.restart()
             last_state_id = 0
             for j in range(steps):
-                state_id, reward, labels = simulator.step()
-                # we get the rewards in reversed order
-                reward.reverse()
+                state_id, reward, labels = step(model.get_state_by_id(last_state_id), seed=seed+i+j)
 
                 # we add to the partial model what we discovered (if new)
                 if state_id not in discovered_states:
@@ -330,36 +342,32 @@ def simulate(
                         s.add_transitions([(probability, new_state)])
 
                 last_state_id = state_id
-                if simulator.is_done():
-                    break
     else:
         discovered_actions = set()
-        random.seed(seed)
         for i in range(runs):
-            state_id = 0
             last_state_id = 0
-            simulator.restart()
             for j in range(steps):
                 # we first choose an action
-                actions = simulator.available_actions()
+                actions = model.get_state_by_id(last_state_id).available_actions()
                 select_action = (
-                    get_range_index(model.get_state_by_id(state_id), scheduler)
+                    get_range_index(model.get_state_by_id(last_state_id), scheduler)
                     if scheduler
                     else random.randint(0, len(actions) - 1)
                 )
-                # we add the action to the partial model
+
+                # we add the action to the partial model (if new)
                 assert partial_model.actions is not None
-                action = model.states[state_id].available_actions()[select_action]
+                action = model.states[last_state_id].available_actions()[select_action]
                 if action not in partial_model.actions:
                     partial_model.new_action(action.labels)
 
                 # we get the new discovery
-                discovery = simulator.step(actions[select_action])
+                discovery = step(model.get_state_by_id(last_state_id),actions[select_action],seed+i+j)
 
                 # we add the rewards.
                 reward = discovery[1]
                 for index, rewardmodel in enumerate(partial_model.rewards):
-                    state = model.get_state_by_id(state_id)
+                    state = model.get_state_by_id(last_state_id)
                     rewardmodel.set_state_action_reward(state, action, reward[index])
 
                 # we add the state to the model
@@ -407,7 +415,5 @@ def simulate(
                         s.add_transitions(trans)
 
                 last_state_id = state_id
-                if simulator.is_done():
-                    break
 
     return partial_model

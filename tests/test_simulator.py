@@ -20,7 +20,7 @@ def test_simulate():
     rewardmodel3 = dtmc.add_rewards("rewardmodel3")
     for stateid in dtmc.states.keys():
         rewardmodel3.rewards[(stateid, EmptyAction)] = 1
-    partial_model = simulator.simulate(dtmc, runs=5, steps=1, seed=1)
+    partial_model = simulator.simulate(dtmc, runs=5, steps=1, seed=3)
 
     # we make the partial model that should be created by the simulator
     other_dtmc = stormvogel.model.new_dtmc()
@@ -28,9 +28,9 @@ def test_simulate():
     init.valuations = {"rolled": 0}
     init.set_transitions(
         [
-            (1 / 6, other_dtmc.new_state("rolled6", valuations={"rolled": 6})),
-            (1 / 6, other_dtmc.new_state("rolled1", valuations={"rolled": 1})),
             (1 / 6, other_dtmc.new_state("rolled2", valuations={"rolled": 2})),
+            (1 / 6, other_dtmc.new_state("rolled4", valuations={"rolled": 4})),
+            (1 / 6, other_dtmc.new_state("rolled5", valuations={"rolled": 5})),
         ]
     )
 
@@ -72,7 +72,7 @@ def test_simulate():
                 1 / 3,
                 other_mdp.new_state(
                     "carchosen",
-                    valuations={"car_pos": 2, "reveal_pos": -1, "chosen_pos": -1},
+                    valuations={"car_pos": 0, "reveal_pos": -1, "chosen_pos": -1},
                 ),
             )
         ]
@@ -82,7 +82,7 @@ def test_simulate():
             (
                 1,
                 other_mdp.new_state(
-                    "open", valuations={"car_pos": 2, "chosen_pos": 0, "reveal_pos": -1}
+                    "open", valuations={"car_pos": 0, "chosen_pos": 0, "reveal_pos": -1}
                 ),
             )
         ]
@@ -93,10 +93,10 @@ def test_simulate():
     other_mdp.get_state_by_id(2).add_transitions(
         [
             (
-                1,
+                0.5,
                 other_mdp.new_state(
                     "goatrevealed",
-                    valuations={"car_pos": 2, "chosen_pos": 0, "reveal_pos": 1},
+                    valuations={"car_pos": 0, "chosen_pos": 0, "reveal_pos": 1},
                 ),
             )
         ]
@@ -105,14 +105,14 @@ def test_simulate():
     rewardmodel = other_mdp.add_rewards("rewardmodel")
     rewardmodel.rewards = {
         (0, stormvogel.model.EmptyAction): 0,
-        (3, action1): 7,
-        (10, stormvogel.model.EmptyAction): 16,
+        (1, action1): 1,
+        (4, stormvogel.model.EmptyAction): 10,
     }
     rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
     rewardmodel2.rewards = {
         (0, stormvogel.model.EmptyAction): 0,
-        (3, action1): 7,
-        (10, stormvogel.model.EmptyAction): 16,
+        (1, action1): 1,
+        (4, stormvogel.model.EmptyAction): 10,
     }
 
     assert partial_model == other_mdp
@@ -140,7 +140,7 @@ def test_simulate():
                 1 / 3,
                 other_mdp.new_state(
                     "carchosen",
-                    valuations={"car_pos": 2, "reveal_pos": -1, "chosen_pos": -1},
+                    valuations={"car_pos": 0, "reveal_pos": -1, "chosen_pos": -1},
                 ),
             )
         ]
@@ -150,7 +150,7 @@ def test_simulate():
             (
                 1,
                 other_mdp.new_state(
-                    "open", valuations={"car_pos": 2, "chosen_pos": 0, "reveal_pos": -1}
+                    "open", valuations={"car_pos": 0, "chosen_pos": 0, "reveal_pos": -1}
                 ),
             )
         ]
@@ -161,10 +161,10 @@ def test_simulate():
     other_mdp.get_state_by_id(2).set_transitions(
         [
             (
-                1,
+                0.5,
                 other_mdp.new_state(
                     "goatrevealed",
-                    valuations={"car_pos": 2, "chosen_pos": 0, "reveal_pos": 1},
+                    valuations={"car_pos": 0, "chosen_pos": 0, "reveal_pos": 1},
                 ),
             )
         ]
@@ -174,29 +174,16 @@ def test_simulate():
 
     # we do a more complicated mdp test to check if partial model transitions are properly added:
     lion = create_lion_mdp()
-    partial_model = simulator.simulate(lion, steps=100, seed=2, scheduler=scheduler)
+    partial_model = simulator.simulate(lion, steps=100, seed=1, scheduler=scheduler)
 
     lion = stormvogel.model.new_mdp(name="lion")
     init = lion.get_initial_state()
     hungry = lion.new_state("hungry :(")
     satisfied = init
-    starving = lion.new_state("starving :((")
     full = lion.new_state("full")
-
+    starving = lion.new_state("starving :((")
     hunt = lion.new_action("hunt >:D")
 
-    full.set_transitions(
-        stormvogel.model.Transition(
-            {
-                hunt: stormvogel.model.Branch(
-                    [
-                        (0.5, satisfied),
-                        (0.5, full),
-                    ]
-                ),
-            }
-        )
-    )
 
     satisfied.set_transitions(
         stormvogel.model.Transition(
@@ -218,13 +205,26 @@ def test_simulate():
         )
     )
 
-    starving.set_transitions(
+    full.set_transitions(
         stormvogel.model.Transition(
             {
-                hunt: stormvogel.model.Branch([(0.1, full), (0.5, satisfied)]),
+                hunt: stormvogel.model.Branch(
+                    [
+                        (0.5, full), (0.5, satisfied),
+                    ]
+                ),
             }
         )
     )
+
+    starving.set_transitions(
+        stormvogel.model.Transition(
+            {
+                hunt: stormvogel.model.Branch([(0.2, hungry)]),
+            }
+        )
+    )
+
     lion.add_self_loops()
 
     reward_model = lion.add_rewards("R")
