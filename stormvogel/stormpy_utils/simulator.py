@@ -136,17 +136,22 @@ def get_range_index(
     return available_actions.index(action)
 
 
-def step(state: stormvogel.model.State, action: stormvogel.model.Action | None = None, seed: int | None = None):
+def step(
+    state: stormvogel.model.State,
+    action: stormvogel.model.Action | None = None,
+    seed: int | None = None,
+):
     """given a state, action and seed we simulate a step and return information on the state we discover"""
 
     transitions = state.get_outgoing_transitions(action)
-    probability_distribution = [t[0] for t in transitions]
+    assert transitions is not None  # what if there are no transitions?
+    probability_distribution = [float(t[0]) for t in transitions]
     states = [t[1] for t in transitions]
     if seed is not None:
         rng = random.Random(seed)
-        next_state = rng.choices(states, k=1 , weights=probability_distribution)[0]
+        next_state = rng.choices(states, k=1, weights=probability_distribution)[0]
     else:
-        next_state = random.choices(states, k=1 , weights=probability_distribution)[0]
+        next_state = random.choices(states, k=1, weights=probability_distribution)[0]
 
     next_state_id = next_state.id
 
@@ -156,7 +161,8 @@ def step(state: stormvogel.model.State, action: stormvogel.model.Action | None =
             rewards.append(rewardmodel.get_state_reward(next_state))
     else:
         for rewardmodel in next_state.model.rewards:
-            rewards.append(rewardmodel.get_state_action_reward(state,action))
+            assert action is not None
+            rewards.append(rewardmodel.get_state_action_reward(state, action))
 
     return next_state_id, rewards, next_state.labels
 
@@ -295,7 +301,10 @@ def simulate(
         for i in range(runs):
             last_state_id = 0
             for j in range(steps):
-                state_id, reward, labels = step(model.get_state_by_id(last_state_id), seed=seed+i+j)
+                state_id, reward, labels = step(
+                    model.get_state_by_id(last_state_id),
+                    seed=seed + i + j if seed is not None else None,
+                )
 
                 # we add to the partial model what we discovered (if new)
                 if state_id not in discovered_states:
@@ -362,7 +371,11 @@ def simulate(
                     partial_model.new_action(action.labels)
 
                 # we get the new discovery
-                discovery = step(model.get_state_by_id(last_state_id),actions[select_action],seed+i+j)
+                discovery = step(
+                    model.get_state_by_id(last_state_id),
+                    actions[select_action],
+                    seed=seed + i + j if seed is not None else None,
+                )
 
                 # we add the rewards.
                 reward = discovery[1]

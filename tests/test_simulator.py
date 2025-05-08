@@ -184,7 +184,6 @@ def test_simulate():
     starving = lion.new_state("starving :((")
     hunt = lion.new_action("hunt >:D")
 
-
     satisfied.set_transitions(
         stormvogel.model.Transition(
             {
@@ -210,7 +209,8 @@ def test_simulate():
             {
                 hunt: stormvogel.model.Branch(
                     [
-                        (0.5, full), (0.5, satisfied),
+                        (0.5, full),
+                        (0.5, satisfied),
                     ]
                 ),
             }
