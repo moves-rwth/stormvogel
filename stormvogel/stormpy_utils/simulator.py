@@ -1,14 +1,8 @@
 import stormvogel.result
-import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.model
 from typing import Callable
 import random
 from stormvogel.model import EmptyAction
-
-try:
-    import stormpy.simulator
-except ImportError:
-    stormpy = None
 
 
 class Path:
@@ -186,32 +180,25 @@ def simulate_path(
 
     Returns a path object.
     """
-    assert stormpy is not None
-
-    # we initialize the simulator
-    stormpy_model = mapping.stormvogel_to_stormpy(model)
-    if seed:
-        simulator = stormpy.simulator.create_simulator(stormpy_model, seed)
-    else:
-        simulator = stormpy.simulator.create_simulator(stormpy_model)
-    assert simulator is not None
 
     # we start adding states or state action pairs to the path
     state_id = 0
     path = {}
-    simulator.restart()
     if not model.supports_actions():
         for i in range(steps):
             # for each step we add a state to the path
-            if not model.states[state_id].is_absorbing() and not simulator.is_done():
-                state_id, reward, labels = simulator.step()
+            if not model.states[state_id].is_absorbing():
+                state_id, reward, labels = step(
+                    model.get_state_by_id(state_id),
+                    seed=seed + i if seed is not None else None,
+                )
                 path[i + 1] = model.states[state_id]
             else:
                 break
     else:
         for i in range(steps):
             # we first choose an action (randomly or according to scheduler)
-            actions = simulator.available_actions()
+            actions = model.get_state_by_id(state_id).available_actions()
             select_action = (
                 get_range_index(model.get_state_by_id(state_id), scheduler)
                 if scheduler
@@ -223,11 +210,12 @@ def simulate_path(
                 select_action
             ]
 
-            if (
-                not model.states[state_id].is_absorbing(stormvogel_action)
-                and not simulator.is_done()
-            ):
-                state_id, reward, labels = simulator.step(actions[select_action])
+            if not model.states[state_id].is_absorbing(stormvogel_action):
+                state_id, reward, labels = step(
+                    model.get_state_by_id(state_id),
+                    actions[select_action],
+                    seed=seed + i if seed is not None else None,
+                )
                 path[i + 1] = (stormvogel_action, model.states[state_id])
             else:
                 break

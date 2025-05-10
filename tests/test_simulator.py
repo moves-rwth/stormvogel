@@ -270,15 +270,15 @@ def test_simulate_path():
 
     other_path = simulator.Path(
         {
-            1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(3)),
+            1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(1)),
             2: (
                 action0,
-                pomdp.get_state_by_id(12),
+                pomdp.get_state_by_id(6),
             ),
-            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(23)),
+            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(16)),
             4: (
                 action1,
-                pomdp.get_state_by_id(46),
+                pomdp.get_state_by_id(32),
             ),
         },
         pomdp,
@@ -303,15 +303,15 @@ def test_simulate_path():
     # we make the path that the simulate path function should create
     other_path = simulator.Path(
         {
-            1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(3)),
+            1: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(1)),
             2: (
                 action0,
-                pomdp.get_state_by_id(10),
+                pomdp.get_state_by_id(4),
             ),
-            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(21)),
+            3: (stormvogel.model.EmptyAction, pomdp.get_state_by_id(13)),
             4: (
                 action1,
-                pomdp.get_state_by_id(41),
+                pomdp.get_state_by_id(25),
             ),
         },
         pomdp,
