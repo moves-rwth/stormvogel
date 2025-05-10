@@ -2,6 +2,7 @@ import stormvogel.model
 import re
 import stormvogel.parametric as parametric
 import numpy as np
+import json
 
 try:
     import stormpy
@@ -556,11 +557,9 @@ def stormpy_to_stormvogel(
             valuations = sparsemodel.state_valuations
 
             for state_id, state in model.states.items():
-                s = valuations.get_string(state_id)
-                s = s.strip("[]")
-                matches = re.findall(r"(\w+)=(\S+)", s)
-                result = {match[0]: int(match[1]) for match in matches}
-                state.valuations = result
+                v = json.loads(str(valuations.get_json(state_id)))
+                if v is not None:
+                    state.valuations = v
 
     def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> stormvogel.model.Model:
         """

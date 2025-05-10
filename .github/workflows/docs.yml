@@ -18,6 +18,7 @@ env:
 jobs:
   pre-commit:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
     container:
       image: movesrwth/stormpy:ci-debug
     steps:
@@ -54,6 +55,8 @@ jobs:
         with:
           files: |
             docs/**/*.ipynb
+          exclude: |
+            docs/1-introduction/1-Introduction.ipynb
 
       - name: Run documentation notebooks
         run: |

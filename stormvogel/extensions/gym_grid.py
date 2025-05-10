@@ -125,7 +125,16 @@ def gymnasium_render_model_gif(
     loop: int = 0,
 ) -> str:
     """Render a gymnasium model to a gif, using the gymnasium_scheduler (A map from state numbers to action numbers) to pick an action.
-    Leave as None for a random action."""
+    Leave as None for a random action.
+
+    Args:
+        env: The gymnasium environment.
+        gymnasium_scheduler: A function that takes a state number and returns an action number.
+        filename: The name of the gif file to save.
+        max_length: The maximum number of frames to render.
+        fps: Frames per second for the gif.
+        loop: Number of times to loop the gif (0 means loop forever).
+    """
     frames = []  # List to store frames
 
     state, info = env.reset()
