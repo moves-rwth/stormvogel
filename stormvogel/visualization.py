@@ -6,7 +6,7 @@
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
-import stormvogel.stormpy_utils.simulator as simulator
+import stormvogel.simulator as simulator
 import stormvogel.network
 import stormvogel.displayable
 
