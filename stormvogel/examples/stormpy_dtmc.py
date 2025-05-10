@@ -4,6 +4,8 @@
 def example_building_dtmcs_01():
     import stormpy
 
+    assert stormpy is not None
+
     # Use the SparseMatrixBuilder for constructing the transition matrix
     builder = stormpy.SparseMatrixBuilder(
         rows=0,
