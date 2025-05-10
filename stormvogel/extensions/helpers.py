@@ -1,6 +1,10 @@
 from bidict import bidict
 from typing import Any
-import stormpy
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def choice_mapping(sv_model, sp_model):
@@ -16,4 +20,5 @@ def choice_mapping(sv_model, sp_model):
 
 
 def to_bit_vector(state_set: set[int], model: Any):
+    assert stormpy is not None
     return stormpy.BitVector(model.transition_matrix.nr_columns, list(state_set))

@@ -1,5 +1,6 @@
 import stormvogel.model
 import stormvogel.result
+from typing import Union
 
 try:
     import stormpy
@@ -8,7 +9,7 @@ except ImportError:
 
 
 def convert_scheduler_to_stormvogel(
-    model: stormvogel.model.Model, stormpy_scheduler: stormpy.storage.Scheduler
+    model: stormvogel.model.Model, stormpy_scheduler: "stormpy.storage.Scheduler"
 ):
     """Converts a stormpy scheduler to a stormvogel scheduler"""
     taken_actions = {}
@@ -23,9 +24,11 @@ def convert_scheduler_to_stormvogel(
 
 def convert_model_checking_result(
     model: stormvogel.model.Model,
-    stormpy_result: stormpy.core.ExplicitQuantitativeCheckResult
-    | stormpy.core.ExplicitQualitativeCheckResult
-    | stormpy.core.ExplicitParametricQuantitativeCheckResult,
+    stormpy_result: Union[
+        "stormpy.core.ExplicitQuantitativeCheckResult",
+        "stormpy.core.ExplicitQualitativeCheckResult",
+        "stormpy.core.ExplicitParametricQuantitativeCheckResult",
+    ],
     with_scheduler: bool = True,
 ) -> stormvogel.result.Result | None:
     """

@@ -1,5 +1,6 @@
 import stormvogel.model
 import json
+from typing import Optional, Union
 
 try:
     import stormpy
@@ -9,13 +10,14 @@ except ImportError:
 
 def stormvogel_to_stormpy(
     model: stormvogel.model.Model,
-) -> (
-    stormpy.storage.SparseDtmc
-    | stormpy.storage.SparseMdp
-    | stormpy.storage.SparseCtmc
-    | stormpy.storage.SparsePomdp
-    | None
-):
+) -> Optional[
+    Union[
+        "stormpy.storage.SparseDtmc",
+        "stormpy.storage.SparseMdp",
+        "stormpy.storage.SparseCtmc",
+        "stormpy.storage.SparsePomdp",
+    ]
+]:
     def build_matrix(
         model: stormvogel.model.Model,
         choice_labeling: stormpy.storage.ChoiceLabeling | None,
@@ -375,11 +377,13 @@ def stormvogel_to_stormpy(
 
 
 def stormpy_to_stormvogel(
-    sparsemodel: stormpy.storage.SparseDtmc
-    | stormpy.storage.SparseMdp
-    | stormpy.storage.SparseCtmc
-    | stormpy.storage.SparsePomdp
-    | stormpy.storage.SparseMA,
+    sparsemodel: Union[
+        "stormpy.storage.SparseDtmc",
+        "stormpy.storage.SparseMdp",
+        "stormpy.storage.SparseCtmc",
+        "stormpy.storage.SparsePomdp",
+        "stormpy.storage.SparseMA",
+    ],
 ) -> stormvogel.model.Model | None:
     def add_states(
         model: stormvogel.model.Model,
