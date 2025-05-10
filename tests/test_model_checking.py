@@ -19,12 +19,14 @@ def test_model_checking():
     # and directly
     prop = stormpy.parse_properties(prop)
 
-    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(mdp)
+    stormpy_model = stormvogel.stormpy_utils.mapping.stormvogel_to_stormpy(mdp)
     stormpy_result = stormpy.model_checking(
         stormpy_model, prop[0], extract_scheduler=True
     )
 
-    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
+    stormvogel_model = stormvogel.stormpy_utils.mapping.stormpy_to_stormvogel(
+        stormpy_model
+    )
 
     stormvogel_result = (
         stormvogel.stormpy_utils.convert_results.convert_model_checking_result(
@@ -39,10 +41,12 @@ def test_model_checking():
 
     # indirectly:
     prop = stormpy.parse_properties(prop)
-    stormpy_model = stormvogel.mapping.stormvogel_to_stormpy(dtmc)
+    stormpy_model = stormvogel.stormpy_utils.mapping.stormvogel_to_stormpy(dtmc)
     stormpy_result = stormpy.model_checking(stormpy_model, prop[0])
 
-    stormvogel_model = stormvogel.mapping.stormpy_to_stormvogel(stormpy_model)
+    stormvogel_model = stormvogel.stormpy_utils.mapping.stormpy_to_stormvogel(
+        stormpy_model
+    )
 
     stormvogel_result = (
         stormvogel.stormpy_utils.convert_results.convert_model_checking_result(

@@ -1,4 +1,4 @@
-import stormvogel.stormpy_utils.simulator as simulator
+import stormvogel.simulator as simulator
 import stormvogel.model
 from typing import Callable
 import imageio

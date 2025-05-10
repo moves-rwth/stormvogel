@@ -8,7 +8,7 @@ from stormvogel.model import *  # NOQA
 from stormvogel.property_builder import build_property_string  # NOQA
 from stormvogel.result import *  # NOQA
 from stormvogel.show import *  # NOQA
-from stormvogel.stormpy_utils.simulator import *  # NOQA
+from stormvogel.simulator import *  # NOQA
 from stormvogel import pgc  # NOQA
 from stormvogel import examples  # NOQA
 from stormvogel import extensions  # NOQA

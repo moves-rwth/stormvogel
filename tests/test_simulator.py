@@ -5,7 +5,7 @@ import stormvogel.examples.monty_hall_pomdp
 from stormvogel.examples.lion import create_lion_mdp
 from stormvogel.model import EmptyAction
 import stormvogel.model
-import stormvogel.stormpy_utils.simulator as simulator
+import stormvogel.simulator as simulator
 
 
 def test_simulate():
