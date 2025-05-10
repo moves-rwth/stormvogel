@@ -2,6 +2,8 @@ import stormvogel.model
 import re
 import stormvogel.parametric as parametric
 import numpy as np
+from ast import literal_eval
+
 import json
 
 try:
@@ -471,40 +473,43 @@ def value_to_stormvogel(value: stormpy.pycarl.cln.FactorizedRationalFunction) ->
 
     print(value)
 
-    regular_form = value.rational_function()
-    numerator = regular_form.numerator
-    denominator = regular_form.denominator
-
     #if our function is just a rational number we return a float:
 
     #otherwise we build a rational function
-    stormvogel_numerator = parametric.Polynomial(degree=numerator.total_degree,dimension=len(numerator.gather_variables()))
-    print(dir(regular_form))
+    if isinstance(value, stormpy.pycarl.cln.FactorizedRationalFunction):
+        regular_form = value.rational_function()
+        numerator = regular_form.numerator
+        denominator = regular_form.denominator
+        numerator_variables = numerator.gather_variables()
+        denominator_variables = denominator.gather_variables()
+        stormvogel_numerator = parametric.Polynomial(degree=numerator.total_degree,dimension=len(numerator_variables)) 
+        stormvogel_denominator = parametric.Polynomial(degree=denominator.total_degree,dimension=len(denominator_variables))
 
-    print(numerator)
-    print(numerator.to_smt2())
+        print(numerator)
+        print(numerator.to_smt2())
+        #we convert to a list format
+        expr = str(numerator.to_smt2())
+        expr = str(numerator.to_smt2())
+        expr_no_ops = re.sub(r'\(\s*[+\-*/]', '(', expr)
+        expr_commas = re.sub(r'\s+', ',', expr_no_ops)
+        expr_lists = expr_commas.replace('(', '[').replace(')', ']')
+        fixed = re.sub(r'\[\s*,', '[', expr_lists)
+        quoted = re.sub(r'([,\[])\s*(-?\d+(?:\.\d*)?|\_?[a-zA-Z]\w*)', r"\1'\2'", fixed)
+        term_list = literal_eval(quoted)
 
-    smt2 = numerator.to_smt2
-    vars = re.findall(r"_r_\d+", expr)
-    counts = Counter(vars)
-    result = list(counts.items())
-
-    #and then convert to np array
-
-
-    print(dir(numerator))
-
-    print(numerator.gather_variables())
-
-    stormvogel_numerator.set_coefficient([])
-
-    stormvogel_denominator = parametric.Polynomial(degree=denominator.total_degree,dimension=len(denominator.gather_variables()))
+        #and then we convert it to a numpy array
+        
 
 
+        print(dir(numerator))
 
-    stormvogel_rational_function = parametric.RationalFunction(stormvogel_numerator, stormvogel_denominator)
+        print(numerator.gather_variables())
 
-    return stormvogel_rational_function
+        stormvogel_numerator.set_coefficient([])
+
+        stormvogel_rational_function = parametric.RationalFunction(stormvogel_numerator, stormvogel_denominator)
+
+        return stormvogel_rational_function
 
 
 

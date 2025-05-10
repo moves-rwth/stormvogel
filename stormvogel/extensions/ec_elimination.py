@@ -2,8 +2,9 @@ from typing import Tuple
 
 try:
     import stormpy
-finally:
+except:
     pass
+
 import stormvogel.model
 import stormvogel.stormpy_utils.mapping as mapping
 from stormvogel.extensions.helpers import choice_mapping

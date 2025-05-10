@@ -2,8 +2,8 @@
 
 from stormvogel import layout  # NOQA
 from stormvogel.layout import Layout  # NOQA
-from stormvogel.stormpy_utils.mapping import *  # NOQA
-from stormvogel.stormpy_utils.model_checking import model_checking  # NOQA
+#from stormvogel.stormpy_utils.mapping import *  # NOQA
+#from stormvogel.stormpy_utils.model_checking import model_checking  # NOQA
 from stormvogel.model import *  # NOQA
 from stormvogel.property_builder import build_property_string  # NOQA
 from stormvogel.result import *  # NOQA
