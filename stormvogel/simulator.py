@@ -110,12 +110,12 @@ class Path:
         return len(self.path)
 
 
-def get_range_index(
+def get_action(
     state: stormvogel.model.State,
     scheduler: stormvogel.result.Scheduler
     | Callable[[stormvogel.model.State], stormvogel.model.Action],
-) -> int:
-    """Helper function to convert the chosen action in a state by a scheduler to a range index."""
+) -> stormvogel.model.Action:
+    """Helper function to obtain the chosen action in a state by a scheduler."""
     assert scheduler is not None
     if isinstance(scheduler, stormvogel.result.Scheduler):
         action = scheduler.get_choice_of_state(state)
@@ -124,10 +124,7 @@ def get_range_index(
     else:
         raise TypeError("Must be of type Scheduler or a function")
 
-    available_actions = state.available_actions()
-
-    assert action is not None
-    return available_actions.index(action)
+    return action
 
 
 def step(
@@ -198,25 +195,19 @@ def simulate_path(
     else:
         for i in range(steps):
             # we first choose an action (randomly or according to scheduler)
-            actions = model.get_state_by_id(state_id).available_actions()
-            select_action = (
-                get_range_index(model.get_state_by_id(state_id), scheduler)
+            action = (
+                get_action(model.get_state_by_id(state_id), scheduler)
                 if scheduler
-                else random.randint(0, len(actions) - 1)
+                else random.choice(model.get_state_by_id(state_id).available_actions())
             )
 
-            # we add the state action pair to the path
-            stormvogel_action = model.states[state_id].available_actions()[
-                select_action
-            ]
-
-            if not model.states[state_id].is_absorbing(stormvogel_action):
+            if not model.states[state_id].is_absorbing(action):
                 state_id, reward, labels = step(
                     model.get_state_by_id(state_id),
-                    actions[select_action],
+                    action,
                     seed=seed + i if seed is not None else None,
                 )
-                path[i + 1] = (stormvogel_action, model.states[state_id])
+                path[i + 1] = (action, model.states[state_id])
             else:
                 break
 
@@ -253,7 +244,7 @@ def simulate(
     init = partial_model.get_initial_state()
     init.valuations = model.get_initial_state().valuations
 
-    # we add each rewardmodel to the partial model
+    # we add each (empty) rewardmodel to the partial model
     if model.rewards:
         for index, reward in enumerate(model.rewards):
             reward_model = partial_model.add_rewards(model.rewards[index].name)
@@ -323,6 +314,7 @@ def simulate(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of states, they collapse
                     assert new_state is not None
+
                     # if the starting state of the transition is known, we append the existing branch
                     # otherwise we make a new branch
                     if last_state_id in discovered_states_before_transitions:
@@ -345,34 +337,32 @@ def simulate(
             last_state_id = 0
             for j in range(steps):
                 # we first choose an action
-                actions = model.get_state_by_id(last_state_id).available_actions()
-                select_action = (
-                    get_range_index(model.get_state_by_id(last_state_id), scheduler)
+                action = (
+                    get_action(model.get_state_by_id(last_state_id), scheduler)
                     if scheduler
-                    else random.randint(0, len(actions) - 1)
+                    else random.choice(
+                        model.get_state_by_id(last_state_id).available_actions()
+                    )
                 )
 
                 # we add the action to the partial model (if new)
                 assert partial_model.actions is not None
-                action = model.states[last_state_id].available_actions()[select_action]
                 if action not in partial_model.actions:
                     partial_model.new_action(action.labels)
 
                 # we get the new discovery
-                discovery = step(
+                state_id, reward, labels = step(
                     model.get_state_by_id(last_state_id),
-                    actions[select_action],
+                    action,
                     seed=seed + i + j if seed is not None else None,
                 )
 
                 # we add the rewards.
-                reward = discovery[1]
                 for index, rewardmodel in enumerate(partial_model.rewards):
                     state = model.get_state_by_id(last_state_id)
                     rewardmodel.set_state_action_reward(state, action, reward[index])
 
                 # we add the state to the model
-                state_id, labels = discovery[0], discovery[2]
                 if state_id not in discovered_states:
                     discovered_states.add(state_id)
                     new_state = partial_model.new_state(
