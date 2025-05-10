@@ -2,8 +2,8 @@ from typing import Tuple
 
 try:
     import stormpy
-except:
-    pass
+except ImportError:
+    stormpy = None
 
 import stormvogel.model
 import stormvogel.stormpy_utils.mapping as mapping
@@ -16,6 +16,7 @@ def map_state_labels(m, res):
         m: stormpy model
         res (EndComponentEliminatorReturnTypeDouble): EC result
     """
+    assert stormpy is not None
     old_nr_columns = m.transition_matrix.nr_columns
     new_nr_columns = res.matrix.nr_columns
     sl = stormpy.StateLabeling(new_nr_columns)
@@ -35,6 +36,7 @@ def map_choice_labels(m_old, m_new, res):
         m_new: new strompy model that is based on res
         res (EndComponentEliminatorReturnTypeDouble): EC result
     """
+    assert stormpy is not None
     new_nr_rows = m_new.transition_matrix.nr_rows
     cl = stormpy.storage.ChoiceLabeling(new_nr_rows)
     old_nr_columns = m_old.transition_matrix.nr_columns
@@ -61,6 +63,7 @@ def simple_ec_elimination(m):
     Args:
         m: stormpy model
     """
+    assert stormpy is not None
     # Keep all states, and consider ecs to be possible anywhere in the model
     subsystem = stormpy.BitVector(m.nr_states, True)
     possible_ec_rows = stormpy.BitVector(m.nr_choices, True)
@@ -86,6 +89,7 @@ def stormvogel_get_maximal_end_components(
 ) -> list[Tuple[set[int], set[stormvogel.model.Action]]]:
     """Get the maximal end components of this model.
     They are returned as a list of tuples where the first element is a set of state ids, and the second a set of actions."""
+    assert stormpy is not None
     sp_model = mapping.stormvogel_to_stormpy(sv_model)
     f = choice_mapping(sv_model, sp_model)
     decomposition = stormpy.get_maximal_end_components(sp_model)

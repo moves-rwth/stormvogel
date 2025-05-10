@@ -5,6 +5,7 @@ import numpy as np
 from ast import literal_eval
 
 import json
+from typing import Optional, Union
 
 try:
     import stormpy
@@ -71,13 +72,14 @@ def value_to_stormpy(value: parametric.Parametric | float, variables) -> stormpy
 
 def stormvogel_to_stormpy(
     model: stormvogel.model.Model,
-) -> (
-    stormpy.storage.SparseDtmc
-    | stormpy.storage.SparseMdp
-    | stormpy.storage.SparseCtmc
-    | stormpy.storage.SparsePomdp
-    | None
-):
+) -> Optional[
+    Union[
+        "stormpy.storage.SparseDtmc",
+        "stormpy.storage.SparseMdp",
+        "stormpy.storage.SparseCtmc",
+        "stormpy.storage.SparsePomdp",
+    ]
+]:
     def build_matrix(
         model: stormvogel.model.Model,
         variables,
@@ -467,29 +469,19 @@ def stormvogel_to_stormpy(
         raise RuntimeError("This type of model is not yet supported for this action")
 
 
-def value_to_stormvogel(value: stormpy.pycarl.cln.FactorizedRationalFunction) -> parametric.Parametric | float:
+def value_to_stormvogel(value) -> parametric.Parametric | float:
     """Converts a stormpy transition value to a stormvogel one"""
-
 
     print(value)
 
-    #if our function is just a rational number we return a float:
+    def convert_polynomial(polynomial: stormpy.pycarl.cln.Polynomial) -> parametric.Polynomial:
+        variables = polynomial.gather_variables()
+        variables = re.sub(r'{|}', '', str(variables))
+        variables = re.sub(r'<Variable (\w+).*?>', r'\1', variables)
+        variables = f"[{', '.join(variables.split(', '))}]"
 
-    #otherwise we build a rational function
-    if isinstance(value, stormpy.pycarl.cln.FactorizedRationalFunction):
-        regular_form = value.rational_function()
-        numerator = regular_form.numerator
-        denominator = regular_form.denominator
-        numerator_variables = numerator.gather_variables()
-        denominator_variables = denominator.gather_variables()
-        stormvogel_numerator = parametric.Polynomial(degree=numerator.total_degree,dimension=len(numerator_variables)) 
-        stormvogel_denominator = parametric.Polynomial(degree=denominator.total_degree,dimension=len(denominator_variables))
-
-        print(numerator)
-        print(numerator.to_smt2())
-        #we convert to a list format
-        expr = str(numerator.to_smt2())
-        expr = str(numerator.to_smt2())
+        #we convert polynomial to a list format
+        expr = str(polynomial.to_smt2())
         expr_no_ops = re.sub(r'\(\s*[+\-*/]', '(', expr)
         expr_commas = re.sub(r'\s+', ',', expr_no_ops)
         expr_lists = expr_commas.replace('(', '[').replace(')', ']')
@@ -497,29 +489,61 @@ def value_to_stormvogel(value: stormpy.pycarl.cln.FactorizedRationalFunction) ->
         quoted = re.sub(r'([,\[])\s*(-?\d+(?:\.\d*)?|\_?[a-zA-Z]\w*)', r"\1'\2'", fixed)
         term_list = literal_eval(quoted)
 
+        #we initialize the polynomial
+        stormvogel_polynomial = parametric.Polynomial(degree=polynomial.total_degree,dimension=len(variables)) 
+
         #and then we convert it to a numpy array
-        
+        for term in term_list:
+            #we distinguish between three cases
+            if isinstance(term,list):
+                if len(term) == 1: #a term in a singleton list means there is supposed to be a minus
+                    stormvogel_polynomial.set_coefficient(index_tuple,-1)
+            else:
+                index = variables.index(term)
+                index_list = []
+                for i in len(variables):
+                    if i == index:
+                        index_list[i] = 1
+                    else:
+                        index_list[i] = 0
+                index_tuple = tuple(index_list)
+                stormvogel_polynomial.set_coefficient(index_tuple,1)
 
+        return stormvogel_polynomial
 
-        print(dir(numerator))
+    #if our function is just a rational number we return a float:
+    if isinstance(value, stormpy.pycarl.cln.Rational):
+        return float(value)
 
-        print(numerator.gather_variables())
+    #otherwise we build a rational function
+    elif isinstance(value, stormpy.pycarl.cln.FactorizedPolynomial):
+        regular_form = value.polynomial()
+        return convert_polynomial(regular_form)
 
-        stormvogel_numerator.set_coefficient([])
+    elif isinstance(value, stormpy.pycarl.cln.FactorizedRationalFunction):
+        regular_form = value.rational_function()
+        numerator = regular_form.numerator
+        denominator = regular_form.denominator
+
+        converted_numerator = convert_polynomial(numerator)
+        converted_denominator = convert_polynomial(denominator)
 
         stormvogel_rational_function = parametric.RationalFunction(stormvogel_numerator, stormvogel_denominator)
-
         return stormvogel_rational_function
+    else:
+        raise RuntimeError("this type of transition value is not supported yet")
 
 
 
 
 def stormpy_to_stormvogel(
-    sparsemodel: stormpy.storage.SparseDtmc
-    | stormpy.storage.SparseMdp
-    | stormpy.storage.SparseCtmc
-    | stormpy.storage.SparsePomdp
-    | stormpy.storage.SparseMA,
+    sparsemodel: Union[
+        "stormpy.storage.SparseDtmc",
+        "stormpy.storage.SparseMdp",
+        "stormpy.storage.SparseCtmc",
+        "stormpy.storage.SparsePomdp",
+        "stormpy.storage.SparseMA",
+    ],
 ) -> stormvogel.model.Model | None:
     def add_states(
         model: stormvogel.model.Model,

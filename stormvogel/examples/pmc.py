@@ -12,7 +12,7 @@ def create_die_dtmc():
 
     p1 = parametric.Polynomial(1, 3)
     p2 = parametric.Polynomial(1, 1)
-    p1.set_coefficient((1,1,1), 1)
+    p1.set_coefficient((1,1,1), 4)
     p2.set_coefficient((1,), 1)
     p2.set_coefficient((0,), -1)
 
