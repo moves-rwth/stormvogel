@@ -10,8 +10,8 @@ def create_die_dtmc():
 
     # From the initial state, we have two transitions that either bring us further or to a sink state
 
-    p1 = parametric.Polynomial(1, 3)
-    p2 = parametric.Polynomial(1, 1)
+    p1 = parametric.Polynomial()
+    p2 = parametric.Polynomial()
     p1.set_coefficient((1,1,1), 4)
     p2.set_coefficient((1,), 1)
     p2.set_coefficient((0,), -1)

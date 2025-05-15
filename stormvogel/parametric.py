@@ -1,51 +1,64 @@
-import numpy as np
-
-
 class Polynomial:
     """
     Represents polynomials, to be used as values for parametric models.
-    Polynomials are represented as an n-dimensional (numpy array) tensor.
+    Polynomials are represented as an dictionary with n-dimensional tuples as keys.
 
     Args:
         coefficients: coefficients of the terms
     """
 
-    coefficients: np.ndarray = np.array([])
-    degree: int
-    dimension: int
+    coefficients: dict[tuple,float]
 
-    def __init__(self, degree: int, dimension: int):
-        self.coefficients = np.zeros((degree + 1,) * dimension)
-        self.degree = degree
-        self.dimension = dimension
+    def __init__(self):
+        self.coefficients = {}
 
     def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
+        if self.coefficients != {}:
+            print(self.coefficients)
+            length = len(list(self.coefficients.keys())[0])
+            if length != len(exponents):
+                raise RuntimeError(f"The length of the exponents tuple should be: {length}")
         self.coefficients[exponents] = coefficient
 
     def get_dimension(self) -> int:
-        return self.dimension
+        if self.coefficients is not {}:
+            return len(list(self.coefficients.keys())[0])
+        else:
+            return 0
+
+    def get_degree(self) -> int:
+        if self.coefficients is not {}:
+            largest = 0
+            for term in self.coefficients.keys():
+                for exponent in term:
+                    if exponent > largest:
+                        largest = exponent
+
+            return largest
+        else:
+            return 0
 
     # TODO valuation function
 
     def __str__(self) -> str:
         s = ""
         # we iterate through each term
-        for index, id in enumerate(np.ndindex(self.coefficients.shape)):
+        for exponents, coefficient in self.coefficients.items():
             # we only print terms with nonzero coefficients
-            if self.coefficients[id] != 0:
+            if coefficient != 0:
                 # we don't print coefficients that are 1
-                if self.coefficients[id] != 1:
-                    s += f"{self.coefficients[id]}*"
+                if coefficient != 1:
+                    s += f"{coefficient}*"
 
                 # we print the variables with their corresponding powers
                 # if the tuple only consists of zeroes then we are left with 1
                 all_zero = True
-                for i in range(len(id)):
-                    if id[i] != 0:
+                for variable,exponent in enumerate(exponents):
+                    if exponent != 0:
                         all_zero = False
-                        s += f"x_{i}"
-                        if id[i] != 1:
-                            s += f"^{id[i]}"
+                        s += f"x_{variable}"
+                        if exponent != 1:
+                            s += f"^{exponent}"
                 if all_zero:
                     s += "1"
                 s += " + "
@@ -68,8 +81,8 @@ class RationalFunction:
 
     def __init__(self, numerator: Polynomial, denominator: Polynomial):
         denominator_all_zero = True
-        for index, id in enumerate(np.ndindex(denominator.coefficients.shape)):
-            if denominator.coefficients[id] != 0:
+        for exponents, coefficient in denominator.coefficients.items():
+            if coefficient != 0:
                 denominator_all_zero = False
 
         if not denominator_all_zero:
@@ -99,8 +112,8 @@ class RationalFunction:
 Parametric = Polynomial | RationalFunction
 
 if __name__ == "__main__":
-    polynomial1 = Polynomial(3, 3)
-    polynomial2 = Polynomial(4, 4)
+    polynomial1 = Polynomial()
+    polynomial2 = Polynomial()
     polynomial1.set_coefficient((0, 0, 1), 5)
     polynomial1.set_coefficient((3, 2, 1), 2.4)
     polynomial2.set_coefficient((2, 3, 2, 1), 1)
