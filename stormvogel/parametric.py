@@ -10,11 +10,10 @@ class Polynomial:
     coefficients: dict[tuple,float]
 
     def __init__(self):
-        self.coefficients = {}
+        self.coefficients = dict()
 
     def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
         if self.coefficients != {}:
-            print(self.coefficients)
             length = len(list(self.coefficients.keys())[0])
             if length != len(exponents):
                 raise RuntimeError(f"The length of the exponents tuple should be: {length}")

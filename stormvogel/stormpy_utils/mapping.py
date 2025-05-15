@@ -462,12 +462,27 @@ def stormvogel_to_stormpy(
 def value_to_stormvogel(value) -> parametric.Parametric | float:
     """Converts a stormpy transition value to a stormvogel one"""
 
+
     print(value)
+    print(type(value))
+
+    def is_float(val) -> bool:
+        """we check if we can convert a value to a float"""
+        try:
+            float(val)
+            return True
+        except (ValueError, TypeError):
+            return False
 
     def convert_polynomial(polynomial: stormpy.pycarl.cln.Polynomial) -> parametric.Polynomial:
+        """helper function for converting pycarl polynomials to stormvogel polynomials"""
 
+        #if the polynomial is a constant we are done immediately
+        print(polynomial)
+        print(type(polynomial))
+        if is_float(polynomial):
+            return float(polynomial)
 
-        print(dir(polynomial))
         #we create the list of variables
         #TODO make this more concise
         variables = polynomial.gather_variables()
@@ -475,11 +490,8 @@ def value_to_stormvogel(value) -> parametric.Parametric | float:
         variables = re.sub(r'<Variable (\w+).*?>', r'\1', variables)
         variables_list = [v.strip() for v in variables.split(",")]
 
-        print(variables_list)
-
         #we convert the polynomial to a more suitable list format
         #TODO make this more concise
-        print(polynomial.to_smt2())
         expr = str(polynomial.to_smt2())
         expr_no_ops = re.sub(r'\(\s*[+\-*/]', '(', expr)
         expr_commas = re.sub(r'\s+', ',', expr_no_ops)
@@ -490,9 +502,6 @@ def value_to_stormvogel(value) -> parametric.Parametric | float:
         print(term_list)
 
         #we initialize the polynomial
-        print(polynomial.total_degree)
-        print(len(variables_list))
-
         stormvogel_polynomial = parametric.Polynomial()
 
         #and then we convert it to a dictionary of coefficients
@@ -504,53 +513,54 @@ def value_to_stormvogel(value) -> parametric.Parametric | float:
                 if len(term) == 1: #a term in a singleton list means there is supposed to be a minus
                     #we distinguish again between the singleton term to be a rational number or variable (with possibly a minus in front of it)
                     if isinstance(term[0], float):
-                        index_tuple = tuple([0 for i in range(length_tuple)])
-                        stormvogel_polynomial.set_coefficient(index_tuple,-1 * term[0])
+                        index_tuple = [0 for i in range(length_tuple)]
+                        stormvogel_polynomial.set_coefficient(tuple(index_tuple),-1 * float(term[0]))
                     else:
-                        index_tuple = tuple([0 for i in range(length_tuple)])
+                        index_tuple = [0 for i in range(length_tuple)]
                         for i in range(length_tuple):
                             if variables_list[i] == term[0]:
                                 index_tuple[i] == 1
                             else:
                                 index_tuple[i] == 0
 
-                        stormvogel_polynomial.set_coefficient(index_tuple,-1 * term[0])
-                else:
+                        stormvogel_polynomial.set_coefficient(tuple(index_tuple),-1)
+                elif len(term) == 2 and is_float(term[0]):
                     #the case where we have a larger list
                     #we check if we have a coefficient
-                    if len(term) == 2 and isinstance(term[0],float):
-                        index_tuple = tuple([0 for i in range(length_tuple)])
-                        for i in range(len(term[1])):
-                            for j,var in variables_list:
-                                if term[1][i] == var:
-                                    index_tuple[j] += 1
-                        stormvogel_polynomial.set_coefficient(index_tuple,term[0])
-                    else:
-                        index_tuple = tuple([0 for i in range(length_tuple)])
-                        for i in range(len(term)):
-                            for j,var in enumerate(variables_list):
-                                if term[i] == var:
-                                    index_tuple[j] += 1
-                        stormvogel_polynomial.set_coefficient(index_tuple,1)
+                    index_tuple = [0 for i in range(length_tuple)]
+                    for i in range(len(term[1])):
+                        for j,var in enumerate(variables_list):
+                            if term[1][i] == var:
+                                index_tuple[j] += 1
+
+                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),float(term[0]))
+                else:
+                    #if we have no coefficient (i.e. coefficient = 1)
+                    index_tuple = [0 for i in range(length_tuple)]
+                    for i in range(len(term)):
+                        for j,var in enumerate(variables_list):
+                            if term[i] == var:
+                                index_tuple[j] += 1
+                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),1)
             else:
                 #we distinguish between the single term to be a rational number and a variable
-                if isinstance(term, float):
-                    stormvogel_polynomial.set_coefficient(index_tuple,term)
+                if is_float(term):
+                    index_tuple = [0 for i in range(length_tuple)]
+                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),float(term))
                 else:
-                    index = variables.index(term)
-                    index_list = [0 for i in range(length_tuple)]
-                    for i in range(len(variables_list)):
-                        if i == index:
-                            index_list[i] = 1
+                    index_tuple = [0 for i in range(length_tuple)]
+                    for i,var in enumerate(variables_list):
+                        if term == var:
+                            index_tuple[i] = 1
                         else:
-                            index_list[i] = 0
+                            index_tuple[i] = 0
                     stormvogel_polynomial.set_coefficient(tuple(index_tuple),1)
         print(stormvogel_polynomial)
 
         return stormvogel_polynomial
 
     #if our function is just a rational number we return a float:
-    if isinstance(value, stormpy.pycarl.cln.Rational):
+    if is_float(value):
         return float(value)
 
     #in case of a polynomial we build one
