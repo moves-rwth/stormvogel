@@ -41,5 +41,6 @@ pyproject_path = Path(__file__).parents[1] / "pyproject.toml"
 with pyproject_path.open("rb") as f:
     pyproject = tomllib.load(f)
 
-release = pyproject["tool"]["poetry"]["version"]
-version = ".".join(release.split(".")[:2])  # e.g., "0.3"
+version = pyproject["tool"]["poetry"]["version"]
+
+html_title = f"stormvogel v{version}"
