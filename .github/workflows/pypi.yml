@@ -1,6 +1,9 @@
 name: Test
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -42,15 +45,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Run tests
-        run: poetry run pytest -vv
-
-      - name: List kernels
-        run: poetry run jupyter kernelspec list
-
-      - name: Glob notebooks in docs folder
-        uses: tj-actions/glob@v22
-        id: glob
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v2.1
         with:
-          files: |
-            docs/**/*.ipynb
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
