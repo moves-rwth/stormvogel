@@ -9,7 +9,10 @@
 
 name: Publish Docker image
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   push_to_registry:
@@ -36,6 +39,13 @@ jobs:
         with:
           images: stormvogel/stormvogel
 
+      - name: Get tag name
+        id: branch_name
+        run: |
+          echo "SOURCE_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "SOURCE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -43,7 +53,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ github.ref_name == 'main' && 'stormvogel/stormvogel:latest,' || '' }}stormvogel/stormvogel:${{ github.ref_name }}
+          tags: ${{ github.ref_name == 'main' && 'stormvogel/stormvogel:latest,' || '' }}stormvogel/stormvogel:${{ env.SOURCE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
