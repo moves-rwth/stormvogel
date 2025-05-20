@@ -7,6 +7,8 @@ Welcome to stormvogel's documentation!
 ======================================
 Last update: |today|
 
+Current version: |version|
+
 Get started here:
 
 .. toctree::
