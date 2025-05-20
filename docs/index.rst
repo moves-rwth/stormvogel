@@ -5,7 +5,9 @@
 
 Welcome to stormvogel's documentation!
 ======================================
-Last update: |today|
+Last update: |today|.
+
+Current version: |version|.
 
 Get started here:
 
