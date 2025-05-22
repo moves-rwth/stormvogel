@@ -7,12 +7,7 @@ from typing import Tuple, cast
 from stormvogel import parametric
 import copy
 
-Number = (
-    float
-    | Fraction
-    | int
-    | parametric.Parametric
-)
+Number = float | Fraction | int | parametric.Parametric
 
 
 class ModelType(Enum):
@@ -571,7 +566,7 @@ class Model:
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
-                    if isinstance(tup[0],parametric.Parametric):
+                    if isinstance(tup[0], parametric.Parametric):
                         return True
         return False
 
@@ -612,7 +607,6 @@ class Model:
                         return False
 
         return True
-
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
@@ -1059,7 +1053,7 @@ class Model:
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
-                    if isinstance(tup[0],parametric.Parametric):
+                    if isinstance(tup[0], parametric.Parametric):
                         if tup[0].get_dimension() > nr_parameters:
                             nr_parameters = tup[0].get_dimension()
         return nr_parameters

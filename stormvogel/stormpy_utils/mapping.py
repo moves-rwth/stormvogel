@@ -1,11 +1,9 @@
 import stormvogel.model
 import re
 import stormvogel.parametric as parametric
-import numpy as np
-from ast import literal_eval
 
 import json
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 try:
     import stormpy
@@ -13,51 +11,62 @@ except ImportError:
     stormpy = None
 
 
-def value_to_stormpy(value: parametric.Parametric | float, variables) -> stormpy.pycarl.cln.FactorizedRationalFunction:
+def value_to_stormpy(
+    value, variables
+) -> "stormpy.pycarl.cln.FactorizedRationalFunction":
     """converts a stormvogel transition value to a stormpy (pycarl) value"""
+    assert stormpy is not None
 
-    def convert_polynomial(polynomial: parametric.Polynomial) -> stormpy.pycarl.cln.FactorizedPolynomial:
+    def convert_polynomial(
+        polynomial: parametric.Polynomial,
+    ) -> "stormpy.pycarl.cln.FactorizedPolynomial":
         """helper function for converting polynomials to pycarl polyomials"""
+        assert stormpy is not None
+
         terms = []
         for term, value in polynomial.coefficients.items():
             if value != 0:
-                stormpy_term = stormpy.pycarl.cln.cln.Term(stormpy.pycarl.cln.cln.Rational(value))
-                for index,exp in enumerate(term):
+                stormpy_term = stormpy.pycarl.cln.cln.Term(
+                    stormpy.pycarl.cln.cln.Rational(value)
+                )
+                for index, exp in enumerate(term):
                     for i in range(exp):
                         stormpy_term *= variables[index]
                 terms.append(stormpy_term)
         polynomial = stormpy.pycarl.cln.cln.Polynomial(terms)
-        factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(polynomial,stormpy.pycarl.cln.cln._FactorizationCache())
+        factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
+            polynomial, stormpy.pycarl.cln.cln._FactorizationCache()
+        )
         return stormpy.pycarl.cln.FactorizedRationalFunction(factorized_polynomial)
 
-    #we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
+    # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
     if isinstance(value, float):
         rational = stormpy.pycarl.cln.cln.Rational(value)
         polynomial = stormpy.pycarl.cln.cln.Polynomial(rational)
-        factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(polynomial,stormpy.pycarl.cln.cln._FactorizationCache())
-        factorized_rational = stormpy.pycarl.cln.FactorizedRationalFunction(factorized_polynomial)
+        factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
+            polynomial, stormpy.pycarl.cln.cln._FactorizationCache()
+        )
+        factorized_rational = stormpy.pycarl.cln.FactorizedRationalFunction(
+            factorized_polynomial
+        )
         return factorized_rational
     elif isinstance(value, parametric.RationalFunction):
-        #numerator
-        factorized_numerator = stormpy.pycarl.cln.FactorizedPolynomial(numerator,stormpy.pycarl.cln.cln._FactorizationCache())
+        # numerator
+        factorized_numerator = convert_polynomial(value.numerator)
 
-        #denominator
-        factorized_denominator = stormpy.pycarl.cln.FactorizedPolynomial(denominator,stormpy.pycarl.cln.cln._FactorizationCache())
+        # denominator
+        factorized_denominator = convert_polynomial(value.denominator)
 
-        #the rational function:
+        # the rational function:
+        factorized_rational_function = stormpy.pycarl.cln.FactorizedRationalFunction(
+            factorized_numerator, factorized_denominator
+        )
+        return factorized_rational_function
     elif isinstance(value, parametric.Polynomial):
         return convert_polynomial(value)
     else:
-        #TODO interval models
+        # TODO interval models
         raise RuntimeError("unsupported value type")
-
-    #we make and return the total rational function
-    if isinstance(value, parametric.RationalFunction):
-        stormpy_function = stormpy.pycarl.cln.FactorizedRationalFunction(factorized_numerator, factorized_denominator)
-    else:
-        stormpy_function = stormpy.pycarl.cln.FactorizedRationalFunction(factorized_numerator)
-
-    return stormpy_function
 
 
 def stormvogel_to_stormpy(
@@ -107,7 +116,9 @@ def stormvogel_to_stormpy(
             for action in transition[1].transition.items():
                 for tuple in action[1].branch:
                     val = tuple[0]
-                    if is_parametric: #in this case we need to have a factorized rational function
+                    if (
+                        is_parametric
+                    ):  # in this case we need to have a factorized rational function
                         val = value_to_stormpy(val, variables)
                     builder.add_next_value(
                         row=row_index,
@@ -189,7 +200,9 @@ def stormvogel_to_stormpy(
 
         return valuations.build()
 
-    def map_dtmc(model: stormvogel.model.Model, variables) -> stormpy.storage.SparseDtmc:
+    def map_dtmc(
+        model: stormvogel.model.Model, variables
+    ) -> stormpy.storage.SparseDtmc:
         """
         Takes a simple representation of a dtmc as input and outputs a dtmc how it is represented in stormpy
         """
@@ -272,7 +285,9 @@ def stormvogel_to_stormpy(
 
         return mdp
 
-    def map_ctmc(model: stormvogel.model.Model, variables) -> stormpy.storage.SparseCtmc:
+    def map_ctmc(
+        model: stormvogel.model.Model, variables
+    ) -> stormpy.storage.SparseCtmc:
         """
         Takes a simple representation of a ctmc as input and outputs a ctmc how it is represented in stormpy
         """
@@ -305,7 +320,9 @@ def stormvogel_to_stormpy(
 
         return ctmc
 
-    def map_pomdp(model: stormvogel.model.Model, variables) -> stormpy.storage.SparsePomdp:
+    def map_pomdp(
+        model: stormvogel.model.Model, variables
+    ) -> stormpy.storage.SparsePomdp:
         """
         Takes a simple representation of an pomdp as input and outputs an pomdp how it is represented in stormpy
         """
@@ -459,12 +476,8 @@ def stormvogel_to_stormpy(
         raise RuntimeError("This type of model is not yet supported for this action")
 
 
-def value_to_stormvogel(value) -> parametric.Parametric | float:
+def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
     """Converts a stormpy transition value to a stormvogel one"""
-
-
-    print(value)
-    print(type(value))
 
     def is_float(val) -> bool:
         """we check if we can convert a value to a float"""
@@ -474,112 +487,75 @@ def value_to_stormvogel(value) -> parametric.Parametric | float:
         except (ValueError, TypeError):
             return False
 
-    def convert_polynomial(polynomial: stormpy.pycarl.cln.Polynomial) -> parametric.Polynomial:
+    def convert_polynomial(
+        polynomial: stormpy.pycarl.cln.Polynomial,
+    ) -> parametric.Polynomial:
         """helper function for converting pycarl polynomials to stormvogel polynomials"""
 
-        #if the polynomial is a constant we are done immediately
-        print(polynomial)
-        print(type(polynomial))
-        if is_float(polynomial):
-            return float(polynomial)
-
-        #we create the list of variables
-        #TODO make this more concise
+        # we create the list of variables
+        # TODO make this more concise
         variables = polynomial.gather_variables()
-        variables = re.sub(r'{|}', '', str(variables))
-        variables = re.sub(r'<Variable (\w+).*?>', r'\1', variables)
+        variables = re.sub(r"{|}", "", str(variables))
+        variables = re.sub(r"<Variable (\w+).*?>", r"\1", variables)
         variables_list = [v.strip() for v in variables.split(",")]
 
-        #we convert the polynomial to a more suitable list format
-        #TODO make this more concise
-        expr = str(polynomial.to_smt2())
-        expr_no_ops = re.sub(r'\(\s*[+\-*/]', '(', expr)
-        expr_commas = re.sub(r'\s+', ',', expr_no_ops)
-        expr_lists = expr_commas.replace('(', '[').replace(')', ']')
-        fixed = re.sub(r'\[\s*,', '[', expr_lists)
-        quoted = re.sub(r'([,\[])\s*(-?\d+(?:\.\d*)?|\_?[a-zA-Z]\w*)', r"\1'\2'", fixed)
-        term_list = literal_eval(quoted)
-        print(term_list)
+        # we convert the polynomial to a more suitable list format
+        parts = re.split(r"\+(?![^(]*\))", str(polynomial))
+        stripped_parts = [part.strip("()") for part in parts]
+        term_list = []
+        for p in stripped_parts:
+            factors = re.split(r"\*(?![^(]*\))", str(p))
+            term_list.append(factors)
 
-        #we initialize the polynomial
+        # we initialize the polynomial
         stormvogel_polynomial = parametric.Polynomial()
 
-        #and then we convert it to a dictionary of coefficients
+        # and then we convert it to a dictionary of coefficients
         length_tuple = len(variables_list)
         for term in term_list:
-            #we distinguish between variables/constants and proper polynomials
-            if isinstance(term,list):
-                #now we distinguish between singletons and larger lists
-                if len(term) == 1: #a term in a singleton list means there is supposed to be a minus
-                    #we distinguish again between the singleton term to be a rational number or variable (with possibly a minus in front of it)
-                    if isinstance(term[0], float):
-                        index_tuple = [0 for i in range(length_tuple)]
-                        stormvogel_polynomial.set_coefficient(tuple(index_tuple),-1 * float(term[0]))
-                    else:
-                        index_tuple = [0 for i in range(length_tuple)]
-                        for i in range(length_tuple):
-                            if variables_list[i] == term[0]:
-                                index_tuple[i] == 1
-                            else:
-                                index_tuple[i] == 0
-
-                        stormvogel_polynomial.set_coefficient(tuple(index_tuple),-1)
-                elif len(term) == 2 and is_float(term[0]):
-                    #the case where we have a larger list
-                    #we check if we have a coefficient
-                    index_tuple = [0 for i in range(length_tuple)]
-                    for i in range(len(term[1])):
-                        for j,var in enumerate(variables_list):
-                            if term[1][i] == var:
-                                index_tuple[j] += 1
-
-                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),float(term[0]))
-                else:
-                    #if we have no coefficient (i.e. coefficient = 1)
-                    index_tuple = [0 for i in range(length_tuple)]
-                    for i in range(len(term)):
-                        for j,var in enumerate(variables_list):
-                            if term[i] == var:
-                                index_tuple[j] += 1
-                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),1)
+            # we check if there is a coefficient
+            if is_float(term[0]):
+                index_tuple = [0 for i in range(length_tuple)]
+                for i in range(len(term)):
+                    for j, var in enumerate(variables_list):
+                        if term[i] == var:
+                            index_tuple[j] += 1
+                stormvogel_polynomial.set_coefficient(
+                    tuple(index_tuple), float(term[0])
+                )
             else:
-                #we distinguish between the single term to be a rational number and a variable
-                if is_float(term):
-                    index_tuple = [0 for i in range(length_tuple)]
-                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),float(term))
-                else:
-                    index_tuple = [0 for i in range(length_tuple)]
-                    for i,var in enumerate(variables_list):
-                        if term == var:
-                            index_tuple[i] = 1
-                        else:
-                            index_tuple[i] = 0
-                    stormvogel_polynomial.set_coefficient(tuple(index_tuple),1)
-        print(stormvogel_polynomial)
+                index_tuple = [0 for i in range(length_tuple)]
+                for i in range(len(term)):
+                    for j, var in enumerate(variables_list):
+                        if term[i] == var:
+                            index_tuple[j] += 1
+                stormvogel_polynomial.set_coefficient(tuple(index_tuple), float(1))
 
         return stormvogel_polynomial
 
-    #if our function is just a rational number we return a float:
-    if is_float(value):
-        return float(value)
-
-    #in case of a polynomial we build one
-    elif isinstance(value, stormpy.pycarl.cln.FactorizedPolynomial):
-        regular_form = value.polynomial()
-        return convert_polynomial(regular_form)
-    #and in case of a rational function we build one by building two polynomials
-    elif isinstance(value, stormpy.pycarl.cln.FactorizedRationalFunction):
+    if sparsemodel.has_parameters:
+        # if the model has parameters, all values are rational functions
         regular_form = value.rational_function()
         numerator = regular_form.numerator
         denominator = regular_form.denominator
 
         converted_numerator = convert_polynomial(numerator)
-        converted_denominator = convert_polynomial(denominator)
 
-        stormvogel_rational_function = parametric.RationalFunction(stormvogel_numerator, stormvogel_denominator)
+        # we only return a polynomial if the denominator is 1
+        if denominator.is_constant():
+            if float(denominator.constant_part()) == 1:
+                if numerator.is_constant():
+                    return float(numerator.constant_part())
+                else:
+                    return converted_numerator
+        converted_denominator = convert_polynomial(denominator)
+        stormvogel_rational_function = parametric.RationalFunction(
+            converted_numerator, converted_denominator
+        )
         return stormvogel_rational_function
     else:
-        raise RuntimeError("this type of transition value is not supported yet")
+        # if our function is just a rational number we return a float:
+        return float(value)
 
 
 def stormpy_to_stormvogel(
@@ -651,16 +627,18 @@ def stormpy_to_stormvogel(
         matrix = sparsedtmc.transition_matrix
         for state in sparsedtmc.states:
             row = matrix.get_row(state.id)
-            if sparsedtmc.has_parameters:
-                transitionshorthand = [
-                    (value_to_stormvogel(x.value()), model.get_state_by_id(x.column)) for x in row
-                ]
-            else:
-                transitionshorthand = [
-                    (x.value(), model.get_state_by_id(x.column)) for x in row
-                ]
+            transitionshorthand = [
+                (
+                    value_to_stormvogel(x.value(), sparsedtmc),
+                    model.get_state_by_id(x.column),
+                )
+                for x in row
+            ]
             transitions = stormvogel.model.transition_from_shorthand(
-                transitionshorthand
+                cast(
+                    list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+                    transitionshorthand,
+                )
             )
             model.set_transitions(model.get_state_by_id(state.id), transitions)
 

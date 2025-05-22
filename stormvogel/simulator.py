@@ -136,7 +136,10 @@ def step(
 
     transitions = state.get_outgoing_transitions(action)
     assert transitions is not None  # what if there are no transitions?
-    probability_distribution = [float(t[0]) for t in transitions]
+    probability_distribution = []
+    for t in transitions:
+        assert isinstance(t[0], float) or isinstance(t[0], int)
+        probability_distribution.append(float(t[0]))
     states = [t[1] for t in transitions]
     if seed is not None:
         rng = random.Random(seed)
@@ -310,6 +313,9 @@ def simulate(
                         stormvogel.model.EmptyAction
                     ].branch:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], float) or isinstance(
+                                tuple[0], int
+                            )
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of states, they collapse
@@ -384,6 +390,9 @@ def simulate(
                     assert transitions is not None
                     for tuple in transitions:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], float) or isinstance(
+                                tuple[0], int
+                            )
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of action with next state, they collapse

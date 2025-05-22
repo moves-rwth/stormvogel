@@ -37,7 +37,9 @@ def test_model_checking():
         # now we do it for a dtmc:
         dtmc = stormvogel.examples.die.create_die_dtmc()
         prop = 'P=? [F "rolled1"]'
-        result = stormvogel.stormpy_utils.model_checking.model_checking(dtmc, prop, True)
+        result = stormvogel.stormpy_utils.model_checking.model_checking(
+            dtmc, prop, True
+        )
 
         # indirectly:
         prop = stormpy.parse_properties(prop)

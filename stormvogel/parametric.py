@@ -7,7 +7,7 @@ class Polynomial:
         coefficients: coefficients of the terms
     """
 
-    coefficients: dict[tuple,float]
+    coefficients: dict[tuple, float]
 
     def __init__(self):
         self.coefficients = dict()
@@ -16,8 +16,10 @@ class Polynomial:
         if self.coefficients != {}:
             length = len(list(self.coefficients.keys())[0])
             if length != len(exponents):
-                raise RuntimeError(f"The length of the exponents tuple should be: {length}")
-        self.coefficients[exponents] = coefficient
+                raise RuntimeError(
+                    f"The length of the exponents tuple should be: {length}"
+                )
+        self.coefficients[exponents] = float(coefficient)
 
     def get_dimension(self) -> int:
         if self.coefficients is not {}:
@@ -52,7 +54,7 @@ class Polynomial:
                 # we print the variables with their corresponding powers
                 # if the tuple only consists of zeroes then we are left with 1
                 all_zero = True
-                for variable,exponent in enumerate(exponents):
+                for variable, exponent in enumerate(exponents):
                     if exponent != 0:
                         all_zero = False
                         s += f"x_{variable}"
@@ -63,6 +65,14 @@ class Polynomial:
                 s += " + "
 
         return s[:-3]
+
+    def __lt__(self, other) -> bool:
+        return str(self.coefficients) < str(other.coefficients)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Polynomial):
+            return self.coefficients == other.coefficients
+        return False
 
 
 class RationalFunction:
@@ -90,12 +100,8 @@ class RationalFunction:
         else:
             raise RuntimeError("dividing by 0 is not allowed")
 
-
     def get_dimension(self) -> int:
-        if numerator.dimension > denominator.dimension:
-            return numerator.dimension
-        else:
-            return denominator.dimension
+        return max(self.numerator.dimension, self.denominator.dimension)
 
     # TODO valuation function
 
@@ -106,6 +112,9 @@ class RationalFunction:
             s += "-"
         s += "\n" + str(self.denominator)
         return s
+
+    def __lt__(self, other):
+        return self.numerator < other.numerator or self.denominator < other.denominator
 
 
 Parametric = Polynomial | RationalFunction
