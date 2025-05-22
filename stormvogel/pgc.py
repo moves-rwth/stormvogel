@@ -151,7 +151,7 @@ def build_pgc(
 
     def add_new_transitions(tuples, states_seen, state):
         """
-        helper function to add all the newly found transitions to the model
+        helper function to add all the newly found transitions and states to the model
         """
         branch = []
         if tuples is not None:
@@ -166,7 +166,7 @@ def build_pgc(
 
                 if s not in states_seen:
                     states_seen.append(s)
-                    new_state = model.new_state()
+                    new_state = model.new_state(id=len(model.states))
                     state_lookup[s] = new_state
                     branch.append((val, new_state))
                     states_to_be_visited.append(s)
@@ -199,8 +199,7 @@ def build_pgc(
     states_to_be_visited = [initial_state_pgc]
     state_lookup = {initial_state_pgc: init}
     while len(states_to_be_visited) > 0:
-        state = states_to_be_visited[0]
-        states_to_be_visited.remove(state)
+        state = states_to_be_visited.pop(0)
         transition = {}
 
         if state not in states_seen:
