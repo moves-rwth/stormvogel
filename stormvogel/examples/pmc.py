@@ -8,7 +8,7 @@ def create_simple_pmc():
 
     init = pmc.get_initial_state()
 
-    # From the initial state, we have two transitions that either bring us further or to a sink state
+    # From the initial state, we have two transitions that either bring us to state A or state B
 
     p1 = parametric.Polynomial()
     p2 = parametric.Polynomial()

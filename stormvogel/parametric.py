@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class Polynomial:
     """
     Represents polynomials, to be used as values for parametric models.
@@ -68,11 +72,6 @@ class Polynomial:
 
     def __lt__(self, other) -> bool:
         return str(self.coefficients) < str(other.coefficients)
-
-    def __eq__(self, other) -> bool:
-        if isinstance(other, Polynomial):
-            return self.coefficients == other.coefficients
-        return False
 
 
 class RationalFunction:
