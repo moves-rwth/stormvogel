@@ -425,7 +425,7 @@ def test_pgc_endless():
             initial_state_pgc=init,
             available_actions=available_actions,
             modeltype=model.ModelType.MDP,
-            max_size=5000,
+            max_size=2000,
         )
 
 

@@ -968,7 +968,7 @@ class Model:
     ) -> State:
         """Creates a new state and returns it."""
 
-        #we can either provide an id, or check which one is free
+        # we can either provide an id, or check which one is free
         if id is None:
             state_id = self.__free_state_id()
         else:
