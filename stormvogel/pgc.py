@@ -1,6 +1,6 @@
 import stormvogel.model
 from dataclasses import dataclass
-from collections.abc import Callable
+from collections.abc import Callable, Any, cast
 import inspect
 
 
@@ -35,7 +35,7 @@ class State:
 
 
 def valid_input(
-    delta: Callable,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
     rewards: Callable | None = None,
     labels: Callable | None = None,
@@ -129,7 +129,7 @@ def valid_input(
 
 
 def build_pgc(
-    delta: Callable,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
     rewards: Callable | None = None,
     labels: Callable | None = None,
@@ -233,6 +233,8 @@ def build_pgc(
                     else:
                         stormvogel_action = stormvogel.model.EmptyAction
 
+                delta = cast(Callable[[Any, Action], Any], delta)
+                print(type(delta))
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list) and tuples is not None:
