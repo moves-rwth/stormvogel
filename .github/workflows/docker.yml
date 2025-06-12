@@ -53,6 +53,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          pull: true
           tags: ${{ github.ref_name == 'main' && 'stormvogel/stormvogel:latest,' || '' }}stormvogel/stormvogel:${{ env.SOURCE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
 
