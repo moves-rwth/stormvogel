@@ -2,7 +2,7 @@ FROM movesrwth/stormpy:stable
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get -y install curl git vim nano
+    apt-get -y install curl git vim nano libcairo2-dev
 
 # Set environment variables for Python and Poetry versions
 ARG PYTHON_VERSION
