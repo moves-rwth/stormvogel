@@ -41,7 +41,7 @@ def render_model_gif(
     for i in range(1, min(max_length, len(path) + 1)):
         state = path.get_step(i)
         if not isinstance(state, stormvogel.model.State):
-            state = state[i]
+            state = state[1]
         frames.append(state_to_image(state))  # type: ignore
 
     os.makedirs("gifs", exist_ok=True)

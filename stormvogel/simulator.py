@@ -40,7 +40,7 @@ class Path:
             state = self.path[step]
             assert isinstance(state, stormvogel.model.State)
             return state
-        if self.supports_actions():
+        if self.model.supports_actions():
             t = self.path[step]
             assert (
                 isinstance(t, tuple)
