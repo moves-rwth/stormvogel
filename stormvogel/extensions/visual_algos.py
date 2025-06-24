@@ -4,6 +4,7 @@ along with a function to display the workings of the algorithms."""
 from typing import Any
 import stormvogel.model
 import matplotlib.pyplot as plt
+from time import sleep
 
 
 def naive_value_iteration(
@@ -113,3 +114,67 @@ def display_value_iteration_result(
     fig.set_size_inches(hor_size, hor_size)
 
     plt.show()
+
+
+def arg_max(funcs, args):
+    """Takes a list of callables and arguments and return the argument that yields the highest value."""
+    executed = [f(x) for f, x in zip(funcs, args)]
+    index = executed.index(max(executed))
+    return args[index]
+
+
+def policy_iteration(
+    model: stormvogel.model.Model,
+    prop: str,
+    visualize: bool = True,
+    layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+    delay: int = 2,
+    clear: bool = True,
+) -> stormvogel.Result:
+    """Performs policy iteration on the given mdp.
+    Args:
+        model (Model): MDP.
+        prop (str): PRISM property string to maximize. Rembember that this is a property on the induced DTMC, not the MDP.
+        visualize (bool): Whether the intermediate and final results should be visualized. Defaults to True.
+        layout (Layout): Layout to use to show the intermediate results.
+        delay (int): Seconds to wait between each iteration.
+        clear (bool): Whether to clear the visualization of each previous iteration.
+    """
+    old = None
+    new = stormvogel.random_scheduler(model)
+
+    while not old == new:
+        old = new
+
+        dtmc = old.generate_induced_dtmc()
+        dtmc_result = stormvogel.model_checking(dtmc, prop=prop)  # type: ignore
+
+        if visualize:
+            vis = stormvogel.visualization.Visualization(
+                model, layout=layout, scheduler=old, result=dtmc_result
+            )
+            vis.show()
+            sleep(delay)
+            if clear:
+                vis.clear()
+
+        choices = {
+            i: arg_max(
+                [
+                    lambda a: sum(
+                        [
+                            (p * dtmc_result.get_result_of_state(s2.id))  # type: ignore
+                            for p, s2 in s1.get_outgoing_transitions(a)  # type: ignore
+                        ]
+                    )
+                    for _ in s1.available_actions()
+                ],
+                s1.available_actions(),
+            )
+            for i, s1 in model.get_states().items()
+        }
+        new = stormvogel.Scheduler(model, choices)
+    if visualize:
+        print("Value iteration done:")
+        stormvogel.show(model, layout=layout, scheduler=new, result=dtmc_result)  # type: ignore
+    return dtmc_result  # type: ignore

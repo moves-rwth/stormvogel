@@ -1,4 +1,5 @@
 import stormvogel.model
+import random
 
 
 class Scheduler:
@@ -61,6 +62,14 @@ class Scheduler:
         return False
 
 
+def random_scheduler(model: stormvogel.model.Model) -> Scheduler:
+    """Create a random scheduler for the provided model."""
+    choices = {
+        i: random.choice(s.available_actions()) for (i, s) in model.get_states().items()
+    }
+    return Scheduler(model, taken_actions=choices)
+
+
 class Result:
     """Result object represents the model checking results for a given model
 
@@ -90,10 +99,15 @@ class Result:
             self.scheduler = None
 
     def get_result_of_state(
-        self, state: stormvogel.model.State
+        self, state: stormvogel.model.State | int
     ) -> stormvogel.model.Number | None:
         """returns the model checking result for a given state"""
-        if state in self.model.states.values():
+        if isinstance(state, int) and state in self.model.states.keys():
+            return self.values[state]
+        if (
+            isinstance(state, stormvogel.model.State)
+            and state in self.model.states.values()
+        ):
             return self.values[state.id]
         else:
             raise RuntimeError("This state is not a part of the model")
