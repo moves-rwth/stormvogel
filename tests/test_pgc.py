@@ -2,6 +2,7 @@ from stormvogel import pgc, model
 import math
 import pytest
 import re
+from typing import cast
 
 
 def test_pgc_mdp():
@@ -388,6 +389,7 @@ def test_pgc_mdp_empty_action():
 
 
 def test_pgc_endless():
+    #we test if we get the correct error when the model gets too large
     init = pgc.State(x="")
 
     def available_actions(s: pgc.State):
@@ -417,7 +419,7 @@ def test_pgc_endless():
     with pytest.raises(
         RuntimeError,
         match=re.escape(
-            "The model you want te create has a very large amount of states (at least 2000), if you wish to proceed, set max_size to some larger number."
+            "The model you want te create has a very large amount of states (at least 10000), if you wish to proceed, set max_size to some larger number."
         ),
     ):
         pgc.build_pgc(
@@ -425,7 +427,7 @@ def test_pgc_endless():
             initial_state_pgc=init,
             available_actions=available_actions,
             modeltype=model.ModelType.MDP,
-            max_size=2000,
+            max_size=10000,
         )
 
 

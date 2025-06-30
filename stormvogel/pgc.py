@@ -1,6 +1,6 @@
 import stormvogel.model
 from dataclasses import dataclass
-from collections.abc import Callable, Any, cast
+from typing import cast, Any, Callable
 import inspect
 
 
@@ -33,9 +33,9 @@ class State:
             return self.__dict__ == other.__dict__
         return False
 
-
+##Callable[[Any, Action], Any] | Callable[[Any], Any],
 def valid_input(
-    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
+    delta,
     initial_state_pgc,
     rewards: Callable | None = None,
     labels: Callable | None = None,
@@ -127,9 +127,9 @@ def valid_input(
                 f"The valuations function must take exactly one argument (state), but it takes {num_params} arguments"
             )
 
-
+#Callable[[Any, Action], Any] | Callable[[Any], Any],
 def build_pgc(
-    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
+    delta,
     initial_state_pgc,
     rewards: Callable | None = None,
     labels: Callable | None = None,
@@ -138,7 +138,7 @@ def build_pgc(
     rates: Callable | None = None,
     valuations: Callable | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
-    max_size: int = 2000,
+    max_size: int = 10000,
 ) -> stormvogel.model.Model:
     """
     function that converts a delta function, an available_actions function an initial state and a model type
@@ -234,7 +234,7 @@ def build_pgc(
                         stormvogel_action = stormvogel.model.EmptyAction
 
                 delta = cast(Callable[[Any, Action], Any], delta)
-                print(type(delta))
+                #print(type(delta))
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list) and tuples is not None:
