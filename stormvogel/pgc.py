@@ -23,7 +23,7 @@ class State:
             setattr(self, key, value)
 
     def __repr__(self):
-        return f"State({self.__dict__})"
+        return f"state({self.__dict__})"
 
     def __hash__(self):
         return hash(str(self.__dict__))
@@ -34,16 +34,17 @@ class State:
         return False
 
 
-##Callable[[Any, Action], Any] | Callable[[Any], Any],
 def valid_input(
-    delta,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
-    rewards: Callable | None = None,
-    labels: Callable | None = None,
-    available_actions: Callable | None = None,
-    observations: Callable | None = None,
-    rates: Callable | None = None,
-    valuations: Callable | None = None,
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
+    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    | None = None,
+    labels: Callable[[Any], list[str]] | None = None,
+    available_actions: Callable[[Any], list[Action]] | None = None,
+    observations: Callable[[Any], int] | None = None,
+    rates: Callable[[Any], float] | None = None,
+    valuations: Callable[[Any], dict[str, float | int | bool]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ):
     """
@@ -129,16 +130,17 @@ def valid_input(
             )
 
 
-# Callable[[Any, Action], Any] | Callable[[Any], Any],
 def build_pgc(
-    delta,
-    initial_state_pgc,
-    rewards: Callable | None = None,
-    labels: Callable | None = None,
-    available_actions: Callable | None = None,
-    observations: Callable | None = None,
-    rates: Callable | None = None,
-    valuations: Callable | None = None,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
+    initial_state_pgc: Any,
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
+    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    | None = None,
+    labels: Callable[[Any], list[str]] | None = None,
+    available_actions: Callable[[Any], list[Action]] | None = None,
+    observations: Callable[[Any], int] | None = None,
+    rates: Callable[[Any], float] | None = None,
+    valuations: Callable[[Any], dict[str, float | int | bool]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
     max_size: int = 10000,
 ) -> stormvogel.model.Model:
@@ -148,7 +150,7 @@ def build_pgc(
 
     this works analogous to a prism file, where the delta is the module in this case.
 
-    (this function uses the pgc classes State and Action instead of the ones from stormvogel.model)
+    (this function uses the pgc classes state and action instead of the ones from stormvogel.model)
     """
 
     def add_new_transitions(tuples, state):
@@ -235,8 +237,7 @@ def build_pgc(
                     else:
                         stormvogel_action = stormvogel.model.EmptyAction
 
-                delta = cast(Callable[[Any, Action], Any], delta)
-                # print(type(delta))
+                delta = cast(Callable[[Any, action], Any], delta)
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list) and tuples is not None:
@@ -282,13 +283,18 @@ def build_pgc(
         if model.supports_actions():
             # we first create the right number of reward models
             assert available_actions is not None
+            rewards = cast(
+                Callable[[Any, action], dict[str, stormvogel.model.Number]], rewards
+            )
             for reward in rewards(
                 initial_state_pgc, available_actions(initial_state_pgc)[0]
             ).items():
                 model.add_rewards(reward[0])
 
+            # we take the initial state reward to compare later
             action = available_actions(initial_state_pgc)[0]
             initial_state_rewards = rewards(initial_state_pgc, action)
+
             for state, s in state_lookup.items():
                 assert available_actions is not None
                 for action in available_actions(state):
@@ -321,6 +327,7 @@ def build_pgc(
                         )
         else:
             # we first create the right number of reward models
+            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Number]], rewards)
             for reward in rewards(initial_state_pgc).items():
                 model.add_rewards(reward[0])
 

@@ -13,7 +13,7 @@ def test_pgc_mdp():
     left = pgc.Action(["left"])
     right = pgc.Action(["right"])
 
-    def available_actions(s: pgc.State):
+    def available_actions(s: pgc.State) -> list[pgc.Action]:
         if s.x == N:
             return [right]
         elif s.x == 0:
@@ -21,7 +21,7 @@ def test_pgc_mdp():
         else:
             return [left, right]
 
-    def rewards(s: pgc.State, a: pgc.Action):
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Number]:
         return {"r1": 1, "r2": 2}
 
     def labels(s: pgc.State):
@@ -60,18 +60,18 @@ def test_pgc_mdp():
     state1 = regular_model.new_state(labels=["init", "1"])
     state2 = regular_model.new_state(labels=["2"])
     state0 = regular_model.new_state(labels=["0"])
-    left = regular_model.new_action(frozenset({"left"}))
-    right = regular_model.new_action(frozenset({"right"}))
+    other_left = regular_model.new_action(frozenset({"left"}))
+    other_right = regular_model.new_action(frozenset({"right"}))
     branch12 = model.Branch([(0.5, state1), (0.5, state2)])
     branch10 = model.Branch([(0.5, state1), (0.5, state0)])
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
     regular_model.add_transitions(
-        state1, model.Transition({left: branch12, right: branch10})
+        state1, model.Transition({other_left: branch12, other_right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({left: branch01}))
+    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
+    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
     rewardmodel = regular_model.add_rewards("r1")
     for i in range(2 * N):
@@ -104,7 +104,7 @@ def test_pgc_mdp_int():
         else:
             return [left, right]
 
-    def rewards(s, a: pgc.Action):
+    def rewards(s, a: pgc.Action) -> dict[str, model.Number]:
         return {"r1": 1, "r2": 2}
 
     def labels(s):
@@ -143,8 +143,8 @@ def test_pgc_mdp_int():
     state1 = regular_model.new_state(labels=["init", "1"])
     state2 = regular_model.new_state(labels=["2"])
     state0 = regular_model.new_state(labels=["0"])
-    left = regular_model.new_action(frozenset({"left"}))
-    right = regular_model.new_action(frozenset({"right"}))
+    other_left = regular_model.new_action(frozenset({"left"}))
+    other_right = regular_model.new_action(frozenset({"right"}))
     branch12 = model.Branch([(0.5, state1), (0.5, state2)])
     branch10 = model.Branch([(0.5, state1), (0.5, state0)])
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
@@ -153,11 +153,11 @@ def test_pgc_mdp_int():
     regular_model.add_transitions(
         state1,
         model.Transition(
-            {right: branch10, left: branch12}
+            {other_right: branch10, other_left: branch12}
         ),  # state1, model.Transition({left: branch12, right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({left: branch01}))
+    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
+    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
     rewardmodel = regular_model.add_rewards("r1")
     for i in range(2 * N):
@@ -178,7 +178,7 @@ def test_pgc_dtmc():
     p = 0.5
     initial_state = pgc.State(s=0)
 
-    def rewards(s: pgc.State):
+    def rewards(s: pgc.State) -> dict[str, model.Number]:
         return {"r1": 1, "r2": 2}
 
     def delta(s: pgc.State):
@@ -206,7 +206,7 @@ def test_pgc_dtmc():
             case 7:
                 return [(1, pgc.State(s=7, d=0))]
 
-    def valuations(s: pgc.State):
+    def valuations(s: pgc.State) -> dict[str, float | int | bool]:
         match s.s:
             case 0:
                 return {"s": 0, "d": -1}
@@ -238,6 +238,10 @@ def test_pgc_dtmc():
                         return {"s": 7, "d": 5}
                     case 6:
                         return {"s": 7, "d": 6}
+                    case _:
+                        return {"s": -1, "d": -1}
+            case _:
+                return {"s": -1, "d": -1}
 
     pgc_model = pgc.build_pgc(
         delta=delta,
@@ -448,7 +452,7 @@ def test_pgc_pomdp():
         else:
             return [left, right]
 
-    def rewards(s: pgc.State, a: pgc.Action):
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Number]:
         return {"r1": 1, "r2": 2}
 
     def labels(s: pgc.State):
@@ -492,18 +496,18 @@ def test_pgc_pomdp():
     state1 = regular_model.new_state(labels=["init", "1"])
     state2 = regular_model.new_state(labels=["2"])
     state0 = regular_model.new_state(labels=["0"])
-    left = regular_model.new_action(frozenset({"left"}))
-    right = regular_model.new_action(frozenset({"right"}))
+    other_left = regular_model.new_action(frozenset({"left"}))
+    other_right = regular_model.new_action(frozenset({"right"}))
     branch12 = model.Branch([(0.5, state1), (0.5, state2)])
     branch10 = model.Branch([(0.5, state1), (0.5, state0)])
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
     regular_model.add_transitions(
-        state1, model.Transition({left: branch12, right: branch10})
+        state1, model.Transition({other_left: branch12, other_right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({left: branch01}))
+    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
+    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
     rewardmodel = regular_model.add_rewards("r1")
     for i in range(2 * N):
@@ -530,12 +534,14 @@ def test_pgc_ctmc():
             case "eating":
                 return [(3.0, "hungry")]
 
-    def rates(s):
+    def rates(s) -> float:
         match s:
             case "hungry":
                 return 5
             case "eating":
                 return 3
+            case _:
+                return 0
 
     pgc_model = pgc.build_pgc(
         delta, initial_state_pgc="hungry", rates=rates, modeltype=model.ModelType.CTMC
