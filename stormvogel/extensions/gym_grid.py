@@ -16,7 +16,7 @@ def gymnasium_grid_to_stormvogel(
     TRANSITIONS = env.unwrapped.P
     NO_ACTIONS = env.action_space.n
     INV_MAP = {v: k for k, v in action_label_map.items()}
-    ALL_ACTIONS = [pgc.Action([x]) for x in GRID_ACTION_LABEL_MAP.values()]
+    ALL_ACTIONS = [pgc.Action([x]) for x in action_label_map.values()]
 
     def action_numer_map(a):
         return INV_MAP[a.labels[0]]
