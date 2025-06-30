@@ -33,6 +33,7 @@ class State:
             return self.__dict__ == other.__dict__
         return False
 
+
 ##Callable[[Any, Action], Any] | Callable[[Any], Any],
 def valid_input(
     delta,
@@ -127,7 +128,8 @@ def valid_input(
                 f"The valuations function must take exactly one argument (state), but it takes {num_params} arguments"
             )
 
-#Callable[[Any, Action], Any] | Callable[[Any], Any],
+
+# Callable[[Any, Action], Any] | Callable[[Any], Any],
 def build_pgc(
     delta,
     initial_state_pgc,
@@ -234,7 +236,7 @@ def build_pgc(
                         stormvogel_action = stormvogel.model.EmptyAction
 
                 delta = cast(Callable[[Any, Action], Any], delta)
-                #print(type(delta))
+                # print(type(delta))
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list) and tuples is not None:
@@ -247,6 +249,7 @@ def build_pgc(
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
+            delta = cast(Callable[[Any], Any], delta)
             tuples = delta(state)
 
             if not isinstance(tuples, list) and tuples is not None:

@@ -2,7 +2,6 @@ from stormvogel import pgc, model
 import math
 import pytest
 import re
-from typing import cast
 
 
 def test_pgc_mdp():
@@ -389,7 +388,7 @@ def test_pgc_mdp_empty_action():
 
 
 def test_pgc_endless():
-    #we test if we get the correct error when the model gets too large
+    # we test if we get the correct error when the model gets too large
     init = pgc.State(x="")
 
     def available_actions(s: pgc.State):
