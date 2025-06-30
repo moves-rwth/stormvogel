@@ -80,24 +80,24 @@ class State:
                 "There is already a state with this id. Make sure the id is unique."
             )
 
-        used_names = [state.name for state in self.model.states.values()]
-        if name in used_names:
-            raise RuntimeError(
-                "There is already a state with this name. Make sure the name is unique."
-            )
-
         self.labels = labels
         self.valuations = valuations
         self.id = id
         self.observation = None
 
         if name is None:
-            if str(id) in used_names:
+            if str(id) in self.model.used_names:
                 raise RuntimeError(
                     "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
+            self.model.used_names.add(str(id))
             self.name = str(id)
         else:
+            if name in self.model.used_names:
+                raise RuntimeError(
+                    "There is already a state with this name. Make sure the name is unique."
+                )
+            self.model.used_names.add(name)
             self.name = name
 
     def add_label(self, label: str):
@@ -528,6 +528,9 @@ class Model:
             self.markovian_states = []
         else:
             self.markovian_states = None
+
+        # We also keep track of used state names
+        self.used_names = set()
 
         # Add the initial state if specified to do so
         if create_initial_state:
