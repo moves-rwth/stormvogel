@@ -42,7 +42,6 @@ def test_pmc_conversion():
     assert pmc == new_pmc
 
 
-"""
 def test_pmdp_conversion():
      # Create a new model with the name "simple pmdp"
     pmdp = stormvogel.model.new_mdp("simple pmdp")
@@ -79,7 +78,6 @@ def test_pmdp_conversion():
     print(pmdp)
     print(new_pmdp)
     assert pmdp == new_pmdp
-"""
 
 # def test_pmc_valuations():
 #    pmc = stormvogel.examples.pmc.create_simple_pmc()

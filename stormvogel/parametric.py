@@ -18,17 +18,28 @@ class Polynomial:
 
     def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
         if self.coefficients != {}:
-            length = len(list(self.coefficients.keys())[0])
-            if length != len(exponents):
+            my_dimension = self.get_dimension()
+
+            #TODO fix this by using lists instead of tuples
+            if isinstance(exponents,tuple):
+                term_dimension = len(exponents)
+            else:
+                term_dimension = 1
+
+            if my_dimension != term_dimension:
                 raise RuntimeError(
-                    f"The length of the exponents tuple should be: {length}"
+                    f"The length of the exponents tuple should be: {my_dimension}"
                 )
         self.coefficients[exponents] = float(coefficient)
 
     def get_dimension(self) -> int:
         # returns the number of different variables present
         if self.coefficients is not {}:
-            return len(list(self.coefficients.keys())[0])
+            key = list(self.coefficients.keys())[0]
+            if isinstance(key,tuple):
+                return len(list(self.coefficients.keys())[0])
+            else:
+                return 1
         else:
             return 0
 
