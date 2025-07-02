@@ -36,7 +36,7 @@ def value_to_stormpy(
         factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
             polynomial, stormpy.pycarl.cln.cln._FactorizationCache()
         )
-        return stormpy.pycarl.cln.FactorizedRationalFunction(factorized_polynomial)
+        return factorized_polynomial
 
     if model.is_parametric():
         assert stormpy is not None
@@ -56,6 +56,7 @@ def value_to_stormpy(
             factorized_numerator = convert_polynomial(value.numerator)
             factorized_denominator = convert_polynomial(value.denominator)
 
+            # TODO gives segmentation fault
             factorized_rational_function = (
                 stormpy.pycarl.cln.FactorizedRationalFunction(
                     factorized_numerator, factorized_denominator
@@ -63,7 +64,10 @@ def value_to_stormpy(
             )
             return factorized_rational_function
         elif isinstance(value, parametric.Polynomial):
-            return convert_polynomial(value)
+            factorized_rational = stormpy.pycarl.cln.FactorizedRationalFunction(
+                convert_polynomial(value)
+            )
+            return factorized_rational
     else:
         return value
 
@@ -558,10 +562,10 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
 
         # we convert the polynomial to a more suitable list format
         parts = re.split(r"\+(?![^(]*\))", str(polynomial))
-        stripped_parts = [part.strip("()") for part in parts]
+        stripped_parts = [part.replace("(", "").replace(")", "") for part in parts]
         term_list = []
         for p in stripped_parts:
-            factors = re.split(r"\*(?![^(]*\))", str(p))
+            factors = re.split(r"[*^](?![^(]*\))", str(p))
             term_list.append(factors)
 
         # we initialize the polynomial
@@ -570,22 +574,23 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
         # and then we convert it to a dictionary of coefficients
         length_tuple = len(variables_list)
         for term in term_list:
-            # we check if there is a coefficient
+            # we iterate through all coefficients, variables and exponents
+            index_tuple = [0 for i in range(length_tuple)]
+            for i in range(len(term)):
+                for j, var in enumerate(variables_list):
+                    # we check if there is an exponent or not
+                    if term[i] == var:
+                        if i < len(term) - 1 and is_float(term[i + 1]):
+                            index_tuple[j] = int(term[i + 1])
+                        else:
+                            index_tuple[j] = 1
+
+            # we check if there is a coefficient at the beginning
             if is_float(term[0]):
-                index_tuple = [0 for i in range(length_tuple)]
-                for i in range(len(term)):
-                    for j, var in enumerate(variables_list):
-                        if term[i] == var:
-                            index_tuple[j] += 1
                 stormvogel_polynomial.set_coefficient(
                     tuple(index_tuple), float(term[0])
                 )
             else:
-                index_tuple = [0 for i in range(length_tuple)]
-                for i in range(len(term)):
-                    for j, var in enumerate(variables_list):
-                        if term[i] == var:
-                            index_tuple[j] += 1
                 stormvogel_polynomial.set_coefficient(tuple(index_tuple), float(1))
 
         return stormvogel_polynomial

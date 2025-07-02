@@ -1,24 +1,85 @@
-import stormvogel.examples.pmc
 import stormvogel.stormpy_utils.mapping as mapping
+import stormvogel.parametric
+import stormvogel.model
 
 
 def test_pmc_conversion():
-    pmc = stormvogel.examples.pmc.create_simple_pmc()
+    # Create a new model with the name "simple pmc"
+    pmc = stormvogel.model.new_dtmc("simple pmc")
+
+    init = pmc.get_initial_state()
+
+    # From the initial state, we have two transitions that either bring us to state A or state B
+    p1 = stormvogel.parametric.Polynomial()
+    p1.set_coefficient((1, 1, 1), 4)
+
+    # the other transition is a rational function with two polynomials
+    p2 = stormvogel.parametric.Polynomial()
+    # p3 = stormvogel.parametric.Polynomial()
+    p2.set_coefficient((2, 0), 1)
+    p2.set_coefficient((2, 2), -1)
+    # p3.set_coefficient((2,), 2)
+    # r1 = stormvogel.parametric.RationalFunction(p2,p3)
+    # TODO make it work for proper rational functions
+
+    pmc.new_state(labels=["A"])
+    pmc.new_state(labels=["B"])
+
+    init.set_transitions(
+        [
+            (p1, pmc.get_states_with_label("A")[0]),
+            (p2, pmc.get_states_with_label("B")[0]),
+        ]
+    )
+
+    # we add self loops to all states with no outgoing transitions
+    pmc.add_self_loops()
 
     # we test the mapping
     stormpy_pmc = mapping.stormvogel_to_stormpy(pmc)
     new_pmc = mapping.stormpy_to_stormvogel(stormpy_pmc)
+
     assert pmc == new_pmc
 
 
-# def test_pmdp_conversion():
-#    pmdp = stormvogel.examples.pmc.create_simple_pmdp()
-#
-#    # we test the mapping
-#    stormpy_pmdp = mapping.stormvogel_to_stormpy(pmdp)
-#    new_pmdp = mapping.stormpy_to_stormvogel(stormpy_pmdp)
-#    assert pmdp == new_pmdp
+"""
+def test_pmdp_conversion():
+     # Create a new model with the name "simple pmdp"
+    pmdp = stormvogel.model.new_mdp("simple pmdp")
 
+    init = pmdp.get_initial_state()
+
+    # From the initial state, we have two actions with transitions that either bring us to a goal state or sink state
+
+    p1 = stormvogel.parametric.Polynomial()
+    p2 = stormvogel.parametric.Polynomial()
+    p1.set_coefficient((1), 1)
+    p2.set_coefficient((0), 1)
+    p2.set_coefficient((1), -1)
+
+    pmdp.new_state(labels=["goal"])
+    pmdp.new_state(labels=["sink"])
+
+    action_a = pmdp.new_action(frozenset({"a"}))
+    action_b = pmdp.new_action(frozenset({"b"}))
+    branch0 = stormvogel.model.Branch([(p1, pmdp.get_states_with_label("goal")[0]), (p2, pmdp.get_states_with_label("sink")[0])])
+    branch1 = stormvogel.model.Branch([(p2, pmdp.get_states_with_label("sink")[0]), (p1, pmdp.get_states_with_label("goal")[0])])
+
+    pmdp.add_transitions(
+        init, stormvogel.model.Transition({action_a: branch0, action_b: branch1})
+    )
+
+    # we add self loops to all states with no outgoing transitions
+    pmdp.add_self_loops()
+
+    # we test the mapping
+    stormpy_pmdp = mapping.stormvogel_to_stormpy(pmdp)
+    new_pmdp = mapping.stormpy_to_stormvogel(stormpy_pmdp)
+
+    print(pmdp)
+    print(new_pmdp)
+    assert pmdp == new_pmdp
+"""
 
 # def test_pmc_valuations():
 #    pmc = stormvogel.examples.pmc.create_simple_pmc()

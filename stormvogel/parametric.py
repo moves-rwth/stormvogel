@@ -26,6 +26,7 @@ class Polynomial:
         self.coefficients[exponents] = float(coefficient)
 
     def get_dimension(self) -> int:
+        # returns the number of different variables present
         if self.coefficients is not {}:
             return len(list(self.coefficients.keys())[0])
         else:
@@ -100,20 +101,22 @@ class RationalFunction:
             raise RuntimeError("dividing by 0 is not allowed")
 
     def get_dimension(self) -> int:
-        return max(self.numerator.dimension, self.denominator.dimension)
+        # returns the number of different variables present
+        return max(self.numerator.get_dimension(), self.denominator.get_dimension())
 
     # TODO valuation function
 
     def __str__(self) -> str:
-        s = str(self.numerator) + "\n"
-        # the length of the division line depends on the length of the largest polynomial
-        for i in range(max(len(str(self.numerator)), len(str(self.denominator)))):
-            s += "-"
-        s += "\n" + str(self.denominator)
+        s = "(" + str(self.numerator) + ")/(" + str(self.denominator) + ")"
         return s
 
     def __lt__(self, other):
-        return self.numerator < other.numerator or self.denominator < other.denominator
+        if isinstance(other, Polynomial):
+            return self.numerator < other or self.denominator < other
+        else:
+            return (
+                self.numerator < other.numerator or self.denominator < other.denominator
+            )
 
 
 Parametric = Polynomial | RationalFunction
