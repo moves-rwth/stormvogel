@@ -350,7 +350,7 @@ def stormvogel_to_stormpy(
             "This model has states with no outgoing transitions.\nUse the add_self_loops() function to add self loops to all states with no outgoing transition."
         )
 
-    if model.unassigned_variables():
+    if model.has_unassigned_variables():
         raise RuntimeError("Each state should have a value for each variable")
 
     assert stormpy is not None
