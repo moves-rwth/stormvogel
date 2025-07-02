@@ -117,7 +117,8 @@ def stormvogel_to_stormpy(
         # we assign the values to the variables in the states
         for state in model.states.values():
             valuations.add_state(
-                state.id, integer_values=list(state.valuations.values())
+                model.stormpy_id[state.id],
+                integer_values=list(state.valuations.values()),
             )
 
         return valuations.build()
