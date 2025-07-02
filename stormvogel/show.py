@@ -82,4 +82,6 @@ def show_bird():
     m = stormvogel.model.new_dtmc(create_initial_state=False)
     m.new_state("🐦")
     m.add_self_loops()
-    return show(m, show_editor=False, layout=stormvogel.layout.SV())
+    return show(
+        m, show_editor=False, do_init_server=False, layout=stormvogel.layout.SV()
+    )

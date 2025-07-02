@@ -231,6 +231,23 @@ def test_remove_state():
         assert False
 
 
+def test_reassign_ids_removed_states():
+    # we test if reassigning ids works after states are removed
+
+    # we first make the die dtmc, remove one state and reassign ids
+    dtmc = stormvogel.examples.die.create_die_dtmc()
+    dtmc.remove_state(dtmc.get_initial_state())
+    dtmc.reassign_ids()
+
+    # we make the dtmc with the state already removed and ids already reassigned
+    other_dtmc = stormvogel.model.new_dtmc(create_initial_state=False)
+    for i in range(6):
+        other_dtmc.new_state(labels=[f"rolled{i+1}"], valuations={"rolled": i + 1})
+    other_dtmc.add_self_loops()
+
+    assert dtmc == other_dtmc
+
+
 def test_remove_transitions_between_states():
     # we make a model and remove transitions between two states
     dtmc = stormvogel.model.new_dtmc()
@@ -430,8 +447,8 @@ def test_valuation_methods():
     )
     dtmc.add_self_loops()
 
-    assert dtmc.unassigned_variables()
+    assert dtmc.has_unassigned_variables()
 
     dtmc.set_valuation_at_remaining_states()  # TODO more elaborate test, especially when unassigned_variables() returns more information
 
-    assert not dtmc.unassigned_variables()
+    assert not dtmc.has_unassigned_variables()

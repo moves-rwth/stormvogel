@@ -1,6 +1,6 @@
 import stormvogel.model
 from dataclasses import dataclass
-from collections.abc import Callable
+from typing import cast, Any, Callable
 import inspect
 
 
@@ -23,7 +23,7 @@ class State:
             setattr(self, key, value)
 
     def __repr__(self):
-        return f"State({self.__dict__})"
+        return f"state({self.__dict__})"
 
     def __hash__(self):
         return hash(str(self.__dict__))
@@ -35,14 +35,16 @@ class State:
 
 
 def valid_input(
-    delta: Callable,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
-    rewards: Callable | None = None,
-    labels: Callable | None = None,
-    available_actions: Callable | None = None,
-    observations: Callable | None = None,
-    rates: Callable | None = None,
-    valuations: Callable | None = None,
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
+    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    | None = None,
+    labels: Callable[[Any], list[str]] | None = None,
+    available_actions: Callable[[Any], list[Action]] | None = None,
+    observations: Callable[[Any], int] | None = None,
+    rates: Callable[[Any], float] | None = None,
+    valuations: Callable[[Any], dict[str, float | int | bool]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ):
     """
@@ -129,16 +131,18 @@ def valid_input(
 
 
 def build_pgc(
-    delta: Callable,
-    initial_state_pgc,
-    rewards: Callable | None = None,
-    labels: Callable | None = None,
-    available_actions: Callable | None = None,
-    observations: Callable | None = None,
-    rates: Callable | None = None,
-    valuations: Callable | None = None,
+    delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
+    initial_state_pgc: Any,
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
+    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    | None = None,
+    labels: Callable[[Any], list[str]] | None = None,
+    available_actions: Callable[[Any], list[Action]] | None = None,
+    observations: Callable[[Any], int] | None = None,
+    rates: Callable[[Any], float] | None = None,
+    valuations: Callable[[Any], dict[str, float | int | bool]] | None = None,
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
-    max_size: int = 2000,
+    max_size: int = 10000,
 ) -> stormvogel.model.Model:
     """
     function that converts a delta function, an available_actions function an initial state and a model type
@@ -146,12 +150,12 @@ def build_pgc(
 
     this works analogous to a prism file, where the delta is the module in this case.
 
-    (this function uses the pgc classes State and Action instead of the ones from stormvogel.model)
+    (this function uses the pgc classes state and action instead of the ones from stormvogel.model)
     """
 
-    def add_new_transitions(tuples, states_seen, state):
+    def add_new_transitions(tuples, state):
         """
-        helper function to add all the newly found transitions to the model
+        helper function to add all the newly found transitions and states to the model
         """
         branch = []
         if tuples is not None:
@@ -164,9 +168,8 @@ def build_pgc(
                     s = tup[1]
                     val = tup[0]
 
-                if s not in states_seen:
-                    states_seen.append(s)
-                    new_state = model.new_state()
+                if s not in state_lookup:
+                    new_state = model.new_state(id=len(model.states))
                     state_lookup[s] = new_state
                     branch.append((val, new_state))
                     states_to_be_visited.append(s)
@@ -194,17 +197,12 @@ def build_pgc(
     init = model.new_state(labels=["init"])
 
     # we continue calling delta and adding new states until no states are
-    # left to be checked
-    states_seen = []
+    # left to be visited
     states_to_be_visited = [initial_state_pgc]
     state_lookup = {initial_state_pgc: init}
     while len(states_to_be_visited) > 0:
-        state = states_to_be_visited[0]
-        states_to_be_visited.remove(state)
+        state = states_to_be_visited.pop(0)
         transition = {}
-
-        if state not in states_seen:
-            states_seen.append(state)
 
         if model.supports_actions():
             # we loop over all available actions and call the delta function for each actions
@@ -239,6 +237,7 @@ def build_pgc(
                     else:
                         stormvogel_action = stormvogel.model.EmptyAction
 
+                delta = cast(Callable[[Any, action], Any], delta)
                 tuples = delta(state, action)
 
                 if not isinstance(tuples, list) and tuples is not None:
@@ -246,11 +245,12 @@ def build_pgc(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                     )
 
-                branch = add_new_transitions(tuples, states_seen, state)
+                branch = add_new_transitions(tuples, state)
 
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
         else:
+            delta = cast(Callable[[Any], Any], delta)
             tuples = delta(state)
 
             if not isinstance(tuples, list) and tuples is not None:
@@ -258,7 +258,7 @@ def build_pgc(
                     f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                 )
 
-            branch = add_new_transitions(tuples, states_seen, state)
+            branch = add_new_transitions(tuples, state)
 
             if branch != []:
                 transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
@@ -273,7 +273,7 @@ def build_pgc(
         )
 
         # if at some point we discovered more than max_size states, we complain
-        if len(states_seen) > max_size:
+        if len(list(state_lookup)) > max_size:
             raise RuntimeError(
                 f"The model you want te create has a very large amount of states (at least {max_size}), if you wish to proceed, set max_size to some larger number."
             )
@@ -283,14 +283,19 @@ def build_pgc(
         if model.supports_actions():
             # we first create the right number of reward models
             assert available_actions is not None
+            rewards = cast(
+                Callable[[Any, action], dict[str, stormvogel.model.Number]], rewards
+            )
             for reward in rewards(
                 initial_state_pgc, available_actions(initial_state_pgc)[0]
             ).items():
                 model.add_rewards(reward[0])
 
+            # we take the initial state reward to compare later
             action = available_actions(initial_state_pgc)[0]
             initial_state_rewards = rewards(initial_state_pgc, action)
-            for state in states_seen:
+
+            for state, s in state_lookup.items():
                 assert available_actions is not None
                 for action in available_actions(state):
                     rewarddict = rewards(state, action)
@@ -311,7 +316,6 @@ def build_pgc(
                             "Make sure that the rewards function returns a dictionary with the same keys on each return"
                         )
 
-                    s = state_lookup[state]
                     assert s is not None
                     for index, reward in enumerate(rewarddict.items()):
                         a = model.get_action_with_labels(frozenset(action.labels))
@@ -323,11 +327,12 @@ def build_pgc(
                         )
         else:
             # we first create the right number of reward models
+            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Number]], rewards)
             for reward in rewards(initial_state_pgc).items():
                 model.add_rewards(reward[0])
 
             initial_state_rewards = rewards(initial_state_pgc)
-            for state in states_seen:
+            for state, s in state_lookup.items():
                 rewarddict = rewards(state)
 
                 # we check for the rewards when the function does not return a dict object
@@ -353,9 +358,7 @@ def build_pgc(
 
     # we add the observations
     if observations is not None:
-        for state in states_seen:
-            s = state_lookup[state]
-
+        for state, s in state_lookup.items():
             # we check for the observations when it does not return an integer
             o = observations(state)
             if o is None:
@@ -372,9 +375,7 @@ def build_pgc(
 
     # we add the exit rates
     if rates is not None:
-        for state in states_seen:
-            s = state_lookup[state]
-
+        for state, s in state_lookup.items():
             r = rates(state)
             if not isinstance(r, stormvogel.model.Number):
                 raise ValueError(
@@ -385,9 +386,7 @@ def build_pgc(
     # we add the valuations
     if valuations is not None:
         initial_state_valuations = valuations(initial_state_pgc)
-        for state in states_seen:
-            s = state_lookup[state]
-
+        for state, s in state_lookup.items():
             valuation_list = valuations(state)
             if valuation_list is None:
                 raise ValueError(
@@ -418,7 +417,7 @@ def build_pgc(
 
     # we add the labels
     if labels is not None:
-        for state in states_seen:
+        for state, s in state_lookup.items():
             labellist = labels(state)
 
             # we check for the labels when the function does not return a list object
@@ -428,7 +427,6 @@ def build_pgc(
                     f"On input {state}, the labels function does not have a return value"
                 )
 
-            s = state_lookup[state]
             assert s is not None
             if not isinstance(
                 labellist, list

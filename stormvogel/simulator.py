@@ -40,7 +40,7 @@ class Path:
             state = self.path[step]
             assert isinstance(state, stormvogel.model.State)
             return state
-        if self.supports_actions():
+        if self.model.supports_actions():
             t = self.path[step]
             assert (
                 isinstance(t, tuple)
@@ -181,6 +181,9 @@ def simulate_path(
     Returns a path object.
     """
 
+    # we need to set the seed for choosing actions in case no scheduler is provided
+    random.seed(seed)
+
     # we start adding states or state action pairs to the path
     state_id = 0
     path = {}
@@ -240,6 +243,9 @@ def simulate(
 
     Returns the partial model discovered by all the runs of the simulator together
     """
+
+    # we need to set the seed for choosing actions in case no scheduler is provided
+    random.seed(seed)
 
     # we keep track of all discovered states over all runs and add them to the partial model
     # we also add the discovered rewards and actions to the partial model if present

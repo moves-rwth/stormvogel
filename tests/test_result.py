@@ -981,3 +981,10 @@ def test_induced_dtmc():
     other_dtmc.add_self_loops()
 
     assert dtmc == other_dtmc
+
+
+def test_random_scheduler():
+    lion = stormvogel.examples.create_lion_mdp()
+    sched = stormvogel.result.random_scheduler(lion)
+    for i in lion.get_states().keys():
+        sched.get_choice_of_state(i)

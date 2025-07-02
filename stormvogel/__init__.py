@@ -13,6 +13,7 @@ from stormvogel.simulator import *  # NOQA
 from stormvogel import pgc  # NOQA
 from stormvogel import examples  # NOQA
 from stormvogel import extensions  # NOQA
+from stormvogel.visualization import Visualization  # NOQA
 
 
 def is_in_notebook():

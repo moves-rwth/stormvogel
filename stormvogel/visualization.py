@@ -161,6 +161,11 @@ class Visualization(stormvogel.displayable.Displayable):
             self.nt.show()
         self.maybe_display_output()
 
+    def clear(self) -> None:
+        """Clear visualization."""
+        with self.output:
+            ipd.clear_output()
+
     def update(self) -> None:
         """Tries to update an existing visualization to apply layout changes WITHOUT reloading. If show was not called before, nothing happens."""
         if self.nt is not None:

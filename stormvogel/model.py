@@ -79,24 +79,24 @@ class State:
                 "There is already a state with this id. Make sure the id is unique."
             )
 
-        used_names = [state.name for state in self.model.states.values()]
-        if name in used_names:
-            raise RuntimeError(
-                "There is already a state with this name. Make sure the name is unique."
-            )
-
         self.labels = labels
         self.valuations = valuations
         self.id = id
         self.observation = None
 
         if name is None:
-            if str(id) in used_names:
+            if str(id) in self.model.used_names:
                 raise RuntimeError(
                     "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
+            self.model.used_names.add(str(id))
             self.name = str(id)
         else:
+            if name in self.model.used_names:
+                raise RuntimeError(
+                    "There is already a state with this name. Make sure the name is unique."
+                )
+            self.model.used_names.add(name)
             self.name = name
 
     def add_label(self, label: str):
@@ -530,6 +530,9 @@ class Model:
         else:
             self.markovian_states = None
 
+        # We also keep track of used state names
+        self.used_names = set()
+
         # Add the initial state if specified to do so
         if create_initial_state:
             self.new_state(["init"])
@@ -653,7 +656,7 @@ class Model:
             if state not in states:
                 remove.append(state)
         for state in remove:
-            sub_model.remove_state(state)
+            sub_model.remove_state(state, normalize=False)
 
         if normalize:
             sub_model.normalize()
@@ -717,7 +720,7 @@ class Model:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
 
-    def unassigned_variables(self) -> bool:
+    def has_unassigned_variables(self) -> bool:
         # TODO return list of pairs of variables and states where it is undefined
         variables = self.get_variables()
         if variables == set():
@@ -841,6 +844,7 @@ class Model:
             "Warning: Using this can cause problems in your code if there are existing references to states by id."
         )
 
+        # we change the ids in the dictionaries
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -858,6 +862,10 @@ class Model:
                     sorted(self.exit_rates.items())
                 )
             }
+
+        # we change the ids in the states themselves
+        for index, state in enumerate(self.states.values()):
+            state.id = index
 
     def remove_state(
         self, state: State, normalize: bool = True, reassign_ids: bool = False
@@ -909,9 +917,6 @@ class Model:
             # we reassign the ids if specified to do so
             if reassign_ids:
                 self.reassign_ids()
-                for other_state in self.states.values():
-                    if other_state.id > state.id:
-                        other_state.id -= 1
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
@@ -977,9 +982,16 @@ class Model:
         labels: list[str] | str | None = None,
         valuations: dict[str, int | bool | float] | None = None,
         name: str | None = None,
+        id: int | None = None,
     ) -> State:
         """Creates a new state and returns it."""
-        state_id = self.__free_state_id()
+
+        # we can either provide an id, or check which one is free
+        if id is None:
+            state_id = self.__free_state_id()
+        else:
+            state_id = id
+
         if isinstance(labels, list):
             state = State(labels, valuations or {}, state_id, self, name=name)
         elif isinstance(labels, str):
