@@ -43,7 +43,7 @@ def test_pmc_conversion():
 
 
 def test_pmdp_conversion():
-     # Create a new model with the name "simple pmdp"
+    # Create a new model with the name "simple pmdp"
     pmdp = stormvogel.model.new_mdp("simple pmdp")
 
     init = pmdp.get_initial_state()
@@ -52,17 +52,28 @@ def test_pmdp_conversion():
 
     p1 = stormvogel.parametric.Polynomial()
     p2 = stormvogel.parametric.Polynomial()
-    p1.set_coefficient((1), 1)
-    p2.set_coefficient((0), 1)
-    p2.set_coefficient((1), -1)
+    p1.set_coefficient((1,), 1)
+    p2.set_coefficient((0,), 1)
+    p2.set_coefficient((1,), -1)
 
     pmdp.new_state(labels=["goal"])
     pmdp.new_state(labels=["sink"])
 
     action_a = pmdp.new_action(frozenset({"a"}))
     action_b = pmdp.new_action(frozenset({"b"}))
-    branch0 = stormvogel.model.Branch([(p1, pmdp.get_states_with_label("goal")[0]), (p2, pmdp.get_states_with_label("sink")[0])])
-    branch1 = stormvogel.model.Branch([(p2, pmdp.get_states_with_label("sink")[0]), (p1, pmdp.get_states_with_label("goal")[0])])
+    branch0 = stormvogel.model.Branch(
+        [
+            (p1, pmdp.get_states_with_label("goal")[0]),
+            (p2, pmdp.get_states_with_label("sink")[0]),
+        ]
+    )
+    branch1 = stormvogel.model.Branch(
+        [
+            (p2, pmdp.get_states_with_label("goal")[0]),
+            (p1, pmdp.get_states_with_label("sink")[0]),
+        ]
+    )
+    # TODO goes wrong when we change order
 
     pmdp.add_transitions(
         init, stormvogel.model.Transition({action_a: branch0, action_b: branch1})
@@ -73,11 +84,11 @@ def test_pmdp_conversion():
 
     # we test the mapping
     stormpy_pmdp = mapping.stormvogel_to_stormpy(pmdp)
+
     new_pmdp = mapping.stormpy_to_stormvogel(stormpy_pmdp)
 
-    print(pmdp)
-    print(new_pmdp)
     assert pmdp == new_pmdp
+
 
 # def test_pmc_valuations():
 #    pmc = stormvogel.examples.pmc.create_simple_pmc()

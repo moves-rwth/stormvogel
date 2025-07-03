@@ -17,14 +17,12 @@ class Polynomial:
         self.coefficients = dict()
 
     def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
+        # TODO exponents may also be a single integer
+        assert isinstance(exponents, tuple)
+
         if self.coefficients != {}:
             my_dimension = self.get_dimension()
-
-            #TODO fix this by using lists instead of tuples
-            if isinstance(exponents,tuple):
-                term_dimension = len(exponents)
-            else:
-                term_dimension = 1
+            term_dimension = len(list(exponents))
 
             if my_dimension != term_dimension:
                 raise RuntimeError(
@@ -36,8 +34,8 @@ class Polynomial:
         # returns the number of different variables present
         if self.coefficients is not {}:
             key = list(self.coefficients.keys())[0]
-            if isinstance(key,tuple):
-                return len(list(self.coefficients.keys())[0])
+            if isinstance(key, tuple):
+                return len(key)
             else:
                 return 1
         else:

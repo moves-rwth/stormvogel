@@ -23,12 +23,13 @@ def value_to_stormpy(
         assert stormpy is not None
 
         terms = []
-        for term, value in polynomial.coefficients.items():
-            if value != 0:
+        for exponent, coefficient in polynomial.coefficients.items():
+            if coefficient != 0:
                 stormpy_term = stormpy.pycarl.cln.cln.Term(
-                    stormpy.pycarl.cln.cln.Rational(value)
+                    stormpy.pycarl.cln.cln.Rational(coefficient)
                 )
-                for index, exp in enumerate(term):
+                assert isinstance(exponent, tuple)
+                for index, exp in enumerate(exponent):
                     for i in range(exp):
                         stormpy_term *= variables[index]
                 terms.append(stormpy_term)
