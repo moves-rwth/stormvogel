@@ -56,24 +56,23 @@ def test_pmdp_conversion():
     p2.set_coefficient((0,), 1)
     p2.set_coefficient((1,), -1)
 
-    pmdp.new_state(labels=["goal"])
-    pmdp.new_state(labels=["sink"])
+    goal = pmdp.new_state(labels=["goal"])
+    sink = pmdp.new_state(labels=["sink"])
 
     action_a = pmdp.new_action(frozenset({"a"}))
     action_b = pmdp.new_action(frozenset({"b"}))
     branch0 = stormvogel.model.Branch(
         [
-            (p1, pmdp.get_states_with_label("goal")[0]),
-            (p2, pmdp.get_states_with_label("sink")[0]),
+            (p1, goal),
+            (p2, sink),
         ]
     )
     branch1 = stormvogel.model.Branch(
         [
-            (p2, pmdp.get_states_with_label("goal")[0]),
-            (p1, pmdp.get_states_with_label("sink")[0]),
+            (p1, sink),
+            (p2, goal),
         ]
     )
-    # TODO goes wrong when we change order
 
     pmdp.add_transitions(
         init, stormvogel.model.Transition({action_a: branch0, action_b: branch1})

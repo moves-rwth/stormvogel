@@ -253,6 +253,10 @@ class Branch:
 
     branch: list[tuple[Number, State]]
 
+    def sort_states(self):
+        """sorts the branch list by states"""
+        self.branch.sort(key=lambda x: x[1])
+
     def __str__(self):
         parts = []
         for prob, state in self.branch:
