@@ -265,13 +265,20 @@ class Visualization(stormvogel.displayable.Displayable):
     def __format_probability(self, prob: stormvogel.model.Number) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
-        if isinstance(prob, str) or math.isinf(prob):
+        if isinstance(prob, str):
             return str(prob)
         else:
-            if self.layout.layout["numbers"]["fractions"]:
-                return str(fractions.Fraction(prob).limit_denominator(1000))
-            else:
-                return str(round(float(prob), self.layout.layout["numbers"]["digits"]))
+            if isinstance(prob, (int, float)):
+                if math.isinf(float(prob)):
+                    return str(prob)
+                if self.layout.layout["numbers"]["fractions"]:
+                    return str(fractions.Fraction(prob).limit_denominator(1000))
+                else:
+                    return str(
+                        round(float(prob), self.layout.layout["numbers"]["digits"])
+                    )
+            else:  # TODO case for when we have parameters
+                return ""
 
     def __format_rewards(
         self, s: stormvogel.model.State, a: stormvogel.model.Action

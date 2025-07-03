@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
+from stormvogel import parametric
 import copy
 
-Parameter = str
-
-Number = float | Parameter | Fraction | int
+Number = float | Fraction | int | parametric.Parametric
 
 
 class ModelType(Enum):
@@ -170,6 +169,7 @@ class State:
         transitions = self.get_outgoing_transitions(action)
         if transitions is not None:
             for transition in transitions:
+                assert isinstance(transition[0], (int, float))
                 if float(transition[0]) > 0 and transition[1] != self:
                     return False
         return True
@@ -252,6 +252,10 @@ class Branch:
     """
 
     branch: list[tuple[Number, State]]
+
+    def sort_states(self):
+        """sorts the branch list by states"""
+        self.branch.sort(key=lambda x: x[1])
 
     def __str__(self):
         parts = []
@@ -340,6 +344,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, int)
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
+        or isinstance(first_element, parametric.Parametric)
     ):
         return Transition(
             {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
@@ -563,6 +568,15 @@ class Model:
         """Returns whether this model supports observations."""
         return self.get_type() == ModelType.POMDP
 
+    def is_parametric(self):
+        """Returns whether this model contains parametric transition values"""
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        return True
+        return False
+
     def is_stochastic(self) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
         For continuous models: Checks if all sums of outgoing rates sum to 0
@@ -651,6 +665,9 @@ class Model:
         if normalize:
             sub_model.normalize()
         return sub_model
+
+    # def apply_valuation(self):
+    # TODO:
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
@@ -1045,6 +1062,17 @@ class Model:
             if model.name == name:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def get_nr_parameters(self) -> int:
+        """Returns the number of parameters of this model"""
+        nr_parameters = 0
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        if tup[0].get_dimension() > nr_parameters:
+                            nr_parameters = tup[0].get_dimension()
+        return nr_parameters
 
     def get_states(self) -> dict[int, State]:
         return self.states
