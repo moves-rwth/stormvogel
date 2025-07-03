@@ -5,22 +5,22 @@ from dataclasses import dataclass
 class Polynomial:
     """
     Represents polynomials, to be used as values for parametric models.
-    Polynomials are represented as an dictionary with n-dimensional tuples as keys.
+    Polynomials are represented as a dictionary with n-dimensional tuples as keys.
 
     Args:
-        coefficients: coefficients of the terms
+        terms: terms of the polynomial (dictionary that relates exponents to coefficients)
     """
 
-    coefficients: dict[tuple, float]
+    terms: dict[tuple, float]
 
     def __init__(self):
-        self.coefficients = dict()
+        self.terms = dict()
 
-    def set_coefficient(self, exponents: tuple[int, ...], coefficient: float):
+    def set_term(self, exponents: tuple[int, ...], coefficient: float):
         # TODO exponents may also be a single integer
         assert isinstance(exponents, tuple)
 
-        if self.coefficients != {}:
+        if self.terms != {}:
             my_dimension = self.get_dimension()
             term_dimension = len(list(exponents))
 
@@ -28,12 +28,12 @@ class Polynomial:
                 raise RuntimeError(
                     f"The length of the exponents tuple should be: {my_dimension}"
                 )
-        self.coefficients[exponents] = float(coefficient)
+        self.terms[exponents] = float(coefficient)
 
     def get_dimension(self) -> int:
-        # returns the number of different variables present
-        if self.coefficients is not {}:
-            key = list(self.coefficients.keys())[0]
+        """returns the number of different variables present"""
+        if self.terms is not {}:
+            key = list(self.terms.keys())[0]
             if isinstance(key, tuple):
                 return len(key)
             else:
@@ -42,9 +42,9 @@ class Polynomial:
             return 0
 
     def get_degree(self) -> int:
-        if self.coefficients is not {}:
+        if self.terms is not {}:
             largest = 0
-            for term in self.coefficients.keys():
+            for term in self.terms.keys():
                 for exponent in term:
                     if exponent > largest:
                         largest = exponent
@@ -58,7 +58,7 @@ class Polynomial:
     def __str__(self) -> str:
         s = ""
         # we iterate through each term
-        for exponents, coefficient in self.coefficients.items():
+        for exponents, coefficient in self.terms.items():
             # we only print terms with nonzero coefficients
             if coefficient != 0:
                 # we don't print coefficients that are 1
@@ -81,7 +81,7 @@ class Polynomial:
         return s[:-3]
 
     def __lt__(self, other) -> bool:
-        return str(self.coefficients) < str(other.coefficients)
+        return str(self.terms) < str(other.terms)
 
 
 class RationalFunction:
@@ -99,7 +99,7 @@ class RationalFunction:
 
     def __init__(self, numerator: Polynomial, denominator: Polynomial):
         denominator_all_zero = True
-        for exponents, coefficient in denominator.coefficients.items():
+        for exponents, coefficient in denominator.terms.items():
             if coefficient != 0:
                 denominator_all_zero = False
 
@@ -107,10 +107,10 @@ class RationalFunction:
             self.numerator = numerator
             self.denominator = denominator
         else:
-            raise RuntimeError("dividing by 0 is not allowed")
+            raise RuntimeError("dividision by 0 is not allowed")
 
     def get_dimension(self) -> int:
-        # returns the number of different variables present
+        """returns the number of different variables present"""
         return max(self.numerator.get_dimension(), self.denominator.get_dimension())
 
     # TODO valuation function
@@ -133,10 +133,10 @@ Parametric = Polynomial | RationalFunction
 if __name__ == "__main__":
     polynomial1 = Polynomial()
     polynomial2 = Polynomial()
-    polynomial1.set_coefficient((0, 0, 1), 5)
-    polynomial1.set_coefficient((3, 2, 1), 2.4)
-    polynomial2.set_coefficient((2, 3, 2, 1), 1)
-    polynomial2.set_coefficient((0, 0, 0, 0), 3)
+    polynomial1.set_term((0, 0, 1), 5)
+    polynomial1.set_term((3, 2, 1), 2.4)
+    polynomial2.set_term((2, 3, 2, 1), 1)
+    polynomial2.set_term((0, 0, 0, 0), 3)
 
     rationalfunction = RationalFunction(polynomial1, polynomial2)
 

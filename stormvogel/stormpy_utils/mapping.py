@@ -23,7 +23,7 @@ def value_to_stormpy(
         assert stormpy is not None
 
         terms = []
-        for exponent, coefficient in polynomial.coefficients.items():
+        for exponent, coefficient in polynomial.terms.items():
             if coefficient != 0:
                 stormpy_term = stormpy.pycarl.cln.cln.Term(
                     stormpy.pycarl.cln.cln.Rational(coefficient)
@@ -573,10 +573,10 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
         # we initialize the polynomial
         stormvogel_polynomial = parametric.Polynomial()
 
-        # and then we convert it to a dictionary of coefficients
+        # and then we convert it to a dictionary of terms
         length_tuple = len(variables_list)
         for term in term_list:
-            # we iterate through all coefficients, variables and exponents
+            # we iterate through all terms, variables and exponents
             index_tuple = [0 for i in range(length_tuple)]
             for i in range(len(term)):
                 for j, var in enumerate(variables_list):
@@ -589,11 +589,9 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
 
             # we check if there is a coefficient at the beginning
             if is_float(term[0]):
-                stormvogel_polynomial.set_coefficient(
-                    tuple(index_tuple), float(term[0])
-                )
+                stormvogel_polynomial.set_term(tuple(index_tuple), float(term[0]))
             else:
-                stormvogel_polynomial.set_coefficient(tuple(index_tuple), float(1))
+                stormvogel_polynomial.set_term(tuple(index_tuple), float(1))
 
         return stormvogel_polynomial
 
