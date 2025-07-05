@@ -23,7 +23,8 @@ def sample_gym(
         no_samples (int): Total number of samples (starting at an initial state).
             To resolve multiple initial states, a new, single initial state is added if necessary.
         sample_length (int): The maximum length of a single sample.
-        gymnasium_scheduler (Callable[any, int] | None): A function from states to action numbers.
+        gymnasium_scheduler (Callable[[any], int] | None): A function from states to action numbers.
+        convert_obs (Callable[[any], any]): Converts the observations to a hashable type. You can also apply rounding here.
     """
     # First, do the sampling
     initial_states = defaultdict(lambda: 0)
