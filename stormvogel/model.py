@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
+from stormvogel import parametric
 import copy
 
-Parameter = str
-
-Number = float | Parameter | Fraction | int
+Number = float | Fraction | int | parametric.Parametric
 
 
 class ModelType(Enum):
@@ -80,24 +79,24 @@ class State:
                 "There is already a state with this id. Make sure the id is unique."
             )
 
-        used_names = [state.name for state in self.model.states.values()]
-        if name in used_names:
-            raise RuntimeError(
-                "There is already a state with this name. Make sure the name is unique."
-            )
-
         self.labels = labels
         self.valuations = valuations
         self.id = id
         self.observation = None
 
         if name is None:
-            if str(id) in used_names:
+            if str(id) in self.model.used_names:
                 raise RuntimeError(
                     "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
+            self.model.used_names.add(str(id))
             self.name = str(id)
         else:
+            if name in self.model.used_names:
+                raise RuntimeError(
+                    "There is already a state with this name. Make sure the name is unique."
+                )
+            self.model.used_names.add(name)
             self.name = name
 
     def add_label(self, label: str):
@@ -170,6 +169,7 @@ class State:
         transitions = self.get_outgoing_transitions(action)
         if transitions is not None:
             for transition in transitions:
+                assert isinstance(transition[0], (int, float))
                 if float(transition[0]) > 0 and transition[1] != self:
                     return False
         return True
@@ -252,6 +252,10 @@ class Branch:
     """
 
     branch: list[tuple[Number, State]]
+
+    def sort_states(self):
+        """sorts the branch list by states"""
+        self.branch.sort(key=lambda x: x[1])
 
     def __str__(self):
         parts = []
@@ -351,6 +355,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, int)
         or isinstance(first_element, Fraction)
         or isinstance(first_element, str)
+        or isinstance(first_element, parametric.Parametric)
     ):
         return Transition(
             {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
@@ -540,6 +545,9 @@ class Model:
         else:
             self.markovian_states = None
 
+        # We also keep track of used state names
+        self.used_names = set()
+
         # Add the initial state if specified to do so
         if create_initial_state:
             self.new_state(["init"])
@@ -603,6 +611,15 @@ class Model:
 
         return True
 
+    def is_parametric(self):
+        """Returns whether this model contains parametric transition values"""
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        return True
+        return False
+
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
         if not self.supports_rates():
@@ -648,11 +665,14 @@ class Model:
             if state not in states:
                 remove.append(state)
         for state in remove:
-            sub_model.remove_state(state)
+            sub_model.remove_state(state, normalize=False)
 
         if normalize:
             sub_model.normalize()
         return sub_model
+
+    # def apply_valuation(self):
+    # TODO:
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
@@ -709,7 +729,7 @@ class Model:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
 
-    def unassigned_variables(self) -> bool:
+    def has_unassigned_variables(self) -> bool:
         # TODO return list of pairs of variables and states where it is undefined
         variables = self.get_variables()
         if variables == set():
@@ -833,6 +853,7 @@ class Model:
             "Warning: Using this can cause problems in your code if there are existing references to states by id."
         )
 
+        # we change the ids in the dictionaries
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -850,6 +871,10 @@ class Model:
                     sorted(self.exit_rates.items())
                 )
             }
+
+        # we change the ids in the states themselves
+        for index, state in enumerate(self.states.values()):
+            state.id = index
 
     def remove_state(
         self, state: State, normalize: bool = True, reassign_ids: bool = False
@@ -901,9 +926,6 @@ class Model:
             # we reassign the ids if specified to do so
             if reassign_ids:
                 self.reassign_ids()
-                for other_state in self.states.values():
-                    if other_state.id > state.id:
-                        other_state.id -= 1
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
@@ -1045,6 +1067,17 @@ class Model:
             if model.name == name:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
+
+    def get_nr_parameters(self) -> int:
+        """Returns the number of parameters of this model"""
+        nr_parameters = 0
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        if tup[0].get_dimension() > nr_parameters:
+                            nr_parameters = tup[0].get_dimension()
+        return nr_parameters
 
     def get_states(self) -> dict[int, State]:
         return self.states

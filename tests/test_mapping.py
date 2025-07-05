@@ -1,14 +1,14 @@
 import stormvogel.examples.monty_hall
-import stormvogel.examples.stormpy_mdp
+import stormvogel.examples.stormpy_examples.stormpy_mdp
 import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.model
-import stormvogel.examples.stormpy_dtmc
+import stormvogel.examples.stormpy_examples.stormpy_dtmc
 import stormvogel.examples.die
-import stormvogel.examples.stormpy_ctmc
-import stormvogel.examples.stormpy_pomdp
+import stormvogel.examples.stormpy_examples.stormpy_ctmc
+import stormvogel.examples.stormpy_examples.stormpy_pomdp
 import stormvogel.examples.nuclear_fusion_ctmc
 import stormvogel.examples.monty_hall_pomdp
-import stormvogel.examples.stormpy_ma
+import stormvogel.examples.stormpy_examples.stormpy_ma
 import stormvogel.examples.simple_ma
 from typing import Union
 
@@ -101,7 +101,7 @@ def sparse_equal(
 def test_stormpy_to_stormvogel_and_back_dtmc():
     if stormpy is not None:
         # we test it for an example stormpy representation of a dtmc
-        stormpy_dtmc = stormvogel.examples.stormpy_dtmc.example_building_dtmcs_01()
+        stormpy_dtmc = stormvogel.examples.stormpy_examples.stormpy_dtmc.example_building_dtmcs_01()
         # print(stormpy_dtmc.transition_matrix)
         stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
         # print(stormvogel_dtmc)
@@ -137,7 +137,9 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
 def test_stormpy_to_stormvogel_and_back_mdp():
     if stormpy is not None:
         # we test it for an example stormpy representation of an mdp
-        stormpy_mdp = stormvogel.examples.stormpy_mdp.example_building_mdps_01()
+        stormpy_mdp = (
+            stormvogel.examples.stormpy_examples.stormpy_mdp.example_building_mdps_01()
+        )
         # print(stormpy_mdp)
         stormvogel_mdp = mapping.stormpy_to_stormvogel(stormpy_mdp)
         # print(stormvogel_mdp)
@@ -204,7 +206,7 @@ def test_stormvogel_to_stormpy_and_back_ctmc():
 def test_stormpy_to_stormvogel_and_back_ctmc():
     if stormpy is not None:
         # we create a stormpy representation of an example ctmc
-        stormpy_ctmc = stormvogel.examples.stormpy_ctmc.example_building_ctmcs_01()
+        stormpy_ctmc = stormvogel.examples.stormpy_examples.stormpy_ctmc.example_building_ctmcs_01()
         # print(stormpy_ctmc)
         stormvogel_ctmc = mapping.stormpy_to_stormvogel(stormpy_ctmc)
         # print(stormvogel_ctmc)
@@ -237,7 +239,7 @@ def test_stormvogel_to_stormpy_and_back_pomdp():
 def test_stormpy_to_stormvogel_and_back_pomdp():
     if stormpy is not None:
         # we create a stormpy representation of an example pomdp
-        stormpy_pomdp = stormvogel.examples.stormpy_pomdp.example_building_pomdps_01()
+        stormpy_pomdp = stormvogel.examples.stormpy_examples.stormpy_pomdp.example_building_pomdps_01()
         # print(stormpy_pomdp)
         stormvogel_pomdp = mapping.stormpy_to_stormvogel(stormpy_pomdp)
         # print(stormvogel_pomdp)
@@ -264,7 +266,9 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 def test_stormpy_to_stormvogel_and_back_ma():
     if stormpy is not None:
         # we create a stormpy representation of an example ma
-        stormpy_ma = stormvogel.examples.stormpy_ma.example_building_mas_01()
+        stormpy_ma = (
+            stormvogel.examples.stormpy_examples.stormpy_ma.example_building_mas_01()
+        )
         # print(stormpy_ma)
         stormvogel_ma = mapping.stormpy_to_stormvogel(stormpy_ma)
         # print(stormvogel_ma)
@@ -273,3 +277,109 @@ def test_stormpy_to_stormvogel_and_back_ma():
         # print(new_stormpy_ma)
 
         assert sparse_equal(stormpy_ma, new_stormpy_ma)
+
+
+# Tests for modified models:
+
+
+def test_modified_stormpy_to_stormvogel_and_back():
+    if stormpy is not None:
+        # we build a simple stormpy dtmc
+        builder = stormpy.SparseMatrixBuilder(
+            rows=0,
+            columns=0,
+            entries=0,
+            force_dimensions=False,
+            has_custom_row_grouping=False,
+        )
+
+        builder.add_next_value(row=0, column=1, value=0.5)
+        builder.add_next_value(0, 2, 0.5)
+        builder.add_next_value(1, 1, 1)
+        builder.add_next_value(2, 2, 1)
+
+        transition_matrix = builder.build()
+        state_labeling = stormpy.storage.StateLabeling(3)
+
+        labels = {"init", "one", "two"}
+        for label in labels:
+            state_labeling.add_label(label)
+
+        state_labeling.add_label_to_state("init", 0)
+        state_labeling.add_label_to_state("one", 1)
+        state_labeling.add_label_to_state("two", 2)
+
+        components = stormpy.SparseModelComponents(
+            transition_matrix=transition_matrix,
+            state_labeling=state_labeling,
+        )
+
+        stormpy_dtmc = stormpy.storage.SparseDtmc(components)
+
+        # we map it to stormvogel
+        stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
+
+        # we modify the model
+        assert stormvogel_dtmc is not None
+        stormvogel_dtmc.remove_state(stormvogel_dtmc.get_initial_state())
+        stormvogel_dtmc.new_state(name="three", labels=["three"], id=4)
+        stormvogel_dtmc.add_self_loops()
+
+        # we map it back to stormpy
+        new_stormpy_dtmc = mapping.stormvogel_to_stormpy(stormvogel_dtmc)
+
+        # we create the already modified stormpy model
+        builder = stormpy.SparseMatrixBuilder(
+            rows=0,
+            columns=0,
+            entries=0,
+            force_dimensions=False,
+            has_custom_row_grouping=False,
+        )
+
+        builder.add_next_value(0, 0, 1)
+        builder.add_next_value(1, 1, 1)
+        builder.add_next_value(2, 2, 1)
+
+        transition_matrix = builder.build()
+        state_labeling = stormpy.storage.StateLabeling(3)
+
+        labels = {"one", "two", "three"}
+        for label in labels:
+            state_labeling.add_label(label)
+
+        state_labeling.add_label_to_state("one", 0)
+        state_labeling.add_label_to_state("two", 1)
+        state_labeling.add_label_to_state("three", 2)
+
+        components = stormpy.SparseModelComponents(
+            transition_matrix=transition_matrix,
+            state_labeling=state_labeling,
+        )
+
+        other_new_stormpy_dtmc = stormpy.storage.SparseDtmc(components)
+
+        assert sparse_equal(new_stormpy_dtmc, other_new_stormpy_dtmc)
+
+
+# TODO other way around
+
+
+# Test id mappings in case they are out of order
+def test_id_mapping():
+    if stormpy is not None:
+        # make stormvogel model of dtmc
+        stormvogel_dtmc = stormvogel.examples.die.create_die_dtmc()
+        # remove states without reassigning ids
+        stormvogel_dtmc.remove_state(stormvogel_dtmc.get_initial_state())
+        stormvogel_dtmc.remove_state(stormvogel_dtmc.get_state_by_id(2))
+        # map to stormpy and back
+        stormpy_dtmc = mapping.stormvogel_to_stormpy(stormvogel_dtmc)
+        new_stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
+
+        # we compare (should be unequal)
+        assert new_stormvogel_dtmc != stormvogel_dtmc
+
+        # we reassign ids of original model and compare again
+        stormvogel_dtmc.reassign_ids()
+        assert new_stormvogel_dtmc == stormvogel_dtmc

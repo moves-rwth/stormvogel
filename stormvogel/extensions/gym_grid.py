@@ -18,7 +18,7 @@ def gymnasium_grid_to_stormvogel(
     INV_MAP = {v: k for k, v in action_label_map.items()}
     ALL_ACTIONS = [pgc.Action([x]) for x in action_label_map.values()]
 
-    def action_numer_map(a):
+    def action_numer_map(a: pgc.Action):
         return INV_MAP[a.labels[0]]
 
     if "taxi" in env.spec.id.lower():
@@ -29,12 +29,12 @@ def gymnasium_grid_to_stormvogel(
             n=0, done=False
         )  # Otherwise, it's just 0 (Cliffwalking and FrozenLake).
 
-    def available_actions(s):
+    def available_actions(s: pgc.State):
         if s.n == -1:
             return [pgc.PgcEmpytAction]
         return ALL_ACTIONS[:NO_ACTIONS]
 
-    def delta(s, a):
+    def delta(s: pgc.State, a: pgc.Action):
         if (
             s.n == -1
         ):  # Special taxi init state. It goes to every location that a passenger could spawn in. This should explore all states.
@@ -44,13 +44,13 @@ def gymnasium_grid_to_stormvogel(
         trans = TRANSITIONS[s.n][action_numer_map(a)]
         return list(map(lambda x: (x[0], pgc.State(n=int(x[1]), done=x[3])), trans))
 
-    def rewards(s, a):
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, stormvogel.model.Number]:
         if s.n == -1:
             return {"R": 0}
         reward = list(map(lambda x: x[2], TRANSITIONS[s.n][action_numer_map(a)]))[0]
         return {"R": reward}
 
-    def labels(s):
+    def labels(s: pgc.State):
         labels = [str(s.n), str(to_coordinate(s.n, env))]
         if s.n == get_target_state(env):
             labels.append("target")

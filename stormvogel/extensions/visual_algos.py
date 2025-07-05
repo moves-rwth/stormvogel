@@ -76,6 +76,7 @@ def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float
             branch = model.get_branch(s)
             for transition_prob, target in branch.branch:
                 current_prob = matrix_steps_states[current_step][s_id]
+                assert isinstance(transition_prob, (int, float))
                 matrix_steps_states[next_step][target.id] += current_prob * float(
                     transition_prob
                 )

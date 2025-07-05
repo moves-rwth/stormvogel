@@ -136,7 +136,10 @@ def step(
 
     transitions = state.get_outgoing_transitions(action)
     assert transitions is not None  # what if there are no transitions?
-    probability_distribution = [float(t[0]) for t in transitions]
+    probability_distribution = []
+    for t in transitions:
+        assert isinstance(t[0], float) or isinstance(t[0], int)
+        probability_distribution.append(float(t[0]))
     states = [t[1] for t in transitions]
     if seed is not None:
         rng = random.Random(seed)
@@ -177,6 +180,9 @@ def simulate_path(
 
     Returns a path object.
     """
+
+    # we need to set the seed for choosing actions in case no scheduler is provided
+    random.seed(seed)
 
     # we start adding states or state action pairs to the path
     state_id = 0
@@ -237,6 +243,9 @@ def simulate(
 
     Returns the partial model discovered by all the runs of the simulator together
     """
+
+    # we need to set the seed for choosing actions in case no scheduler is provided
+    random.seed(seed)
 
     # we keep track of all discovered states over all runs and add them to the partial model
     # we also add the discovered rewards and actions to the partial model if present
@@ -310,6 +319,9 @@ def simulate(
                         stormvogel.model.EmptyAction
                     ].branch:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], float) or isinstance(
+                                tuple[0], int
+                            )
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of states, they collapse
@@ -384,6 +396,9 @@ def simulate(
                     assert transitions is not None
                     for tuple in transitions:
                         if tuple[1].id == state_id:
+                            assert isinstance(tuple[0], float) or isinstance(
+                                tuple[0], int
+                            )
                             probability += float(
                                 tuple[0]
                             )  # if there are multiple transitions between the same pair of action with next state, they collapse
