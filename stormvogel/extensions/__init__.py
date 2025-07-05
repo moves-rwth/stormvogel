@@ -3,3 +3,4 @@ from stormvogel.extensions.gifs import *  # NOQA
 from stormvogel.extensions.gym_grid import *  # NOQA
 from stormvogel.extensions.helpers import *  # NOQA
 from stormvogel.extensions.visual_algos import *  # NOQA
+from stormvogel.extensions.gym_sampling import *  # NOQA
