@@ -10,6 +10,8 @@ def sample_gym(
     no_samples: int = 10,
     sample_length: int = 20,
     gymnasium_scheduler: Callable[[Any], int] | None = None,
+    convert_obs: Callable[[Any], Any] = lambda x: x,
+    max_size: int = 10000,
 ):
     """Sample the gym environment and convert it to a Stormvogel MDP.
     In reality, gym environments are POMDPs, and gymnasium only allows us to access the observation.
@@ -32,7 +34,7 @@ def sample_gym(
     for s_no in range(no_samples):
         prev_state = None
         obs, _ = env.reset()
-        state = (obs, False)
+        state = (convert_obs(obs), False)
         initial_states[state] += 1
         for _ in range(sample_length):
             action = (
@@ -42,7 +44,7 @@ def sample_gym(
             )
             prev_state = state
             obs, reward, terminated, truncated, info = env.step(action)
-            state = (obs, terminated)
+            state = (convert_obs(obs), terminated)
             transition_counts[(prev_state, action)][state] += 1
             transition_samples[(prev_state, action)] += 1
             reward_sums[(prev_state, action)] += float(reward)
@@ -88,13 +90,16 @@ def sample_gym(
         if s is NEW_INITIAL_STATE:
             return []
         done = ["done"] if s[1] else []
-        return [str(x) for x in s[0]] + done
+        return [str(s[0])] + done
 
-    return pgc.build_pgc(
+    sv_model = pgc.build_pgc(
         delta=delta,
         initial_state_pgc=init,
         available_actions=available_actions,
         labels=labels,
         rewards=rewards,
         modeltype=stormvogel.model.ModelType.MDP,
+        max_size=max_size,
     )
+    sv_model.name = f"`Gymnasium sample from {env.unwrapped.spec.id} with {no_samples} samples of max length {sample_length}`"  # type: ignore
+    return sv_model
