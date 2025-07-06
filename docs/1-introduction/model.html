@@ -43499,15 +43499,15 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
 // exports.Element = SVGCanvasElement;
 </script>
     <style type="text/css">
-      #YRewYKWyoa {
-        width: 381px;
-        height: 374px;
+      #ldmboukIfy {
+        width: 655px;
+        height: 375px;
         border: 1px solid lightgray;
       }
     </style>
   </head>
   <body>
-    <div id="YRewYKWyoa"></div>
+    <div id="ldmboukIfy"></div>
     <script type="text/javascript">
         //js
 class NetworkWrapper {
@@ -43616,26 +43616,37 @@ class NetworkWrapper {
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states", x: 0, y: -3 },
-{ id: 1, label: `rolled1`, group: "states", x: 3, y: -146 },
-{ id: 2, label: `rolled2`, group: "states", x: 128, y: -67 },
-{ id: 3, label: `rolled3`, group: "states", x: 120, y: 77 },
-{ id: 4, label: `rolled4`, group: "states", x: -6, y: 135 },
-{ id: 5, label: `rolled5`, group: "states", x: -124, y: 70 },
-{ id: 6, label: `rolled6`, group: "states", x: -124, y: -73 },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init,green light,still`, group: "green_light", x: 194, y: -96 },
+{ id: 1, label: `red light,still`, group: "red_light", x: -51, y: -142 },
+{ id: 2, label: `green light,moving`, group: "green_light", x: 186, y: 153 },
+{ id: 3, label: `red light,moving`, group: "red_light", x: -108, y: 98 },
+{ id: 4, label: `accident`, group: "states", x: -367, y: 177 },
+{ id: 10000000000, label: `accelerate`, group: "actions", x: 144, y: 35 },
+{ id: 10000000001, label: `wait`, group: "actions", x: 68, y: -99 },
+{ id: 10000000002, label: `accelerate`, group: "actions", x: -158, y: -50 },
+{ id: 10000000003, label: `wait`, group: "actions", x: 87, y: -212 },
+{ id: 10000000004, label: `brake`, group: "actions", x: 275, y: 33 },
+{ id: 10000000005, label: `wait`, group: "actions", x: 33, y: 176 },
+{ id: 10000000006, label: `brake`, group: "actions", x: -25, y: -3 },
+{ id: 10000000007, label: `wait`, group: "actions", x: -238, y: 163 },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 1, label: "1/6" },
-{ from: 0, to: 2, label: "1/6" },
-{ from: 0, to: 3, label: "1/6" },
-{ from: 0, to: 4, label: "1/6" },
-{ from: 0, to: 5, label: "1/6" },
-{ from: 0, to: 6, label: "1/6" },
-{ from: 1, to: 1, label: "1" },
-{ from: 2, to: 2, label: "1" },
-{ from: 3, to: 3, label: "1" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 2, label: "1" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 1, label: "1" },
+{ from: 1, to: 10000000002 },
+{ from: 10000000002, to: 3, label: "1" },
+{ from: 1, to: 10000000003 },
+{ from: 10000000003, to: 0, label: "1" },
+{ from: 2, to: 10000000004 },
+{ from: 10000000004, to: 0, label: "1" },
+{ from: 2, to: 10000000005 },
+{ from: 10000000005, to: 3, label: "1" },
+{ from: 3, to: 10000000006 },
+{ from: 10000000006, to: 1, label: "1" },
+{ from: 3, to: 10000000007 },
+{ from: 10000000007, to: 4, label: "1" },
 { from: 4, to: 4, label: "1" },
-{ from: 5, to: 5, label: "1" },
-{ from: 6, to: 6, label: "1" },
 ]);
     var options_local = {
   "__fake_macros": {
@@ -43659,6 +43670,8 @@ class NetworkWrapper {
   },
   "edit_groups": {
     "groups": [
+      "green_light",
+      "red_light",
       "states",
       "actions"
     ]
@@ -43678,7 +43691,7 @@ class NetworkWrapper {
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 20
       }
     },
     "scheduled_actions": {
@@ -43702,7 +43715,24 @@ class NetworkWrapper {
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "#000000",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "#ffffff",
+        "size": 20
+      }
+    },
+    "red_light": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ec9393",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -43713,7 +43743,41 @@ class NetworkWrapper {
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 20
+      }
+    },
+    "green_light": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#bcfe58",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 20
+      }
+    },
+    "init": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#bcfe58",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
+      },
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 20
       }
     }
   },
@@ -43749,53 +43813,77 @@ class NetworkWrapper {
   },
   "misc": {
     "enable_physics": true,
-    "width": 381,
-    "height": 374,
+    "width": 655,
+    "height": 375,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/die.json",
+    "filename": "layouts/car.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": 0,
-      "y": -3
+      "x": 194,
+      "y": -96
     },
     "1": {
-      "x": 3,
-      "y": -146
+      "x": -51,
+      "y": -142
     },
     "2": {
-      "x": 128,
-      "y": -67
+      "x": 186,
+      "y": 153
     },
     "3": {
-      "x": 120,
-      "y": 77
+      "x": -108,
+      "y": 98
     },
     "4": {
-      "x": -6,
-      "y": 135
+      "x": -367,
+      "y": 177
     },
-    "5": {
-      "x": -124,
-      "y": 70
+    "10000000000": {
+      "x": 144,
+      "y": 35
     },
-    "6": {
-      "x": -124,
-      "y": -73
+    "10000000001": {
+      "x": 68,
+      "y": -99
+    },
+    "10000000002": {
+      "x": -158,
+      "y": -50
+    },
+    "10000000003": {
+      "x": 87,
+      "y": -212
+    },
+    "10000000004": {
+      "x": 275,
+      "y": 33
+    },
+    "10000000005": {
+      "x": 33,
+      "y": 176
+    },
+    "10000000006": {
+      "x": -25,
+      "y": -3
+    },
+    "10000000007": {
+      "x": -238,
+      "y": 163
     }
   },
   "physics": true,
   "autoResize": true,
-  "width": 381,
-  "height": 374
+  "width": 655,
+  "height": 375
 };
-    var container_local = document.getElementById("YRewYKWyoa");
-    var nw_YRewYKWyoa = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    var container_local = document.getElementById("ldmboukIfy");
+    var nw_ldmboukIfy = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
 
     </script>
   </body>

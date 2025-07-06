@@ -18,24 +18,14 @@
       }
     }
   },
+  "edit_groups": {
+    "groups": [
+      "r",
+      "states",
+      "actions"
+    ]
+  },
   "groups": {
-    "states": {
-      "borderWidth": 1,
-      "color": {
-        "background": "white",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
-      }
-    },
     "actions": {
       "borderWidth": 1,
       "color": {
@@ -54,22 +44,45 @@
       }
     },
     "scheduled_actions": {
-      "borderWidth": 1,
+      "shape": "box",
       "color": {
         "background": "pink",
+        "border": "red"
+      }
+    },
+    "states": {
+      "borderWidth": 1,
+      "color": {
+        "background": "white",
         "border": "black",
         "highlight": {
           "background": "white",
           "border": "red"
         }
       },
-      "shape": "box",
+      "shape": "ellipse",
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 14
+        "size": 21
+      }
+    },
+    "r": {
+      "borderWidth": 1,
+      "color": {
+        "background": "#ff6666",
+        "border": "black",
+        "highlight": {
+          "background": "white",
+          "border": "red"
+        }
       },
-      "schedColor": false
+      "shape": "ellipse",
+      "mass": 1,
+      "font": {
+        "color": "black",
+        "size": 21
+      }
     }
   },
   "reload_button": false,
@@ -77,11 +90,14 @@
     "arrows": "to",
     "font": {
       "color": "black",
-      "size": 14
+      "size": 14,
+      "strokeColor": "white",
+      "strokeWidth": 2
     },
     "color": {
       "color": "black"
-    }
+    },
+    "width": 1
   },
   "numbers": {
     "fractions": true,
@@ -101,8 +117,8 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 381,
-    "height": 374,
+    "width": 800,
+    "height": 600,
     "explore": false
   },
   "saving": {
@@ -113,35 +129,58 @@
   },
   "positions": {
     "0": {
-      "x": 0,
-      "y": -3
+      "x": 73,
+      "y": 22
     },
     "1": {
-      "x": 3,
-      "y": -146
+      "x": 118,
+      "y": 151
     },
     "2": {
-      "x": 128,
-      "y": -67
+      "x": -26,
+      "y": -61
     },
     "3": {
-      "x": 120,
-      "y": 77
+      "x": 240,
+      "y": 150
     },
     "4": {
-      "x": -6,
-      "y": 135
+      "x": -12,
+      "y": 231
     },
     "5": {
-      "x": -124,
-      "y": 70
+      "x": 20,
+      "y": -198
     },
     "6": {
-      "x": -124,
-      "y": -73
+      "x": -133,
+      "y": -19
+    },
+    "7": {
+      "x": 367,
+      "y": 109
+    },
+    "8": {
+      "x": -144,
+      "y": 198
+    },
+    "9": {
+      "x": -40,
+      "y": 364
+    },
+    "10": {
+      "x": 145,
+      "y": -246
+    },
+    "11": {
+      "x": -88,
+      "y": -278
+    },
+    "12": {
+      "x": -263,
+      "y": -14
     }
   },
-  "width": 381,
-  "height": 374,
-  "physics": true
+  "physics": true,
+  "autoResize": true
 }
