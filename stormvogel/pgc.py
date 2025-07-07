@@ -5,19 +5,6 @@ import inspect
 
 
 @dataclass
-class Action:
-    """pgc action object. Contains a list of labels"""
-
-    labels: list[str]
-
-    def __contains__(self, item):
-        return item in self.labels
-
-
-PgcEmptyAction = Action([])
-
-
-@dataclass
 class State:
     """pgc state object. Can contain any number of any type of arguments"""
 
@@ -35,6 +22,9 @@ class State:
         if isinstance(other, State):
             return self.__dict__ == other.__dict__
         return False
+
+
+type Action = list[str]
 
 
 def valid_input(
@@ -224,18 +214,18 @@ def build_pgc(
 
             for action in actionslist:
                 try:
-                    if action.labels != []:
+                    if action != []:
                         stormvogel_action = model.new_action(
                             frozenset(
-                                action.labels  # type: ignore
+                                action  # type: ignore
                             ),  # right now we only look at one label
                         )
                     else:
                         stormvogel_action = stormvogel.model.EmptyAction
                 except RuntimeError:
-                    if action.labels != []:
+                    if action != []:
                         stormvogel_action = model.get_action_with_labels(
-                            frozenset(action.labels)
+                            frozenset(action)
                         )
                     else:
                         stormvogel_action = stormvogel.model.EmptyAction
@@ -321,7 +311,7 @@ def build_pgc(
 
                     assert s is not None
                     for index, reward in enumerate(rewarddict.items()):
-                        a = model.get_action_with_labels(frozenset(action.labels))
+                        a = model.get_action_with_labels(frozenset(action))
                         assert a is not None
                         model.rewards[index].set_state_action_reward(
                             s,
