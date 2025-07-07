@@ -10,6 +10,9 @@ class Action:
 
     labels: list[str]
 
+    def __contains__(self, item):
+        return item in self.labels
+
 
 PgcEmptyAction = Action([])
 
