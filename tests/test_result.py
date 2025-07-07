@@ -958,6 +958,13 @@ def test_induced_dtmc():
     mdp.set_transitions(mdp.get_initial_state(), transition)
     mdp.add_self_loops()
 
+    # we set rewards (because we must also check if they are carried over)
+    rewardmodel = mdp.add_rewards("r1")
+    for i in range(4):
+        pair = mdp.get_state_action_pair(i)
+        assert pair is not None
+        rewardmodel.set_state_action_reward(pair[0], pair[1], i)
+
     # we create the induced dtmc
     chosen_actions = dict()
     for state_id, state in mdp.states.items():
@@ -973,12 +980,18 @@ def test_induced_dtmc():
     branch0 = stormvogel.model.Branch(
         cast(
             list[tuple[stormvogel.model.Number, stormvogel.model.State]],
-            [(1 / 2, state1), (1 / 2, state2)],  # TODO why do we need to cast in dtmcs
+            [(1 / 2, state1), (1 / 2, state2)],
         )
     )
     transition = stormvogel.model.Transition({stormvogel.model.EmptyAction: branch0})
     other_dtmc.set_transitions(other_dtmc.get_initial_state(), transition)
     other_dtmc.add_self_loops()
+
+    # and the rewards of the induced dtmc
+    rewardmodel = other_dtmc.add_rewards("r1")
+    rewardmodel.set_state_reward(other_dtmc.get_state_by_id(0), 0)
+    rewardmodel.set_state_reward(other_dtmc.get_state_by_id(1), 2)
+    rewardmodel.set_state_reward(other_dtmc.get_state_by_id(2), 3)
 
     assert dtmc == other_dtmc
 
