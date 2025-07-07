@@ -271,6 +271,9 @@ class Branch:
     def __add__(self, other):
         return Branch(self.branch + other.branch)
 
+    def sum_probabilities(self) -> Number:
+        return sum([prob for (prob, _) in self.branch])  # type: ignore
+
 
 class Transition:
     """Represents a transition, which map actions to branches.
@@ -318,6 +321,14 @@ class Transition:
                     return False
             return True
         return False
+
+    def sum_probabilities(self, action) -> Number:
+        return self.transition[action].sum_probabilities()
+
+    def is_stochastic(self, epsilon: Number) -> bool:
+        return all(
+            [abs(self.sum_probabilities(a) - 1) <= epsilon for a in self.transition]  # type: ignore
+        )
 
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
@@ -577,26 +588,20 @@ class Model:
                         return True
         return False
 
-    def is_stochastic(self) -> bool:
-        """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1
+    def is_stochastic(self, epsilon: Number = 0.000001) -> bool:
+        """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1, with at most epsilon rounding error.
         For continuous models: Checks if all sums of outgoing rates sum to 0
         """
 
         if not self.supports_rates():
-            for state in self.states.values():
-                for action in state.available_actions():
-                    sum_prob = 0
-                    transitions = state.get_outgoing_transitions(action)
-                    assert transitions is not None
-                    for transition in transitions:
-                        if (
-                            isinstance(transition[0], float)
-                            or isinstance(transition[0], Fraction)
-                            or isinstance(transition[0], int)
-                        ):
-                            sum_prob += transition[0]
-                    if sum_prob != 1:
-                        return False
+            return all(
+                [
+                    self.get_transitions(s).is_stochastic(epsilon)
+                    for s in self.states
+                    if s in self.transitions
+                ]
+            )
+
         else:
             for state in self.states.values():
                 for action in state.available_actions():
