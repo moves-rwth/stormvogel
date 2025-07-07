@@ -15,6 +15,8 @@ class Scheduler:
     # taken actions are hashed by the state id
     taken_actions: dict[int, stormvogel.model.Action]
 
+    # TODO functionality to convert a lambda scheduler to this object
+
     def __init__(
         self,
         model: stormvogel.model.Model,
@@ -22,8 +24,6 @@ class Scheduler:
     ):
         self.model = model
         self.taken_actions = taken_actions
-
-        # TODO functionality to convert a lambda scheduler to this object
 
     def get_choice_of_state(
         self, state: stormvogel.model.State | int
@@ -40,12 +40,25 @@ class Scheduler:
         """This function resolves the nondeterminacy of the mdp and returns the scheduler induced dtmc"""
         if self.model.get_type() == stormvogel.model.ModelType.MDP:
             induced_dtmc = stormvogel.model.new_dtmc(create_initial_state=False)
+
+            # we initialize the reward models
+            for reward_model in self.model.rewards:
+                induced_dtmc.add_rewards(reward_model.name)
+
+            # we add all the states and transitions according to the choices
             for state in self.model.states.values():
                 induced_dtmc.new_state(labels=state.labels, valuations=state.valuations)
                 action = self.get_choice_of_state(state)
                 transitions = state.get_outgoing_transitions(action)
                 assert transitions is not None
                 induced_dtmc.add_transitions(s=state, transitions=transitions)
+
+                # we also add the rewards
+                for reward_model in self.model.rewards:
+                    induced_reward_model = induced_dtmc.get_rewards(reward_model.name)
+                    reward = reward_model.get_state_action_reward(state, action)
+                    assert reward is not None
+                    induced_reward_model.set_state_reward(state, reward)
 
             return induced_dtmc
 
