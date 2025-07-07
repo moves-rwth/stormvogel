@@ -64,9 +64,9 @@ def sample_gym(
 
     def available_actions(s):
         if s is NEW_INITIAL_STATE:
-            return [pgc.PgcEmpytAction]
+            return [pgc.PgcEmptyAction]
         elif s[1]:
-            return [pgc.PgcEmpytAction]
+            return [pgc.PgcEmptyAction]
         return [a for a in ALL_ACTIONS if transition_counts[(s, INV_MAP[a.labels[0]])]]
 
     def delta(s, a):
@@ -98,7 +98,7 @@ def sample_gym(
         initial_state_pgc=init,
         available_actions=available_actions,
         labels=labels,
-        rewards=rewards,
+        rewards=rewards,  # type: ignore
         modeltype=stormvogel.model.ModelType.MDP,
         max_size=max_size,
     )

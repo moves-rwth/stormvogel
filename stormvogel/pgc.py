@@ -11,7 +11,7 @@ class Action:
     labels: list[str]
 
 
-PgcEmpytAction = Action([])
+PgcEmptyAction = Action([])
 
 
 @dataclass

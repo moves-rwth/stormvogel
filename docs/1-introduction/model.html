@@ -43499,15 +43499,15 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
 // exports.Element = SVGCanvasElement;
 </script>
     <style type="text/css">
-      #qodDZqyorY {
-        width: 300px;
-        height: 342px;
+      #BWYLDFpkXP {
+        width: 461px;
+        height: 358px;
         border: 1px solid lightgray;
       }
     </style>
   </head>
   <body>
-    <div id="qodDZqyorY"></div>
+    <div id="BWYLDFpkXP"></div>
     <script type="text/javascript">
         //js
 class NetworkWrapper {
@@ -43616,17 +43616,33 @@ class NetworkWrapper {
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states", x: 4, y: -87 },
-{ id: 1, label: `try`, group: "states", x: 5, y: 27 },
-{ id: 2, label: `fail`, group: "states", x: -94, y: -28 },
-{ id: 3, label: `success`, group: "states", x: 101, y: 105 },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init,`, group: "states", x: -200, y: -25 },
+{ id: 1, label: `studied
+€	r1: 0`, group: "states", x: 3, y: -112 },
+{ id: 2, label: `didn't study
+€	r1: 15`, group: "states", x: -17, y: 119 },
+{ id: 3, label: `pass test
+€	r1: 100`, group: "states", x: 92, y: 27 },
+{ id: 4, label: `fail test
+€	r1: 0`, group: "states", x: 8, y: -1 },
+{ id: 5, label: `end
+€	r1: 0`, group: "states", x: 140, y: -58 },
+{ id: 10000000000, label: `study
+€	r1: 0`, group: "actions", x: -124, y: -138 },
+{ id: 10000000001, label: `don't study
+€	r1: 0`, group: "actions", x: -154, y: 103 },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 1, label: "1" },
-{ from: 1, to: 1, label: "1/100" },
-{ from: 1, to: 2, label: "1/100" },
-{ from: 1, to: 3, label: "49/50" },
-{ from: 2, to: 0, label: "1" },
-{ from: 3, to: 3, label: "1" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: "1" },
+{ from: 0, to: 10000000001 },
+{ from: 10000000001, to: 2, label: "1" },
+{ from: 1, to: 3, label: "9/10" },
+{ from: 1, to: 4, label: "1/10" },
+{ from: 2, to: 3, label: "2/5" },
+{ from: 2, to: 4, label: "3/5" },
+{ from: 3, to: 5, label: "1" },
+{ from: 4, to: 5, label: "1" },
+{ from: 5, to: 5, label: "1" },
 ]);
     var options_local = {
   "__fake_macros": {
@@ -43658,7 +43674,7 @@ class NetworkWrapper {
     "actions": {
       "borderWidth": 1,
       "color": {
-        "background": "lightblue",
+        "background": "#fbd0f5",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -43682,7 +43698,7 @@ class NetworkWrapper {
     "states": {
       "borderWidth": 1,
       "color": {
-        "background": "white",
+        "background": "#c9f9a9",
         "border": "black",
         "highlight": {
           "background": "white",
@@ -43729,39 +43745,55 @@ class NetworkWrapper {
   },
   "misc": {
     "enable_physics": true,
-    "width": 300,
-    "height": 342,
+    "width": 461,
+    "height": 358,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/commu.json",
+    "filename": "layouts/pinkgreen.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": 4,
-      "y": -87
+      "x": -200,
+      "y": -25
     },
     "1": {
-      "x": 5,
-      "y": 27
+      "x": 3,
+      "y": -112
     },
     "2": {
-      "x": -94,
-      "y": -28
+      "x": -17,
+      "y": 119
     },
     "3": {
-      "x": 101,
-      "y": 105
+      "x": 92,
+      "y": 27
+    },
+    "4": {
+      "x": 8,
+      "y": -1
+    },
+    "5": {
+      "x": 140,
+      "y": -58
+    },
+    "10000000000": {
+      "x": -124,
+      "y": -138
+    },
+    "10000000001": {
+      "x": -154,
+      "y": 103
     }
   },
   "physics": true,
   "autoResize": true
 };
-    var container_local = document.getElementById("qodDZqyorY");
-    var nw_qodDZqyorY = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    var container_local = document.getElementById("BWYLDFpkXP");
+    var nw_BWYLDFpkXP = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
 
     </script>
   </body>

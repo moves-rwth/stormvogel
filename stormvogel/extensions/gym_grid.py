@@ -31,7 +31,7 @@ def gymnasium_grid_to_stormvogel(
 
     def available_actions(s: pgc.State):
         if s.n == -1:
-            return [pgc.PgcEmpytAction]
+            return [pgc.PgcEmptyAction]
         return ALL_ACTIONS[:NO_ACTIONS]
 
     def delta(s: pgc.State, a: pgc.Action):
