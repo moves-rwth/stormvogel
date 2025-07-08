@@ -579,6 +579,15 @@ class Model:
         """Returns whether this model supports observations."""
         return self.get_type() == ModelType.POMDP
 
+    def is_parametric(self):
+        """Returns whether this model contains parametric transition values"""
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        return True
+        return False
+
     def is_stochastic(self, epsilon: Number = 0.000001) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1, with at most epsilon rounding error.
         For continuous models: Checks if all sums of outgoing rates sum to 0
@@ -610,15 +619,6 @@ class Model:
                         return False
 
         return True
-
-    def is_parametric(self):
-        """Returns whether this model contains parametric transition values"""
-        for transition in self.transitions.values():
-            for branch in transition.transition.values():
-                for tup in branch.branch:
-                    if isinstance(tup[0], parametric.Parametric):
-                        return True
-        return False
 
     def normalize(self):
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
