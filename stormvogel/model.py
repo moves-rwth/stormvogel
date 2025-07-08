@@ -330,6 +330,9 @@ class Transition:
             [abs(self.sum_probabilities(a) - 1) <= epsilon for a in self.transition]  # type: ignore
         )
 
+    def __getitem(self, item):
+        return self.transition[item]
+
 
 TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
 
