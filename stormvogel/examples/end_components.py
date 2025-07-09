@@ -7,10 +7,10 @@ def create_end_components_mdp():
 
     def available_actions(s: pgc.State):
         if "init" in s.x:
-            return [pgc.Action(["one"]), pgc.Action(["two"])]
+            return [["one"], ["two"]]
         elif "mec1" in s.x or "mec2" in s.x:
-            return [pgc.Action(["one"]), pgc.Action(["two"])]
-        return [pgc.Action([])]
+            return [["one"], ["two"]]
+        return [[]]
 
     def delta(s: pgc.State, a: pgc.Action):
         if "init" in s.x and "one" in a.labels:

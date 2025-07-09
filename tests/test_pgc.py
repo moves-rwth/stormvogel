@@ -10,8 +10,8 @@ def test_pgc_mdp():
     p = 0.5
     initial_state = pgc.State(x=math.floor(N / 2))
 
-    left = pgc.Action(["left"])
-    right = pgc.Action(["right"])
+    left = ["left"]
+    right = ["right"]
 
     def available_actions(s: pgc.State) -> list[pgc.Action]:
         if s.x == N:
@@ -93,8 +93,8 @@ def test_pgc_mdp_int():
     p = 0.5
     initial_state = math.floor(N / 2)
 
-    left = pgc.Action(["left"])
-    right = pgc.Action(["right"])
+    left = ["left"]
+    right = ["right"]
 
     def available_actions(s):
         if s == N:
@@ -364,7 +364,7 @@ def test_pgc_dtmc_arbitrary():
 def test_pgc_mdp_empty_action():
     # we test if we can also provide empty actions
     def available_actions(s):
-        return [pgc.Action([])]
+        return [[]]
 
     def delta(current_state, action):
         match current_state:
@@ -397,14 +397,14 @@ def test_pgc_endless():
 
     def available_actions(s: pgc.State):
         if s == init:  # If we are in the initial state, we have a choice.
-            return [pgc.Action(["study"]), pgc.Action(["don't study"])]
+            return [["study"], ["don't study"]]
         else:  # Otherwise, we don't have any choice, we are just a Markov chain.
-            return [pgc.Action([])]
+            return [[]]
 
     def delta(s: pgc.State, a: pgc.Action):
-        if "study" in a.labels:
+        if "study" in a:
             return [(1, pgc.State(x=["studied"]))]
-        elif "don't study" in a.labels:
+        elif "don't study" in a:
             return [(1, pgc.State(x=["didn't study"]))]
         elif "studied" in s.x:
             return [
@@ -441,8 +441,8 @@ def test_pgc_pomdp():
     p = 0.5
     initial_state = pgc.State(x=math.floor(N / 2))
 
-    left = pgc.Action(["left"])
-    right = pgc.Action(["right"])
+    left = ["left"]
+    right = ["right"]
 
     def available_actions(s: pgc.State):
         if s.x == N:
