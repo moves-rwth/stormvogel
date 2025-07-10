@@ -10,15 +10,15 @@ def test_pmc_conversion():
     init = pmc.get_initial_state()
 
     # From the initial state, we have two transitions that either bring us to state A or state B
-    p1 = stormvogel.parametric.Polynomial()
-    p1.set_term((1, 1, 1), 4)
+    p1 = stormvogel.parametric.Polynomial(["x", "y", "z"])
+    p1.add_term((1, 1, 1), 4)
 
     # the other transition is a rational function with two polynomials
-    p2 = stormvogel.parametric.Polynomial()
+    p2 = stormvogel.parametric.Polynomial(["x", "y"])
     # p3 = stormvogel.parametric.Polynomial()
-    p2.set_term((2, 0), 1)
-    p2.set_term((2, 2), -1)
-    # p3.set_term((2,), 2)
+    p2.add_term((2, 0), 1)
+    p2.add_term((2, 2), -1)
+    # p3.add_term((2,), 2)
     # r1 = stormvogel.parametric.RationalFunction(p2,p3)
     # TODO make it work for proper rational functions
 
@@ -50,11 +50,11 @@ def test_pmdp_conversion():
 
     # From the initial state, we have two actions with transitions that either bring us to a goal state or sink state
 
-    p1 = stormvogel.parametric.Polynomial()
-    p2 = stormvogel.parametric.Polynomial()
-    p1.set_term((1,), 1)
-    p2.set_term((0,), 1)
-    p2.set_term((1,), -1)
+    p1 = stormvogel.parametric.Polynomial(["x"])
+    p2 = stormvogel.parametric.Polynomial(["x"])
+    p1.add_term((1,), 1)
+    p2.add_term((0,), 1)
+    p2.add_term((1,), -1)
 
     goal = pmdp.new_state(labels=["goal"])
     sink = pmdp.new_state(labels=["sink"])

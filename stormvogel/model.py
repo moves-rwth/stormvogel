@@ -1071,16 +1071,15 @@ class Model:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
 
-    def get_nr_parameters(self) -> int:
-        """Returns the number of parameters of this model"""
-        nr_parameters = 0
+    def get_parameters(self) -> set[str]:
+        """Returns the set of parameters of this model"""
+        parameters = set()
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
                     if isinstance(tup[0], parametric.Parametric):
-                        if tup[0].get_dimension() > nr_parameters:
-                            nr_parameters = tup[0].get_dimension()
-        return nr_parameters
+                        parameters = parameters.union(tup[0].get_variables())
+        return parameters
 
     def get_states(self) -> dict[int, State]:
         return self.states
