@@ -54,7 +54,15 @@ class Polynomial:
         else:
             return 0
 
-    # TODO valuation function
+    def evaluate(self, values: dict[str, float]) -> float:
+        """evaluates the polynomial with the given values"""
+        result = 0
+        for exponents, coefficient in self.terms.items():
+            term = coefficient
+            for variable, exponent in enumerate(exponents):
+                term *= values[self.variables[variable]] ** exponent
+            result += term
+        return result
 
     def __str__(self) -> str:
         s = ""
@@ -123,7 +131,9 @@ class RationalFunction:
         "returns the total set of variables of this rational function"
         return set(self.numerator.variables).union(set(self.denominator.variables))
 
-    # TODO valuation function
+    def evaluate(self, values: dict[str, float]) -> float:
+        """evaluates the rational function with the given values"""
+        return self.numerator.evaluate(values) / self.denominator.evaluate(values)
 
     def __str__(self) -> str:
         s = "(" + str(self.numerator) + ")/(" + str(self.denominator) + ")"

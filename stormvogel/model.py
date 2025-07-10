@@ -674,8 +674,21 @@ class Model:
             sub_model.normalize()
         return sub_model
 
-    # def apply_valuation(self):
-    # TODO:
+    def parameter_valuation(self, values: dict[str, float]) -> "Model":
+        """evaluates all parametric transitions with the given values and returns the new model"""
+        evaluated_model = copy.deepcopy(self)
+        for state, transition in evaluated_model.transitions.items():
+            for action, branch in transition.transition.items():
+                new_branch = []
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        tup = (tup[0].evaluate(values), tup[1])
+                    new_branch.append(tup)
+                evaluated_model.transitions[state].transition[
+                    action
+                ].branch = new_branch
+
+        return evaluated_model
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
