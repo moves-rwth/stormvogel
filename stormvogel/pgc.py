@@ -40,7 +40,7 @@ def valid_input(
     rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
     | Callable[[Any], dict[str, stormvogel.model.Number]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,
@@ -136,7 +136,7 @@ def build_pgc(
     rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
     | Callable[[Any], dict[str, stormvogel.model.Number]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,

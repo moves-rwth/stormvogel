@@ -43,6 +43,7 @@ def create_knuth_yao_pmc():
 
     return pgc.build_pgc(
         delta=delta,
+        labels=labels,
         initial_state_pgc=pgc.State(s=0),
         modeltype=model.ModelType.DTMC,
     )

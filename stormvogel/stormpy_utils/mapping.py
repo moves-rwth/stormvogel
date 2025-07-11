@@ -12,16 +12,18 @@ except ImportError:
 
 
 def value_to_stormpy(
-    value, variables: list[stormpy.pycarl.Variable], model: stormvogel.model.Model
+    value, variables: list["stormpy.pycarl.Variable"], model: stormvogel.model.Model
 ) -> "stormpy.pycarl.cln.FactorizedRationalFunction":
     """converts a stormvogel transition value to a stormpy (pycarl) value"""
+
+    assert stormpy is not None
 
     def convert_polynomial(
         polynomial: parametric.Polynomial,
     ) -> "stormpy.pycarl.cln.FactorizedPolynomial":
         """helper function for converting polynomials to pycarl polyomials"""
-        assert stormpy is not None
 
+        assert stormpy is not None
         terms = []
         for exponent, coefficient in polynomial.terms.items():
             if coefficient != 0:
@@ -40,10 +42,8 @@ def value_to_stormpy(
         return factorized_polynomial
 
     if model.is_parametric():
-        assert stormpy is not None
-
         # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
-        if isinstance(value, float):
+        if isinstance(value, stormvogel.model.Number):
             rational = stormpy.pycarl.cln.cln.Rational(value)
             polynomial = stormpy.pycarl.cln.cln.Polynomial(rational)
             factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(

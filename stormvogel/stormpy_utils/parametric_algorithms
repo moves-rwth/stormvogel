@@ -1,0 +1,14 @@
+from stormvogel import parametric, model
+from stormvogel.stormpy_utils import mapping
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
+
+def gradient_descent(model: model.Model):
+    stormpy_model = mapping.stormvogel_to_stormpy(model)
+    
+
+def solution_function()
+    return True

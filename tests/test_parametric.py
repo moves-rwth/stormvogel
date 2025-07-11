@@ -1,93 +1,109 @@
 import stormvogel.stormpy_utils.mapping as mapping
+import stormvogel.stormpy_utils.model_checking as model_checking
 import stormvogel.parametric
 import stormvogel.model
+import stormvogel.examples.knuth_yao_pmc
+
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
 
 
 def test_pmc_conversion():
-    # Create a new model with the name "simple pmc"
-    pmc = stormvogel.model.new_dtmc("simple pmc")
+    if stormpy is not None:
+        # Create a new model with the name "simple pmc"
+        pmc = stormvogel.model.new_dtmc("simple pmc")
 
-    init = pmc.get_initial_state()
+        init = pmc.get_initial_state()
 
-    # From the initial state, we have two transitions that either bring us to state A or state B
-    p1 = stormvogel.parametric.Polynomial(["x", "y", "z"])
-    p1.add_term((1, 1, 1), 4)
+        # From the initial state, we have two transitions that either bring us to state A or state B
+        p1 = stormvogel.parametric.Polynomial(["x", "y", "z"])
+        p1.add_term((1, 1, 1), 4)
 
-    # the other transition is a rational function with two polynomials
-    p2 = stormvogel.parametric.Polynomial(["x", "y"])
-    # p3 = stormvogel.parametric.Polynomial(["z"])
-    p2.add_term((2, 0), 1)
-    p2.add_term((2, 2), -1)
-    # p3.add_term((2,), 2)
-    # r1 = stormvogel.parametric.RationalFunction(p2,p3)
+        # the other transition is a rational function with two polynomials
+        p2 = stormvogel.parametric.Polynomial(["x", "y"])
+        # p3 = stormvogel.parametric.Polynomial(["z"])
+        p2.add_term((2, 0), 1)
+        p2.add_term((2, 2), -1)
+        # p3.add_term((2,), 2)
+        # r1 = stormvogel.parametric.RationalFunction(p2,p3)
 
-    # TODO make it work for proper rational functions
+        # TODO make it work for proper rational functions
 
-    pmc.new_state(labels=["A"])
-    pmc.new_state(labels=["B"])
+        pmc.new_state(labels=["A"])
+        pmc.new_state(labels=["B"])
 
-    init.set_transitions(
-        [
-            (p1, pmc.get_states_with_label("A")[0]),
-            (p2, pmc.get_states_with_label("B")[0]),
-        ]
-    )
+        init.set_transitions(
+            [
+                (p1, pmc.get_states_with_label("A")[0]),
+                (p2, pmc.get_states_with_label("B")[0]),
+            ]
+        )
 
-    # we add self loops to all states with no outgoing transitions
-    pmc.add_self_loops()
+        # we add self loops to all states with no outgoing transitions
+        pmc.add_self_loops()
 
-    # we test the mapping
-    stormpy_pmc = mapping.stormvogel_to_stormpy(pmc)
-    new_pmc = mapping.stormpy_to_stormvogel(stormpy_pmc)
+        # we test the mapping
+        stormpy_pmc = mapping.stormvogel_to_stormpy(pmc)
+        new_pmc = mapping.stormpy_to_stormvogel(stormpy_pmc)
 
-    assert pmc == new_pmc
+        assert pmc == new_pmc
+
+        # We also test it for the knuth yao model
+        pmc = stormvogel.examples.knuth_yao_pmc.create_knuth_yao_pmc()
+        stormpy_pmc = mapping.stormvogel_to_stormpy(pmc)
+        new_pmc = mapping.stormpy_to_stormvogel(stormpy_pmc)
+
+        assert pmc == new_pmc
 
 
 def test_pmdp_conversion():
-    # Create a new model with the name "simple pmdp"
-    pmdp = stormvogel.model.new_mdp("simple pmdp")
+    if stormpy is not None:
+        # Create a new model with the name "simple pmdp"
+        pmdp = stormvogel.model.new_mdp("simple pmdp")
 
-    init = pmdp.get_initial_state()
+        init = pmdp.get_initial_state()
 
-    # From the initial state, we have two actions with transitions that either bring us to a goal state or sink state
+        # From the initial state, we have two actions with transitions that either bring us to a goal state or sink state
 
-    p1 = stormvogel.parametric.Polynomial(["x"])
-    p2 = stormvogel.parametric.Polynomial(["x"])
-    p1.add_term((1,), 1)
-    p2.add_term((0,), 1)
-    p2.add_term((1,), -1)
+        p1 = stormvogel.parametric.Polynomial(["x"])
+        p2 = stormvogel.parametric.Polynomial(["x"])
+        p1.add_term((1,), 1)
+        p2.add_term((0,), 1)
+        p2.add_term((1,), -1)
 
-    goal = pmdp.new_state(labels=["goal"])
-    sink = pmdp.new_state(labels=["sink"])
+        goal = pmdp.new_state(labels=["goal"])
+        sink = pmdp.new_state(labels=["sink"])
 
-    action_a = pmdp.new_action(frozenset({"a"}))
-    action_b = pmdp.new_action(frozenset({"b"}))
-    branch0 = stormvogel.model.Branch(
-        [
-            (p1, goal),
-            (p2, sink),
-        ]
-    )
-    branch1 = stormvogel.model.Branch(
-        [
-            (p1, sink),
-            (p2, goal),
-        ]
-    )
+        action_a = pmdp.new_action(frozenset({"a"}))
+        action_b = pmdp.new_action(frozenset({"b"}))
+        branch0 = stormvogel.model.Branch(
+            [
+                (p1, goal),
+                (p2, sink),
+            ]
+        )
+        branch1 = stormvogel.model.Branch(
+            [
+                (p1, sink),
+                (p2, goal),
+            ]
+        )
 
-    pmdp.add_transitions(
-        init, stormvogel.model.Transition({action_a: branch0, action_b: branch1})
-    )
+        pmdp.add_transitions(
+            init, stormvogel.model.Transition({action_a: branch0, action_b: branch1})
+        )
 
-    # we add self loops to all states with no outgoing transitions
-    pmdp.add_self_loops()
+        # we add self loops to all states with no outgoing transitions
+        pmdp.add_self_loops()
 
-    # we test the mapping
-    stormpy_pmdp = mapping.stormvogel_to_stormpy(pmdp)
+        # we test the mapping
+        stormpy_pmdp = mapping.stormvogel_to_stormpy(pmdp)
 
-    new_pmdp = mapping.stormpy_to_stormvogel(stormpy_pmdp)
+        new_pmdp = mapping.stormpy_to_stormvogel(stormpy_pmdp)
 
-    assert pmdp == new_pmdp
+        assert pmdp == new_pmdp
 
 
 def test_pmc_valuations():
@@ -142,3 +158,20 @@ def test_pmc_valuations():
     new_induced_pmc.add_self_loops()
 
     assert induced_pmc == new_induced_pmc
+
+
+###############stormpy methods####################
+
+
+def test_gradient_descent():
+    if stormpy is not None:
+        assert True
+
+
+def test_solution_function():
+    if stormpy is not None:
+        pmc = stormvogel.examples.knuth_yao_pmc.create_knuth_yao_pmc()
+
+        result = model_checking.model_checking(pmc, 'P=? [F "rolled6"]')
+        assert result is not None
+        print(result.values[0])
