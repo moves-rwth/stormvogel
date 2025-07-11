@@ -37,6 +37,10 @@ def create_knuth_yao_pmc():
             case 7:
                 return [(1, s)]
 
+    def labels(s: pgc.State):
+        if s.s == 7:
+            return f"rolled{str(s.d)}"
+
     return pgc.build_pgc(
         delta=delta,
         initial_state_pgc=pgc.State(s=0),
