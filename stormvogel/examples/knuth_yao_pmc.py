@@ -1,18 +1,17 @@
 from stormvogel import parametric
 from stormvogel import model, pgc
-from stormvogel.show import show
 
 
 def create_knuth_yao_pmc():
-    #we first make polynomials 'x' and '1-x'
+    # we first make polynomials 'x' and '1-x'
     x = parametric.Polynomial(["x"])
-    x.add_term((1,),1)
+    x.add_term((1,), 1)
 
     invx = parametric.Polynomial(["x"])
-    invx.add_term((1,),-1)
-    invx.add_term((0,),1)
+    invx.add_term((1,), -1)
+    invx.add_term((0,), 1)
 
-    #we build the knuth yao dice using the pgc model builder
+    # we build the knuth yao dice using the pgc model builder
     def delta(s: pgc.State):
         match s.s:
             case 0:
@@ -38,7 +37,7 @@ def create_knuth_yao_pmc():
             case 7:
                 return [(1, s)]
 
-    knuth_yao = pgc.build_pgc(
+    return pgc.build_pgc(
         delta=delta,
         initial_state_pgc=pgc.State(s=0),
         modeltype=model.ModelType.DTMC,
