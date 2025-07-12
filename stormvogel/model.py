@@ -7,7 +7,8 @@ from typing import Tuple, cast
 from stormvogel import parametric
 import copy
 
-Number = float | Fraction | int | parametric.Parametric
+Number = float | Fraction | int
+Value = Number | parametric.Parametric
 
 
 class ModelType(Enum):
@@ -26,7 +27,7 @@ class Observation:
     """Represents an observation of a state (for pomdps)
 
     Args:
-        observation: the observation as an integer
+        observation: the observation of a state as an integer
     """
 
     observation: int
@@ -50,8 +51,8 @@ class State:
 
     Args:
         labels: The labels of this state. Corresponds to Storm labels.
-        valuations: The valuations of this state. Corresponds to Storm valuations.
-        id: The number of this state in the matrix.
+        valuations: The valuations of this state. Corresponds to Storm valuations/features.
+        id: The id of this state.
         model: The model this state belongs to.
         observation: the observation of this state in case the model is a pomdp.
         name: the name of this state.
@@ -150,7 +151,7 @@ class State:
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
-    ) -> list[tuple[Number, "State"]] | None:
+    ) -> list[tuple[Value, "State"]] | None:
         """gets the outgoing transitions"""
         if action and self.model.supports_actions():
             if self.id in self.model.transitions.keys():
@@ -251,7 +252,7 @@ class Branch:
             The first element is the probability and the second element is the target state.
     """
 
-    branch: list[tuple[Number, State]]
+    branch: list[tuple[Value, State]]
 
     def sort_states(self):
         """sorts the branch list by states"""
@@ -271,7 +272,7 @@ class Branch:
     def __add__(self, other):
         return Branch(self.branch + other.branch)
 
-    def sum_probabilities(self) -> Number:
+    def sum_probabilities(self) -> Value:
         return sum([prob for (prob, _) in self.branch])  # type: ignore
 
 
@@ -322,10 +323,10 @@ class Transition:
             return True
         return False
 
-    def sum_probabilities(self, action) -> Number:
+    def sum_probabilities(self, action) -> Value:
         return self.transition[action].sum_probabilities()
 
-    def is_stochastic(self, epsilon: Number) -> bool:
+    def is_stochastic(self, epsilon: Value) -> bool:
         return all(
             [abs(self.sum_probabilities(a) - 1) <= epsilon for a in self.transition]  # type: ignore
         )
@@ -334,7 +335,7 @@ class Transition:
         return self.transition[item]
 
 
-TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
+TransitionShorthand = list[tuple[Value, State]] | list[tuple[Action, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
@@ -361,7 +362,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, parametric.Parametric)
     ):
         return Transition(
-            {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
+            {EmptyAction: Branch(cast(list[tuple[Value, State]], shorthand))}
         )
     raise RuntimeError(
         f"Type of {first_element} not supported in transition {shorthand}"
@@ -378,13 +379,13 @@ class RewardModel:
 
     name: str
     model: "Model"
-    rewards: dict[Tuple[int, Action], Number]
+    rewards: dict[Tuple[int, Action], Value]
     """Rewards dict. Hashed by state id and Action.
     The function update_rewards can be called to update rewards. After this, rewards will correspond to intermediate_rewards.
     Note that in models without actions, EmptyAction will be used here."""
 
     def __init__(
-        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]
+        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Value]
     ):
         self.name = name
         self.rewards = rewards
@@ -395,7 +396,7 @@ class RewardModel:
         else:
             self.state_action_pair = None
 
-    def set_from_rewards_vector(self, vector: list[Number]) -> None:
+    def set_from_rewards_vector(self, vector: list[Value]) -> None:
         """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
@@ -404,7 +405,7 @@ class RewardModel:
                 self.rewards[s.id, a] = vector[combined_id]
                 combined_id += 1
 
-    def get_state_reward(self, state: State) -> Number | None:
+    def get_state_reward(self, state: State) -> Value | None:
         """Gets the reward at said state or state action pair. Return None if no reward is present."""
         if self.model.supports_actions():
             raise RuntimeError(
@@ -415,7 +416,7 @@ class RewardModel:
         else:
             return None
 
-    def get_state_action_reward(self, state: State, action: Action) -> Number | None:
+    def get_state_action_reward(self, state: State, action: Action) -> Value | None:
         """Gets the reward at said state or state action pair. Returns None if no reward was found."""
         if self.model.supports_actions():
             if action in state.available_actions():
@@ -430,7 +431,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def set_state_reward(self, state: State, value: Number):
+    def set_state_reward(self, state: State, value: Value):
         """Sets the reward at said state. If the model has actions, try to use the empty state."""
         if self.model.supports_actions():
             self.set_state_action_reward(state, EmptyAction, value)
@@ -441,7 +442,7 @@ class RewardModel:
         self,
         state: State,
         action: Action,
-        value: Number,
+        value: Value,
         auto_update_rewards: bool = True,
     ):
         """sets the reward at said state action pair (in case of models with actions).
@@ -456,7 +457,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def reward_vector(self) -> list[Number]:
+    def reward_vector(self) -> list[Value]:
         """Return the rewards in a (stormpy) vector format."""
         vector = []
         for s in self.model.states.values():
@@ -469,7 +470,7 @@ class RewardModel:
                 vector.append(reward)
         return vector
 
-    def set_unset_rewards(self, value: Number):
+    def set_unset_rewards(self, value: Value):
         """Fills up rewards that were not set yet with the specified value.
         Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
         for s in self.model.states.values():
@@ -511,7 +512,7 @@ class Model:
     actions: set[Action] | None
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates (hashed by id of the state)
-    exit_rates: dict[int, Number] | None
+    exit_rates: dict[int, Value] | None
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
@@ -591,7 +592,7 @@ class Model:
                         return True
         return False
 
-    def is_stochastic(self, epsilon: Number = 0.000001) -> bool:
+    def is_stochastic(self, epsilon: Value = 0.000001) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1, with at most epsilon rounding error.
         For continuous models: Checks if all sums of outgoing rates sum to 0
         """
@@ -1113,13 +1114,13 @@ class Model:
         else:
             raise RuntimeError("Only POMDP models support observations")
 
-    def get_rate(self, state: State) -> Number:
+    def get_rate(self, state: State) -> Value:
         """Gets the rate of a state."""
         if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot get a rate of a deterministic-time model.")
         return self.exit_rates[state.id]
 
-    def set_rate(self, state: State, rate: Number):
+    def set_rate(self, state: State, rate: Value):
         """Sets the rate of a state."""
         if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")

@@ -19,11 +19,14 @@ def model_checking(
     """
 
     assert stormpy is not None
-    if prop:
-        prop = stormpy.parse_properties(prop)
 
+    # the user must provide a property string, otherwise we provide the widget for building one
+    if prop:
+        # we first map the model to a stormpy model
         stormpy_model = mapping.stormvogel_to_stormpy(model)
 
+        # we perform the model checking operation
+        prop = stormpy.parse_properties(prop)
         assert prop is not None
         if model.supports_actions() and scheduler:
             stormpy_result = stormpy.model_checking(
@@ -36,8 +39,8 @@ def model_checking(
         # using the initial one for now. (otherwise schedulers won't work)
         stormvogel_model = mapping.stormpy_to_stormvogel(stormpy_model)
 
+        # we convert the results
         assert stormvogel_model is not None
-
         stormvogel_result = convert_results.convert_model_checking_result(
             stormvogel_model, stormpy_result
         )
@@ -61,4 +64,4 @@ if __name__ == "__main__":
     rewardmodel2 = mdp.add_rewards("rewardmodel2")
     rewardmodel2.set_from_rewards_vector(list(range(67)))
 
-    print(model_checking(mdp))  # ,'R{"rewardmodel"}min=? [F "target" | "done"]'))
+    print(model_checking(mdp))

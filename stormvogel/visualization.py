@@ -262,7 +262,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         )
                     network_action_id += 1
 
-    def __format_probability(self, prob: stormvogel.model.Number) -> str:
+    def __format_probability(self, prob: stormvogel.model.Value) -> str:
         """Take a probability value and format it nicely using a fraction or rounding it.
         Which one of these to pick is specified in the layout."""
         if isinstance(prob, str):

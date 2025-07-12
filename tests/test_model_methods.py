@@ -61,7 +61,7 @@ def test_transition_from_shorthand():
     transition_shorthand = [(1 / 2, state)]
     branch = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             transition_shorthand,
         )
     )
@@ -71,7 +71,7 @@ def test_transition_from_shorthand():
     assert (
         stormvogel.model.transition_from_shorthand(
             cast(
-                list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+                list[tuple[stormvogel.model.Value, stormvogel.model.State]],
                 transition_shorthand,
             )
         )
@@ -84,7 +84,7 @@ def test_transition_from_shorthand():
     action = mdp.new_action(frozenset({"action"}))
     transition_shorthand = [(action, state)]
     branch = stormvogel.model.Branch(
-        cast(list[tuple[stormvogel.model.Number, stormvogel.model.State]], [(1, state)])
+        cast(list[tuple[stormvogel.model.Value, stormvogel.model.State]], [(1, state)])
     )
     transition = stormvogel.model.Transition({action: branch})
 
@@ -181,13 +181,13 @@ def test_remove_state():
     action1 = mdp.new_action("1")
     branch0 = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             [(1 / 2, state1), (1 / 2, state2)],
         )
     )
     branch1 = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             [(1 / 4, state1), (3 / 4, state2)],
         )
     )

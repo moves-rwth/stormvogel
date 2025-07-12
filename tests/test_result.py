@@ -979,7 +979,7 @@ def test_induced_dtmc():
     state2 = other_dtmc.new_state()
     branch0 = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             [(1 / 2, state1), (1 / 2, state2)],
         )
     )

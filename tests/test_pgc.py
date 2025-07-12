@@ -21,7 +21,7 @@ def test_pgc_mdp():
         else:
             return [left, right]
 
-    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Number]:
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Value]:
         return {"r1": 1, "r2": 2}
 
     def labels(s: pgc.State):
@@ -104,7 +104,7 @@ def test_pgc_mdp_int():
         else:
             return [left, right]
 
-    def rewards(s, a: pgc.Action) -> dict[str, model.Number]:
+    def rewards(s, a: pgc.Action) -> dict[str, model.Value]:
         return {"r1": 1, "r2": 2}
 
     def labels(s):
@@ -178,7 +178,7 @@ def test_pgc_dtmc():
     p = 0.5
     initial_state = pgc.State(s=0)
 
-    def rewards(s: pgc.State) -> dict[str, model.Number]:
+    def rewards(s: pgc.State) -> dict[str, model.Value]:
         return {"r1": 1, "r2": 2}
 
     def delta(s: pgc.State):
@@ -452,7 +452,7 @@ def test_pgc_pomdp():
         else:
             return [left, right]
 
-    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Number]:
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, model.Value]:
         return {"r1": 1, "r2": 2}
 
     def labels(s: pgc.State):
