@@ -43,7 +43,7 @@ def value_to_stormpy(
 
     if model.is_parametric():
         # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
-        if isinstance(value, stormvogel.model.Number):
+        if isinstance(value, float | int):
             rational = stormpy.pycarl.cln.cln.Rational(value)
             polynomial = stormpy.pycarl.cln.cln.Polynomial(rational)
             factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(

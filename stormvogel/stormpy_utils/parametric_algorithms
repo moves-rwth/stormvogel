@@ -8,7 +8,10 @@ except ImportError:
 
 def gradient_descent(model: model.Model):
     stormpy_model = mapping.stormvogel_to_stormpy(model)
-    
 
-def solution_function()
+def parameter_lifting(model: model.Model):
+    return True
+
+def solution_function():
+    #user can do this by simply taking the model checking result and then for initial state?
     return True

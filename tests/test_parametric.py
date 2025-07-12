@@ -1,5 +1,4 @@
 import stormvogel.stormpy_utils.mapping as mapping
-import stormvogel.stormpy_utils.model_checking as model_checking
 import stormvogel.parametric
 import stormvogel.model
 import stormvogel.examples.knuth_yao_pmc
@@ -160,18 +159,67 @@ def test_pmc_valuations():
     assert induced_pmc == new_induced_pmc
 
 
-###############stormpy methods####################
-
-
 def test_gradient_descent():
     if stormpy is not None:
         assert True
 
 
+"""
 def test_solution_function():
     if stormpy is not None:
         pmc = stormvogel.examples.knuth_yao_pmc.create_knuth_yao_pmc()
 
-        result = model_checking.model_checking(pmc, 'P=? [F "rolled6"]')
-        assert result is not None
-        print(result.values[0])
+        # result = model_checking.model_checking(pmc, 'P=? [F "rolled1"]')
+        # assert result is not None
+
+        # print(result.values[0])
+
+
+
+def test_stormpy_pmc():
+    import stormpy
+    import stormpy.info
+
+    import stormpy.examples
+    import stormpy.examples.files
+
+    import stormpy._config as config
+
+    # Check support for parameters
+    if not config.storm_with_pars:
+        print("Support parameters is missing. Try building storm-pars.")
+        return
+
+    import stormpy.pars
+
+    if stormpy.info.storm_ratfunc_use_cln():
+        from stormpy.pycarl.cln import formula
+    else:
+        from stormpy.pycarl.gmp import formula
+
+    path = stormpy.examples.files.prism_pdtmc_die
+    prism_program = stormpy.parse_prism_program(path)
+
+    formula_str = "P=? [F s=7 & d=2]"
+    properties = stormpy.parse_properties_for_prism_program(formula_str, prism_program)
+    model = stormpy.build_parametric_model(prism_program, properties)
+
+    print(model.transition_matrix)
+
+    stormvogel_model = mapping.stormpy_to_stormvogel(model)
+    model = mapping.stormvogel_to_stormpy(stormvogel_model)
+
+    print(model.transition_matrix)
+
+    initial_state = model.initial_states[0]
+    result = stormpy.model_checking(model, properties[0])
+    print("Result: {}".format(result.at(initial_state)))
+
+    collector = stormpy.ConstraintCollector(model)
+    print("Well formed constraints:")
+    for formula in collector.wellformed_constraints:
+        print(formula.get_constraint())
+    print("Graph preserving constraints:")
+    for formula in collector.graph_preserving_constraints:
+        print(formula.get_constraint())
+"""

@@ -36,6 +36,8 @@ def convert_model_checking_result(
     """
     assert stormpy is not None
 
+    # TODO convert parametric results as well
+
     if (
         type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult
         or type(stormpy_result)
