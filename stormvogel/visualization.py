@@ -1,8 +1,5 @@
 """Contains the code responsible for model visualization."""
 
-# Note to future maintainers: The way that IPython display behaves is very flakey sometimes.
-# If you remove a with output: statement, everything might just break, be prepared.
-
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
