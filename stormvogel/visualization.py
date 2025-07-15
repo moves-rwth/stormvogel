@@ -16,6 +16,7 @@ import IPython.display as ipd
 import random
 import string
 import cairosvg
+from fractions import Fraction
 
 
 def und(x: str) -> str:
@@ -216,10 +217,25 @@ class Visualization(stormvogel.displayable.Displayable):
             rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
             group = self.__group_state(state, "states")
 
+            color = None
+
+            result_colors = True
+            if result_colors and self.result is not None:
+                result = self.result.get_result_of_state(state)
+                max_result = self.result.maximum_result()
+                if isinstance(result, (int, float, Fraction)) and isinstance(
+                    max_result, (int, float, Fraction)
+                ):
+                    color1 = "#000000"
+                    color2 = "#ffffff"
+                    factor = result / max_result if max_result != 0 else 1
+                    color = blend_colors(color1, color2, float(factor))
+
             self.nt.add_node(
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
+                color=color,
             )
 
     def __add_transitions(self) -> None:

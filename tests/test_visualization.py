@@ -1,6 +1,11 @@
-from stormvogel.visualization import Visualization
+from stormvogel.visualization import Visualization, blend_colors
 from stormvogel.model import Model, ModelType
 from stormvogel.result import Result, Scheduler
+
+
+def test_blend_colors():
+    assert blend_colors("#000000", "#ffffff", 0.5) == "#7f7f7f"
+    assert blend_colors("#a52143", "#0034f6", 0.7) == "#732678"
 
 
 def boilerplate(mocker):
