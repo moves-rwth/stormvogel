@@ -25,9 +25,9 @@ def convert_scheduler_to_stormvogel(
 def convert_model_checking_result(
     model: stormvogel.model.Model,
     stormpy_result: Union[
-        "stormpy.core.ExplicitQuantitativeCheckResult",
-        "stormpy.core.ExplicitQualitativeCheckResult",
-        "stormpy.core.ExplicitParametricQuantitativeCheckResult",
+        "stormpy.ExplicitQuantitativeCheckResult",
+        "stormpy.ExplicitQualitativeCheckResult",
+        "stormpy.ExplicitParametricQuantitativeCheckResult",
     ],
     with_scheduler: bool = True,
 ) -> stormvogel.result.Result | None:
@@ -37,9 +37,8 @@ def convert_model_checking_result(
     assert stormpy is not None
 
     if (
-        type(stormpy_result) == stormpy.core.ExplicitQuantitativeCheckResult
-        or type(stormpy_result)
-        == stormpy.core.ExplicitParametricQuantitativeCheckResult
+        type(stormpy_result) == stormpy.ExplicitQuantitativeCheckResult
+        or type(stormpy_result) == stormpy.ExplicitParametricQuantitativeCheckResult
     ):
         if stormpy_result.has_scheduler and with_scheduler:
             stormvogel_result = stormvogel.result.Result(
@@ -60,7 +59,7 @@ def convert_model_checking_result(
                     for (index, value) in enumerate(stormpy_result.get_values())
                 },
             )
-    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
+    elif type(stormpy_result == stormpy.ExplicitQualitativeCheckResult):
         values = {i: stormpy_result.at(i) for i in range(0, len(model.states))}
         if stormpy_result.has_scheduler and with_scheduler:
             stormvogel_result = stormvogel.result.Result(
