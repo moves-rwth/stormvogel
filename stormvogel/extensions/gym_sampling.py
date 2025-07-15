@@ -54,8 +54,8 @@ def sample_gym(
 
     # Then use the pgc API to build the model
     NEW_INITIAL_STATE = "GYM_SAMPLE_INIT"
-    ALL_ACTIONS = [pgc.Action([str(x)]) for x in range(env.action_space.n)]
-    INV_MAP = {a.labels[0]: no for no, a in enumerate(ALL_ACTIONS)}
+    ALL_ACTIONS = [[str(x)] for x in range(env.action_space.n)]
+    INV_MAP = {a[0]: no for no, a in enumerate(ALL_ACTIONS)}
 
     if len(initial_states) == 1:
         (init,) = initial_states
@@ -64,10 +64,10 @@ def sample_gym(
 
     def available_actions(s):
         if s is NEW_INITIAL_STATE:
-            return [pgc.PgcEmpytAction]
+            return [[]]
         elif s[1]:
-            return [pgc.PgcEmpytAction]
-        return [a for a in ALL_ACTIONS if transition_counts[(s, INV_MAP[a.labels[0]])]]
+            return [[]]
+        return [a for a in ALL_ACTIONS if transition_counts[(s, INV_MAP[a[0]])]]
 
     def delta(s, a):
         if s is NEW_INITIAL_STATE:
@@ -75,16 +75,15 @@ def sample_gym(
         elif s[1]:
             return [(1, s)]
         return [
-            (count / transition_samples[(s, INV_MAP[a.labels[0]])], s_)
-            for s_, count in transition_counts[(s, INV_MAP[a.labels[0]])].items()
+            (count / transition_samples[(s, INV_MAP[a[0]])], s_)
+            for s_, count in transition_counts[(s, INV_MAP[a[0]])].items()
         ]
 
     def rewards(s, a) -> dict[str, stormvogel.model.Number]:
         if s is NEW_INITIAL_STATE or s[1]:
             return {"R": 0}
         return {
-            "R": reward_sums[s, INV_MAP[a.labels[0]]]
-            / transition_samples[(s, INV_MAP[a.labels[0]])]
+            "R": reward_sums[s, INV_MAP[a[0]]] / transition_samples[(s, INV_MAP[a[0]])]
         }
 
     def labels(s):
@@ -98,7 +97,7 @@ def sample_gym(
         initial_state_pgc=init,
         available_actions=available_actions,
         labels=labels,
-        rewards=rewards,
+        rewards=rewards,  # type: ignore
         modeltype=stormvogel.model.ModelType.MDP,
         max_size=max_size,
     )

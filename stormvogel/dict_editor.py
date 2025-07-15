@@ -21,6 +21,7 @@ class WidgetWrapper:
         "Text": widgets.Text,
         "Dropdown": widgets.Dropdown,
         "TagsInput": widgets.TagsInput,
+        "IntText": widgets.IntText,
     }
 
     def __init__(

@@ -55,7 +55,8 @@
   },
   "numbers": {
     "fractions": true,
-    "digits": 5
+    "digits": 5,
+    "denominator_limit": 1000
   },
   "state_properties": {
     "show_results": true,
