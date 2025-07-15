@@ -674,8 +674,21 @@ class Model:
             sub_model.normalize()
         return sub_model
 
-    # def apply_valuation(self):
-    # TODO:
+    def parameter_valuation(self, values: dict[str, float]) -> "Model":
+        """evaluates all parametric transitions with the given values and returns the new model"""
+        evaluated_model = copy.deepcopy(self)
+        for state, transition in evaluated_model.transitions.items():
+            for action, branch in transition.transition.items():
+                new_branch = []
+                for tup in branch.branch:
+                    if isinstance(tup[0], parametric.Parametric):
+                        tup = (tup[0].evaluate(values), tup[1])
+                    new_branch.append(tup)
+                evaluated_model.transitions[state].transition[
+                    action
+                ].branch = new_branch
+
+        return evaluated_model
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
@@ -1071,16 +1084,15 @@ class Model:
                 return model
         raise RuntimeError(f"Reward model {name} not present in model.")
 
-    def get_nr_parameters(self) -> int:
-        """Returns the number of parameters of this model"""
-        nr_parameters = 0
+    def get_parameters(self) -> set[str]:
+        """Returns the set of parameters of this model"""
+        parameters = set()
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
                     if isinstance(tup[0], parametric.Parametric):
-                        if tup[0].get_dimension() > nr_parameters:
-                            nr_parameters = tup[0].get_dimension()
-        return nr_parameters
+                        parameters = parameters.union(tup[0].get_variables())
+        return parameters
 
     def get_states(self) -> dict[int, State]:
         return self.states

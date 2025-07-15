@@ -413,20 +413,27 @@ def build_pgc(
         for state, s in state_lookup.items():
             labellist = labels(state)
 
-            # we check for the labels when the function does not return a list object
-            # or the length is not always the same
-            if labellist is None:
-                raise ValueError(
-                    f"On input {state}, the labels function does not have a return value"
-                )
-
             assert s is not None
-            if not isinstance(
-                labellist, list
-            ):  # if we don't get a list, we assume there is just one label
+
+            # if the labels function has no return value we assume this state simply has no labels
+            if labellist is None:
+                continue
+
+            # we check for the labels when the function does not return a list object, or when
+            # the list does not consist of strings
+            if not isinstance(labellist, list):
+                if not isinstance(labellist, str):
+                    raise ValueError(
+                        f"On input {state}, the labels function does not return a string or a list of strings"
+                    )
+                # if we don't get a list, we assume there is just one label
                 s.add_label(labellist)
             else:
                 for label in labellist:
+                    if not isinstance(label, str):
+                        raise ValueError(
+                            f"On input {state}, the labels function does not return a string or a list of strings"
+                        )
                     s.add_label(label)
 
     return model

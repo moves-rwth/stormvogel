@@ -520,7 +520,7 @@ def stormvogel_to_stormpy(
     # we store the pycarl parameters of a model
     stormpy.pycarl.clear_variable_pool()
     variables = []
-    for p in range(model.get_nr_parameters()):
+    for p in range(len(model.get_parameters())):
         var = stormpy.pycarl.Variable()
         variables.append(var)
 
@@ -571,7 +571,7 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
             term_list.append(factors)
 
         # we initialize the polynomial
-        stormvogel_polynomial = parametric.Polynomial()
+        stormvogel_polynomial = parametric.Polynomial(variables_list)
 
         # and then we convert it to a dictionary of terms
         length_tuple = len(variables_list)
@@ -589,9 +589,9 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
 
             # we check if there is a coefficient at the beginning
             if is_float(term[0]):
-                stormvogel_polynomial.set_term(tuple(index_tuple), float(term[0]))
+                stormvogel_polynomial.add_term(tuple(index_tuple), float(term[0]))
             else:
-                stormvogel_polynomial.set_term(tuple(index_tuple), float(1))
+                stormvogel_polynomial.add_term(tuple(index_tuple), float(1))
 
         return stormvogel_polynomial
 

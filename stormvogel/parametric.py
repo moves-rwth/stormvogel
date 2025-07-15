@@ -9,14 +9,17 @@ class Polynomial:
 
     Args:
         terms: terms of the polynomial (dictionary that relates exponents to coefficients)
+        variables: variables of the polynomial as a list of strings
     """
 
     terms: dict[tuple, float]
+    variables: list[str]
 
-    def __init__(self):
+    def __init__(self, variables: list[str]):
         self.terms = dict()
+        self.variables = variables
 
-    def set_term(self, exponents: tuple[int, ...], coefficient: float):
+    def add_term(self, exponents: tuple[int, ...], coefficient: float):
         # TODO exponents may also be a single integer
         assert isinstance(exponents, tuple)
 
@@ -32,16 +35,14 @@ class Polynomial:
 
     def get_dimension(self) -> int:
         """returns the number of different variables present"""
-        if self.terms is not {}:
-            key = list(self.terms.keys())[0]
-            if isinstance(key, tuple):
-                return len(key)
-            else:
-                return 1
-        else:
-            return 0
+        return len(self.variables)
+
+    def get_variables(self) -> set[str]:
+        """returns the set of parameters"""
+        return set(self.variables)
 
     def get_degree(self) -> int:
+        """returns the degree of the polynomial"""
         if self.terms is not {}:
             largest = 0
             for term in self.terms.keys():
@@ -53,7 +54,15 @@ class Polynomial:
         else:
             return 0
 
-    # TODO valuation function
+    def evaluate(self, values: dict[str, float]) -> float:
+        """evaluates the polynomial with the given values"""
+        result = 0
+        for exponents, coefficient in self.terms.items():
+            term = coefficient
+            for variable, exponent in enumerate(exponents):
+                term *= values[self.variables[variable]] ** exponent
+            result += term
+        return result
 
     def __str__(self) -> str:
         s = ""
@@ -71,7 +80,7 @@ class Polynomial:
                 for variable, exponent in enumerate(exponents):
                     if exponent != 0:
                         all_zero = False
-                        s += f"x_{variable}"
+                        s += f"{self.variables[variable]}"
                         if exponent != 1:
                             s += f"^{exponent}"
                 if all_zero:
@@ -82,6 +91,11 @@ class Polynomial:
 
     def __lt__(self, other) -> bool:
         return str(self.terms) < str(other.terms)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Polynomial):
+            return self.terms == other.terms
+        return False
 
 
 class RationalFunction:
@@ -113,7 +127,13 @@ class RationalFunction:
         """returns the number of different variables present"""
         return max(self.numerator.get_dimension(), self.denominator.get_dimension())
 
-    # TODO valuation function
+    def get_variables(self) -> set[str]:
+        "returns the total set of variables of this rational function"
+        return set(self.numerator.variables).union(set(self.denominator.variables))
+
+    def evaluate(self, values: dict[str, float]) -> float:
+        """evaluates the rational function with the given values"""
+        return self.numerator.evaluate(values) / self.denominator.evaluate(values)
 
     def __str__(self) -> str:
         s = "(" + str(self.numerator) + ")/(" + str(self.denominator) + ")"
@@ -129,15 +149,3 @@ class RationalFunction:
 
 
 Parametric = Polynomial | RationalFunction
-
-if __name__ == "__main__":
-    polynomial1 = Polynomial()
-    polynomial2 = Polynomial()
-    polynomial1.set_term((0, 0, 1), 5)
-    polynomial1.set_term((3, 2, 1), 2.4)
-    polynomial2.set_term((2, 3, 2, 1), 1)
-    polynomial2.set_term((0, 0, 0, 0), 3)
-
-    rationalfunction = RationalFunction(polynomial1, polynomial2)
-
-    print(rationalfunction)
