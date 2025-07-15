@@ -43499,7 +43499,7 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
 // exports.Element = SVGCanvasElement;
 </script>
     <style type="text/css">
-      #SqSVvHdSJF {
+      #kqwrAULoVy {
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
@@ -43507,7 +43507,7 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
     </style>
   </head>
   <body>
-    <div id="SqSVvHdSJF"></div>
+    <div id="kqwrAULoVy"></div>
     <script type="text/javascript">
         //js
 class NetworkWrapper {
@@ -43616,36 +43616,30 @@ class NetworkWrapper {
     </script>
     <script type="text/javascript">
         //js
-    var nodes_local = new vis.DataSet([{ id: 0, label: `init
-☆ 90`, group: "states", color: "#191919" },
+    var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states" },
 { id: 1, label: `studied
-€	R: 0
-☆ 90`, group: "states", color: "#191919" },
+€	R: 0`, group: "states" },
 { id: 2, label: `didn't study
-€	R: 15
-☆ 55`, group: "states", color: "#727272" },
+€	R: 15`, group: "states" },
 { id: 3, label: `pass test
-€	R: 100
-☆ 100`, group: "states", color: "#000000" },
+€	R: 100`, group: "states" },
 { id: 4, label: `fail test
-€	R: 0
-☆ 0`, group: "states", color: "#ffffff" },
+€	R: 0`, group: "states" },
 { id: 5, label: `end
-€	R: 0
-☆ 0`, group: "states", color: "#ffffff" },
+€	R: 0`, group: "states" },
 { id: 10000000000, label: `study
-€	R: 0`, group: "scheduled_actions" },
+€	R: 0`, group: "actions" },
 { id: 10000000001, label: `don't study
 €	R: 0`, group: "actions" },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000, color: "red" },
-{ from: 10000000000, to: 1, label: "1", color: "red" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 10000000000, to: 1, label: "1" },
 { from: 0, to: 10000000001 },
 { from: 10000000001, to: 2, label: "1" },
-{ from: 1, to: 4, label: "1/10" },
 { from: 1, to: 3, label: "9/10" },
-{ from: 2, to: 4, label: "3/5" },
+{ from: 1, to: 4, label: "1/10" },
 { from: 2, to: 3, label: "2/5" },
+{ from: 2, to: 4, label: "3/5" },
 { from: 3, to: 5, label: "1" },
 { from: 4, to: 5, label: "1" },
 { from: 5, to: 5, label: "1" },
@@ -43673,8 +43667,7 @@ class NetworkWrapper {
   "edit_groups": {
     "groups": [
       "states",
-      "actions",
-      "scheduled_actions"
+      "actions"
     ]
   },
   "groups": {
@@ -43696,20 +43689,10 @@ class NetworkWrapper {
       }
     },
     "scheduled_actions": {
-      "borderWidth": 1,
+      "shape": "box",
       "color": {
         "background": "pink",
-        "border": "red",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "box",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 14
+        "border": "red"
       }
     },
     "states": {
@@ -43749,9 +43732,14 @@ class NetworkWrapper {
     "digits": 5,
     "denominator_limit": 1000
   },
-  "state_properties": {
+  "results": {
     "show_results": true,
     "result_symbol": "\u2606",
+    "result_colors": false,
+    "min_result_color": "#ffffff",
+    "max_result_color": "#ff0000"
+  },
+  "state_properties": {
     "show_rewards": true,
     "reward_symbol": "\u20ac",
     "show_zero_rewards": true,
@@ -43777,8 +43765,8 @@ class NetworkWrapper {
   "physics": true,
   "autoResize": true
 };
-    var container_local = document.getElementById("SqSVvHdSJF");
-    var nw_SqSVvHdSJF = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    var container_local = document.getElementById("kqwrAULoVy");
+    var nw_kqwrAULoVy = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
 
     </script>
   </body>

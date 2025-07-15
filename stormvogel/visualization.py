@@ -219,16 +219,16 @@ class Visualization(stormvogel.displayable.Displayable):
 
             color = None
 
-            result_colors = True
+            result_colors = self.layout.layout["results"]["result_colors"]
             if result_colors and self.result is not None:
                 result = self.result.get_result_of_state(state)
                 max_result = self.result.maximum_result()
                 if isinstance(result, (int, float, Fraction)) and isinstance(
                     max_result, (int, float, Fraction)
                 ):
-                    color1 = "#000000"
-                    color2 = "#ffffff"
-                    factor = result / max_result if max_result != 0 else 1
+                    color1 = self.layout.layout["results"]["max_result_color"]
+                    color2 = self.layout.layout["results"]["min_result_color"]
+                    factor = result / max_result if max_result != 0 else 0
                     color = blend_colors(color1, color2, float(factor))
 
             self.nt.add_node(
@@ -330,17 +330,14 @@ class Visualization(stormvogel.displayable.Displayable):
     def __format_result(self, s: stormvogel.model.State) -> str:
         """Create a string that shows the result for this state. Starts with newline.
         If results are not enabled, then it returns the empty string."""
-        if (
-            self.result is None
-            or not self.layout.layout["state_properties"]["show_results"]
-        ):
+        if self.result is None or not self.layout.layout["results"]["show_results"]:
             return ""
         result_of_state = self.result.get_result_of_state(s)
         if result_of_state is None:
             return ""
         return (
             "\n"
-            + self.layout.layout["state_properties"]["result_symbol"]
+            + self.layout.layout["results"]["result_symbol"]
             + " "
             + self.__format_number(result_of_state)
         )
