@@ -106,6 +106,10 @@
     "digits": {
       "__description": "Round digits",
       "__widget": "IntSlider"
+    },
+    "denominator_limit": {
+      "__description": "Denom limit",
+      "__widget": "IntText"
     }
   },
   "state_properties": {

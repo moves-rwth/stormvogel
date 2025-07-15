@@ -263,7 +263,7 @@ class Visualization(stormvogel.displayable.Displayable):
             n,
             self.layout.layout["numbers"]["fractions"],
             self.layout.layout["numbers"]["digits"],
-            1000,
+            self.layout.layout["numbers"]["denominator_limit"],
         )
 
     def __format_rewards(
