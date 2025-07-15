@@ -11,8 +11,6 @@ import pathlib
 from time import sleep
 from typing import Tuple
 import warnings
-import math
-import fractions
 import ipywidgets as widgets
 import IPython.display as ipd
 import random
@@ -222,7 +220,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         self.nt.add_edge(
                             state_id,
                             target.id,
-                            label=self.__format_probability(prob),
+                            label=self.__format_number(prob),
                         )
                 else:
                     group = self.__group_action(state_id, action, "actions")
@@ -254,28 +252,19 @@ class Visualization(stormvogel.displayable.Displayable):
                         self.nt.add_edge(
                             network_action_id,
                             target.id,
-                            label=self.__format_probability(prob),
+                            label=self.__format_number(prob),
                             color=edge_color,
                         )
                     network_action_id += 1
 
-    def __format_probability(self, prob: stormvogel.model.Number) -> str:
-        """Take a probability value and format it nicely using a fraction or rounding it.
-        Which one of these to pick is specified in the layout."""
-        if isinstance(prob, str):
-            return str(prob)
-        else:
-            if isinstance(prob, (int, float)):
-                if math.isinf(float(prob)):
-                    return str(prob)
-                if self.layout.layout["numbers"]["fractions"]:
-                    return str(fractions.Fraction(prob).limit_denominator(1000))
-                else:
-                    return str(
-                        round(float(prob), self.layout.layout["numbers"]["digits"])
-                    )
-            else:  # TODO case for when we have parameters
-                return ""
+    def __format_number(self, n: stormvogel.model.Number) -> str:
+        """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
+        return stormvogel.model.number_to_string(
+            n,
+            self.layout.layout["numbers"]["fractions"],
+            self.layout.layout["numbers"]["digits"],
+            1000,
+        )
 
     def __format_rewards(
         self, s: stormvogel.model.State, a: stormvogel.model.Action
@@ -299,7 +288,7 @@ class Visualization(stormvogel.displayable.Displayable):
                 not self.layout.layout["state_properties"]["show_zero_rewards"]
                 and reward == 0
             ):
-                res += f"\t{reward_model.name}: {reward}"
+                res += f"\t{reward_model.name}: {self.__format_number(reward)}"
         if res == EMPTY_RES:
             return ""
         return res
@@ -319,7 +308,7 @@ class Visualization(stormvogel.displayable.Displayable):
             "\n"
             + self.layout.layout["state_properties"]["result_symbol"]
             + " "
-            + self.__format_probability(result_of_state)
+            + self.__format_number(result_of_state)
         )
 
     def __format_observations(self, s: stormvogel.model.State) -> str:
