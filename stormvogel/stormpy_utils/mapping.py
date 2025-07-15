@@ -25,17 +25,17 @@ def value_to_stormpy(
         terms = []
         for exponent, coefficient in polynomial.terms.items():
             if coefficient != 0:
-                stormpy_term = stormpy.pycarl.cln.cln.Term(
-                    stormpy.pycarl.cln.cln.Rational(coefficient)
+                stormpy_term = stormpy.pycarl.cln.Term(
+                    stormpy.pycarl.cln.Rational(coefficient)
                 )
                 assert isinstance(exponent, tuple)
                 for index, exp in enumerate(exponent):
                     for i in range(exp):
                         stormpy_term *= variables[index]
                 terms.append(stormpy_term)
-        polynomial = stormpy.pycarl.cln.cln.Polynomial(terms)
+        polynomial = stormpy.pycarl.cln.Polynomial(terms)
         factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
-            polynomial, stormpy.pycarl.cln.cln._FactorizationCache()
+            polynomial, stormpy.pycarl.cln.factorization_cache
         )
         return factorized_polynomial
 
@@ -44,10 +44,10 @@ def value_to_stormpy(
 
         # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
         if isinstance(value, float):
-            rational = stormpy.pycarl.cln.cln.Rational(value)
-            polynomial = stormpy.pycarl.cln.cln.Polynomial(rational)
+            rational = stormpy.pycarl.cln.Rational(value)
+            polynomial = stormpy.pycarl.cln.Polynomial(rational)
             factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
-                polynomial, stormpy.pycarl.cln.cln._FactorizationCache()
+                polynomial, stormpy.pycarl.cln.factorization_cache
             )
             factorized_rational = stormpy.pycarl.cln.FactorizedRationalFunction(
                 factorized_polynomial
