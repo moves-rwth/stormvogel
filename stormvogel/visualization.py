@@ -16,6 +16,7 @@ import IPython.display as ipd
 import random
 import string
 import cairosvg
+from fractions import Fraction
 
 
 def und(x: str) -> str:
@@ -31,6 +32,24 @@ def random_word(k: int) -> str:
 def random_color() -> str:
     """Return a random HEX color."""
     return "#" + "".join([random.choice("0123456789ABCDEF") for j in range(6)])
+
+
+def blend_colors(c1: str, c2: str, factor: float) -> str:
+    """Blend two colors in HEX format. #RRGGBB.
+    Args:
+        color1 (str): Color 1 in HEX format #RRGGBB
+        color2 (str): Color 2 in HEX format #RRGGBB
+        factor (float): The fraction of the resulting color that should come from color1."""
+    r1 = int("0x" + c1[1:3], 0)
+    g1 = int("0x" + c1[3:5], 0)
+    b1 = int("0x" + c1[5:7], 0)
+    r2 = int("0x" + c2[1:3], 0)
+    g2 = int("0x" + c2[3:5], 0)
+    b2 = int("0x" + c2[5:7], 0)
+    r_res = int(factor * r1 + (1 - factor) * r2)
+    g_res = int(factor * g1 + (1 - factor) * g2)
+    b_res = int(factor * b1 + (1 - factor) * b2)
+    return "#" + "".join("%02x" % i for i in [r_res, g_res, b_res])
 
 
 class Visualization(stormvogel.displayable.Displayable):
@@ -198,10 +217,25 @@ class Visualization(stormvogel.displayable.Displayable):
             rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
             group = self.__group_state(state, "states")
 
+            color = None
+
+            result_colors = self.layout.layout["results"]["result_colors"]
+            if result_colors and self.result is not None:
+                result = self.result.get_result_of_state(state)
+                max_result = self.result.maximum_result()
+                if isinstance(result, (int, float, Fraction)) and isinstance(
+                    max_result, (int, float, Fraction)
+                ):
+                    color1 = self.layout.layout["results"]["max_result_color"]
+                    color2 = self.layout.layout["results"]["min_result_color"]
+                    factor = result / max_result if max_result != 0 else 0
+                    color = blend_colors(color1, color2, float(factor))
+
             self.nt.add_node(
                 state.id,
                 label=",".join(state.labels) + rewards + res + observations,
                 group=group,
+                color=color,
             )
 
     def __add_transitions(self) -> None:
@@ -296,17 +330,14 @@ class Visualization(stormvogel.displayable.Displayable):
     def __format_result(self, s: stormvogel.model.State) -> str:
         """Create a string that shows the result for this state. Starts with newline.
         If results are not enabled, then it returns the empty string."""
-        if (
-            self.result is None
-            or not self.layout.layout["state_properties"]["show_results"]
-        ):
+        if self.result is None or not self.layout.layout["results"]["show_results"]:
             return ""
         result_of_state = self.result.get_result_of_state(s)
         if result_of_state is None:
             return ""
         return (
             "\n"
-            + self.layout.layout["state_properties"]["result_symbol"]
+            + self.layout.layout["results"]["result_symbol"]
             + " "
             + self.__format_number(result_of_state)
         )

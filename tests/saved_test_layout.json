@@ -58,9 +58,14 @@
     "digits": 5,
     "denominator_limit": 1000
   },
-  "state_properties": {
+  "results": {
     "show_results": true,
     "result_symbol": "\u2606",
+    "result_colors": false,
+    "min_result_color": "#ffffff",
+    "max_result_color": "#ff0000"
+  },
+  "state_properties": {
     "show_rewards": true,
     "reward_symbol": "\u20ac",
     "show_zero_rewards": true,
