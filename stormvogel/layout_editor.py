@@ -162,4 +162,4 @@ class LayoutEditor(stormvogel.displayable.Displayable):
 
     def __warn_failed_positions_save(self):
         print(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
-Sorry for the inconvenience. See 'Communication server remark' in docs.""")
+Sorry for the inconvenience. See 'Implementation details' in docs.""")

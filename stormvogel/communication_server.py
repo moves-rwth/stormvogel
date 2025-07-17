@@ -176,19 +176,19 @@ function return_id_result(url, id, data) {
 
 def __warn_request():
     print(
-        "Test request failed. See 'Communication server remark' in docs. Disable warning by use_server=False."
+        "Test request failed. See 'Implementation details' in docs. Disable warning by use_server=False."
     )
 
 
 def __warn_server():
     print(
-        "Could not start server. See 'Communication server remark' in docs. Disable warning by use_server=False."
+        "Could not start server. See 'Implementation details' in docs. Disable warning by use_server=False."
     )
 
 
 def __warn_no_free_port():
     print(
-        f"""No free port [{min_port, max_port}). See 'Communication server remark' in docs. Disable warning by use_server=False."""
+        f"""No free port [{min_port, max_port}). See 'Implementation details' in docs. Disable warning by use_server=False."""
     )
 
 

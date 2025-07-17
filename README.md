@@ -15,9 +15,9 @@ Check out the [the stormvogel documentation](https://moves-rwth.github.io/stormv
 
 ## Installation
 
-There are different ways to install stormvogel, depending on your needs. For now, we recommend installing with Docker for users.
+There are different ways to install stormvogel, depending on your needs. If you do not have stormpy installed, we recommend installing with Docker. If you already have stormpy, or are not interested in features that rely on stormpy, then we recommend installing without docker.
 
-Note: We are currently working on making stormpy easy to install, which would make a direct installation preferable on Linux/macOS. This README will be updated when this is working.
+Note: We are currently working on making stormpy easy to install with pip, which would make a direct installation preferable on Linux/macOS. This README will be updated when this is working.
 
 ### Docker (release version, recommended for users)
 
@@ -55,5 +55,8 @@ Notice that part of the tests will fail if stormpy is not installed.
 ```
 pytest
 ```
+## Authors
+Stormvogel was mainly developped at Radboud University by Linus Heck, Pim Leerkes, and Ivo Melse under supervision from Sebastian Junges and Matthias Volk.
+
 ## License
 Stormvogel is licenced under the [GPL-3.0 license](https://github.com/moves-rwth/stormvogel?tab=GPL-3.0-1-ov-file).
