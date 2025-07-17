@@ -6,7 +6,7 @@ from PIL import ImageFont
 
 def create_die_dtmc():
     # Create a new model with the name "Die"
-    dtmc = stormvogel.model.new_dtmc("Die")
+    dtmc = stormvogel.model.new_dtmc()
 
     init = dtmc.get_initial_state()
     init.add_valuation("rolled", 0)

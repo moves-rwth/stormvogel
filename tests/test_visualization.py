@@ -24,7 +24,7 @@ def boilerplate(mocker):
 
 
 def simple_model():
-    model = Model("simple", ModelType.DTMC)
+    model = Model(ModelType.DTMC)
     one = model.new_state("one")
     init = model.get_initial_state()
     model.set_transitions(init, [(1, one)])
@@ -96,7 +96,7 @@ def test_results_count(mocker):
 
 def test_results_scheduler(mocker):
     MockNetwork = boilerplate(mocker)
-    model = Model("mdp", model_type=ModelType.MDP)
+    model = Model(model_type=ModelType.MDP)
     init = model.get_initial_state()
     good = model.new_action(frozenset(["GOOD"]))
     bad = model.new_action(frozenset(["BAD"]))
