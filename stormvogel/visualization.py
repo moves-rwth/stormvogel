@@ -216,6 +216,11 @@ class Visualization(stormvogel.displayable.Displayable):
             observations = self.__format_observations(state)
             rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
             group = self.__group_state(state, "states")
+            id_label_part = (
+                f"{state.id}\n"
+                if self.layout.layout["state_properties"]["show_ids"]
+                else ""
+            )
 
             color = None
 
@@ -233,7 +238,11 @@ class Visualization(stormvogel.displayable.Displayable):
 
             self.nt.add_node(
                 state.id,
-                label=",".join(state.labels) + rewards + res + observations,
+                label=id_label_part
+                + ",".join(state.labels)
+                + rewards
+                + res
+                + observations,
                 group=group,
                 color=color,
             )
