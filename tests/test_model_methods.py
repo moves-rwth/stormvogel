@@ -160,7 +160,7 @@ def test_remove_state():
     ctmc.remove_state(ctmc.get_state_by_id(3), reassign_ids=True)
 
     # we make a ctmc with the state already missing
-    new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
+    new_ctmc = stormvogel.model.new_ctmc()
     new_ctmc.get_state_by_id(0).set_transitions([(3, new_ctmc.new_state("helium"))])
     new_ctmc.get_state_by_id(1).set_transitions([(2, new_ctmc.new_state("carbon"))])
 
@@ -359,7 +359,7 @@ def test_get_sub_model():
     sub_model = dtmc.get_sub_model(states)
 
     # we build what the submodel should look like
-    new_dtmc = stormvogel.model.new_dtmc("Die")
+    new_dtmc = stormvogel.model.new_dtmc()
     init = new_dtmc.get_initial_state()
     init.valuations = {"rolled": 0}
     init.set_transitions(
@@ -437,7 +437,7 @@ def test_valuation_methods():
     assert dtmc.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
 
     # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
-    dtmc = stormvogel.model.new_dtmc("Die")
+    dtmc = stormvogel.model.new_dtmc()
     init = dtmc.get_initial_state()
     init.set_transitions(
         [
