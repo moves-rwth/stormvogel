@@ -137,6 +137,10 @@
   },
   "state_properties": {
     "__collapse": true,
+    "show_ids": {
+      "__description": "Show ids",
+      "__widget": "Checkbox"
+    },
     "show_rewards": {
       "__description": "Show rewards",
       "__widget": "Checkbox"
