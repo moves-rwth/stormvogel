@@ -66,6 +66,7 @@
     "max_result_color": "#ff0000"
   },
   "state_properties": {
+    "show_ids": false,
     "show_rewards": true,
     "reward_symbol": "\u20ac",
     "show_zero_rewards": true,

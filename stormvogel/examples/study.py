@@ -3,7 +3,7 @@ from stormvogel.model import EmptyAction
 
 
 def create_study_mdp():
-    mdp = stormvogel.model.new_mdp("Study")
+    mdp = stormvogel.model.new_mdp()
 
     init = mdp.get_initial_state()
     study = mdp.action("study")

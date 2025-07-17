@@ -2,7 +2,7 @@ import stormvogel.model
 
 
 def create_monty_hall_mdp():
-    mdp = stormvogel.model.new_mdp("Monty Hall")
+    mdp = stormvogel.model.new_mdp()
 
     init = mdp.get_initial_state()
 

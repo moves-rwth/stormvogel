@@ -3,7 +3,7 @@ import stormvogel.model
 
 def create_simple_ma():
     # Create a new model
-    ma = stormvogel.model.new_ma("example ma")
+    ma = stormvogel.model.new_ma()
 
     init = ma.get_initial_state()
 

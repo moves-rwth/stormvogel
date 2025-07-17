@@ -5,7 +5,7 @@ import stormvogel.model
 
 def test_pmc_conversion():
     # Create a new model with the name "simple pmc"
-    pmc = stormvogel.model.new_dtmc("simple pmc")
+    pmc = stormvogel.model.new_dtmc()
 
     init = pmc.get_initial_state()
 
@@ -45,7 +45,7 @@ def test_pmc_conversion():
 
 def test_pmdp_conversion():
     # Create a new model with the name "simple pmdp"
-    pmdp = stormvogel.model.new_mdp("simple pmdp")
+    pmdp = stormvogel.model.new_mdp()
 
     init = pmdp.get_initial_state()
 

@@ -2,7 +2,7 @@ from stormvogel.model import Model, ModelType, Branch, Transition
 
 
 def create_lion_mdp():
-    lion = Model(name="lion", model_type=ModelType.MDP)
+    lion = Model(model_type=ModelType.MDP)
     init = lion.get_initial_state()
     full = lion.new_state("full")
     satisfied = init
