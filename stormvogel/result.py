@@ -138,7 +138,7 @@ class Result:
             + str(self.scheduler)
         )
 
-    def maximum_result(self) -> stormvogel.model.Number:
+    def maximum_result(self) -> stormvogel.model.Value:
         """Return the maximum result."""
         return max(self.values.values())
 

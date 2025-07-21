@@ -14,7 +14,7 @@ Value = Number | parametric.Parametric
 
 
 def number_to_string(
-    n: Number, use_fractions: bool, round_digits: int, denom_limit: int
+    n: Value, use_fractions: bool, round_digits: int, denom_limit: int
 ) -> str:
     """Convert a Number to a string."""
     if isinstance(n, (int, float)):
