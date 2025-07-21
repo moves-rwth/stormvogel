@@ -733,14 +733,6 @@ class Model:
                     state, [(float(0) if self.supports_rates() else float(1), state)]
                 )
 
-    def get_variables(self) -> set[str]:
-        """gets the set of all variables present in this model (features)"""
-        variables = set()
-        for state in self.states.values():
-            for variable in state.valuations.keys():
-                variables.add(variable)
-        return variables
-
     def set_valuation_at_remaining_states(
         self, variables: list[str] | None = None, value: int | bool | float = 0
     ):
@@ -1056,13 +1048,11 @@ class Model:
 
     def get_state_by_name(self, state_name) -> State | None:
         """Get a state by its name."""
-        names = [state.name for state in self.states.values()]
+        names = {state.name: state for state in self.states.values()}
         if state_name not in names:
             raise RuntimeError("Requested a non-existing state")
 
-        for state in self.states.values():
-            if state.name == state_name:
-                return state
+        return names[state_name]
 
     def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
@@ -1081,6 +1071,13 @@ class Model:
         for _id, state in self.states.items():
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
+
+    def get_variables(self) -> set[str]:
+        """gets the set of all variables present in this model (features)"""
+        variables: set[str] = set()
+        for _id, state in self.states.items():
+            variables = variables | set(state.valuations.keys())
+        return variables
 
     def get_default_rewards(self) -> RewardModel:
         """Gets the default reward model, throws a RuntimeError if there is none."""

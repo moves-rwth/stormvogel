@@ -46,21 +46,19 @@ class Polynomial:
         """returns the set of parameters"""
         return set(self.variables)
 
-    def get_degree(self) -> int:
+    def get_degree(self) -> int | None:
         """returns the degree of the polynomial"""
         if self.terms is not {}:
             largest = 0
             for term in self.terms.keys():
-                for exponent in term:
-                    if exponent > largest:
-                        largest = exponent
-
+                current = sum(list(term))
+                if current > largest:
+                    largest = current
             return largest
-        else:
-            return 0
+        raise RuntimeError("A polynomial without terms does not have a degree.")
 
     def evaluate(self, values: dict[str, float]) -> float:
-        """evaluates the polynomial with the given values"""
+        """evaluates the polynomial with the given values for the variables"""
         result = 0
         for exponents, coefficient in self.terms.items():
             term = coefficient
