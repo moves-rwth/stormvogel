@@ -433,8 +433,8 @@ def test_get_state_action_reward():
 
 def test_valuation_methods():
     # first we test the get_variables function
-    dtmc = stormvogel.examples.monty_hall.create_monty_hall_mdp()
-    assert dtmc.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    assert mdp.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
 
     # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
     dtmc = stormvogel.model.new_dtmc("Die")

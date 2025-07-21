@@ -207,7 +207,7 @@ def simulate_path(
                 else random.choice(model.get_state_by_id(state_id).available_actions())
             )
 
-            if not model.states[state_id].is_absorbing(action):
+            if not model.states[state_id].is_absorbing():
                 state_id, reward, labels = step(
                     model.get_state_by_id(state_id),
                     action,

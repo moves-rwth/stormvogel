@@ -23,6 +23,11 @@ class Polynomial:
         # TODO exponents may also be a single integer
         assert isinstance(exponents, tuple)
 
+        if exponents in self.terms.keys():
+            raise RuntimeError(
+                "There is already a term with these exponents in this polynomial"
+            )
+
         if self.terms != {}:
             my_dimension = self.get_dimension()
             term_dimension = len(list(exponents))
@@ -139,7 +144,7 @@ class RationalFunction:
         s = "(" + str(self.numerator) + ")/(" + str(self.denominator) + ")"
         return s
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         if isinstance(other, Polynomial):
             return self.numerator < other or self.denominator < other
         else:
