@@ -12,6 +12,8 @@ def create_knuth_yao_pmc():
     invx.add_term((0,), 1)
 
     # we build the knuth yao dice using the pgc model builder
+    initial_state = pgc.State(s=0)
+
     def delta(s: pgc.State):
         match s.s:
             case 0:
@@ -37,12 +39,18 @@ def create_knuth_yao_pmc():
             case 7:
                 return [(1, s)]
 
-    def labels(s: pgc.State):
+    # we add labels to the final states
+    def labels(s: pgc.State) -> str | None:
         if s.s == 7:
             return f"rolled{str(s.d)}"
 
     return pgc.build_pgc(
         delta=delta,
-        initial_state_pgc=pgc.State(s=0),
+        labels=labels,
+        initial_state_pgc=initial_state,
         modeltype=model.ModelType.DTMC,
     )
+
+
+if __name__ == "__main__":
+    print(create_knuth_yao_pmc())

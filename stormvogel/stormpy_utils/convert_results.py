@@ -36,42 +36,33 @@ def convert_model_checking_result(
     """
     assert stormpy is not None
 
+    # we distinguish between quantitative and qualitative results
+    # (determines what kind of values our result contains)
     if (
         type(stormpy_result) == stormpy.ExplicitQuantitativeCheckResult
         or type(stormpy_result) == stormpy.ExplicitParametricQuantitativeCheckResult
     ):
-        if stormpy_result.has_scheduler and with_scheduler:
-            stormvogel_result = stormvogel.result.Result(
-                model,
-                {
-                    index: value
-                    for (index, value) in enumerate(stormpy_result.get_values())
-                },
-                scheduler=convert_scheduler_to_stormvogel(
-                    model, stormpy_result.scheduler
-                ),
-            )
-        else:
-            stormvogel_result = stormvogel.result.Result(
-                model,
-                {
-                    index: value
-                    for (index, value) in enumerate(stormpy_result.get_values())
-                },
-            )
-    elif type(stormpy_result == stormpy.ExplicitQualitativeCheckResult):
+        values = {
+            index: value for (index, value) in enumerate(stormpy_result.get_values())
+        }
+    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
         values = {i: stormpy_result.at(i) for i in range(0, len(model.states))}
-        if stormpy_result.has_scheduler and with_scheduler:
-            stormvogel_result = stormvogel.result.Result(
-                model,
-                values,
-                scheduler=convert_scheduler_to_stormvogel(
-                    model, stormpy_result.scheduler
-                ),
-            )
-        else:
-            stormvogel_result = stormvogel.result.Result(model, values)
     else:
         raise RuntimeError("Unsupported result type")
+
+    # we check if our results and expected converted results come with a scheduler
+    if stormpy_result.has_scheduler and with_scheduler:
+        # we build the results object containing a converted scheduler
+        stormvogel_result = stormvogel.result.Result(
+            model,
+            values,
+            scheduler=convert_scheduler_to_stormvogel(model, stormpy_result.scheduler),
+        )
+    else:
+        # we build the results object without a scheduler
+        stormvogel_result = stormvogel.result.Result(
+            model,
+            values,
+        )
 
     return stormvogel_result

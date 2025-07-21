@@ -30,10 +30,10 @@ type Action = list[str]
 def valid_input(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
-    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
-    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
+    | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,
@@ -126,10 +126,10 @@ def valid_input(
 def build_pgc(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc: Any,
-    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
-    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
+    | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,
@@ -277,7 +277,7 @@ def build_pgc(
             # we first create the right number of reward models
             assert available_actions is not None
             rewards = cast(
-                Callable[[Any, action], dict[str, stormvogel.model.Number]], rewards
+                Callable[[Any, action], dict[str, stormvogel.model.Value]], rewards
             )
             for reward in rewards(
                 initial_state_pgc, available_actions(initial_state_pgc)[0]
@@ -320,7 +320,7 @@ def build_pgc(
                         )
         else:
             # we first create the right number of reward models
-            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Number]], rewards)
+            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Value]], rewards)
             for reward in rewards(initial_state_pgc).items():
                 model.add_rewards(reward[0])
 
@@ -370,7 +370,7 @@ def build_pgc(
     if rates is not None:
         for state, s in state_lookup.items():
             r = rates(state)
-            if not isinstance(r, stormvogel.model.Number):
+            if not isinstance(r, stormvogel.model.Value):
                 raise ValueError(
                     f"On input {state}, the rates function does not return a number"
                 )

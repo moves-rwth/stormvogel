@@ -134,12 +134,17 @@ def step(
 ):
     """given a state, action and seed we simulate a step and return information on the state we discover"""
 
+    # we go to the next state according to the probability distribution of the transition
     transitions = state.get_outgoing_transitions(action)
     assert transitions is not None  # what if there are no transitions?
+
+    # we build the probability distribution
     probability_distribution = []
     for t in transitions:
         assert isinstance(t[0], float) or isinstance(t[0], int)
         probability_distribution.append(float(t[0]))
+
+    # we select the next state (according to the seed)
     states = [t[1] for t in transitions]
     if seed is not None:
         rng = random.Random(seed)
@@ -149,6 +154,7 @@ def step(
 
     next_state_id = next_state.id
 
+    # we also add the rewards
     rewards = []
     if not next_state.model.supports_actions():
         for rewardmodel in next_state.model.rewards:
@@ -207,7 +213,8 @@ def simulate_path(
                 else random.choice(model.get_state_by_id(state_id).available_actions())
             )
 
-            if not model.states[state_id].is_absorbing(action):
+            # we append the next state action pair
+            if not model.states[state_id].is_absorbing():
                 state_id, reward, labels = step(
                     model.get_state_by_id(state_id),
                     action,
@@ -272,7 +279,6 @@ def simulate(
                     )
                 except RuntimeError:
                     pass
-
             else:
                 r = model.rewards[index].get_state_reward(model.get_initial_state())
                 assert r is not None
@@ -281,14 +287,19 @@ def simulate(
                     r,
                 )
 
-    # now we start stepping through the model for the given number of runs
+    # we keep track of the following sets
     discovered_states = {0}
     discovered_transitions = set()
+
+    # we distinguish between models with and without actions
     if not partial_model.supports_actions():
         discovered_states_before_transitions = set()
+        # now we start stepping through the model for the given number of runs
         for i in range(runs):
+            # we start at state 0 and we begin taking steps
             last_state_id = 0
             for j in range(steps):
+                # we make a step
                 state_id, reward, labels = step(
                     model.get_state_by_id(last_state_id),
                     seed=seed + i + j if seed is not None else None,
@@ -312,9 +323,11 @@ def simulate(
                 # we also add the transitions that we travelled through, so we need to keep track of the last state
                 # and of the discovered transitions so that we don't add duplicates
                 if (last_state_id, state_id) not in discovered_transitions:
-                    probability = 0
-                    transitions = model.get_transitions(last_state_id)
                     discovered_transitions.add((last_state_id, state_id))
+                    transitions = model.get_transitions(last_state_id)
+
+                    # we calculate the transition probability
+                    probability = 0
                     for tuple in transitions.transition[
                         stormvogel.model.EmptyAction
                     ].branch:
@@ -344,8 +357,11 @@ def simulate(
 
                 last_state_id = state_id
     else:
+        # we additionally keep track of actions
         discovered_actions = set()
+        # now we start stepping through the model for the given number of runs
         for i in range(runs):
+            # we start at state 0 and we begin taking steps
             last_state_id = 0
             for j in range(steps):
                 # we first choose an action
@@ -388,11 +404,13 @@ def simulate(
                 # we also add the transitions that we travelled through, so we need to keep track of the last state
                 # and of the discovered transitions so that we don't add duplicates
                 if (last_state_id, state_id, action) not in discovered_transitions:
-                    probability = 0
                     transitions = model.get_state_by_id(
                         last_state_id
                     ).get_outgoing_transitions(action)
                     discovered_transitions.add((last_state_id, state_id, action))
+
+                    # we calculate the transition probability
+                    probability = 0
                     assert transitions is not None
                     for tuple in transitions:
                         if tuple[1].id == state_id:

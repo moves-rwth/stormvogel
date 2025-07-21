@@ -9,11 +9,12 @@ from stormvogel import parametric
 import copy
 import math
 
-Number = float | Fraction | int | parametric.Parametric
+Number = float | Fraction | int
+Value = Number | parametric.Parametric
 
 
 def number_to_string(
-    n: Number, use_fractions: bool, round_digits: int, denom_limit: int
+    n: Value, use_fractions: bool, round_digits: int, denom_limit: int
 ) -> str:
     """Convert a Number to a string."""
     if isinstance(n, (int, float)):
@@ -50,7 +51,7 @@ class Observation:
     """Represents an observation of a state (for pomdps)
 
     Args:
-        observation: the observation as an integer
+        observation: the observation of a state as an integer
     """
 
     observation: int
@@ -74,8 +75,8 @@ class State:
 
     Args:
         labels: The labels of this state. Corresponds to Storm labels.
-        valuations: The valuations of this state. Corresponds to Storm valuations.
-        id: The number of this state in the matrix.
+        valuations: The valuations of this state. Corresponds to Storm valuations/features.
+        id: The id of this state.
         model: The model this state belongs to.
         observation: the observation of this state in case the model is a pomdp.
         name: the name of this state.
@@ -108,13 +109,16 @@ class State:
         self.id = id
         self.observation = None
 
+        # names must be unique
         if name is None:
-            if str(id) in self.model.used_names:
+            # if the user does not provide a name, we try to choose the id as a string
+            name = str(id)
+            if name in self.model.used_names:
                 raise RuntimeError(
                     "You need to choose a state name because of a conflict (possibly because of state removal)."
                 )
-            self.model.used_names.add(str(id))
-            self.name = str(id)
+            self.model.used_names.add(name)
+            self.name = name
         else:
             if name in self.model.used_names:
                 raise RuntimeError(
@@ -125,8 +129,10 @@ class State:
 
     def add_label(self, label: str):
         """adds a new label to the state"""
-        if label not in self.labels:
-            self.labels.append(label)
+        if label in self.labels:
+            raise RuntimeError(f"The label {label} is already present in this state.")
+
+        self.labels.append(label)
 
     def set_observation(self, observation: int) -> Observation:
         """sets the observation for this state"""
@@ -174,8 +180,10 @@ class State:
 
     def get_outgoing_transitions(
         self, action: "Action | None" = None
-    ) -> list[tuple[Number, "State"]] | None:
-        """gets the outgoing transitions"""
+    ) -> list[tuple[Value, "State"]] | None:
+        """gets the outgoing transitions of this state"""
+
+        # if the model supports actions we need to provide one
         if action and self.model.supports_actions():
             if self.id in self.model.transitions.keys():
                 branch = self.model.transitions[self.id].transition[action]
@@ -186,16 +194,18 @@ class State:
             if self.id in self.model.transitions.keys():
                 branch = self.model.transitions[self.id].transition[EmptyAction]
                 return branch.branch
-        return None
 
-    def is_absorbing(self, action: "Action | None" = None) -> bool:
+    def is_absorbing(self) -> bool:
         """returns if the state has a nonzero transition going to another state or not"""
-        transitions = self.get_outgoing_transitions(action)
-        if transitions is not None:
-            for transition in transitions:
-                assert isinstance(transition[0], (int, float))
-                if float(transition[0]) > 0 and transition[1] != self:
-                    return False
+
+        # for all actions we check if the state has outgoing transitions to a different state with value != 0
+        for action in self.available_actions():
+            transitions = self.get_outgoing_transitions(action)
+            if transitions is not None:
+                for transition in transitions:
+                    assert isinstance(transition[0], (int, float))
+                    if float(transition[0]) != 0 and transition[1] != self:
+                        return False
         return True
 
     def is_initial(self):
@@ -272,10 +282,10 @@ class Branch:
 
     Args:
         branch: The branch as a list of tuples.
-            The first element is the probability and the second element is the target state.
+            The first element is the probability value and the second element is the target state.
     """
 
-    branch: list[tuple[Number, State]]
+    branch: list[tuple[Value, State]]
 
     def sort_states(self):
         """sorts the branch list by states"""
@@ -295,7 +305,7 @@ class Branch:
     def __add__(self, other):
         return Branch(self.branch + other.branch)
 
-    def sum_probabilities(self) -> Number:
+    def sum_probabilities(self) -> Value:
         return sum([prob for (prob, _) in self.branch])  # type: ignore
 
 
@@ -305,7 +315,7 @@ class Transition:
         Note that a single Transition might correspond to multiple 'arrows'.
 
     Args:
-        transition: The transition.
+        transition: The transition dictionary. For each available action, we have a branch.
     """
 
     transition: dict[Action, Branch]
@@ -346,10 +356,11 @@ class Transition:
             return True
         return False
 
-    def sum_probabilities(self, action) -> Number:
+    def sum_probabilities(self, action) -> Value:
         return self.transition[action].sum_probabilities()
 
-    def is_stochastic(self, epsilon: Number) -> bool:
+    def is_stochastic(self, epsilon: Value) -> bool:
+        """returns whether the probabilities in the branches sum to 1"""
         return all(
             [abs(self.sum_probabilities(a) - 1) <= epsilon for a in self.transition]  # type: ignore
         )
@@ -358,7 +369,7 @@ class Transition:
         return self.transition[item]
 
 
-TransitionShorthand = list[tuple[Number, State]] | list[tuple[Action, State]]
+TransitionShorthand = list[tuple[Value, State]] | list[tuple[Action, State]]
 
 
 def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
@@ -385,7 +396,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         or isinstance(first_element, parametric.Parametric)
     ):
         return Transition(
-            {EmptyAction: Branch(cast(list[tuple[Number, State]], shorthand))}
+            {EmptyAction: Branch(cast(list[tuple[Value, State]], shorthand))}
         )
     raise RuntimeError(
         f"Type of {first_element} not supported in transition {shorthand}"
@@ -397,29 +408,25 @@ class RewardModel:
     """Represents a state-exit reward model.
     Args:
         name: Name of the reward model.
-        rewards: The rewards, the keys are the state's ids (or state action pair ids).
+        model: The model this rewardmodel belongs to.
+        rewards: The rewards, the keys state action pairs.
     """
 
     name: str
     model: "Model"
-    rewards: dict[Tuple[int, Action], Number]
+    rewards: dict[Tuple[int, Action], Value]
     """Rewards dict. Hashed by state id and Action.
     The function update_rewards can be called to update rewards. After this, rewards will correspond to intermediate_rewards.
     Note that in models without actions, EmptyAction will be used here."""
 
     def __init__(
-        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Number]
+        self, name: str, model: "Model", rewards: dict[Tuple[int, Action], Value]
     ):
         self.name = name
         self.rewards = rewards
         self.model = model
 
-        if self.model.supports_actions():
-            self.set_action_state = {}
-        else:
-            self.state_action_pair = None
-
-    def set_from_rewards_vector(self, vector: list[Number]) -> None:
+    def set_from_rewards_vector(self, vector: list[Value]) -> None:
         """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
@@ -428,7 +435,7 @@ class RewardModel:
                 self.rewards[s.id, a] = vector[combined_id]
                 combined_id += 1
 
-    def get_state_reward(self, state: State) -> Number | None:
+    def get_state_reward(self, state: State) -> Value | None:
         """Gets the reward at said state or state action pair. Return None if no reward is present."""
         if self.model.supports_actions():
             raise RuntimeError(
@@ -439,7 +446,7 @@ class RewardModel:
         else:
             return None
 
-    def get_state_action_reward(self, state: State, action: Action) -> Number | None:
+    def get_state_action_reward(self, state: State, action: Action) -> Value | None:
         """Gets the reward at said state or state action pair. Returns None if no reward was found."""
         if self.model.supports_actions():
             if action in state.available_actions():
@@ -454,7 +461,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def set_state_reward(self, state: State, value: Number):
+    def set_state_reward(self, state: State, value: Value):
         """Sets the reward at said state. If the model has actions, try to use the empty state."""
         if self.model.supports_actions():
             self.set_state_action_reward(state, EmptyAction, value)
@@ -465,7 +472,7 @@ class RewardModel:
         self,
         state: State,
         action: Action,
-        value: Number,
+        value: Value,
         auto_update_rewards: bool = True,
     ):
         """sets the reward at said state action pair (in case of models with actions).
@@ -480,7 +487,7 @@ class RewardModel:
                 "The model this rewardmodel belongs to does not support actions"
             )
 
-    def reward_vector(self) -> list[Number]:
+    def get_reward_vector(self) -> list[Value]:
         """Return the rewards in a (stormpy) vector format."""
         vector = []
         for s in self.model.states.values():
@@ -493,7 +500,7 @@ class RewardModel:
                 vector.append(reward)
         return vector
 
-    def set_unset_rewards(self, value: Number):
+    def set_unset_rewards(self, value: Value):
         """Fills up rewards that were not set yet with the specified value.
         Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
         for s in self.model.states.values():
@@ -535,7 +542,7 @@ class Model:
     actions: set[Action] | None
     rewards: list[RewardModel]
     # In ctmcs we work with rate transitions but additionally we can optionally store exit rates (hashed by id of the state)
-    exit_rates: dict[int, Number] | None
+    exit_rates: dict[int, Value] | None
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
@@ -615,7 +622,7 @@ class Model:
                         return True
         return False
 
-    def is_stochastic(self, epsilon: Number = 0.000001) -> bool:
+    def is_stochastic(self, epsilon: Value = 0.000001) -> bool:
         """For discrete models: Checks if all sums of outgoing transition probabilities for all states equal 1, with at most epsilon rounding error.
         For continuous models: Checks if all sums of outgoing rates sum to 0
         """
@@ -653,6 +660,7 @@ class Model:
             self.add_self_loops()
             for state in self.states.values():
                 for action in state.available_actions():
+                    # we first calculate the sum
                     sum_prob = 0
                     transitions = state.get_outgoing_transitions(action)
                     assert transitions is not None
@@ -664,6 +672,7 @@ class Model:
                         ):
                             sum_prob += tuple[0]
 
+                    # then we divide each value by the sum
                     new_transitions = []
                     for tuple in transitions:
                         if (
@@ -699,7 +708,7 @@ class Model:
         return sub_model
 
     def parameter_valuation(self, values: dict[str, float]) -> "Model":
-        """evaluates all parametric transitions with the given values and returns the new model"""
+        """evaluates all parametric transitions with the given values and returns the induced model"""
         evaluated_model = copy.deepcopy(self)
         for state, transition in evaluated_model.transitions.items():
             for action, branch in transition.transition.items():
@@ -724,7 +733,7 @@ class Model:
                 id += 1
 
     def get_state_action_pair(self, id: int) -> tuple[State, Action] | None:
-        """Does the inverse of the function above"""
+        """Given an id, we return the corresponding state action pair"""
         i = 0
         for s in self.states.values():
             for a in s.available_actions():
@@ -748,32 +757,33 @@ class Model:
                     state, [(float(0) if self.supports_rates() else float(1), state)]
                 )
 
-    def get_variables(self) -> set[str]:
-        """gets the set of all variables present in this model"""
-        variables = set()
-        for state in self.states.values():
-            for variable in state.valuations.keys():
-                variables.add(variable)
-        return variables
-
     def set_valuation_at_remaining_states(
         self, variables: list[str] | None = None, value: int | bool | float = 0
     ):
-        """sets value to variables in all states where they don't have a value yet"""
+        """sets (dummy) value to variables in all states where they don't have a value yet"""
+
+        # we either set it at all variables or just at a given subset of variables
         if variables is None:
             v = self.get_variables()
         else:
             v = variables
+
+        # we set the values
         for state in self.states.values():
             for var in v:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
 
     def has_unassigned_variables(self) -> bool:
+        """we return whether this model has variables without a value"""
         # TODO return list of pairs of variables and states where it is undefined
         variables = self.get_variables()
+
+        # if there are no variables at all, it is trivially true
         if variables == set():
             return False
+
+        # we check all variables in all states
         for state in self.states.values():
             for variable in variables:
                 if variable not in state.valuations.keys():
@@ -788,7 +798,7 @@ class Model:
         return True
 
     def add_markovian_state(self, markovian_state: State):
-        """Adds a state to the markovian states."""
+        """adds a state to the markovian states (in case of markov automatas)"""
         if self.get_type() == ModelType.MA and self.markovian_states is not None:
             self.markovian_states.append(markovian_state)
         else:
@@ -886,14 +896,14 @@ class Model:
         return action
 
     def reassign_ids(self):
-        """reassigns the ids of states, transitions and rates to be in order again.
+        """Reassigns the ids of states, transitions and rates to be in order again.
         Mainly useful to keep consistent with storm."""
 
         print(
             "Warning: Using this can cause problems in your code if there are existing references to states by id."
         )
 
-        # we change the ids in the dictionaries
+        # we change the ids in the dictionaries of the model object
         self.states = {
             new_id: value
             for new_id, (old_id, value) in enumerate(sorted(self.states.items()))
@@ -928,7 +938,7 @@ class Model:
             for index, transition in self.transitions.items():
                 for action, branch in transition.transition.items():
                     for index_tuple, tuple in enumerate(branch.branch):
-                        # remove the tuple if it goes to the state
+                        # remove the tuple if it refernces the state
                         if tuple[1].id == state.id:
                             self.transitions[index].transition[action].branch.pop(
                                 index_tuple
@@ -966,6 +976,8 @@ class Model:
             # we reassign the ids if specified to do so
             if reassign_ids:
                 self.reassign_ids()
+        else:
+            raise RuntimeError("This state is not part of this model.")
 
     def remove_transitions_between_states(
         self, state0: State, state1: State, normalize: bool = True
@@ -990,15 +1002,6 @@ class Model:
             raise RuntimeError(
                 "This method only works for models that don't support actions."
             )
-
-    def get_all_state_labels(self):
-        """returns the set of all state labels of the model"""
-        labels = set()
-        for state in self.states.values():
-            for label in state.labels:
-                if label not in labels:
-                    labels.add(label)
-        return labels
 
     def get_action(self, name: str) -> Action:
         """Gets an existing action."""
@@ -1069,13 +1072,11 @@ class Model:
 
     def get_state_by_name(self, state_name) -> State | None:
         """Get a state by its name."""
-        names = [state.name for state in self.states.values()]
+        names = {state.name: state for state in self.states.values()}
         if state_name not in names:
             raise RuntimeError("Requested a non-existing state")
 
-        for state in self.states.values():
-            if state.name == state_name:
-                return state
+        return names[state_name]
 
     def get_initial_state(self) -> State:
         """Gets the initial state (id=0)."""
@@ -1094,6 +1095,13 @@ class Model:
         for _id, state in self.states.items():
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
+
+    def get_variables(self) -> set[str]:
+        """gets the set of all variables present in this model (features)"""
+        variables: set[str] = set()
+        for _id, state in self.states.items():
+            variables = variables | set(state.valuations.keys())
+        return variables
 
     def get_default_rewards(self) -> RewardModel:
         """Gets the default reward model, throws a RuntimeError if there is none."""
@@ -1122,7 +1130,7 @@ class Model:
         return self.states
 
     def add_rewards(self, name: str) -> RewardModel:
-        """Creates a reward model with the specified name and adds returns it."""
+        """Creates a reward model with the specified name, adds it and returns it."""
         for model in self.rewards:
             if model.name == name:
                 raise RuntimeError(f"Reward model {name} already present in model.")
@@ -1137,13 +1145,13 @@ class Model:
         else:
             raise RuntimeError("Only POMDP models support observations")
 
-    def get_rate(self, state: State) -> Number:
+    def get_rate(self, state: State) -> Value:
         """Gets the rate of a state."""
         if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot get a rate of a deterministic-time model.")
         return self.exit_rates[state.id]
 
-    def set_rate(self, state: State, rate: Number):
+    def set_rate(self, state: State, rate: Value):
         """Sets the rate of a state."""
         if not self.supports_rates() or self.exit_rates is None:
             raise RuntimeError("Cannot set a rate of a deterministic-time model.")

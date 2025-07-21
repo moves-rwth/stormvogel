@@ -9,7 +9,7 @@ from time import sleep
 
 def naive_value_iteration(
     model: stormvogel.model.Model, epsilon: float, target_state: stormvogel.model.State
-) -> list[list[stormvogel.model.Number]]:
+) -> list[list[stormvogel.model.Value]]:
     """Run naive value iteration. The result is a 2D list where result[n][m] is the probability to be in state m at step n.
 
     Args:

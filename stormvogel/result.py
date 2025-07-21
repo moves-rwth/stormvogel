@@ -94,13 +94,13 @@ class Result:
 
     model: stormvogel.model.Model
     # values are hashed by the state id:
-    values: dict[int, stormvogel.model.Number]
+    values: dict[int, stormvogel.model.Value]
     scheduler: Scheduler | None
 
     def __init__(
         self,
         model: stormvogel.model.Model,
-        values: dict[int, stormvogel.model.Number],
+        values: dict[int, stormvogel.model.Value],
         scheduler: Scheduler | None = None,
     ):
         self.model = model
@@ -113,7 +113,7 @@ class Result:
 
     def get_result_of_state(
         self, state: stormvogel.model.State | int
-    ) -> stormvogel.model.Number | None:
+    ) -> stormvogel.model.Value | None:
         """returns the model checking result for a given state"""
         if isinstance(state, int) and state in self.model.states.keys():
             return self.values[state]
@@ -138,7 +138,7 @@ class Result:
             + str(self.scheduler)
         )
 
-    def maximum_result(self) -> stormvogel.model.Number:
+    def maximum_result(self) -> stormvogel.model.Value:
         """Return the maximum result."""
         return max(self.values.values())
 

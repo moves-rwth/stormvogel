@@ -44,7 +44,7 @@ def gymnasium_grid_to_stormvogel(
         trans = TRANSITIONS[s.n][action_numer_map(a)]
         return list(map(lambda x: (x[0], pgc.State(n=int(x[1]), done=x[3])), trans))
 
-    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, stormvogel.model.Number]:
+    def rewards(s: pgc.State, a: pgc.Action) -> dict[str, stormvogel.model.Value]:
         if s.n == -1:
             return {"R": 0}
         reward = list(map(lambda x: x[2], TRANSITIONS[s.n][action_numer_map(a)]))[0]

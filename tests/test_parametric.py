@@ -18,6 +18,7 @@ def test_pmc_conversion():
     # p3 = stormvogel.parametric.Polynomial(["z"])
     p2.add_term((2, 0), 1)
     p2.add_term((2, 2), -1)
+
     # p3.add_term((2,), 2)
     # r1 = stormvogel.parametric.RationalFunction(p2,p3)
 

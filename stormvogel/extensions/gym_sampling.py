@@ -120,7 +120,7 @@ def sample_to_stormvogel(
             for s_, count in transition_counts[(s, INV_MAP[a[0]])].items()
         ]
 
-    def rewards(s, a) -> dict[str, stormvogel.model.Number]:
+    def rewards(s, a) -> dict[str, stormvogel.model.Value]:
         if s is NEW_INITIAL_STATE or s[1]:
             return {"R": 0}
         return {

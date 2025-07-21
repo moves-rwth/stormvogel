@@ -300,7 +300,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         )
                     network_action_id += 1
 
-    def __format_number(self, n: stormvogel.model.Number) -> str:
+    def __format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
         return stormvogel.model.number_to_string(
             n,
