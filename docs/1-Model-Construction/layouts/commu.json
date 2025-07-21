@@ -36,7 +36,7 @@
         }
       },
       "shape": "box",
-      "mass": 0,
+      "mass": 1,
       "font": {
         "color": "black",
         "size": 14
@@ -60,7 +60,7 @@
         }
       },
       "shape": "ellipse",
-      "mass": 2,
+      "mass": 1,
       "font": {
         "color": "black",
         "size": 14
@@ -99,52 +99,32 @@
   },
   "misc": {
     "enable_physics": true,
-    "width": 800,
-    "height": 600,
+    "width": 300,
+    "height": 342,
     "explore": false
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/mec.json",
+    "filename": "layouts/commu.json",
     "save_button": false,
     "load_button": false
   },
   "positions": {
     "0": {
-      "x": -180,
-      "y": 104
+      "x": 4,
+      "y": -87
     },
     "1": {
-      "x": -76,
-      "y": -67
+      "x": 5,
+      "y": 27
     },
     "2": {
-      "x": 87,
-      "y": -39
+      "x": -94,
+      "y": -28
     },
-    "10000000000": {
-      "x": 5,
-      "y": 121
-    },
-    "10000000001": {
-      "x": -271,
-      "y": -5
-    },
-    "10000000002": {
-      "x": 30,
-      "y": -172
-    },
-    "10000000003": {
-      "x": -23,
-      "y": -175
-    },
-    "10000000004": {
-      "x": -6,
-      "y": 25
-    },
-    "10000000005": {
-      "x": -1,
-      "y": -42
+    "3": {
+      "x": 101,
+      "y": 105
     }
   },
   "physics": true,
