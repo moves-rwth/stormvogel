@@ -28,7 +28,7 @@ def test_get_outgoing_transitions():
         stormvogel.model.EmptyAction
     )
 
-    probabilities, states = zip(*transitions)
+    probabilities, states = zip(*transitions)  # type: ignore
 
     assert pytest.approx(list(probabilities)) == [1 / 3, 1 / 3, 1 / 3]
     assert list(states) == [

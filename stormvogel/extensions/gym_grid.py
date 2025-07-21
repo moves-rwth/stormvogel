@@ -16,10 +16,10 @@ def gymnasium_grid_to_stormvogel(
     TRANSITIONS = env.unwrapped.P
     NO_ACTIONS = env.action_space.n
     INV_MAP = {v: k for k, v in action_label_map.items()}
-    ALL_ACTIONS = [pgc.Action([x]) for x in action_label_map.values()]
+    ALL_ACTIONS = [[x] for x in action_label_map.values()]
 
     def action_numer_map(a: pgc.Action):
-        return INV_MAP[a.labels[0]]
+        return INV_MAP[a[0]]
 
     if "taxi" in env.spec.id.lower():
         # For Taxi, we need a special initial state that goes to every state. This is to account for the randomized starting position.
@@ -31,7 +31,7 @@ def gymnasium_grid_to_stormvogel(
 
     def available_actions(s: pgc.State):
         if s.n == -1:
-            return [pgc.PgcEmpytAction]
+            return [[]]
         return ALL_ACTIONS[:NO_ACTIONS]
 
     def delta(s: pgc.State, a: pgc.Action):

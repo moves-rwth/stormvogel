@@ -103,6 +103,7 @@ class Network(stormvogel.displayable.Displayable):
         id: int,
         label: str | None = None,
         group: str | None = None,
+        color: str | None = None,
     ) -> None:
         """Add a node. Only use before calling show."""
         current = "{ id: " + str(id)
@@ -115,6 +116,8 @@ class Network(stormvogel.displayable.Displayable):
         if self.new_nodes_hidden and id != self.initial_node_id:
             current += ", hidden: true"
             current += ", physics: false"
+        if color is not None:
+            current += f', color: "{color}"'
         current += " },\n"
         self.nodes_js += current
 

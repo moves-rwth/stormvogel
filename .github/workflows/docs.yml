@@ -57,7 +57,7 @@ jobs:
           files: |
             docs/**/*.ipynb
           exclude: |
-            docs/1-introduction/1-Introduction.ipynb
+            docs/landing.ipynb
 
       - name: Run documentation notebooks
         run: |
@@ -68,7 +68,7 @@ jobs:
         run: make html
 
       - name: Copy gifs
-        run: cp -r docs/2-extensions/gifs docs/_build/html/2-extensions/
+        run: cp -r docs/4-Reinforcement-Learning/gifs docs/_build/html/4-Reinforcement-Learning/
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'

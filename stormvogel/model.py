@@ -4,11 +4,35 @@ from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
 from typing import Tuple, cast
+
 from stormvogel import parametric
 import copy
+import math
 
 Number = float | Fraction | int
 Value = Number | parametric.Parametric
+
+
+def number_to_string(
+    n: Number, use_fractions: bool, round_digits: int, denom_limit: int
+) -> str:
+    """Convert a Number to a string."""
+    if isinstance(n, (int, float)):
+        if math.isinf(float(n)):
+            return "inf"
+        if use_fractions:
+            return str(Fraction(n).limit_denominator(denom_limit))
+        else:
+            return str(round(float(n), round_digits))
+    elif isinstance(
+        n, Fraction
+    ):  # In the case of Fraction, a denominator of zero would have caused an error before.
+        if use_fractions:
+            return str(n.limit_denominator(denom_limit))
+        else:
+            return str(round(float(n), round_digits))
+    elif isinstance(n, parametric.Parametric):
+        return str(n)
 
 
 class ModelType(Enum):

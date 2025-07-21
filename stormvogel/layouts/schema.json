@@ -106,17 +106,40 @@
     "digits": {
       "__description": "Round digits",
       "__widget": "IntSlider"
+    },
+    "denominator_limit": {
+      "__description": "Denom limit",
+      "__widget": "IntText"
     }
   },
-  "state_properties": {
+  "results": {
     "__collapse": true,
     "show_results": {
-      "__description": "Show results",
+      "__description": "Show result number",
       "__widget": "Checkbox"
     },
     "result_symbol": {
       "__description": "Symbol",
       "__widget": "Text"
+    },
+    "result_colors": {
+      "__description": "Result color gradient",
+      "__widget": "Checkbox"
+    },
+    "min_result_color": {
+      "__description": "Zero",
+      "__widget": "ColorPicker"
+    },
+    "max_result_color": {
+      "__description": "Maximum",
+      "__widget": "ColorPicker"
+    }
+  },
+  "state_properties": {
+    "__collapse": true,
+    "show_ids": {
+      "__description": "Show ids",
+      "__widget": "Checkbox"
     },
     "show_rewards": {
       "__description": "Show rewards",

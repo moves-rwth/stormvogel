@@ -138,6 +138,10 @@ class Result:
             + str(self.scheduler)
         )
 
+    def maximum_result(self) -> stormvogel.model.Number:
+        """Return the maximum result."""
+        return max(self.values.values())
+
     def __eq__(self, other) -> bool:
         if isinstance(other, Result):
             return self.values == other.values and self.scheduler == other.scheduler
