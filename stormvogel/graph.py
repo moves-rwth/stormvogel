@@ -36,6 +36,7 @@ class ModelGraph(DiGraph):
         if action == EmptyAction:
             return
         self.add_node(self._next_action_id, type=NodeType.ACTION, **action_attr)
+        self.add_edge(state, self._next_action_id)
         self._state_action_id_map[(state, action)] = self._next_action_id
         self._next_action_id += 1
 
@@ -51,7 +52,7 @@ class ModelGraph(DiGraph):
             state = state.id
         if isinstance(next_state, State):
             next_state = next_state.id
-        action_id = self._state_action_id_map.get((state, action), None) is not None
+        action_id = self._state_action_id_map.get((state, action), None)
         assert state in self.nodes
         assert action == EmptyAction or action_id is not None
         assert next_state in self.nodes
