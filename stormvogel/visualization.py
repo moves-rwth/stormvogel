@@ -78,7 +78,7 @@ class JSVisualization:
         max_states: int = 1000,
         max_physics_states: int = 500,
         width: int = 800,
-        height: int = 800,
+        height: int = 600,
         spam: widgets.Output = widgets.Output(),
     ) -> None:
         """Create and show a visualization of a Model using a visjs Network
@@ -151,13 +151,19 @@ class JSVisualization:
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
             )
-        self.positions: dict[int, NDArray] = (
-            dict()
-        )  # TODO: We might want to inject this
         self.generate_js()
 
+    # @classmethod
+    # def from_model(cls, model: stormvogel.model.Model):
+    #     G = ModelGraph.from_model(
+    #             model,
+    #             state_properties=self._create_state_properties,
+    #             action_properties=self._create_action_properties,
+    #             transition_properties=self._create_transition_properties,
+    #             )
+
     def _create_state_properties(self, state: stormvogel.model.State):
-        res = self.__format_result(state)
+        res = self.format_result(state)
         observations = self.__format_observations(state)
         rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
         group = self.__group_state(state, "states")
@@ -226,10 +232,8 @@ class JSVisualization:
                 current += f", label: `{label}`"
             if group is not None:
                 current += f', group: "{group}"'
-            if node in self.positions:
-                current += (
-                    f", x: {self.positions[node][0]}, y: {self.positions[node][1]}"
-                )
+            if node in self.layout.layout["positions"]:
+                current += f", x: {self.layout.layout['positions'][node]['x']}, y: {self.layout.layout['positions'][node]['y']}"
             if self.new_nodes_hidden and id != self.initial_node_id:
                 current += ", hidden: true"
                 current += ", physics: false"
@@ -340,7 +344,6 @@ class JSVisualization:
                 )
             self.layout.layout["physics"] = False
             self.layout.copy_settings()
-        # TODO:
         if self.layout.layout["misc"]["explore"]:
             self.nt.enable_exploration_mode(self.model.get_initial_state().id)
         underscored_labels = set(map(und, self.model.get_labels()))
@@ -348,6 +351,7 @@ class JSVisualization:
             {"states", "actions", "scheduled_actions"}
         )
         self.layout.set_possible_groups(possible_groups)
+        self.options_js = json.dumps(self.layout.layout, indent=2)
         if self.use_iframe:
             iframe = self.generate_iframe()
         else:
@@ -368,7 +372,7 @@ class JSVisualization:
             self.layout.layout["numbers"]["denominator_limit"],
         )
 
-    def __format_result(self, s: stormvogel.model.State) -> str:
+    def format_result(self, s: stormvogel.model.State) -> str:
         """Create a string that shows the result for this state. Starts with newline.
         If results are not enabled, then it returns the empty string."""
         if self.result is None or not self.layout.layout["results"]["show_results"]:

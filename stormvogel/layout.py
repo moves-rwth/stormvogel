@@ -1,6 +1,8 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
-from typing import Any
+from typing import Any, Self
+
+from numpy.typing import NDArray
 import stormvogel.rdict
 
 import os
@@ -130,6 +132,23 @@ class Layout:
         """Copy some settings from one place in the layout to another place in the layout.
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout["physics"] = self.layout["misc"]["enable_physics"]
+
+    def add_nx_pos(self, pos: dict[int | str, NDArray], scale: float = 500) -> Self:
+        """Apply NetworkX layout positions to this layout.
+
+        Args:
+            pos (dict[int, NDArray]): A dictionary of node positions from a NetworkX graph.
+            scale (float): Scaling factor for the positions. Defaults to 500.
+        """
+        self.set_value(["physics"], False)
+        self.set_value(
+            ["positions"],
+            {
+                k: {"x": float(x * scale), "y": float(y * scale)}
+                for k, (x, y) in pos.items()
+            },
+        )
+        return self
 
 
 # Define template layouts.
