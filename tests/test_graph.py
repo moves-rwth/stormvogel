@@ -13,7 +13,7 @@ from stormvogel.graph import ModelGraph
     ],
 )
 def test_graph_creation(model):
-    G = ModelGraph.from_model(model)
+    G = ModelGraph(model)
     assert all(state.id in G.nodes for state in model.states.values()), (
         "Missing state in ModelGraph"
     )
