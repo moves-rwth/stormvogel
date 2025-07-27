@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 import warnings
+from time import sleep
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -400,6 +401,62 @@ class JSVisualization:
         """Highlight a set of actions in the model by changing their color. You can clear the current color by setting it to None."""
         for s_id, a in state_action_set:
             self.highlight_action(s_id, a, color)
+
+    def highlight_decomposition(
+        self,
+        decomp: list[tuple[set[int], set[tuple[int, stormvogel.model.Action]]]],
+        colors: list[str] | None = None,
+    ):
+        """Highlight a set of tuples of (states and actions) in the model by changing their color.
+        Args:
+            decomp: A list of tuples (states, actions)
+            colors (optional): A list of colors for the decompossitions. Random colors are picked by default."""
+        for n, v in enumerate(decomp):
+            if colors is None:
+                color = random_color()
+            else:
+                color = colors[n]
+            self.highlight_state_set(v[0], color)
+            self.highlight_action_set(v[1], color)
+
+    def clear_highlighting(self):
+        """Clear all highlighting that is currently active, returing all states to their original colors."""
+        for s_id in self.model.get_states():
+            self.set_node_color(s_id, None)
+        for a_id in self.network_action_map_id.values():
+            self.set_node_color(a_id, None)
+
+    def highlight_path(
+        self,
+        path: simulator.Path,
+        color: str,
+        delay: float = 1,
+        clear: bool = True,
+    ) -> None:
+        """Highlight the path that is provided as an argument in the model.
+        Args:
+            path (simulator.Path): The path to highlight.
+            color (str | None): The color that the highlighted states should get (in HTML color standard).
+                Set to None, in order to clear existing highlights on this path.
+            delay (float): If not None, there will be a pause of a specified time before highlighting the next state in the path.
+            clear (bool): Clear the highlighting of a state after it was highlighted. Only works if delay is not None.
+                This is particularly useful for highlighting paths with loops."""
+        seq = path.to_state_action_sequence()
+        for i, v in enumerate(seq):
+            if isinstance(v, stormvogel.model.State):
+                self.set_node_color(v.id, color)
+                sleep(delay)
+                if clear:
+                    self.set_node_color(v.id, None)
+            elif (
+                isinstance(v, stormvogel.model.Action)
+                and (seq[i - 1].id, v) in self.nt.state_action_id_map
+            ):
+                node_id = self.nt.state_action_id_map[seq[i - 1].id, v]
+                self.set_node_color(node_id, color)
+                sleep(delay)
+                if clear:
+                    self.set_node_color(node_id, None)
 
     def __format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
@@ -1173,6 +1230,8 @@ class Visualization(stormvogel.displayable.Displayable):
     def __to_state_action_sequence(
         self, path: simulator.Path
     ) -> list[stormvogel.model.Action | stormvogel.model.State]:
+        # HACK: The visualization should not verify the path, that should be
+        # responsibility of the path itself
         """Convert a Path to a list containing actions and states."""
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
             self.model.get_initial_state()
