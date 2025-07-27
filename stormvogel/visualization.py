@@ -6,6 +6,9 @@ import cairosvg
 import pathlib
 import warnings
 from time import sleep
+
+from matplotlib.backend_bases import MouseEvent
+from matplotlib.collections import PathCollection
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -17,7 +20,8 @@ from . import simulator
 
 import networkx as nx
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
+from matplotlib.axes import Axes
+import numpy as np
 
 import logging
 import json
@@ -640,37 +644,25 @@ class MplVisualization(VisualizationBase):
     def __init__(
         self,
         model: stormvogel.model.Model,
-        pos: dict[int, NDArray]
-        | None
-        | Callable[[ModelGraph], dict[int, NDArray]] = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
         title: str | None = None,
         interactive: bool = False,
+        hover_node: Callable[[PathCollection, PathCollection, MouseEvent, Axes], None]
+        | None = None,
     ):
         super().__init__(model, layout)
         self.scheduler = None
         self.title = title or ""
         self.interactive = interactive
+        self.hover_node = hover_node
         self.G = ModelGraph.from_model(
-            model, action_properties=lambda s, a: {"model_action": a}
+            model,
+            state_properties=lambda s: {"labels": s.labels},
+            action_properties=lambda s, a: {"labels": a.labels, "model_action": a},
         )
-        if callable(pos):
-            pos = pos(self.G)
-        self._pos = pos or nx.random_layout(self.G)
         self._highlights: dict[int, str] = dict()
         self._edge_highlights: dict[tuple[int, int], str] = dict()
         self._fig = None
-
-    @property
-    def pos(self):
-        return self._pos
-
-    @pos.setter
-    def pos(self, pos: dict[int, NDArray]):
-        assert all([node in pos for node in self.G.nodes]), (
-            "Not all nodes represented in pos"
-        )
-        self._pos = pos
 
     def highlight_state(self, state: stormvogel.model.State | int, color: str = "red"):
         """Highlight a state node of the visualization.
@@ -806,16 +798,22 @@ class MplVisualization(VisualizationBase):
         for edge, color in self._edge_highlights.items():
             edge_colors[edge] = color
 
+        pos = {
+            node: np.array((pos["x"], pos["y"]))
+            for node, pos in self.layout.layout["positions"].items()
+        }
+        if len(pos) != len(self.G.nodes):
+            pos = nx.random_layout(self.G)
         edges = nx.draw_networkx_edges(
             self.G,
-            pos=self.pos,
+            pos=pos,
             ax=ax,
             edge_color=[edge_colors[e] for e in self.G.edges],
             **edge_kwargs,
         )
         nodes = nx.draw_networkx_nodes(
             self.G,
-            pos=self.pos,
+            pos=pos,
             ax=ax,
             node_color=[node_colors[n] for n in self.G.nodes],
             node_size=[node_size[n] for n in self.G.nodes],
@@ -834,28 +832,6 @@ class MplVisualization(VisualizationBase):
         This does not trigger a draw call but will return the figure which might
         draw it depending on your environment.
 
-        Parameters
-        ----------
-        node_alpha : dict[Hashable, float] | float, default=0.25
-            The alpha value for all nodes. If `node_alpha` is a dict, the keys must cover
-            all node identifiers and provide a valid value for them
-        edge_alpha : dict[Hashable, float] | float, default=0.25
-            The alpha value for all edges. If `edge_alpha` is a dict, the keys must cover
-            all edge identifiers and provide a valid value for them
-        node_color : dict[Hashable, float] | None, default=None
-            The color for all nodes. If `node_color` is a dict, the keys must cover
-            all node identifiers and provide a valid value for them
-        edge_color : dict[Hashable, float] | None, default=None
-            The color for all edges. If `edge_color` is a dict, the keys must cover
-            all edge identifiers and provide a valid value for them
-        title : str | None, default=None
-            The title of the matplotlib axes object
-        figsize: tuple[float, float] | None, default=None
-            The figsize in inches, same as the keyword argument for matplotlib.figure.Figure
-
-        Returns
-        -------
-        The updated figure instance
         """
         if self._fig is None:
             self._fig, ax = plt.subplots(figsize=figsize)
@@ -868,7 +844,7 @@ class MplVisualization(VisualizationBase):
             ax = self._fig.gca()
             ax.clear()
         fig = self._fig
-        nodes, _ = self.add_to_ax(
+        nodes, edges = self.add_to_ax(
             ax,
             node_size=node_size,
             node_kwargs=node_kwargs,
@@ -880,14 +856,18 @@ class MplVisualization(VisualizationBase):
         def update_title(ind):
             idx = ind["ind"][0]
             node = node_list[idx]
-            ax.set_title(f"{self.G.nodes[node]['type'].name}: {node}")
+            node_attr = self.G.nodes[node]
+            ax.set_title(f"{node_attr['type'].name}: {node_attr['labels']}")
 
         def hover(event):
             cont, ind = nodes.contains(event)
-            if cont:
-                update_title(ind)
+            if self.hover_node is not None:
+                self.hover_node(nodes, edges, event, ax)
             else:
-                ax.set_title(self.title)
+                if cont:
+                    update_title(ind)
+                else:
+                    ax.set_title(self.title)
             fig.canvas.draw_idle()
 
         if self.interactive:
