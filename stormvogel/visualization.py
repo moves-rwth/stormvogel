@@ -153,15 +153,6 @@ class JSVisualization:
             )
         self.generate_js()
 
-    # @classmethod
-    # def from_model(cls, model: stormvogel.model.Model):
-    #     G = ModelGraph.from_model(
-    #             model,
-    #             state_properties=self._create_state_properties,
-    #             action_properties=self._create_action_properties,
-    #             transition_properties=self._create_transition_properties,
-    #             )
-
     def _create_state_properties(self, state: stormvogel.model.State):
         res = self.format_result(state)
         observations = self.__format_observations(state)
@@ -234,7 +225,7 @@ class JSVisualization:
                 current += f', group: "{group}"'
             if node in self.layout.layout["positions"]:
                 current += f", x: {self.layout.layout['positions'][node]['x']}, y: {self.layout.layout['positions'][node]['y']}"
-            if self.new_nodes_hidden and id != self.initial_node_id:
+            if self.new_nodes_hidden and node != self.initial_node_id:
                 current += ", hidden: true"
                 current += ", physics: false"
             if color is not None:
@@ -266,6 +257,7 @@ class JSVisualization:
 
     def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""
+        # TODO: this gets overwritten from self.show()
         self.options_js = options
 
     def generate_html(self) -> str:
@@ -302,6 +294,7 @@ class JSVisualization:
 
     def enable_exploration_mode(self, initial_node_id: int):
         """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
+        # TODO: this is only relevant when regenerating the js
         self.new_nodes_hidden = True
         self.initial_node_id = initial_node_id
 
@@ -345,13 +338,15 @@ class JSVisualization:
             self.layout.layout["physics"] = False
             self.layout.copy_settings()
         if self.layout.layout["misc"]["explore"]:
-            self.nt.enable_exploration_mode(self.model.get_initial_state().id)
+            self.enable_exploration_mode(self.model.get_initial_state().id)
         underscored_labels = set(map(und, self.model.get_labels()))
         possible_groups = underscored_labels.union(
             {"states", "actions", "scheduled_actions"}
         )
         self.layout.set_possible_groups(possible_groups)
-        self.options_js = json.dumps(self.layout.layout, indent=2)
+        # TODO: I do not think this should happen here..
+        self.generate_js()
+        # self.options_js = json.dumps(self.layout.layout, indent=2)
         if self.use_iframe:
             iframe = self.generate_iframe()
         else:
@@ -362,6 +357,22 @@ class JSVisualization:
         ipd.display(self.output)
         with self.debug_output:
             logging.info("Called Network.show")
+
+    def set_node_color(self, node_id: int, color: str | None) -> None:
+        """Set the color of the node with this node id. Only works once the network is properly loaded."""
+        if color is None:
+            color = "null"
+        else:
+            color = f'"{color}"'
+
+        js = f"""{self.network_wrapper}.setNodeColor({node_id}, {color});"""
+        ipd.display(ipd.Javascript(js))
+        ipd.clear_output()
+
+    def highlight_state(self, state_id: int, color: str | None = "red"):
+        """Highlight a state in the model by changing its color. You can clear the current color by setting it to None."""
+        assert self.nt.nodes.get(state_id) is not None, "State id not in ModelGraph"
+        self.set_node_color(state_id, color)
 
     def __format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
