@@ -1,6 +1,8 @@
 """Contains the code responsible for model visualization."""
 
 from collections.abc import Sequence
+import cairosvg
+import pathlib
 import warnings
 from time import sleep
 import stormvogel.model
@@ -61,6 +63,8 @@ def blend_colors(c1: str, c2: str, factor: float) -> str:
 
 class JSVisualization:
     """Handles visualization of a Model using a Network from stormvogel.network."""
+
+    EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
 
     ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
@@ -457,6 +461,76 @@ class JSVisualization:
                 sleep(delay)
                 if clear:
                     self.set_node_color(node_id, None)
+
+    def export(self, output_format: str, filename: str = "export") -> None:
+        """
+        Export the visualization to your preferred output format.
+        The appropriate file extension will be added automatically.
+
+        Parameters:
+            output_format (str): Desired export format.
+            filename (str): Base name for the exported file.
+
+        Supported output formats (not case-sensitive):
+
+            "HTML"    → An interactive .html file (e.g., draggable nodes)
+            "IFrame"  → Exports as an <iframe> wrapped HTML in a .html file
+            "PDF"     → Exports to .pdf (via conversion from SVG)
+            "SVG"     → Exports to .svg vector image
+        """
+        output_format = output_format.lower()
+        filename_base = pathlib.Path(filename).with_suffix(
+            ""
+        )  # remove extension if present
+
+        if output_format == "html":
+            html = self.generate_html()
+            (filename_base.with_suffix(".html")).write_text(html, encoding="utf-8")
+
+        elif output_format == "iframe":
+            iframe = self.generate_iframe()
+            (filename_base.with_suffix(".html")).write_text(iframe, encoding="utf-8")
+
+        elif output_format == "svg":
+            svg = self.generate_svg()
+            (filename_base.with_suffix(".svg")).write_text(svg, encoding="utf-8")
+
+        elif output_format == "pdf":
+            svg = self.generate_svg()
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"), write_to=filename_base.name + ".pdf"
+            )
+
+        elif output_format == "latex":
+            svg = self.generate_svg()
+            # Create the 'export' folder if it doesn't exist
+            export_folder = pathlib.Path(filename_base)
+            export_folder.mkdir(parents=True, exist_ok=True)
+            pdf_filename = filename_base.with_suffix(".pdf")
+            # Convert SVG to PDF
+            cairosvg.svg2pdf(
+                bytestring=svg.encode("utf-8"),
+                write_to=str(export_folder / pdf_filename),
+            )
+
+            # Create the LaTeX file
+            latex_content = f"""\\documentclass{{article}}
+\\usepackage{{graphicx}}
+\\begin{{document}}
+\\begin{{figure}}[h!]
+\\centering
+\\includegraphics[width=\\textwidth]{{{pdf_filename.name}}}
+\\caption{{Generated using Stormvogel. TODO insert citing instructions}}
+\\end{{figure}}
+\\end{{document}}
+"""
+            # Write the LaTeX code to a .tex file
+            (export_folder / filename_base.with_suffix(".tex")).write_text(
+                latex_content, encoding="utf-8"
+            )
+
+        else:
+            raise RuntimeError(f"Export format not supported: {output_format}")
 
     def __format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
