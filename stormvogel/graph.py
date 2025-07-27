@@ -24,14 +24,45 @@ class ModelGraph(DiGraph):
 
     @property
     def state_action_id_map(self):
+        """
+        dict[tuple[int, Action], int]: A mapping from (state ID, Action) pairs to internal action node IDs.
+
+        This dictionary allows lookup of the internal graph node ID corresponding to a given (state, action) pair.
+        It is used to associate actions with their respective nodes in the graph structure.
+        """
         return self._state_action_id_map
 
     def add_state(self, state: State | int, **attr):
+        """
+        Adds a state node to the graph.
+
+        If a `State` object is provided, its `id` is used as the node identifier.
+        Additional attributes can be assigned to the state node via keyword arguments.
+
+        Args:
+            state (State | int): The state to add, either as a `State` object or its ID.
+            **attr: Arbitrary keyword arguments representing attributes to associate with the state node.
+        """
         if isinstance(state, State):
             state = state.id
         self.add_node(state, type=NodeType.STATE, **attr)
 
     def add_action(self, state: State | int, action: Action, **action_attr):
+        """
+        Adds an action node to the graph and connects it to a given state.
+
+        The action node is uniquely identified and linked from the source state.
+        The action is skipped if it is an `EmptyAction`. Additional attributes
+        can be assigned to the action node via keyword arguments.
+
+        Args:
+            state (State | int): The source state (either a `State` object or its ID) from which the action originates.
+            action (Action): The action to add.
+            **action_attr: Arbitrary keyword arguments representing attributes to associate with the action node.
+
+        Raises:
+            AssertionError: If the source state is not already in the graph.
+        """
         if isinstance(state, State):
             state = state.id
         assert state in self.nodes, f"State {state} not in graph yet"
@@ -50,6 +81,24 @@ class ModelGraph(DiGraph):
         probability: Value,
         **attr,
     ):
+        """
+        Adds a transition to the graph with an associated probability.
+
+        For non-empty actions, this adds an edge from the action node to the target state.
+        For `EmptyAction`, the edge is added directly from the source state to the target state.
+        Additional attributes can be provided for the transition edge.
+
+        Args:
+            state (State | int): The source state (either a `State` object or its ID).
+            action (Action): The action that causes the transition.
+            next_state (int | State): The target state reached by the transition.
+            probability (Value): The probability associated with the transition.
+            **attr: Arbitrary keyword arguments representing attributes to associate with the transition edge.
+
+        Raises:
+            AssertionError: If the source state or target state is not in the graph,
+                or if the action node is missing (for non-empty actions).
+        """
         if isinstance(state, State):
             state = state.id
         if isinstance(next_state, State):
@@ -72,7 +121,32 @@ class ModelGraph(DiGraph):
         transition_properties: Callable[[State, Action, State], dict[str, Any]]
         | None = None,
     ) -> Self:
-        """Construct a directed graph from a model instance"""
+        """
+        Constructs a directed graph representation of a Markov Decision Process (MDP) from a model instance.
+
+        This method initializes the graph from the provided `model` by adding all states, actions, and transitions.
+        Optional callbacks allow customization of properties for states, actions, and transitions.
+
+        Args:
+            model (Model): The MDP model containing states and transitions.
+            state_properties (Callable[[State], dict[str, Any]], optional): A callable that returns a dictionary
+                of properties for a given state. Defaults to None.
+            action_properties (Callable[[State, Action], dict[str, Any]], optional): A callable that returns a
+                dictionary of properties for a given action from a state. Defaults to None.
+            transition_properties (Callable[[State, Action, State], dict[str, Any]], optional): A callable that
+                returns a dictionary of properties for a transition from a source state via an action to a target
+                state. Defaults to None.
+
+        Returns:
+            Self: An instance of the graph populated with the states, actions, and transitions from the model.
+
+        Examples:
+            >>> import stormvogel.examples as examples
+            >>> mdp = examples.create_lion_mdp()
+            >>> G = ModelGraph.from_model(mdp, state_properties = lambda s: {"labels": s.labels})
+            >>> G.nodes[mdp.get_initial_state().id]
+            {'type': <NodeType.STATE: 0>, 'labels': ['init']}
+        """
         G = cls()
         for state in model.states.values():
             props = dict()
