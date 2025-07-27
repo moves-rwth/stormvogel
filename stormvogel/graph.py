@@ -17,19 +17,10 @@ class NodeType(Enum):
 class ModelGraph(DiGraph):
     def __init__(
         self,
-        model: Model,
-        state_properties: Callable[[State], dict[str, Any]] | None = None,
-        action_properties: Callable[[State, Action], dict[str, Any]] | None = None,
-        transition_properties: Callable[[State, Action, State], dict[str, Any]]
-        | None = None,
     ) -> None:
         super().__init__(self)
-        self.model = model
         self._state_action_id_map: dict[tuple[int, Action], int] = dict()
         self._next_action_id = ACTION_ID_OFFSET
-        self._build_from_model(
-            state_properties, action_properties, transition_properties
-        )
 
     @property
     def state_action_id_map(self):
@@ -72,36 +63,39 @@ class ModelGraph(DiGraph):
         else:
             self.add_edge(action_id, next_state, probability=probability, **attr)
 
-    def _build_from_model(
-        self,
+    @classmethod
+    def from_model(
+        cls,
+        model: Model,
         state_properties: Callable[[State], dict[str, Any]] | None = None,
         action_properties: Callable[[State, Action], dict[str, Any]] | None = None,
         transition_properties: Callable[[State, Action, State], dict[str, Any]]
         | None = None,
     ) -> Self:
         """Construct a directed graph from a model instance"""
-        for state in self.model.states.values():
+        G = cls()
+        for state in model.states.values():
             props = dict()
             if state_properties is not None:
                 props = state_properties(state)
-            self.add_state(state, **props)
+            G.add_state(state, **props)
 
-        for state_id, transition in self.model.transitions.items():
-            state = self.model.get_state_by_id(state_id)
+        for state_id, transition in model.transitions.items():
+            state = model.get_state_by_id(state_id)
             for action, branch in transition.transition.items():
                 action_props = dict()
                 if action_properties is not None:
                     action_props = action_properties(state, action)
-                self.add_action(state_id, action, **action_props)
+                G.add_action(state_id, action, **action_props)
                 for probability, target in branch.branch:
                     transition_props = dict()
                     if transition_properties is not None:
                         transition_props = transition_properties(state, action, target)
-                    self.add_transition(
+                    G.add_transition(
                         state_id,
                         action,
                         target,
                         probability=probability,
                         **transition_props,
                     )
-        return self
+        return G
