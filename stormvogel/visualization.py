@@ -212,6 +212,7 @@ class JSVisualization(VisualizationBase):
             max_physics_states (int): If the model has more states, then physics are disabled.
         """
         super().__init__(model, layout)
+        self.initial_state_id = model.get_initial_state().id
         if output is None:
             self.output = widgets.Output()
         else:
@@ -338,10 +339,7 @@ class JSVisualization(VisualizationBase):
                     f", x: {self.layout.layout['positions'][node]['x']}, "
                     f"y: {self.layout.layout['positions'][node]['y']}"
                 )
-            if (
-                self.layout.layout["misc"]["explore"]
-                and node != self.model.get_initial_state().id
-            ):
+            if self.layout.layout["misc"]["explore"] and node != self.initial_state_id:
                 current += ", hidden: true"
                 current += ", physics: false"
             if color is not None:
@@ -412,10 +410,8 @@ class JSVisualization(VisualizationBase):
 
     def enable_exploration_mode(self, initial_node_id: int):
         """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
-        # TODO: this is only relevant when regenerating the js
-        # This should be handled using the layout as well!
-        self.new_nodes_hidden = True
-        self.initial_node_id = initial_node_id
+        self.initial_state_id = initial_node_id
+        self.layout.set_value(["misc", "explore"], True)
 
     def get_positions(self) -> dict:
         """Get the current positions of the nodes on the canvas. Returns empty dict if unsucessful.
@@ -456,8 +452,6 @@ class JSVisualization(VisualizationBase):
                 )
             self.layout.layout["physics"] = False
             self.layout.copy_settings()
-        if self.layout.layout["misc"]["explore"]:
-            self.enable_exploration_mode(self.model.get_initial_state().id)
         underscored_labels = set(map(und, self.model.get_labels()))
         possible_groups = underscored_labels.union(
             {"states", "actions", "scheduled_actions"}
