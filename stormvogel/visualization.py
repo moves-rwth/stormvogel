@@ -1,6 +1,7 @@
 """Contains the code responsible for model visualization."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 import cairosvg
 import pathlib
 import warnings
@@ -629,7 +630,7 @@ class JSVisualization(VisualizationBase):
             raise RuntimeError(f"Export format not supported: {output_format}")
 
 
-class MplVisualization:
+class MplVisualization(VisualizationBase):
     DEFAULT_COLORS = {
         NodeType.STATE: "white",
         NodeType.ACTION: "lightblue",
@@ -637,13 +638,24 @@ class MplVisualization:
     }
 
     def __init__(
-        self, model: stormvogel.model.Model, pos: dict[int, NDArray] | None = None
+        self,
+        model: stormvogel.model.Model,
+        pos: dict[int, NDArray]
+        | None
+        | Callable[[ModelGraph], dict[int, NDArray]] = None,
+        layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+        title: str | None = None,
+        interactive: bool = False,
     ):
+        super().__init__(model, layout)
+        self.scheduler = None
+        self.title = title or ""
+        self.interactive = interactive
         self.G = ModelGraph.from_model(
-            model,
-            state_properties=lambda s: {"group": "states"},
-            action_properties=lambda s, a: {"group": "action"},
+            model, action_properties=lambda s, a: {"model_action": a}
         )
+        if callable(pos):
+            pos = pos(self.G)
         self._pos = pos or nx.random_layout(self.G)
         self._highlights: dict[int, str] = dict()
         self._edge_highlights: dict[tuple[int, int], str] = dict()
@@ -725,11 +737,9 @@ class MplVisualization:
     def add_to_ax(
         self,
         ax,
-        node_alpha: dict[int, float] | float = 0.25,
-        edge_alpha: dict[int, float] | float = 0.25,
-        node_color: dict[int, str] | None = None,
-        edge_color: dict[int, str] | None = None,
         node_size: int | dict[int, int] = 300,
+        node_kwargs: dict[str, Any] | None = None,
+        edge_kwargs: dict[str, Any] | None = None,
     ):
         """Add the networkx graph to a matplotlib axes object
 
@@ -737,18 +747,6 @@ class MplVisualization:
         ----------
         ax : matplotlib.axes.Axes
             A matplotlib axes object
-        node_alpha : dict[Hashable, float] | float, default=0.25
-            The alpha value for all nodes. If `node_alpha` is a dict, the keys must cover
-            all node identifiers and provide a valid value for them
-        edge_alpha : dict[Hashable, float] | float, default=0.25
-            The alpha value for all edges. If `edge_alpha` is a dict, the keys must cover
-            all edge identifiers and provide a valid value for them
-        node_color : dict[Hashable, float] | None, default=None
-            The color for all nodes. If `node_color` is a dict, the keys must cover
-            all node identifiers and provide a valid value for them
-        edge_color : dict[Hashable, float] | None, default=None
-            The color for all edges. If `edge_color` is a dict, the keys must cover
-            all edge identifiers and provide a valid value for them
         node_size : int | dict[Hashable, int], default=300
             The sizes for all nodes. If `node_size` is a dict, the keys must cover
             all node identifiers and provide a valid value for them
@@ -759,35 +757,10 @@ class MplVisualization:
             A tuple consisting of the matplotlib path collection for the networkx nodes
             and a list of matplotlib patches for the edges
         """
-        if isinstance(node_alpha, dict):
-            assert all([n in node_alpha for n in self.G.nodes]), (
-                "Not all nodes are present in node_alpha"
-            )
-        else:
-            node_alpha = {n: node_alpha for n in self.G.nodes}
-        if isinstance(edge_alpha, dict):
-            assert all([e in edge_alpha for e in self.G.edges]), (
-                "Not all edges are present in edge_alpha"
-            )
-        else:
-            edge_alpha = {e: edge_alpha for e in self.G.edges}
-
-        if node_color is None:
-            node_color = {
-                n: self.DEFAULT_COLORS.get(self.G.nodes[n].get("type_"), "grey")
-                for n in self.G.nodes
-            }
-        else:
-            assert all([n in node_color for n in self.G.nodes]), (
-                "node_color is missing nodes"
-            )
-
-        if edge_color is None:
-            edge_color = {e: "black" for e in self.G.edges}
-        else:
-            assert all([e in edge_color for e in self.G.edges]), (
-                "edge_color is missing edges"
-            )
+        if node_kwargs is None:
+            node_kwargs = dict()
+        if edge_kwargs is None:
+            edge_kwargs = dict()
 
         if isinstance(node_size, dict):
             assert all([n in node_size for n in self.G.nodes]), (
@@ -796,40 +769,68 @@ class MplVisualization:
         else:
             node_size = {n: node_size for n in self.G.nodes}
 
+        # fetch the colors from the layout
+        node_colors = dict()
+        for node in self.G.nodes:
+            color = "black"
+            layout_group_color = None
+            match self.G.nodes[node]["type"]:
+                case NodeType.STATE:
+                    group = self._group_state(
+                        self.model.get_state_by_id(node), "states"
+                    )
+                    layout_group_color = self.layout.layout["groups"].get(group)
+                case NodeType.ACTION:
+                    in_edges = list(self.G.in_edges(node))
+                    assert len(in_edges) == 1, (
+                        "An action node should only have a single incoming edge"
+                    )
+                    state, _ = in_edges[0]
+                    group = self._group_action(
+                        state, self.G.nodes[node]["model_action"], "actions"
+                    )
+                    layout_group_color = self.layout.layout["groups"].get(group)
+            if layout_group_color is not None:
+                color = layout_group_color.get("color", {"background": color}).get(
+                    "background"
+                )
+            node_colors[node] = color
+
+        edge_colors = dict()
+        for edge in self.G.edges:
+            edge_colors[edge] = self.layout.layout["edges"]["color"]["color"]
+
         # Now add highlights
         for node, color in self._highlights.items():
-            node_color[node] = color
-            node_alpha[node] = 1
+            node_colors[node] = color
         for edge, color in self._edge_highlights.items():
-            edge_color[edge] = color
-            edge_alpha[edge] = 1
+            edge_colors[edge] = color
 
         edges = nx.draw_networkx_edges(
             self.G,
             pos=self.pos,
             ax=ax,
-            alpha=[edge_alpha[e] for e in self.G.edges],
-            edge_color=[edge_color[e] for e in self.G.edges],
+            # alpha=[edge_alpha[e] for e in self.G.edges],
+            edge_color=[edge_colors[e] for e in self.G.edges],
+            **edge_kwargs,
         )
         nodes = nx.draw_networkx_nodes(
             self.G,
             pos=self.pos,
             ax=ax,
-            node_color=[node_color[n] for n in self.G.nodes],
-            alpha=[node_alpha[n] for n in self.G.nodes],
+            node_color=[node_colors[n] for n in self.G.nodes],
+            # alpha=[node_alpha[n] for n in self.G.nodes],
             node_size=[node_size[n] for n in self.G.nodes],
+            **node_kwargs,
         )
         return nodes, edges
 
     def update(
         self,
-        node_alpha: dict[int, float] | float = 0.25,
-        edge_alpha: dict[int, float] | float = 0.25,
-        node_color: dict[int, str] | None = None,
         node_size: int | Sequence[int] = 300,
-        interactive: bool = False,
-        title: str | None = None,
         figsize: tuple[float, float] | None = None,
+        node_kwargs: dict[str, Any] | None = None,
+        edge_kwargs: dict[str, Any] | None = None,
     ):
         """Update the internal matplotlib figure with the new parameters
         This does not trigger a draw call but will return the figure which might
@@ -870,41 +871,35 @@ class MplVisualization:
             ax.clear()
         fig = self._fig
         nodes, _ = self.add_to_ax(
-            ax, node_alpha, edge_alpha, node_color, node_size=node_size
+            ax,
+            node_size=node_size,
+            node_kwargs=node_kwargs,
+            edge_kwargs=edge_kwargs,
         )
-        if title is not None:
-            ax.set_title(title)
+        ax.set_title(self.title)
         node_list = list(self.G.nodes)
 
         def update_title(ind):
             idx = ind["ind"][0]
             node = node_list[idx]
-            ax.set_title(f"{self.G.nodes[node]['type_'].name}: {node}")
+            ax.set_title(f"{self.G.nodes[node]['type'].name}: {node}")
 
         def hover(event):
             cont, ind = nodes.contains(event)
             if cont:
                 update_title(ind)
-                fig.canvas.draw_idle()
+            else:
+                ax.set_title(self.title)
+            fig.canvas.draw_idle()
 
-        if interactive:
+        if self.interactive:
             fig.canvas.mpl_connect("motion_notify_event", hover)
-        return fig
 
     def show(
         self,
-        node_alpha: dict[int, float] | float = 0.25,
-        edge_alpha: dict[int, float] | float = 0.25,
-        node_color: dict[int, str] | None = None,
-        node_size: int | Sequence[int] = 300,
-        interactive: bool = False,
-        title: str | None = None,
     ):
-        fig = self.update(
-            node_alpha, edge_alpha, node_color, node_size, interactive, title
-        )
+        self.update()
         plt.show()
-        return fig
 
 
 class Visualization(stormvogel.displayable.Displayable):
