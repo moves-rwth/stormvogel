@@ -15,7 +15,7 @@ import stormvogel.result
 import stormvogel.network
 import stormvogel.displayable
 from stormvogel.autoscale_svg import autoscale_svg
-from .graph import ModelGraph, NodeType
+from .graph import ModelGraph, NodeType, ACTION_ID_OFFSET
 from . import simulator
 
 import networkx as nx
@@ -168,7 +168,6 @@ class JSVisualization(VisualizationBase):
 
     EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
 
-    ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
     # This offset is used to keep their ids from colliding. It should be some high constant.
 
@@ -883,7 +882,6 @@ class MplVisualization(VisualizationBase):
 class Visualization(stormvogel.displayable.Displayable):
     """Handles visualization of a Model using a Network from stormvogel.network."""
 
-    ACTION_ID_OFFSET: int = 10**10
     # In the visualization, both actions and states are nodes with an id.
     # This offset is used to keep their ids from colliding. It should be some high constant.
 
@@ -1081,7 +1079,7 @@ class Visualization(stormvogel.displayable.Displayable):
         Note that an action may appear multiple times in the model with a different state as source."""
         if self.nt is None:
             return
-        network_action_id = self.ACTION_ID_OFFSET
+        network_action_id = ACTION_ID_OFFSET
         # In the visualization, both actions and states are nodes, so we need to keep track of how many actions we already have.
         for state_id, transition in self.model.transitions.items():
             for action, branch in transition.transition.items():
