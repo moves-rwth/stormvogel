@@ -810,7 +810,6 @@ class MplVisualization(VisualizationBase):
             self.G,
             pos=self.pos,
             ax=ax,
-            # alpha=[edge_alpha[e] for e in self.G.edges],
             edge_color=[edge_colors[e] for e in self.G.edges],
             **edge_kwargs,
         )
@@ -819,7 +818,6 @@ class MplVisualization(VisualizationBase):
             pos=self.pos,
             ax=ax,
             node_color=[node_colors[n] for n in self.G.nodes],
-            # alpha=[node_alpha[n] for n in self.G.nodes],
             node_size=[node_size[n] for n in self.G.nodes],
             **node_kwargs,
         )
