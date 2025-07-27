@@ -1,6 +1,7 @@
 """Contains the code responsible for model visualization."""
 
 from collections.abc import Sequence
+import warnings
 import stormvogel.model
 import stormvogel.layout
 import stormvogel.result
@@ -373,6 +374,32 @@ class JSVisualization:
         """Highlight a state in the model by changing its color. You can clear the current color by setting it to None."""
         assert self.nt.nodes.get(state_id) is not None, "State id not in ModelGraph"
         self.set_node_color(state_id, color)
+
+    def highlight_action(
+        self, state_id: int, action: stormvogel.model.Action, color: str | None = "red"
+    ):
+        """Highlight an action in the model by changing its color. You can clear the current color by setting it to None."""
+        try:
+            nt_id = self.nt.state_action_id_map[(state_id, action)]
+            self.set_node_color(nt_id, color)
+        except KeyError:
+            warnings.warn(
+                "Tried to highlight an action that is not present in this model."
+            )
+
+    def highlight_state_set(self, state_ids: set[int], color: str | None = "blue"):
+        """Highlight a set of states in the model by changing their color. You can clear the current color by setting it to None."""
+        for s_id in state_ids:
+            self.set_node_color(s_id, color)
+
+    def highlight_action_set(
+        self,
+        state_action_set: set[tuple[int, stormvogel.model.Action]],
+        color: str = "red",
+    ):
+        """Highlight a set of actions in the model by changing their color. You can clear the current color by setting it to None."""
+        for s_id, a in state_action_set:
+            self.highlight_action(s_id, a, color)
 
     def __format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
