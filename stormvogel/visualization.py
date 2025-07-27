@@ -175,8 +175,6 @@ class JSVisualization(VisualizationBase):
         self,
         model: stormvogel.model.Model,
         name: str | None = None,
-        width: int = 800,
-        height: int = 600,
         result: stormvogel.result.Result | None = None,
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
@@ -193,8 +191,6 @@ class JSVisualization(VisualizationBase):
         Args:
             model (Model): The stormvogel model to be displayed.
             name (str): Used to name the iframe. ONLY SPECIFY IF YOU KNOW WHAT YOU ARE DOING. You should never create two networks with the same name, they might clash.
-            width (int): Width of the network, in pixels.
-            height (int): Height of the network, in pixels.
             result (Result, optional): A result associatied with the model.
                 The results are displayed as numbers on a state. Enable the layout editor for options.
                 If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
@@ -255,8 +251,6 @@ class JSVisualization(VisualizationBase):
             )
         else:
             self.network_wrapper: str = f"nw_{self.name}"
-        self.width: int = width
-        self.height: int = height
         self.new_nodes_hidden: bool = False
         if do_init_server:
             self.server: stormvogel.communication_server.CommunicationServer = (
@@ -382,8 +376,8 @@ class JSVisualization(VisualizationBase):
             self._generate_edge_js(),
             self._get_options(),
             self.name,
-            self.width,
-            self.height,
+            self.layout.layout["misc"].get("width", 800),
+            self.layout.layout["misc"].get("height", 600),
         )
 
     def generate_iframe(self) -> str:
@@ -391,8 +385,8 @@ class JSVisualization(VisualizationBase):
         return f"""
           <iframe
                 id="{self.name}"
-                width="{self.width + self.EXTRA_PIXELS}"
-                height="{self.height + self.EXTRA_PIXELS}"
+                width="{self.layout.layout["misc"].get("width", 800) + self.EXTRA_PIXELS}"
+                height="{self.layout.layout["misc"].get("height", 600) + self.EXTRA_PIXELS}"
                 sandbox="allow-scripts allow-same-origin"
                 frameborder="0"
                 srcdoc="{html.escape(self.generate_html())}"
@@ -400,12 +394,12 @@ class JSVisualization(VisualizationBase):
                 allowfullscreen webkitallowfullscreen mozallowfullscreen
           ></iframe>"""
 
-    def generate_svg(self, width: int | None = None) -> str:
+    def generate_svg(self, width: int = 800) -> str:
         """Generate an svg rendering for the network."""
         js = f"RETURN({self.network_wrapper}.getSvg());"
         res = self.server.result(js)[1:-1]
         unescaped = res.encode("utf-8").decode("unicode_escape")
-        scaled = autoscale_svg(unescaped, width or self.width)
+        scaled = autoscale_svg(unescaped, width)
         return scaled
 
     def enable_exploration_mode(self, initial_node_id: int):
@@ -833,23 +827,24 @@ class MplVisualization(VisualizationBase):
     def update(
         self,
         node_size: int | Sequence[int] = 300,
-        figsize: tuple[float, float] | None = None,
         node_kwargs: dict[str, Any] | None = None,
         edge_kwargs: dict[str, Any] | None = None,
     ):
         """Update the internal matplotlib figure with the new parameters
         This does not trigger a draw call but will return the figure which might
         draw it depending on your environment.
-
         """
+        px = 1 / plt.rcParams["figure.dpi"]
+        figsize = (
+            self.layout.layout["misc"].get("width", 800) * px,
+            self.layout.layout["misc"].get("height", 600) * px,
+        )
         if self._fig is None:
             self._fig, ax = plt.subplots(figsize=figsize)
         else:
-            if figsize is not None:
-                w, h = figsize
-                # INFO: This triggers an update everytime
-                self._fig.set_figwidth(w)
-                self._fig.set_figheight(h)
+            w, h = figsize
+            self._fig.set_figwidth(w)
+            self._fig.set_figheight(h)
             ax = self._fig.gca()
             ax.clear()
         fig = self._fig
@@ -881,6 +876,7 @@ class MplVisualization(VisualizationBase):
 
         if self.interactive:
             fig.canvas.mpl_connect("motion_notify_event", hover)
+        return fig
 
     def show(
         self,
