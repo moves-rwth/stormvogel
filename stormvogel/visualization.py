@@ -174,6 +174,9 @@ class JSVisualization(VisualizationBase):
     def __init__(
         self,
         model: stormvogel.model.Model,
+        name: str | None = None,
+        width: int = 800,
+        height: int = 600,
         result: stormvogel.result.Result | None = None,
         scheduler: stormvogel.result.Scheduler | None = None,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
@@ -184,13 +187,14 @@ class JSVisualization(VisualizationBase):
         do_display: bool = True,
         max_states: int = 1000,
         max_physics_states: int = 500,
-        width: int = 800,
-        height: int = 600,
         spam: widgets.Output = widgets.Output(),
     ) -> None:
         """Create and show a visualization of a Model using a visjs Network
         Args:
             model (Model): The stormvogel model to be displayed.
+            name (str): Used to name the iframe. ONLY SPECIFY IF YOU KNOW WHAT YOU ARE DOING. You should never create two networks with the same name, they might clash.
+            width (int): Width of the network, in pixels.
+            height (int): Height of the network, in pixels.
             result (Result, optional): A result associatied with the model.
                 The results are displayed as numbers on a state. Enable the layout editor for options.
                 If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
@@ -198,11 +202,14 @@ class JSVisualization(VisualizationBase):
                 If both result and scheduler are set, then scheduler takes precedence.
             layout (Layout): Layout used for the visualization.
             show_editor (bool): Show an interactive layout editor.
-            use_iframe (bool): Wrap the generated html inside of an IFrame.
-                In some environments, the visualization works better with this enabled.
             output (widgets.Output): The output widget in which the network is rendered.
                 Whether this widget is also displayed automatically depends on do_display.
             debug_output (widgets.Output): Output widget that can be used to debug interactive features.
+            use_iframe (bool): Set to true iff you want to use an iframe. Defaults to False.
+            do_init_server (bool): Set to true iff you want to initialize the server. Defaults to True.
+            do_display (bool): Set to true iff you want the Network to display. Defaults to True.
+            max_states (int): If the model has more states, then the network is not displayed.
+            max_physics_states (int): If the model has more states, then physics are disabled.
         """
         super().__init__(model, layout)
         if output is None:
@@ -216,7 +223,7 @@ class JSVisualization(VisualizationBase):
             ipd.display(self.spam)
 
         # vis stuff
-        self.name: str = random_word(10)
+        self.name: str = name or random_word(10)
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
@@ -249,15 +256,11 @@ class JSVisualization(VisualizationBase):
             self.network_wrapper: str = f"nw_{self.name}"
         self.width: int = width
         self.height: int = height
-        self.nodes_js: str = ""
-        self.edges_js: str = ""
-        self.options_js: str = "{}"
         self.new_nodes_hidden: bool = False
         if do_init_server:
             self.server: stormvogel.communication_server.CommunicationServer = (
                 stormvogel.communication_server.initialize_server()
             )
-        self.generate_js()
 
     def _create_state_properties(self, state: stormvogel.model.State):
         res = self._format_result(state)
@@ -317,8 +320,9 @@ class JSVisualization(VisualizationBase):
                 return properties
         return properties
 
-    def _generate_node_js(self) -> None:
-        self.nodes_js = ""
+    def _generate_node_js(self) -> str:
+        """Generate the required js script for node definition"""
+        node_js = ""
         for node in self.nt.nodes():
             node_attr = self.nt.nodes[node]
             label = node_attr.get("label", None)
@@ -330,17 +334,25 @@ class JSVisualization(VisualizationBase):
             if group is not None:
                 current += f', group: "{group}"'
             if node in self.layout.layout["positions"]:
-                current += f", x: {self.layout.layout['positions'][node]['x']}, y: {self.layout.layout['positions'][node]['y']}"
-            if self.new_nodes_hidden and node != self.initial_node_id:
+                current += (
+                    f", x: {self.layout.layout['positions'][node]['x']}, "
+                    f"y: {self.layout.layout['positions'][node]['y']}"
+                )
+            if (
+                self.layout.layout["misc"]["explore"]
+                and node != self.model.get_initial_state().id
+            ):
                 current += ", hidden: true"
                 current += ", physics: false"
             if color is not None:
                 current += f', color: "{color}"'
             current += " },\n"
-            self.nodes_js += current
+            node_js += current
+        return node_js
 
-    def _generate_edge_js(self) -> None:
-        self.edges_js = ""
+    def _generate_edge_js(self) -> str:
+        """Generate the required js script for edge definition"""
+        edge_js = ""
         for from_, to in self.nt.edges():
             edge_attr = self.nt.edges[(from_, to)]
             label = edge_attr.get("label", None)
@@ -350,27 +362,27 @@ class JSVisualization(VisualizationBase):
                 current += f', label: "{label}"'
             if color is not None:
                 current += f', color: "{color}"'
-            if self.new_nodes_hidden:
+            if self.layout.layout["misc"]["explore"]:
                 current += ", hidden: true"
                 current += ", physics: false"
             current += " },\n"
-            self.edges_js += current
+            edge_js += current
+        return edge_js
 
-    def generate_js(self) -> None:
-        self._generate_node_js()
-        self._generate_edge_js()
-        self.options_js = json.dumps(self.layout.layout, indent=2)
+    def _generate_options_js(self) -> str:
+        return json.dumps(self.layout.layout, indent=2)
 
     def set_options(self, options: str) -> None:
         """Set the options. Only use before calling show."""
-        # TODO: this gets overwritten from self.show()
-        self.options_js = options
+        options_dict = json.loads(options)
+        self.layout = stormvogel.layout.Layout(layout_dict=options_dict)
 
     def generate_html(self) -> str:
+        """Generate an html page representing the current state of the `ModelGraph`"""
         return stormvogel.html_generation.generate_html(
-            self.nodes_js,
-            self.edges_js,
-            self.options_js,
+            self._generate_node_js(),
+            self._generate_edge_js(),
+            self._generate_options_js(),
             self.name,
             self.width,
             self.height,
@@ -401,6 +413,7 @@ class JSVisualization(VisualizationBase):
     def enable_exploration_mode(self, initial_node_id: int):
         """Every node becomes invisible. You can then click any node to reveal all of its successors. Call before adding any nodes to the network."""
         # TODO: this is only relevant when regenerating the js
+        # This should be handled using the layout as well!
         self.new_nodes_hidden = True
         self.initial_node_id = initial_node_id
 
@@ -450,8 +463,6 @@ class JSVisualization(VisualizationBase):
             {"states", "actions", "scheduled_actions"}
         )
         self.layout.set_possible_groups(possible_groups)
-        # TODO: I do not think this should happen here..
-        self.generate_js()
         # self.options_js = json.dumps(self.layout.layout, indent=2)
         if self.use_iframe:
             iframe = self.generate_iframe()
