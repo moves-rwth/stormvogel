@@ -61,7 +61,104 @@ def blend_colors(c1: str, c2: str, factor: float) -> str:
     return "#" + "".join("%02x" % i for i in [r_res, g_res, b_res])
 
 
-class JSVisualization:
+class VisualizationBase:
+    def __init__(
+        self,
+        model: stormvogel.model.Model,
+        layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+    ) -> None:
+        self.model = model
+        self.layout = layout
+
+    def _format_number(self, n: stormvogel.model.Value) -> str:
+        """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
+        return stormvogel.model.number_to_string(
+            n,
+            self.layout.layout["numbers"]["fractions"],
+            self.layout.layout["numbers"]["digits"],
+            self.layout.layout["numbers"]["denominator_limit"],
+        )
+
+    def _format_result(self, s: stormvogel.model.State) -> str:
+        """Create a string that shows the result for this state. Starts with newline.
+        If results are not enabled, then it returns the empty string."""
+        if self.result is None or not self.layout.layout["results"]["show_results"]:
+            return ""
+        result_of_state = self.result.get_result_of_state(s)
+        if result_of_state is None:
+            return ""
+        return (
+            "\n"
+            + self.layout.layout["results"]["result_symbol"]
+            + " "
+            + self._format_number(result_of_state)
+        )
+
+    def _format_observations(self, s: stormvogel.model.State) -> str:
+        """Create a String that shows the observation for this state (FOR POMDPs).
+        Starts with newline."""
+        if (
+            s.observation is None
+            or not self.layout.layout["state_properties"]["show_observations"]
+        ):
+            return ""
+        else:
+            return (
+                "\n"
+                + self.layout.layout["state_properties"]["observation_symbol"]
+                + " "
+                + str(s.observation.observation)
+            )
+
+    def _group_state(self, s: stormvogel.model.State, default: str) -> str:
+        """Return the group of this state.
+        That is, the label of s that has the highest priority, as specified by the user under edit_groups"""
+        und_labels = set(map(lambda x: und(x), s.labels))
+        res = list(
+            filter(
+                lambda x: x in und_labels, self.layout.layout["edit_groups"]["groups"]
+            )
+        )
+        return und(res[0]) if res != [] else default
+
+    def _group_action(self, s_id: int, a: stormvogel.model.Action, default: str) -> str:
+        """Return the group of this action. Only relevant for scheduling"""
+        # Put the action in the group scheduled_actions if appropriate.
+        if self.scheduler is None:
+            return default
+
+        choice = self.scheduler.get_choice_of_state(self.model.get_state_by_id(s_id))
+        return "scheduled_actions" if a == choice else default
+
+    def _format_rewards(
+        self, s: stormvogel.model.State, a: stormvogel.model.Action
+    ) -> str:
+        """Create a string that contains either the state exit reward (if actions are not supported)
+        or the reward of taking this action from this state. (if actions ARE supported)
+        Starts with newline"""
+        if not self.layout.layout["state_properties"]["show_rewards"]:
+            return ""
+        EMPTY_RES = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
+        res = EMPTY_RES
+        for reward_model in self.model.rewards:
+            if self.model.supports_actions():
+                if a in s.available_actions():
+                    reward = reward_model.get_state_action_reward(s, a)
+                else:
+                    reward = None
+            else:
+                reward = reward_model.get_state_reward(s)
+            if reward is not None and not (
+                not self.layout.layout["state_properties"]["show_zero_rewards"]
+                and reward == 0
+            ):
+                res += f"\t{reward_model.name}: {self._format_number(reward)}"
+        if res == EMPTY_RES:
+            return ""
+        return res
+
+
+class JSVisualization(VisualizationBase):
     """Handles visualization of a Model using a Network from stormvogel.network."""
 
     EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
@@ -103,6 +200,7 @@ class JSVisualization:
                 Whether this widget is also displayed automatically depends on do_display.
             debug_output (widgets.Output): Output widget that can be used to debug interactive features.
         """
+        super().__init__(model, layout)
         if output is None:
             self.output = widgets.Output()
         else:
@@ -115,14 +213,12 @@ class JSVisualization:
 
         # vis stuff
         self.name: str = random_word(10)
-        self.model: stormvogel.model.Model = model
         self.result: stormvogel.result.Result | None = result
         self.scheduler: stormvogel.result.Scheduler | None = scheduler
         self.use_iframe: bool = use_iframe
         self.max_states: int = max_states
         self.max_physics_states: int = max_physics_states
         # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
-        self.layout: stormvogel.layout.Layout = layout
         if self.scheduler is None:
             if self.result is not None:
                 self.scheduler = self.result.scheduler
@@ -160,10 +256,10 @@ class JSVisualization:
         self.generate_js()
 
     def _create_state_properties(self, state: stormvogel.model.State):
-        res = self.format_result(state)
-        observations = self.__format_observations(state)
-        rewards = self.__format_rewards(state, stormvogel.model.EmptyAction)
-        group = self.__group_state(state, "states")
+        res = self._format_result(state)
+        observations = self._format_observations(state)
+        rewards = self._format_rewards(state, stormvogel.model.EmptyAction)
+        group = self._group_state(state, "states")
         id_label_part = (
             f"{state.id}\n"
             if self.layout.layout["state_properties"]["show_ids"]
@@ -197,8 +293,8 @@ class JSVisualization:
     def _create_action_properties(
         self, state: stormvogel.model.State, action: stormvogel.model.Action
     ) -> dict:
-        group = self.__group_action(state.id, action, "actions")
-        reward = self.__format_rewards(self.model.get_state_by_id(state.id), action)
+        group = self._group_action(state.id, action, "actions")
+        reward = self._format_rewards(self.model.get_state_by_id(state.id), action)
 
         properties = {
             "label": ",".join(action.labels) + reward,
@@ -213,7 +309,7 @@ class JSVisualization:
             return properties
         for prob, target in transitions:
             if next_state.id == target.id:
-                properties["label"] = self.__format_number(prob)
+                properties["label"] = self._format_number(prob)
                 return properties
         return properties
 
@@ -532,109 +628,21 @@ class JSVisualization:
         else:
             raise RuntimeError(f"Export format not supported: {output_format}")
 
-    def __format_number(self, n: stormvogel.model.Value) -> str:
-        """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
-        return stormvogel.model.number_to_string(
-            n,
-            self.layout.layout["numbers"]["fractions"],
-            self.layout.layout["numbers"]["digits"],
-            self.layout.layout["numbers"]["denominator_limit"],
-        )
-
-    def format_result(self, s: stormvogel.model.State) -> str:
-        """Create a string that shows the result for this state. Starts with newline.
-        If results are not enabled, then it returns the empty string."""
-        if self.result is None or not self.layout.layout["results"]["show_results"]:
-            return ""
-        result_of_state = self.result.get_result_of_state(s)
-        if result_of_state is None:
-            return ""
-        return (
-            "\n"
-            + self.layout.layout["results"]["result_symbol"]
-            + " "
-            + self.__format_number(result_of_state)
-        )
-
-    def __format_observations(self, s: stormvogel.model.State) -> str:
-        """Create a String that shows the observation for this state (FOR POMDPs).
-        Starts with newline."""
-        if (
-            s.observation is None
-            or not self.layout.layout["state_properties"]["show_observations"]
-        ):
-            return ""
-        else:
-            return (
-                "\n"
-                + self.layout.layout["state_properties"]["observation_symbol"]
-                + " "
-                + str(s.observation.observation)
-            )
-
-    def __group_state(self, s: stormvogel.model.State, default: str) -> str:
-        """Return the group of this state.
-        That is, the label of s that has the highest priority, as specified by the user under edit_groups"""
-        und_labels = set(map(lambda x: und(x), s.labels))
-        res = list(
-            filter(
-                lambda x: x in und_labels, self.layout.layout["edit_groups"]["groups"]
-            )
-        )
-        return und(res[0]) if res != [] else default
-
-    def __group_action(
-        self, s_id: int, a: stormvogel.model.Action, default: str
-    ) -> str:
-        """Return the group of this action. Only relevant for scheduling"""
-        # Put the action in the group scheduled_actions if appropriate.
-        if self.scheduler is None:
-            return default
-
-        choice = self.scheduler.get_choice_of_state(self.model.get_state_by_id(s_id))
-        return "scheduled_actions" if a == choice else default
-
-    def __format_rewards(
-        self, s: stormvogel.model.State, a: stormvogel.model.Action
-    ) -> str:
-        """Create a string that contains either the state exit reward (if actions are not supported)
-        or the reward of taking this action from this state. (if actions ARE supported)
-        Starts with newline"""
-        if not self.layout.layout["state_properties"]["show_rewards"]:
-            return ""
-        EMPTY_RES = "\n" + self.layout.layout["state_properties"]["reward_symbol"]
-        res = EMPTY_RES
-        for reward_model in self.model.rewards:
-            if self.model.supports_actions():
-                if a in s.available_actions():
-                    reward = reward_model.get_state_action_reward(s, a)
-                else:
-                    reward = None
-            else:
-                reward = reward_model.get_state_reward(s)
-            if reward is not None and not (
-                not self.layout.layout["state_properties"]["show_zero_rewards"]
-                and reward == 0
-            ):
-                res += f"\t{reward_model.name}: {self.__format_number(reward)}"
-        if res == EMPTY_RES:
-            return ""
-        return res
-
 
 class MplVisualization:
     DEFAULT_COLORS = {
-        NodeType.STATE: "lightblue",
-        NodeType.ACTION: "lightgreen",
+        NodeType.STATE: "white",
+        NodeType.ACTION: "lightblue",
         None: "grey",
     }
-    DEFAULT_ALPHA = 0.25
 
     def __init__(
         self, model: stormvogel.model.Model, pos: dict[int, NDArray] | None = None
     ):
         self.G = ModelGraph.from_model(
-            model, state_properties=lambda s: {"color": "blue"}
+            model,
+            state_properties=lambda s: {"group": "states"},
+            action_properties=lambda s, a: {"group": "action"},
         )
         self._pos = pos or nx.random_layout(self.G)
         self._highlights: dict[int, str] = dict()
