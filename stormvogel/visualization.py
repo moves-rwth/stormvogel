@@ -367,7 +367,7 @@ class JSVisualization(VisualizationBase):
             edge_js += current
         return edge_js
 
-    def _generate_options_js(self) -> str:
+    def _get_options(self) -> str:
         return json.dumps(self.layout.layout, indent=2)
 
     def set_options(self, options: str) -> None:
@@ -380,7 +380,7 @@ class JSVisualization(VisualizationBase):
         return stormvogel.html_generation.generate_html(
             self._generate_node_js(),
             self._generate_edge_js(),
-            self._generate_options_js(),
+            self._get_options(),
             self.name,
             self.width,
             self.height,
@@ -468,6 +468,11 @@ class JSVisualization(VisualizationBase):
         ipd.display(self.output)
         with self.debug_output:
             logging.info("Called Network.show")
+
+    def update(self) -> None:
+        js = f"""{self.network_wrapper}.network.setOptions({self._get_options()});"""
+        with self.spam:
+            ipd.display(ipd.Javascript(js))
 
     def set_node_color(self, node_id: int, color: str | None) -> None:
         """Set the color of the node with this node id. Only works once the network is properly loaded."""
