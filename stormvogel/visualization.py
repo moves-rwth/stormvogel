@@ -765,19 +765,19 @@ class MplVisualization(VisualizationBase):
         self._edge_highlights.clear()
 
     def highlight_scheduler(self, scheduler: stormvogel.result.Scheduler):
-        color = "red"
+        default_color = self.layout.layout["edges"]["color"]["color"]
+        color = self.layout.layout["groups"].get(
+            "scheduled_actions", {"color": {"border": default_color}}
+        )["color"]["border"]
         for state_id, taken_action in scheduler.taken_actions.items():
             self.highlight_state(state_id, color)
             if taken_action == stormvogel.model.EmptyAction:
-                # TODO: if the empty action points to the same state we
-                # need to highlight that edge here
-                pass
-            else:
-                action_node = self.G.state_action_id_map[(state_id, taken_action)]
-                self.highlight_action(state_id, taken_action, color)
-                self.highlight_edge(state_id, action_node, color)
-                for start, end in self.G.out_edges(action_node):
-                    self.highlight_edge(start, end, color)
+                continue
+            action_node = self.G.state_action_id_map[(state_id, taken_action)]
+            self.highlight_action(state_id, taken_action, color)
+            self.highlight_edge(state_id, action_node, color)
+            for start, end in self.G.out_edges(action_node):
+                self.highlight_edge(start, end, color)
 
     def add_to_ax(
         self,
