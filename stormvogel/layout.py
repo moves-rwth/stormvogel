@@ -1,8 +1,9 @@
 """Contains the code responsible for saving/loading layouts and modifying them interactively."""
 
+from numbers import Number
 from typing import Any, Self
 
-from numpy.typing import NDArray
+import numpy.typing as npt
 import stormvogel.rdict
 
 import os
@@ -133,7 +134,9 @@ class Layout:
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout["physics"] = self.layout["misc"]["enable_physics"]
 
-    def add_nx_pos(self, pos: dict[int | str, NDArray], scale: float = 500) -> Self:
+    def add_nx_pos(
+        self, pos: dict[int | str, npt.NDArray[Number]], scale: float = 500
+    ) -> Self:
         """Apply NetworkX layout positions to this layout.
 
         Args:

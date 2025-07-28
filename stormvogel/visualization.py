@@ -71,9 +71,29 @@ class VisualizationBase:
         self,
         model: stormvogel.model.Model,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+        result: stormvogel.result.Result | None = None,
+        scheduler: stormvogel.result.Scheduler | None = None,
     ) -> None:
         self.model = model
         self.layout = layout
+        self.result = result
+        self.scheduler = scheduler
+        # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
+        if self.scheduler is None:
+            if self.result is not None:
+                self.scheduler = self.result.scheduler
+
+        # Set "scheduler" as an active group iff it is present.
+        if self.scheduler is not None:
+            self.layout.add_active_group("scheduled_actions")
+        else:  # Otherwise, disable it
+            self.layout.remove_active_group("scheduled_actions")
+        self.G = ModelGraph.from_model(
+            self.model,
+            state_properties=self._create_state_properties,
+            action_properties=self._create_action_properties,
+            transition_properties=self._create_transition_properties,
+        )
 
     def _format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
@@ -162,101 +182,6 @@ class VisualizationBase:
             return ""
         return res
 
-
-class JSVisualization(VisualizationBase):
-    """Handles visualization of a Model using a Network from stormvogel.network."""
-
-    EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
-
-    # In the visualization, both actions and states are nodes with an id.
-    # This offset is used to keep their ids from colliding. It should be some high constant.
-
-    def __init__(
-        self,
-        model: stormvogel.model.Model,
-        name: str | None = None,
-        result: stormvogel.result.Result | None = None,
-        scheduler: stormvogel.result.Scheduler | None = None,
-        layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
-        output: widgets.Output | None = None,
-        debug_output: widgets.Output = widgets.Output(),
-        use_iframe: bool = False,
-        do_init_server: bool = True,
-        do_display: bool = True,
-        max_states: int = 1000,
-        max_physics_states: int = 500,
-        spam: widgets.Output = widgets.Output(),
-    ) -> None:
-        """Create and show a visualization of a Model using a visjs Network
-        Args:
-            model (Model): The stormvogel model to be displayed.
-            name (str): Used to name the iframe. ONLY SPECIFY IF YOU KNOW WHAT YOU ARE DOING. You should never create two networks with the same name, they might clash.
-            result (Result, optional): A result associatied with the model.
-                The results are displayed as numbers on a state. Enable the layout editor for options.
-                If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
-            scheduler (Scheduler, optional): The scheduled actions will have a different color etc. based on the layout
-                If both result and scheduler are set, then scheduler takes precedence.
-            layout (Layout): Layout used for the visualization.
-            show_editor (bool): Show an interactive layout editor.
-            output (widgets.Output): The output widget in which the network is rendered.
-                Whether this widget is also displayed automatically depends on do_display.
-            debug_output (widgets.Output): Output widget that can be used to debug interactive features.
-            use_iframe (bool): Set to true iff you want to use an iframe. Defaults to False.
-            do_init_server (bool): Set to true iff you want to initialize the server. Defaults to True.
-            do_display (bool): Set to true iff you want the Network to display. Defaults to True.
-            max_states (int): If the model has more states, then the network is not displayed.
-            max_physics_states (int): If the model has more states, then physics are disabled.
-        """
-        super().__init__(model, layout)
-        self.initial_state_id = model.get_initial_state().id
-        if output is None:
-            self.output = widgets.Output()
-        else:
-            self.output = output
-        self.do_display: bool = do_display
-        self.debug_output: widgets.Output = debug_output
-        self.spam = spam
-        with self.output:
-            ipd.display(self.spam)
-
-        # vis stuff
-        self.name: str = name or random_word(10)
-        self.result: stormvogel.result.Result | None = result
-        self.scheduler: stormvogel.result.Scheduler | None = scheduler
-        self.use_iframe: bool = use_iframe
-        self.max_states: int = max_states
-        self.max_physics_states: int = max_physics_states
-        # If a scheduler was not set explictly, but a result was set, then take the scheduler from the results.
-        if self.scheduler is None:
-            if self.result is not None:
-                self.scheduler = self.result.scheduler
-
-        # Set "scheduler" as an active group iff it is present.
-        if self.scheduler is not None:
-            layout.add_active_group("scheduled_actions")
-        else:  # Otherwise, disable it
-            layout.remove_active_group("scheduled_actions")
-
-        self.do_init_server: bool = do_init_server
-        self.nt = ModelGraph.from_model(
-            model,
-            state_properties=self._create_state_properties,
-            action_properties=self._create_action_properties,
-            transition_properties=self._create_transition_properties,
-        )
-        self.network_wrapper: str = ""  # Use this for javascript injection.
-        if self.use_iframe:
-            self.network_wrapper: str = (
-                f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
-            )
-        else:
-            self.network_wrapper: str = f"nw_{self.name}"
-        self.new_nodes_hidden: bool = False
-        if do_init_server:
-            self.server: stormvogel.communication_server.CommunicationServer = (
-                stormvogel.communication_server.initialize_server()
-            )
-
     def _create_state_properties(self, state: stormvogel.model.State):
         res = self._format_result(state)
         observations = self._format_observations(state)
@@ -311,30 +236,107 @@ class JSVisualization(VisualizationBase):
                 return properties
         return properties
 
+
+class JSVisualization(VisualizationBase):
+    """Handles visualization of a Model using a Network from stormvogel.network."""
+
+    EXTRA_PIXELS: int = 20  # To prevent the scroll bar around the Network.
+
+    # In the visualization, both actions and states are nodes with an id.
+    # This offset is used to keep their ids from colliding. It should be some high constant.
+
+    def __init__(
+        self,
+        model: stormvogel.model.Model,
+        name: str | None = None,
+        result: stormvogel.result.Result | None = None,
+        scheduler: stormvogel.result.Scheduler | None = None,
+        layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+        output: widgets.Output | None = None,
+        debug_output: widgets.Output = widgets.Output(),
+        use_iframe: bool = False,
+        do_init_server: bool = True,
+        do_display: bool = True,
+        max_states: int = 1000,
+        max_physics_states: int = 500,
+        spam: widgets.Output = widgets.Output(),
+    ) -> None:
+        """Create and show a visualization of a Model using a visjs Network
+        Args:
+            model (Model): The stormvogel model to be displayed.
+            name (str): Used to name the iframe. ONLY SPECIFY IF YOU KNOW WHAT YOU ARE DOING. You should never create two networks with the same name, they might clash.
+            result (Result, optional): A result associatied with the model.
+                The results are displayed as numbers on a state. Enable the layout editor for options.
+                If this result has a scheduler, then the scheduled actions will have a different color etc. based on the layout
+            scheduler (Scheduler, optional): The scheduled actions will have a different color etc. based on the layout
+                If both result and scheduler are set, then scheduler takes precedence.
+            layout (Layout): Layout used for the visualization.
+            show_editor (bool): Show an interactive layout editor.
+            output (widgets.Output): The output widget in which the network is rendered.
+                Whether this widget is also displayed automatically depends on do_display.
+            debug_output (widgets.Output): Output widget that can be used to debug interactive features.
+            use_iframe (bool): Set to true iff you want to use an iframe. Defaults to False.
+            do_init_server (bool): Set to true iff you want to initialize the server. Defaults to True.
+            do_display (bool): Set to true iff you want the Network to display. Defaults to True.
+            max_states (int): If the model has more states, then the network is not displayed.
+            max_physics_states (int): If the model has more states, then physics are disabled.
+        """
+        super().__init__(model, layout, result, scheduler)
+        self.initial_state_id = model.get_initial_state().id
+        if output is None:
+            self.output = widgets.Output()
+        else:
+            self.output = output
+        self.do_display: bool = do_display
+        self.debug_output: widgets.Output = debug_output
+        self.spam = spam
+        with self.output:
+            ipd.display(self.spam)
+
+        # vis stuff
+        self.name: str = name or random_word(10)
+        self.use_iframe: bool = use_iframe
+        self.max_states: int = max_states
+        self.max_physics_states: int = max_physics_states
+
+        self.do_init_server: bool = do_init_server
+        self.network_wrapper: str = ""  # Use this for javascript injection.
+        if self.use_iframe:
+            self.network_wrapper: str = (
+                f"document.getElementById('{self.name}').contentWindow.nw_{self.name}"
+            )
+        else:
+            self.network_wrapper: str = f"nw_{self.name}"
+        self.new_nodes_hidden: bool = False
+        if do_init_server:
+            self.server: stormvogel.communication_server.CommunicationServer = (
+                stormvogel.communication_server.initialize_server()
+            )
+
     def _generate_node_js(self) -> str:
         """Generate the required js script for node definition"""
         node_js = ""
-        for node in self.nt.nodes():
-            node_attr = self.nt.nodes[node]
+        for node in self.G.nodes():
+            node_attr = self.G.nodes[node]
             label = node_attr.get("label", None)
             color = "black"
             group = None
             layout_group_color = None
             # TODO: Maybe move to separate function
-            match self.nt.nodes[node]["type"]:
+            match self.G.nodes[node]["type"]:
                 case NodeType.STATE:
                     group = self._group_state(
                         self.model.get_state_by_id(node), "states"
                     )
                     layout_group_color = self.layout.layout["groups"].get(group)
                 case NodeType.ACTION:
-                    in_edges = list(self.nt.in_edges(node))
+                    in_edges = list(self.G.in_edges(node))
                     assert len(in_edges) == 1, (
                         "An action node should only have a single incoming edge"
                     )
                     state, _ = in_edges[0]
                     group = self._group_action(
-                        state, self.nt.nodes[node]["model_action"], "actions"
+                        state, self.G.nodes[node]["model_action"], "actions"
                     )
                     layout_group_color = self.layout.layout["groups"].get(group)
             if layout_group_color is not None:
@@ -365,32 +367,30 @@ class JSVisualization(VisualizationBase):
         edge_js = ""
         # preprocess scheduled actions
         scheduled_action_nodes = []
-        for node in self.nt.nodes:
-            if self.nt.nodes[node]["type"] == NodeType.ACTION:
+        for node in self.G.nodes:
+            if self.G.nodes[node]["type"] == NodeType.ACTION:
                 continue
-            for _, target in self.nt.out_edges(node):
-                if self.nt.nodes[target]["type"] == NodeType.STATE:
+            for _, target in self.G.out_edges(node):
+                if self.G.nodes[target]["type"] == NodeType.STATE:
                     continue
-                action = self.nt.nodes[target]["model_action"]
+                action = self.G.nodes[target]["model_action"]
                 group = self._group_action(node, action, "actions")
                 if group == "scheduled_actions":
                     scheduled_action_nodes.append(target)
 
-        for from_, to in self.nt.edges():
-            edge_attr = self.nt.edges[(from_, to)]
+        for from_, to in self.G.edges():
+            edge_attr = self.G.edges[(from_, to)]
             color = self.layout.layout["edges"]["color"]["color"]
-            default = {"color": {"border": color}}
-            match [self.nt.nodes[from_]["type"], self.nt.nodes[to]["type"]]:
+            scheduled_color = self.layout.layout["groups"].get(
+                "scheduled_actions", {"color": {"border": color}}
+            )["color"]["border"]
+            match [self.G.nodes[from_]["type"], self.G.nodes[to]["type"]]:
                 case [NodeType.STATE, NodeType.ACTION]:
                     if to in scheduled_action_nodes:
-                        color = self.layout.layout["groups"].get(
-                            "scheduled_actions", default
-                        )["color"]["border"]
+                        color = scheduled_color
                 case [NodeType.ACTION, NodeType.STATE]:
                     if from_ in scheduled_action_nodes:
-                        color = self.layout.layout["groups"].get(
-                            "scheduled_actions", default
-                        )["color"]["border"]
+                        color = scheduled_color
             label = edge_attr.get("label", None)
             current = "{ from: " + str(from_) + ", to: " + str(to)
             if label is not None:
@@ -524,7 +524,7 @@ class JSVisualization(VisualizationBase):
 
     def highlight_state(self, state_id: int, color: str | None = "red"):
         """Highlight a state in the model by changing its color. You can clear the current color by setting it to None."""
-        assert self.nt.nodes.get(state_id) is not None, "State id not in ModelGraph"
+        assert self.G.nodes.get(state_id) is not None, "State id not in ModelGraph"
         self.set_node_color(state_id, color)
 
     def highlight_action(
@@ -532,7 +532,7 @@ class JSVisualization(VisualizationBase):
     ):
         """Highlight an action in the model by changing its color. You can clear the current color by setting it to None."""
         try:
-            nt_id = self.nt.state_action_id_map[(state_id, action)]
+            nt_id = self.G.state_action_id_map[(state_id, action)]
             self.set_node_color(nt_id, color)
         except KeyError:
             warnings.warn(
@@ -601,9 +601,9 @@ class JSVisualization(VisualizationBase):
                     self.set_node_color(v.id, None)
             elif (
                 isinstance(v, stormvogel.model.Action)
-                and (seq[i - 1].id, v) in self.nt.state_action_id_map
+                and (seq[i - 1].id, v) in self.G.state_action_id_map
             ):
-                node_id = self.nt.state_action_id_map[seq[i - 1].id, v]
+                node_id = self.G.state_action_id_map[seq[i - 1].id, v]
                 self.set_node_color(node_id, color)
                 sleep(delay)
                 if clear:
@@ -681,34 +681,26 @@ class JSVisualization(VisualizationBase):
 
 
 class MplVisualization(VisualizationBase):
-    DEFAULT_COLORS = {
-        NodeType.STATE: "white",
-        NodeType.ACTION: "lightblue",
-        None: "grey",
-    }
-
     def __init__(
         self,
         model: stormvogel.model.Model,
         layout: stormvogel.layout.Layout = stormvogel.layout.DEFAULT(),
+        result: stormvogel.result.Result | None = None,
+        scheduler: stormvogel.result.Scheduler | None = None,
         title: str | None = None,
         interactive: bool = False,
         hover_node: Callable[[PathCollection, PathCollection, MouseEvent, Axes], None]
         | None = None,
     ):
-        super().__init__(model, layout)
-        self.scheduler = None
+        super().__init__(model, layout, result, scheduler)
         self.title = title or ""
         self.interactive = interactive
         self.hover_node = hover_node
-        self.G = ModelGraph.from_model(
-            model,
-            state_properties=lambda s: {"labels": s.labels},
-            action_properties=lambda s, a: {"labels": a.labels, "model_action": a},
-        )
         self._highlights: dict[int, str] = dict()
         self._edge_highlights: dict[tuple[int, int], str] = dict()
         self._fig = None
+        if self.scheduler is not None:
+            self.highlight_scheduler(self.scheduler)
 
     def highlight_state(self, state: stormvogel.model.State | int, color: str = "red"):
         """Highlight a state node of the visualization.
@@ -771,6 +763,21 @@ class MplVisualization(VisualizationBase):
         """Clear all nodes that are marked for highlighting in the visualization"""
         self._highlights.clear()
         self._edge_highlights.clear()
+
+    def highlight_scheduler(self, scheduler: stormvogel.result.Scheduler):
+        color = "red"
+        for state_id, taken_action in scheduler.taken_actions.items():
+            self.highlight_state(state_id, color)
+            if taken_action == stormvogel.model.EmptyAction:
+                # TODO: if the empty action points to the same state we
+                # need to highlight that edge here
+                pass
+            else:
+                action_node = self.G.state_action_id_map[(state_id, taken_action)]
+                self.highlight_action(state_id, taken_action, color)
+                self.highlight_edge(state_id, action_node, color)
+                for start, end in self.G.out_edges(action_node):
+                    self.highlight_edge(start, end, color)
 
     def add_to_ax(
         self,
@@ -904,7 +911,7 @@ class MplVisualization(VisualizationBase):
             idx = ind["ind"][0]
             node = node_list[idx]
             node_attr = self.G.nodes[node]
-            ax.set_title(f"{node_attr['type'].name}: {node_attr['labels']}")
+            ax.set_title(f"{node_attr['type'].name}: {node_attr['label']}")
 
         def hover(event):
             cont, ind = nodes.contains(event)
