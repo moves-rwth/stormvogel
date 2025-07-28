@@ -295,13 +295,9 @@ class JSVisualization(VisualizationBase):
     def _create_action_properties(
         self, state: stormvogel.model.State, action: stormvogel.model.Action
     ) -> dict:
-        group = self._group_action(state.id, action, "actions")
         reward = self._format_rewards(self.model.get_state_by_id(state.id), action)
 
-        properties = {
-            "label": ",".join(action.labels) + reward,
-            "group": group,
-        }
+        properties = {"label": ",".join(action.labels) + reward, "model_action": action}
         return properties
 
     def _create_transition_properties(self, state, action, next_state) -> dict:
@@ -321,8 +317,30 @@ class JSVisualization(VisualizationBase):
         for node in self.nt.nodes():
             node_attr = self.nt.nodes[node]
             label = node_attr.get("label", None)
-            group = node_attr.get("group", None)
-            color = node_attr.get("color", None)
+            color = "black"
+            group = None
+            layout_group_color = None
+            # TODO: Maybe move to separate function
+            match self.nt.nodes[node]["type"]:
+                case NodeType.STATE:
+                    group = self._group_state(
+                        self.model.get_state_by_id(node), "states"
+                    )
+                    layout_group_color = self.layout.layout["groups"].get(group)
+                case NodeType.ACTION:
+                    in_edges = list(self.nt.in_edges(node))
+                    assert len(in_edges) == 1, (
+                        "An action node should only have a single incoming edge"
+                    )
+                    state, _ = in_edges[0]
+                    group = self._group_action(
+                        state, self.nt.nodes[node]["model_action"], "actions"
+                    )
+                    layout_group_color = self.layout.layout["groups"].get(group)
+            if layout_group_color is not None:
+                color = layout_group_color.get("color", {"background": color}).get(
+                    "background"
+                )
             current = "{ id: " + str(node)
             if label is not None:
                 current += f", label: `{label}`"
@@ -345,10 +363,35 @@ class JSVisualization(VisualizationBase):
     def _generate_edge_js(self) -> str:
         """Generate the required js script for edge definition"""
         edge_js = ""
+        # preprocess scheduled actions
+        scheduled_action_nodes = []
+        for node in self.nt.nodes:
+            if self.nt.nodes[node]["type"] == NodeType.ACTION:
+                continue
+            for _, target in self.nt.out_edges(node):
+                if self.nt.nodes[target]["type"] == NodeType.STATE:
+                    continue
+                action = self.nt.nodes[target]["model_action"]
+                group = self._group_action(node, action, "actions")
+                if group == "scheduled_actions":
+                    scheduled_action_nodes.append(target)
+
         for from_, to in self.nt.edges():
             edge_attr = self.nt.edges[(from_, to)]
+            color = self.layout.layout["edges"]["color"]["color"]
+            default = {"color": {"border": color}}
+            match [self.nt.nodes[from_]["type"], self.nt.nodes[to]["type"]]:
+                case [NodeType.STATE, NodeType.ACTION]:
+                    if to in scheduled_action_nodes:
+                        color = self.layout.layout["groups"].get(
+                            "scheduled_actions", default
+                        )["color"]["border"]
+                case [NodeType.ACTION, NodeType.STATE]:
+                    if from_ in scheduled_action_nodes:
+                        color = self.layout.layout["groups"].get(
+                            "scheduled_actions", default
+                        )["color"]["border"]
             label = edge_attr.get("label", None)
-            color = edge_attr.get("color", None)
             current = "{ from: " + str(from_) + ", to: " + str(to)
             if label is not None:
                 current += f', label: "{label}"'
