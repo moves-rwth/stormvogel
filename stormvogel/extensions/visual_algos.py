@@ -151,7 +151,7 @@ def policy_iteration(
         dtmc_result = stormvogel.model_checking(dtmc, prop=prop)  # type: ignore
 
         if visualize:
-            vis = stormvogel.visualization.Visualization(
+            vis = stormvogel.visualization.JSVisualization(
                 model, layout=layout, scheduler=old, result=dtmc_result
             )
             vis.show()

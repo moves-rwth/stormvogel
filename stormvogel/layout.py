@@ -134,7 +134,7 @@ class Layout:
         They differ because visjs requires for them to be arranged a certain way which is not nice for an editor."""
         self.layout["physics"] = self.layout["misc"]["enable_physics"]
 
-    def add_nx_pos(
+    def set_nx_pos(
         self, pos: dict[int | str, npt.NDArray[Number]], scale: float = 500
     ) -> Self:
         """Apply NetworkX layout positions to this layout.

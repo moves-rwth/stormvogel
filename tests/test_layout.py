@@ -50,7 +50,7 @@ def test_layout_saving():
 
 def test_nx_pos():
     pos = {0: np.array([0, 0]), 1: np.array([1, 1])}
-    layout = Layout("tests/test_layout.json").add_nx_pos(pos, scale=1)
+    layout = Layout("tests/test_layout.json").set_nx_pos(pos, scale=1)
     assert layout.layout["positions"] == {
         0: {"x": 0.0, "y": 0.0},
         1: {"x": 1.0, "y": 1.0},
