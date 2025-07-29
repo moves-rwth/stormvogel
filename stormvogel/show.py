@@ -44,13 +44,12 @@ def show(
     """
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
-    # do_display = not show_editor
+
     vis = stormvogel.visualization.JSVisualization(
         model=model,
         result=result,
         scheduler=scheduler,
         layout=layout,
-        do_display=False,
         debug_output=debug_output,
         do_init_server=do_init_server,
         use_iframe=use_iframe,

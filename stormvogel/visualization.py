@@ -261,7 +261,6 @@ class JSVisualization(VisualizationBase):
         debug_output: widgets.Output = widgets.Output(),
         use_iframe: bool = False,
         do_init_server: bool = True,
-        do_display: bool = True,
         max_states: int = 1000,
         max_physics_states: int = 500,
         spam: widgets.Output = widgets.Output(),
@@ -292,7 +291,6 @@ class JSVisualization(VisualizationBase):
             self.output = widgets.Output()
         else:
             self.output = output
-        self.do_display: bool = do_display
         self.debug_output: widgets.Output = debug_output
         self.spam = spam
         with self.output:
