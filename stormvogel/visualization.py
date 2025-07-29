@@ -94,6 +94,11 @@ class VisualizationBase:
             action_properties=self._create_action_properties,
             transition_properties=self._create_transition_properties,
         )
+        underscored_labels = set(map(und, self.model.get_labels()))
+        possible_groups = underscored_labels.union(
+            {"states", "actions", "scheduled_actions"}
+        )
+        self.layout.set_possible_groups(possible_groups)
 
     def _format_number(self, n: stormvogel.model.Value) -> str:
         """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
@@ -322,7 +327,6 @@ class JSVisualization(VisualizationBase):
             color = "black"
             group = None
             layout_group_color = None
-            # TODO: Maybe move to separate function
             match self.G.nodes[node]["type"]:
                 case NodeType.STATE:
                     group = self._group_state(
@@ -343,6 +347,9 @@ class JSVisualization(VisualizationBase):
                 color = layout_group_color.get("color", {"background": color}).get(
                     "background"
                 )
+                # HACK: This is necessary for the selection highlighting to work
+                # and should not be here
+                color = None
             current = "{ id: " + str(node)
             if label is not None:
                 current += f", label: `{label}`"
@@ -380,7 +387,9 @@ class JSVisualization(VisualizationBase):
 
         for from_, to in self.G.edges():
             edge_attr = self.G.edges[(from_, to)]
-            color = self.layout.layout["edges"]["color"]["color"]
+            # TODO:  in order for the layout to have an effect int should be
+            # self.layout.layout["edges"]["color"]["color"]
+            color = None
             scheduled_color = self.layout.layout["groups"].get(
                 "scheduled_actions", {"color": {"border": color}}
             )["color"]["border"]
@@ -489,11 +498,6 @@ class JSVisualization(VisualizationBase):
                 )
             self.layout.layout["physics"] = False
             self.layout.copy_settings()
-        underscored_labels = set(map(und, self.model.get_labels()))
-        possible_groups = underscored_labels.union(
-            {"states", "actions", "scheduled_actions"}
-        )
-        self.layout.set_possible_groups(possible_groups)
         # self.options_js = json.dumps(self.layout.layout, indent=2)
         if self.use_iframe:
             iframe = self.generate_iframe()
