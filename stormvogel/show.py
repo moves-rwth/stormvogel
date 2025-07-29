@@ -21,7 +21,7 @@ def show(
     do_init_server: bool = True,
     max_states: int = 1000,
     max_physics_states: int = 500,
-) -> stormvogel.visualization.Visualization:
+) -> stormvogel.visualization.JSVisualization:
     """Create and show a visualization of a Model using a visjs Network
 
     Args:
@@ -45,7 +45,7 @@ def show(
     if layout is None:
         layout = stormvogel.layout.DEFAULT()
     # do_display = not show_editor
-    vis = stormvogel.visualization.Visualization(
+    vis = stormvogel.visualization.JSVisualization(
         model=model,
         result=result,
         scheduler=scheduler,
@@ -57,7 +57,6 @@ def show(
         max_states=max_states,
         max_physics_states=max_physics_states,
     )
-    vis.show()
     if show_editor:
         e = stormvogel.layout_editor.LayoutEditor(
             layout, vis, do_display=False, debug_output=debug_output
