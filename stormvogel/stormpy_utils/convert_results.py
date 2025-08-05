@@ -45,7 +45,7 @@ def convert_model_checking_result(
         values = {
             index: value for (index, value) in enumerate(stormpy_result.get_values())
         }
-    elif type(stormpy_result == stormpy.core.ExplicitQualitativeCheckResult):
+    elif type(stormpy_result) == stormpy.ExplicitQualitativeCheckResult:
         values = {i: stormpy_result.at(i) for i in range(0, len(model.states))}
     else:
         raise RuntimeError("Unsupported result type")
