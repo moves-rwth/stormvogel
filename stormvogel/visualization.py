@@ -1,6 +1,6 @@
 """Contains the code responsible for model visualization."""
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from typing import Any
 import cairosvg
 import pathlib
@@ -1079,7 +1079,7 @@ class MplVisualization(VisualizationBase):
 
     def update(
         self,
-        node_size: int | Sequence[int] = 300,
+        node_size: int | dict[int, int] = 300,
         node_kwargs: dict[str, Any] | None = None,
         edge_kwargs: dict[str, Any] | None = None,
     ):
