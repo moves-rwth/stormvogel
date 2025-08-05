@@ -1,3 +1,5 @@
+"""Contains the code responsible for representing the structure of a model as a graph"""
+
 from collections.abc import Callable
 from enum import Enum
 from typing import Any, Self
@@ -15,6 +17,14 @@ class NodeType(Enum):
 
 
 class ModelGraph(DiGraph):
+    """A directed graph describing the structure of a model.
+
+    States and actions (except EmptyActions) are represented as nodes in the graph.
+    All outgoing edges of a state node describe the available actions for that state.
+    The outgoing edges from an action describe the possible next states (possible transitions)
+    and hold the probability of each transition as a node attribute.
+    """
+
     def __init__(
         self,
     ) -> None:
