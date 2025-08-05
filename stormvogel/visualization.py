@@ -411,9 +411,9 @@ class JSVisualization(VisualizationBase):
                     layout_group_color = self.layout.layout["groups"].get(group)
                 case NodeType.ACTION:
                     in_edges = list(self.G.in_edges(node))
-                    assert len(in_edges) == 1, (
-                        "An action node should only have a single incoming edge"
-                    )
+                    assert (
+                        len(in_edges) == 1
+                    ), "An action node should only have a single incoming edge"
                     state, _ = in_edges[0]
                     group = self._group_action(
                         state, self.G.nodes[node]["model_action"], "actions"
@@ -1011,9 +1011,9 @@ class MplVisualization(VisualizationBase):
             edge_kwargs = dict()
 
         if isinstance(node_size, dict):
-            assert all([n in node_size for n in self.G.nodes]), (
-                "Not all nodes are present in node_size"
-            )
+            assert all(
+                [n in node_size for n in self.G.nodes]
+            ), "Not all nodes are present in node_size"
         else:
             node_size = {n: node_size for n in self.G.nodes}
 
@@ -1030,9 +1030,9 @@ class MplVisualization(VisualizationBase):
                     layout_group_color = self.layout.layout["groups"].get(group)
                 case NodeType.ACTION:
                     in_edges = list(self.G.in_edges(node))
-                    assert len(in_edges) == 1, (
-                        "An action node should only have a single incoming edge"
-                    )
+                    assert (
+                        len(in_edges) == 1
+                    ), "An action node should only have a single incoming edge"
                     state, _ = in_edges[0]
                     group = self._group_action(
                         state, self.G.nodes[node]["model_action"], "actions"
