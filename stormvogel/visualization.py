@@ -1064,14 +1064,14 @@ class MplVisualization(VisualizationBase):
             self.G,
             pos=pos,
             ax=ax,
-            edge_color=[edge_colors[e] for e in self.G.edges],
+            edge_color=[edge_colors[e] for e in self.G.edges],  # type: ignore
             **edge_kwargs,
         )
         nodes = nx.draw_networkx_nodes(
             self.G,
             pos=pos,
             ax=ax,
-            node_color=[node_colors[n] for n in self.G.nodes],
+            node_color=[node_colors[n] for n in self.G.nodes],  # type: ignore
             node_size=[node_size[n] for n in self.G.nodes],
             **node_kwargs,
         )
