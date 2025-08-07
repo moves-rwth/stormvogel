@@ -71,6 +71,20 @@ class Path:
         """returns the state or state action pair discovered in the given step"""
         return self.path[step]
 
+    def to_state_action_sequence(
+        self,
+    ) -> list[stormvogel.model.Action | stormvogel.model.State]:
+        """Convert a Path to a list containing actions and states."""
+        res: list[stormvogel.model.Action | stormvogel.model.State] = [
+            self.model.get_initial_state()
+        ]
+        for _, v in self.path.items():
+            if isinstance(v, tuple):
+                res += list(v)
+            else:
+                res.append(v)
+        return res
+
     def __str__(self) -> str:
         path = "initial state"
         if self.model.supports_actions():
