@@ -743,7 +743,7 @@ class JSVisualization(VisualizationBase):
         """Clear all highlighting that is currently active, returing all states to their original colors."""
         for s_id in self.model.get_states():
             self.set_node_color(s_id, None)
-        for a_id in self.network_action_map_id.values():
+        for a_id in self.G.state_action_id_map.values():
             self.set_node_color(a_id, None)
 
     def highlight_path(
