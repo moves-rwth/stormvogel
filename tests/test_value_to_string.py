@@ -1,5 +1,6 @@
 from fractions import Fraction
-from stormvogel.model import value_to_string
+from stormvogel.model import value_to_string, Interval
+from stormvogel import parametric
 
 
 def test_int():
@@ -21,10 +22,22 @@ def test_fraction():
 
 
 def test_parametric_polynomial():
-    # TODO Pim can you help me?
-    pass
+    pol = parametric.Polynomial(["x", "y", "z"])
+    pol.add_term((1, 2, 3), 4)
+    pol.add_term((1, 0, 0), 3)
+    assert value_to_string(pol) == "4.0*xy^2z^3 + 3.0*x"
 
 
 def test_parametric_rational():
-    # TODO Pim can you help me?
-    pass
+    pol1 = parametric.Polynomial(["x", "y", "z"])
+    pol1.add_term((1, 2, 3), 4)
+    pol1.add_term((1, 0, 0), 3)
+    pol2 = parametric.Polynomial(["z"])
+    pol2.add_term((1,), 2)
+    rat = parametric.RationalFunction(pol1, pol2)
+    assert value_to_string(rat) == "(4.0*xy^2z^3 + 3.0*x)/(2.0*z)"
+
+
+def test_interval():
+    itvl = Interval(Fraction(1, 3), Fraction(5, 8))
+    assert value_to_string(itvl) == "[1/3,5/8]"

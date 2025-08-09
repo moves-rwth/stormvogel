@@ -27,19 +27,24 @@ class Interval:
         elif idx == 1:
             return self.top
         else:
-            raise IndexError("Interval only has two elements")
+            raise IndexError(
+                "Intervals only have two elements (the bottom and top element)"
+            )
 
     def __lt__(self, other):
         if self.bottom < other.bottom or self.top < other.top:
             return True
         return False
 
+    def __str__(self):
+        return f"[{self.bottom},{self.top}]"
+
 
 Value = Number | parametric.Parametric | Interval
 
 
 def value_to_string(
-    n: Value, use_fractions: bool, round_digits: int, denom_limit: int
+    n: Value, use_fractions: bool = True, round_digits: int = 4, denom_limit: int = 1000
 ) -> str:
     """Convert a Value to a string."""
     if isinstance(n, (int, float)):
@@ -59,7 +64,7 @@ def value_to_string(
     elif isinstance(n, parametric.Parametric):
         return str(n)
     elif isinstance(n, Interval):
-        return str(n)
+        return f"[{value_to_string(n.bottom, use_fractions,round_digits,denom_limit)},{value_to_string(n.top, use_fractions,round_digits,denom_limit)}]"
     else:
         return str(n)
 
