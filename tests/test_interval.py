@@ -12,8 +12,14 @@ def test_convert_imc():
 
     init.set_transitions(
         [
-            ((1 / 3, 2 / 3), imc.get_states_with_label("A")[0]),
-            ((1 / 2, 5 / 6), imc.get_states_with_label("B")[0]),
+            (
+                stormvogel.model.Interval(1 / 3, 2 / 3),
+                imc.get_states_with_label("A")[0],
+            ),
+            (
+                stormvogel.model.Interval(1 / 2, 5 / 6),
+                imc.get_states_with_label("B")[0],
+            ),
         ]
     )
 

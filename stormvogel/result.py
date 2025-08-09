@@ -138,10 +138,21 @@ class Result:
             + str(self.scheduler)
         )
 
-    # TODO what is the behavior in case of interval models?
-    # def maximum_result(self) -> stormvogel.model.Value:
-    #    """Return the maximum result."""
-    #    return max(self.values.values())
+    def maximum_result(self) -> stormvogel.model.Value:
+        """Return the maximum result."""
+        values = list(self.values.values())
+        max_val = values[0]
+        for v in values:
+            if isinstance(v, stormvogel.model.Interval) or isinstance(
+                v, stormvogel.parametric.Parametric
+            ):
+                raise RuntimeError(
+                    "maximum result function does not work for interval/parametric models"
+                )
+            assert isinstance(v, stormvogel.model.Number)
+            if v > max_val:
+                max_val = v
+        return max_val
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Result):

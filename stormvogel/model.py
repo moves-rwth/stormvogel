@@ -10,20 +10,32 @@ import copy
 import math
 
 Number = int | float | Fraction
-Interval = tuple[Number, Number]
-Value = Number | tuple | parametric.Parametric
 
 
-def is_interval(x):
-    return (
-        isinstance(x, tuple) and len(x) == 2 and all(isinstance(i, Number) for i in x)
-    )
+@dataclass
+class Interval:
+    bottom: Number
+    top: Number
+
+    def __init__(self, bottom: Number, top: Number):
+        self.bottom = bottom
+        self.top = top
+
+    def __getitem__(self, idx):
+        if idx == 0:
+            return self.bottom
+        elif idx == 1:
+            return self.top
+        else:
+            raise IndexError("Interval only has two elements")
+
+    def __lt__(self, other):
+        if self.bottom < other.bottom or self.top < other.top:
+            return True
+        return False
 
 
-def is_value(x):
-    return (
-        isinstance(x, Number) or isinstance(x, parametric.Parametric) or is_interval(x)
-    )
+Value = Number | parametric.Parametric | Interval
 
 
 def value_to_string(
@@ -46,7 +58,7 @@ def value_to_string(
             return str(round(float(n), round_digits))
     elif isinstance(n, parametric.Parametric):
         return str(n)
-    elif is_interval(n):
+    elif isinstance(n, Interval):
         return str(n)
     else:
         return str(n)
@@ -630,7 +642,7 @@ class Model:
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
-                    if is_interval(tup[0]):
+                    if isinstance(tup[0], Interval):
                         return True
         return False
 

@@ -72,7 +72,7 @@ def value_to_stormpy(
     elif model.is_interval_model():
         # in the case of interval models, we convert intervals, and regular values are converted
         # to intervals where the lower and upper value are the same
-        if stormvogel.model.is_interval(value):
+        if isinstance(value, stormvogel.model.Interval):
             interval = stormpy.pycarl.pycarl_core.Interval(value[0], value[1])
             return interval
         else:
@@ -703,7 +703,7 @@ def value_to_stormvogel(value, sparsemodel) -> stormvogel.model.Value:
             if lower == upper:
                 return lower
 
-            return (lower, upper)
+            return stormvogel.model.Interval(lower, upper)
 
         # if our function is just a rational number we return a float:
         return float(value)
