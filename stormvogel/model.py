@@ -34,12 +34,15 @@ class Interval:
             return True
         return False
 
+    def __str__(self):
+        return f"[{self.bottom},{self.top}]"
+
 
 Value = Number | parametric.Parametric | Interval
 
 
 def value_to_string(
-    n: Value, use_fractions: bool, round_digits: int, denom_limit: int
+    n: Value, use_fractions: bool = True, round_digits: int = 4, denom_limit: int = 1000
 ) -> str:
     """Convert a Value to a string."""
     if isinstance(n, (int, float)):
