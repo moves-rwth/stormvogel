@@ -16,6 +16,8 @@ def value_to_stormpy(
 ) -> "stormpy.pycarl.cln.FactorizedRationalFunction":
     """converts a stormvogel transition value to a stormpy (pycarl) value"""
 
+    assert stormpy is not None
+
     def convert_polynomial(
         polynomial: parametric.Polynomial,
     ) -> "stormpy.pycarl.cln.FactorizedPolynomial":
@@ -40,8 +42,6 @@ def value_to_stormpy(
         return factorized_polynomial
 
     if model.is_parametric():
-        assert stormpy is not None
-
         # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
         if isinstance(value, float):
             rational = stormpy.pycarl.cln.Rational(value)
@@ -69,6 +69,15 @@ def value_to_stormpy(
                 convert_polynomial(value)
             )
             return factorized_rational
+    elif model.is_interval_model():
+        # in the case of interval models, we convert intervals, and regular values are converted
+        # to intervals where the lower and upper value are the same
+        if isinstance(value, stormvogel.model.Interval):
+            interval = stormpy.pycarl.pycarl_core.Interval(value[0], value[1])
+            return interval
+        else:
+            interval = stormpy.pycarl.pycarl_core.Interval(value, value)
+            return interval
     else:
         return value
 
@@ -98,10 +107,20 @@ def stormvogel_to_stormpy(
         # we precompute the following two values
         nondeterministic = model.supports_actions()
         is_parametric = model.is_parametric()
+        is_interval = model.is_interval_model()
 
-        # we distinguish between parametric and non parametric models
+        # we distinguish between parametric, interval and regular models
         if is_parametric:
             builder = stormpy.ParametricSparseMatrixBuilder(
+                rows=0,
+                columns=0,
+                entries=0,
+                force_dimensions=False,
+                has_custom_row_grouping=nondeterministic,
+                row_groups=0,
+            )
+        elif is_interval:
+            builder = stormpy.IntervalSparseMatrixBuilder(
                 rows=0,
                 columns=0,
                 entries=0,
@@ -237,6 +256,14 @@ def stormvogel_to_stormpy(
             )
             components.state_valuations = valuations
             dtmc = stormpy.storage.SparseParametricDtmc(components)
+        elif model.is_interval_model():
+            components = stormpy.SparseIntervalModelComponents(
+                transition_matrix=matrix,
+                state_labeling=state_labeling,
+                reward_models=reward_models,
+            )
+            components.state_valuations = valuations
+            dtmc = stormpy.storage.SparseIntervalDtmc(components)
         else:
             components = stormpy.SparseModelComponents(
                 transition_matrix=matrix,
@@ -290,6 +317,15 @@ def stormvogel_to_stormpy(
             )
             components.choice_labeling = choice_labeling
             mdp = stormpy.storage.SparseParametricMdp(components)
+        elif model.is_interval_model():
+            components = stormpy.SparseIntervalModelComponents(
+                transition_matrix=matrix,
+                state_labeling=state_labeling,
+                reward_models=reward_models,
+            )
+            components.state_valuations = valuations
+            components.choice_labeling = choice_labeling
+            mdp = stormpy.storage.SparseIntervalMdp(components)
         else:
             components = stormpy.SparseModelComponents(
                 transition_matrix=matrix,
@@ -333,6 +369,18 @@ def stormvogel_to_stormpy(
                 components.exit_rates = list(model.exit_rates.values())
 
             ctmc = stormpy.storage.SparseParametricCtmc(components)
+        elif model.is_interval_model():
+            components = stormpy.SparseIntervalModelComponents(
+                transition_matrix=matrix,
+                state_labeling=state_labeling,
+                reward_models=reward_models,
+                rate_transitions=True,
+            )
+            components.state_valuations = valuations
+            if not model.exit_rates == {} and model.exit_rates is not None:
+                components.exit_rates = list(model.exit_rates.values())
+
+            ctmc = stormpy.storage.SparseIntervalCtmc(components)
         else:
             components = stormpy.SparseModelComponents(
                 transition_matrix=matrix,
@@ -401,6 +449,25 @@ def stormvogel_to_stormpy(
             components.observability_classes = observations
             components.choice_labeling = choice_labeling
             pomdp = stormpy.storage.SparseParametricPomdp(components)
+        elif model.is_interval_model():
+            components = stormpy.SparseIntervalModelComponents(
+                transition_matrix=matrix,
+                state_labeling=state_labeling,
+                reward_models=reward_models,
+            )
+            components.state_valuations = valuations
+            observations = []
+            for state in model.states.values():
+                if state.get_observation() is not None:
+                    observations.append(state.get_observation().get_observation())
+                else:
+                    raise RuntimeError(
+                        f"State {state.id} does not have an observation. Please assign an observation to each state."
+                    )
+
+            components.observability_classes = observations
+            components.choice_labeling = choice_labeling
+            pomdp = stormpy.storage.SparseIntervalPomdp(components)
         else:
             components = stormpy.SparseModelComponents(
                 transition_matrix=matrix,
@@ -482,6 +549,20 @@ def stormvogel_to_stormpy(
                 components.exit_rates = []
             components.choice_labeling = choice_labeling
             ma = stormpy.storage.SparseParametricMA(components)
+        elif model.is_interval_model():
+            components = stormpy.SparseIntervalModelComponents(
+                transition_matrix=matrix,
+                state_labeling=state_labeling,
+                reward_models=reward_models,
+                markovian_states=markovian_states_bitvector,
+            )
+            components.state_valuations = valuations
+            if not model.exit_rates == {} and model.exit_rates is not None:
+                components.exit_rates = list(model.exit_rates.values())
+            else:
+                components.exit_rates = []
+            components.choice_labeling = choice_labeling
+            ma = stormpy.storage.SparseIntervalMA(components)
         else:
             components = stormpy.SparseModelComponents(
                 transition_matrix=matrix,
@@ -536,8 +617,10 @@ def stormvogel_to_stormpy(
         raise RuntimeError("This type of model is not yet supported for this action")
 
 
-def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
+def value_to_stormvogel(value, sparsemodel) -> stormvogel.model.Value:
     """Converts a stormpy transition value to a stormvogel one"""
+
+    assert stormpy is not None
 
     def is_float(val) -> bool:
         """we check if we can convert a value to a float"""
@@ -612,6 +695,16 @@ def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
         )
         return stormvogel_rational_function
     else:
+        # we check if our value is an interval
+        if isinstance(value, stormpy.pycarl.pycarl_core.Interval):
+            # if lower and upper are the same, we return a singular value
+            lower = float(value.lower())
+            upper = float(value.upper())
+            if lower == upper:
+                return lower
+
+            return stormvogel.model.Interval(lower, upper)
+
         # if our function is just a rational number we return a float:
         return float(value)
 

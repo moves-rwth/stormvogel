@@ -9,14 +9,39 @@ from stormvogel import parametric
 import copy
 import math
 
-Number = float | Fraction | int
-Value = Number | parametric.Parametric
+Number = int | float | Fraction
 
 
-def number_to_string(
+@dataclass
+class Interval:
+    bottom: Number
+    top: Number
+
+    def __init__(self, bottom: Number, top: Number):
+        self.bottom = bottom
+        self.top = top
+
+    def __getitem__(self, idx):
+        if idx == 0:
+            return self.bottom
+        elif idx == 1:
+            return self.top
+        else:
+            raise IndexError("Interval only has two elements")
+
+    def __lt__(self, other):
+        if self.bottom < other.bottom or self.top < other.top:
+            return True
+        return False
+
+
+Value = Number | parametric.Parametric | Interval
+
+
+def value_to_string(
     n: Value, use_fractions: bool, round_digits: int, denom_limit: int
 ) -> str:
-    """Convert a Number to a string."""
+    """Convert a Value to a string."""
     if isinstance(n, (int, float)):
         if math.isinf(float(n)):
             return "inf"
@@ -32,6 +57,10 @@ def number_to_string(
         else:
             return str(round(float(n), round_digits))
     elif isinstance(n, parametric.Parametric):
+        return str(n)
+    elif isinstance(n, Interval):
+        return str(n)
+    else:
         return str(n)
 
 
@@ -380,6 +409,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
     - using only the action and the target state (implies probability=1)."""
     if len(shorthand) == 0:
         raise RuntimeError("Transition cannot be empty")
+
     # Check the type of the first element
     first_element = shorthand[0][0]
     if isinstance(first_element, Action):
@@ -388,13 +418,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
             assert isinstance(action, Action)
             transition_content[action] = Branch([(1, state)])
         return Transition(transition_content)
-    elif (
-        isinstance(first_element, float)
-        or isinstance(first_element, int)
-        or isinstance(first_element, Fraction)
-        or isinstance(first_element, str)
-        or isinstance(first_element, parametric.Parametric)
-    ):
+    elif isinstance(first_element, Value):
         return Transition(
             {EmptyAction: Branch(cast(list[tuple[Value, State]], shorthand))}
         )
@@ -612,6 +636,15 @@ class Model:
     def supports_observations(self):
         """Returns whether this model supports observations."""
         return self.get_type() == ModelType.POMDP
+
+    def is_interval_model(self):
+        """Returns whether this model is an interval model, i.e., containts interval values)"""
+        for transition in self.transitions.values():
+            for branch in transition.transition.values():
+                for tup in branch.branch:
+                    if isinstance(tup[0], Interval):
+                        return True
+        return False
 
     def is_parametric(self):
         """Returns whether this model contains parametric transition values"""
