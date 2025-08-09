@@ -27,7 +27,9 @@ class Interval:
         elif idx == 1:
             return self.top
         else:
-            raise IndexError("Interval only has two elements")
+            raise IndexError(
+                "Intervals only have two elements (the bottom and top element)"
+            )
 
     def __lt__(self, other):
         if self.bottom < other.bottom or self.top < other.top:
@@ -62,7 +64,7 @@ def value_to_string(
     elif isinstance(n, parametric.Parametric):
         return str(n)
     elif isinstance(n, Interval):
-        return str(n)
+        return f"[{value_to_string(n.bottom, use_fractions,round_digits,denom_limit)},{value_to_string(n.top, use_fractions,round_digits,denom_limit)}]"
     else:
         return str(n)
 
