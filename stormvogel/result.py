@@ -140,6 +140,9 @@ class Result:
 
     def maximum_result(self) -> stormvogel.model.Value:
         """Return the maximum result."""
+        assert (
+            not self.model.is_interval_model()
+        )  # TODO what to do in case of interval models
         return max(self.values.values())
 
     def __eq__(self, other) -> bool:

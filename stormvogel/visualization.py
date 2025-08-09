@@ -263,7 +263,7 @@ class Visualization(stormvogel.displayable.Displayable):
                         self.nt.add_edge(
                             state_id,
                             target.id,
-                            label=self.__format_number(prob),
+                            label=self.__format_value(prob),
                         )
                 else:
                     group = self.__group_action(state_id, action, "actions")
@@ -295,14 +295,14 @@ class Visualization(stormvogel.displayable.Displayable):
                         self.nt.add_edge(
                             network_action_id,
                             target.id,
-                            label=self.__format_number(prob),
+                            label=self.__format_value(prob),
                             color=edge_color,
                         )
                     network_action_id += 1
 
-    def __format_number(self, n: stormvogel.model.Value) -> str:
-        """Call number_to_string in model.py while accounting for the settings specified in the layout object."""
-        return stormvogel.model.number_to_string(
+    def __format_value(self, n: stormvogel.model.Value) -> str:
+        """Call value_to_string in model.py while accounting for the settings specified in the layout object."""
+        return stormvogel.model.value_to_string(
             n,
             self.layout.layout["numbers"]["fractions"],
             self.layout.layout["numbers"]["digits"],
@@ -331,7 +331,7 @@ class Visualization(stormvogel.displayable.Displayable):
                 not self.layout.layout["state_properties"]["show_zero_rewards"]
                 and reward == 0
             ):
-                res += f"\t{reward_model.name}: {self.__format_number(reward)}"
+                res += f"\t{reward_model.name}: {self.__format_value(reward)}"
         if res == EMPTY_RES:
             return ""
         return res
@@ -348,7 +348,7 @@ class Visualization(stormvogel.displayable.Displayable):
             "\n"
             + self.layout.layout["results"]["result_symbol"]
             + " "
-            + self.__format_number(result_of_state)
+            + self.__format_value(result_of_state)
         )
 
     def __format_observations(self, s: stormvogel.model.State) -> str:
