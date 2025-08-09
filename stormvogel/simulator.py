@@ -342,9 +342,7 @@ def simulate(
 
                     # we calculate the transition probability
                     probability = 0
-                    for tuple in transitions.transition[
-                        stormvogel.model.EmptyAction
-                    ].branch:
+                    for tuple in transitions[stormvogel.model.EmptyAction]:
                         if tuple[1].id == state_id:
                             assert isinstance(tuple[0], float) or isinstance(
                                 tuple[0], int

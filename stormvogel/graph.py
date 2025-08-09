@@ -171,7 +171,7 @@ class ModelGraph(DiGraph):
                 if action_properties is not None:
                     action_props = action_properties(state, action)
                 G.add_action(state_id, action, **action_props)
-                for probability, target in branch.branch:
+                for probability, target in branch:
                     transition_props = dict()
                     if transition_properties is not None:
                         transition_props = transition_properties(state, action, target)

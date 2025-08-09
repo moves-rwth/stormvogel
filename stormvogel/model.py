@@ -206,7 +206,7 @@ class State:
         """returns the list of all available actions in this state"""
         if self.model.supports_actions() and self.id in self.model.transitions.keys():
             action_list = []
-            for action in self.model.transitions[self.id].transition.keys():
+            for action, branch in self.model.transitions[self.id]:
                 action_list.append(action)
             return action_list
         else:
@@ -342,6 +342,9 @@ class Branch:
     def sum_probabilities(self) -> Value:
         return sum([prob for (prob, _) in self.branch])  # type: ignore
 
+    def __iter__(self):
+        return iter(self.branch)
+
 
 class Transition:
     """Represents a transition, which map actions to branches.
@@ -364,7 +367,7 @@ class Transition:
 
     def __str__(self):
         parts = []
-        for action, branch in self.transition.items():
+        for action, branch in self:
             if action == EmptyAction:
                 parts.append(f"{branch}")
             else:
@@ -399,8 +402,11 @@ class Transition:
             [abs(self.sum_probabilities(a) - 1) <= epsilon for a in self.transition]  # type: ignore
         )
 
-    def __getitem(self, item):
+    def __getitem__(self, item):
         return self.transition[item]
+
+    def __iter__(self):
+        return iter(self.transition.items())
 
 
 TransitionShorthand = list[tuple[Value, State]] | list[tuple[Action, State]]
@@ -547,6 +553,9 @@ class RewardModel:
             return self.name == other.name and self.rewards == other.rewards
         return False
 
+    def __iter__(self):
+        return iter(self.rewards.items())
+
 
 @dataclass
 class Model:
@@ -645,8 +654,8 @@ class Model:
     def is_interval_model(self):
         """Returns whether this model is an interval model, i.e., containts interval values)"""
         for transition in self.transitions.values():
-            for branch in transition.transition.values():
-                for tup in branch.branch:
+            for action, branch in transition:
+                for tup in branch:
                     if isinstance(tup[0], Interval):
                         return True
         return False
@@ -654,8 +663,8 @@ class Model:
     def is_parametric(self):
         """Returns whether this model contains parametric transition values"""
         for transition in self.transitions.values():
-            for branch in transition.transition.values():
-                for tup in branch.branch:
+            for action, branch in transition:
+                for tup in branch:
                     if isinstance(tup[0], parametric.Parametric):
                         return True
         return False
@@ -751,7 +760,7 @@ class Model:
         for state, transition in evaluated_model.transitions.items():
             for action, branch in transition.transition.items():
                 new_branch = []
-                for tup in branch.branch:
+                for tup in branch:
                     if isinstance(tup[0], parametric.Parametric):
                         tup = (tup[0].evaluate(values), tup[1])
                     new_branch.append(tup)
@@ -868,9 +877,9 @@ class Model:
             return
 
         if not self.supports_actions():
-            self.transitions[s.id].transition[
+            self.transitions[s.id].transition[EmptyAction].branch += transitions[
                 EmptyAction
-            ].branch += transitions.transition[EmptyAction].branch
+            ].branch
         else:
             # Adding a transition is only valid if they are both empty or both non-empty.
             if (
@@ -890,11 +899,11 @@ class Model:
 
             # Empty action case, add the branches together.
             if transitions.has_empty_action():
-                self.transitions[s.id].transition[EmptyAction] += (
-                    transitions.transition[EmptyAction]
-                )
+                self.transitions[s.id].transition[EmptyAction] += transitions[
+                    EmptyAction
+                ]
             else:
-                for action, branch in transitions.transition.items():
+                for action, branch in transitions:
                     assert self.actions is not None
                     if action not in self.actions:
                         self.actions.add(action)
@@ -974,8 +983,8 @@ class Model:
             # first we remove transitions that go into the state
             remove_actions_index = []
             for index, transition in self.transitions.items():
-                for action, branch in transition.transition.items():
-                    for index_tuple, tuple in enumerate(branch.branch):
+                for action, branch in transition:
+                    for index_tuple, tuple in enumerate(branch):
                         # remove the tuple if it refernces the state
                         if tuple[1].id == state.id:
                             self.transitions[index].transition[action].branch.pop(
@@ -1025,7 +1034,7 @@ class Model:
         Only works on models that don't support actions.
         """
         if not self.supports_actions():
-            for tuple in self.transitions[state0.id].transition[EmptyAction].branch:
+            for tuple in self.transitions[state0.id][EmptyAction]:
                 if tuple[1] == state1:
                     self.transitions[state0.id].transition[EmptyAction].branch.remove(
                         tuple
@@ -1158,8 +1167,8 @@ class Model:
         """Returns the set of parameters of this model"""
         parameters = set()
         for transition in self.transitions.values():
-            for branch in transition.transition.values():
-                for tup in branch.branch:
+            for action, branch in transition:
+                for tup in branch:
                     if isinstance(tup[0], parametric.Parametric):
                         parameters = parameters.union(tup[0].get_variables())
         return parameters
@@ -1205,19 +1214,19 @@ class Model:
         for state_id, state in self.states.items():
             dot += f'{state_id} [ label = "{state_id}: {", ".join(state.labels)}" ];\n'
         for state_id, transition in self.transitions.items():
-            for action, branch in transition.transition.items():
+            for action, branch in transition:
                 if action != EmptyAction:
                     dot += f'{state_id} [ label = "", shape=point ];\n'
         for state_id, transition in self.transitions.items():
-            for action, branch in transition.transition.items():
+            for action, branch in transition:
                 if action == EmptyAction:
                     # Only draw probabilities
-                    for prob, target in branch.branch:
+                    for prob, target in branch:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
                 else:
                     # Draw actions, then probabilities
                     dot += f'{state_id} -> {state_id} [ label = "{action.labels}" ];\n'
-                    for prob, target in branch.branch:
+                    for prob, target in branch:
                         dot += f'{state_id} -> {target.id} [ label = "{prob}" ];\n'
 
         dot += "}"

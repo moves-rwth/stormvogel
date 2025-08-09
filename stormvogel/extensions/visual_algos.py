@@ -35,9 +35,9 @@ def naive_value_iteration(
             transitions = model.get_transitions(state)
             # Now we have to take a decision for an action.
             action_values = {}
-            for action, branch in transitions.transition.items():
+            for action, branch in transitions:
                 branch_value = sum(
-                    [prob * old_values[state.id] for (prob, state) in branch.branch]  # type: ignore
+                    [prob * old_values[state.id] for (prob, state) in branch]  # type: ignore
                 )
                 action_values[action] = branch_value
             # We take the action with the highest value.
@@ -74,7 +74,7 @@ def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float
         next_step = current_step + 1
         for s_id, s in model.get_states().items():
             branch = model.get_branch(s)
-            for transition_prob, target in branch.branch:
+            for transition_prob, target in branch:
                 current_prob = matrix_steps_states[current_step][s_id]
                 assert isinstance(transition_prob, (int, float))
                 matrix_steps_states[next_step][target.id] += current_prob * float(
