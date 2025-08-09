@@ -427,13 +427,15 @@ def build_pgc(
                         f"On input {state}, the labels function does not return a string or a list of strings"
                     )
                 # if we don't get a list, we assume there is just one label
-                s.add_label(labellist)
+                if labellist not in s.labels:
+                    s.add_label(labellist)
             else:
                 for label in labellist:
                     if not isinstance(label, str):
                         raise ValueError(
                             f"On input {state}, the labels function does not return a string or a list of strings"
                         )
-                    s.add_label(label)
+                    if label not in s.labels:
+                        s.add_label(label)
 
     return model
