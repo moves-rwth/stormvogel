@@ -78,7 +78,7 @@ class Path:
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
             self.model.get_initial_state()
         ]
-        for _, v in self.path.items():
+        for _, v in self:
             if isinstance(v, tuple):
                 res += list(v)
             else:
@@ -122,6 +122,9 @@ class Path:
 
     def __len__(self):
         return len(self.path)
+
+    def __iter__(self):
+        return iter(self.path.items())
 
 
 def get_action(

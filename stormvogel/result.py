@@ -158,3 +158,6 @@ class Result:
         if isinstance(other, Result):
             return self.values == other.values and self.scheduler == other.scheduler
         return False
+
+    def __iter__(self):
+        return iter(self.values.items())

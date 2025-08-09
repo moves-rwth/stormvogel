@@ -100,6 +100,9 @@ class Polynomial:
             return self.terms == other.terms
         return False
 
+    def __iter__(self):
+        return iter(self.terms.items())
+
 
 class RationalFunction:
     """
