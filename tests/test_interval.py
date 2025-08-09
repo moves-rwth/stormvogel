@@ -6,14 +6,14 @@ import stormvogel.model
 def test_convert_imc():
     imc = stormvogel.model.new_dtmc()
     init = imc.get_initial_state()
-    
+
     imc.new_state(labels="A")
     imc.new_state(labels="B")
 
     init.set_transitions(
         [
-            ((1/3, 2/3), imc.get_states_with_label("A")[0]),
-            ((1/2, 5/6), imc.get_states_with_label("B")[0]),
+            ((1 / 3, 2 / 3), imc.get_states_with_label("A")[0]),
+            ((1 / 2, 5 / 6), imc.get_states_with_label("B")[0]),
         ]
     )
 

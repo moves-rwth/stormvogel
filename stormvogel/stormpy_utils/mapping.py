@@ -16,6 +16,8 @@ def value_to_stormpy(
 ) -> "stormpy.pycarl.cln.FactorizedRationalFunction":
     """converts a stormvogel transition value to a stormpy (pycarl) value"""
 
+    assert stormpy is not None
+
     def convert_polynomial(
         polynomial: parametric.Polynomial,
     ) -> "stormpy.pycarl.cln.FactorizedPolynomial":
@@ -40,8 +42,6 @@ def value_to_stormpy(
         return factorized_polynomial
 
     if model.is_parametric():
-        assert stormpy is not None
-
         # we have a special case for floats as they are not just a specific case of a polynomial in stormvogel
         if isinstance(value, float):
             rational = stormpy.pycarl.cln.Rational(value)
@@ -72,7 +72,7 @@ def value_to_stormpy(
     elif model.is_interval_model():
         # in the case of interval models, we convert intervals, and regular values are converted
         # to intervals where the lower and upper value are the same
-        if isinstance(value, stormvogel.model.Interval):
+        if stormvogel.model.is_interval(value):
             interval = stormpy.pycarl.pycarl_core.Interval(value[0], value[1])
             return interval
         else:
@@ -617,8 +617,10 @@ def stormvogel_to_stormpy(
         raise RuntimeError("This type of model is not yet supported for this action")
 
 
-def value_to_stormvogel(value, sparsemodel) -> parametric.Parametric | float:
+def value_to_stormvogel(value, sparsemodel) -> stormvogel.model.Value:
     """Converts a stormpy transition value to a stormvogel one"""
+
+    assert stormpy is not None
 
     def is_float(val) -> bool:
         """we check if we can convert a value to a float"""

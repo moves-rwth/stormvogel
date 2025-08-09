@@ -9,25 +9,21 @@ from stormvogel import parametric
 import copy
 import math
 
-Number = float | Fraction | int
+Number = int | float | Fraction
+Interval = tuple[Number, Number]
+Value = Number | tuple | parametric.Parametric
 
 
-class IntervalMeta(type):
-    def __instancecheck__(self, obj):
-        if (
-            isinstance(obj, tuple)
-            and len(obj) == 2
-            and all(isinstance(x, Number) for x in obj)
-        ):
-            return True
-        return False
+def is_interval(x):
+    return (
+        isinstance(x, tuple) and len(x) == 2 and all(isinstance(i, Number) for i in x)
+    )
 
 
-class Interval(metaclass=IntervalMeta):
-    pass
-
-
-Value = Number | parametric.Parametric | Interval
+def is_value(x):
+    return (
+        isinstance(x, Number) or isinstance(x, parametric.Parametric) or is_interval(x)
+    )
 
 
 def value_to_string(
@@ -50,7 +46,9 @@ def value_to_string(
             return str(round(float(n), round_digits))
     elif isinstance(n, parametric.Parametric):
         return str(n)
-    elif isinstance(n, Interval):
+    elif is_interval(n):
+        return str(n)
+    else:
         return str(n)
 
 
@@ -632,7 +630,7 @@ class Model:
         for transition in self.transitions.values():
             for branch in transition.transition.values():
                 for tup in branch.branch:
-                    if isinstance(tup[0], Interval):
+                    if is_interval(tup[0]):
                         return True
         return False
 
