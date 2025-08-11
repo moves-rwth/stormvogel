@@ -465,7 +465,7 @@ class RewardModel:
         """Set the rewards of this model according to a (stormpy) rewards vector."""
         combined_id = 0
         self.rewards = dict()
-        for s in self.model.states.values():
+        for id, s in self.model:
             for a in s.available_actions():
                 self.rewards[s.id, a] = vector[combined_id]
                 combined_id += 1
@@ -525,7 +525,7 @@ class RewardModel:
     def get_reward_vector(self) -> list[Value]:
         """Return the rewards in a (stormpy) vector format."""
         vector = []
-        for s in self.model.states.values():
+        for id, s in self.model:
             for a in s.available_actions():
                 reward = self.rewards[s.id, a]
                 if reward is None:
@@ -538,7 +538,7 @@ class RewardModel:
     def set_unset_rewards(self, value: Value):
         """Fills up rewards that were not set yet with the specified value.
         Use this if converting (to stormpy) doesn't work because the reward vector does not have the expected length."""
-        for s in self.model.states.values():
+        for id, s in self.model:
             for a in s.available_actions():
                 if (s.id, a) not in self.rewards:
                     self.rewards[s.id, a] = value
@@ -677,14 +677,14 @@ class Model:
         if not self.supports_rates():
             return all(
                 [
-                    self.get_transitions(s).is_stochastic(epsilon)
-                    for s in self.states
-                    if s in self.transitions
+                    self.get_transitions(id).is_stochastic(epsilon)
+                    for id, _ in self
+                    if id in self.transitions
                 ]
             )
 
         else:
-            for state in self.states.values():
+            for _, state in self:
                 for action in state.available_actions():
                     sum_rates = 0
                     transitions = state.get_outgoing_transitions(action)
@@ -705,7 +705,7 @@ class Model:
         """Normalizes a model (for states where outgoing transition probabilities don't sum to 1, we divide each probability by the sum)"""
         if not self.supports_rates():
             self.add_self_loops()
-            for state in self.states.values():
+            for _, state in self:
                 for action in state.available_actions():
                     # we first calculate the sum
                     sum_prob = 0
@@ -744,7 +744,7 @@ class Model:
         The states in the collection are the states that stay in the model."""
         sub_model = copy.deepcopy(self)
         remove = []
-        for state in sub_model.states.values():
+        for _, state in sub_model:
             if state not in states:
                 remove.append(state)
         for state in remove:
@@ -758,22 +758,20 @@ class Model:
         """evaluates all parametric transitions with the given values and returns the induced model"""
         evaluated_model = copy.deepcopy(self)
         for state, transition in evaluated_model.transitions.items():
-            for action, branch in transition.transition.items():
+            for action, branch in transition:
                 new_branch = []
                 for tup in branch:
                     if isinstance(tup[0], parametric.Parametric):
                         tup = (tup[0].evaluate(values), tup[1])
                     new_branch.append(tup)
-                evaluated_model.transitions[state].transition[
-                    action
-                ].branch = new_branch
+                evaluated_model.transitions[state][action].branch = new_branch
 
         return evaluated_model
 
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
         id = 0
-        for s in self.states.values():
+        for _,s in self:
             for a in s.available_actions():
                 if a == action and action in s.available_actions() and s == state:
                     return id
@@ -782,7 +780,7 @@ class Model:
     def get_state_action_pair(self, id: int) -> tuple[State, Action] | None:
         """Given an id, we return the corresponding state action pair"""
         i = 0
-        for s in self.states.values():
+        for _,s in self:
             for a in s.available_actions():
                 if id == i:
                     return (s, a)
@@ -816,7 +814,7 @@ class Model:
             v = variables
 
         # we set the values
-        for state in self.states.values():
+        for _,state in self:
             for var in v:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
@@ -831,7 +829,7 @@ class Model:
             return False
 
         # we check all variables in all states
-        for state in self.states.values():
+        for _,state in self:
             for variable in variables:
                 if variable not in state.valuations.keys():
                     return True
@@ -1211,7 +1209,7 @@ class Model:
     def to_dot(self) -> str:
         """Generates a dot representation of this model."""
         dot = "digraph model {\n"
-        for state_id, state in self.states.items():
+        for state_id, state in self:
             dot += f'{state_id} [ label = "{state_id}: {", ".join(state.labels)}" ];\n'
         for state_id, transition in self.transitions.items():
             for action, branch in transition:
@@ -1234,7 +1232,7 @@ class Model:
 
     def __str__(self) -> str:
         res = [f"{self.type} with name {self.name}"]
-        res += ["", "States:"] + [f"{state}" for (_id, state) in self.states.items()]
+        res += ["", "States:"] + [f"{state}" for (_id, state) in self]
         res += ["", "Transitions:"] + [
             f"{id}: {transition}" for (id, transition) in self.transitions.items()
         ]
@@ -1267,6 +1265,9 @@ class Model:
 
     def __getitem__(self, state_id: int):
         return self.states[state_id]
+
+    def __iter__(self):
+        return iter(self.states.items())
 
 
 def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:
