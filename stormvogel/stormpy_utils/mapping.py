@@ -73,10 +73,10 @@ def value_to_stormpy(
         # in the case of interval models, we convert intervals, and regular values are converted
         # to intervals where the lower and upper value are the same
         if isinstance(value, stormvogel.model.Interval):
-            interval = stormpy.pycarl.pycarl_core.Interval(value[0], value[1])
+            interval = stormpy.pycarl.Interval(value[0], value[1])
             return interval
         else:
-            interval = stormpy.pycarl.pycarl_core.Interval(value, value)
+            interval = stormpy.pycarl.Interval(value, value)
             return interval
     else:
         return value
@@ -696,7 +696,7 @@ def value_to_stormvogel(value, sparsemodel) -> stormvogel.model.Value:
         return stormvogel_rational_function
     else:
         # we check if our value is an interval
-        if isinstance(value, stormpy.pycarl.pycarl_core.Interval):
+        if isinstance(value, stormpy.pycarl.Interval):
             # if lower and upper are the same, we return a singular value
             lower = float(value.lower())
             upper = float(value.upper())
