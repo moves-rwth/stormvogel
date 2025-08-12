@@ -321,6 +321,16 @@ class Branch:
 
     branch: list[tuple[Value, State]]
 
+    def __init__(self, *args):
+        if len(args) == 1 and isinstance(args[0], list):
+            self.branch = args[0]
+        elif len(args) == 2:
+            self.branch = [(args[0], args[1])]
+        else:
+            raise TypeError(
+                "expects either (list of (value,state) tuples) or (value, state)"
+            )
+
     def sort_states(self):
         """sorts the branch list by states"""
         self.branch.sort(key=lambda x: x[1])
@@ -427,7 +437,7 @@ def transition_from_shorthand(shorthand: TransitionShorthand) -> Transition:
         transition_content = {}
         for action, state in shorthand:
             assert isinstance(action, Action)
-            transition_content[action] = Branch([(1, state)])
+            transition_content[action] = Branch(1, state)
         return Transition(transition_content)
     elif isinstance(first_element, Value):
         return Transition(

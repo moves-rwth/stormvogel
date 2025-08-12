@@ -220,7 +220,7 @@ def test_simulate():
     starving.set_transitions(
         stormvogel.model.Transition(
             {
-                hunt: stormvogel.model.Branch([(0.2, hungry)]),
+                hunt: stormvogel.model.Branch(0.2, hungry),
             }
         )
     )
