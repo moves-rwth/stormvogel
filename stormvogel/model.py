@@ -1124,7 +1124,13 @@ class Model:
         return names[state_name]
 
     def get_initial_state(self) -> State:
-        """Gets the initial state (id=0)."""
+        """Gets the initial state (contains label "init")."""
+        # TODO support for multiple initial states
+        for state in self.get_states():
+            if "init" in state.labels:
+                return state
+
+        # if no label "init" is set, we take the state with id=0
         return self.states[0]
 
     def get_ordered_labels(self) -> list[list[str]]:
@@ -1172,7 +1178,7 @@ class Model:
     def get_states(self) -> list[State]:
         return list(self.states.values())
 
-    def add_rewards(self, name: str) -> RewardModel:
+    def new_reward_model(self, name: str) -> RewardModel:
         """Creates a reward model with the specified name, adds it and returns it."""
         for model in self.rewards:
             if model.name == name:

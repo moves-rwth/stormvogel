@@ -73,12 +73,12 @@ def test_pgc_mdp():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -159,12 +159,12 @@ def test_pgc_mdp_int():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -328,10 +328,10 @@ def test_pgc_dtmc():
         regular_model.get_state_by_id(13), [(1, regular_model.get_state_by_id(13))]
     )
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for _, state in regular_model:
         rewardmodel.set_state_reward(state, 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for _, state in regular_model:
         rewardmodel.set_state_reward(state, 2)
 
@@ -509,12 +509,12 @@ def test_pgc_pomdp():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None

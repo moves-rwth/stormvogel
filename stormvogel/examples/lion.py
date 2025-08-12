@@ -61,7 +61,7 @@ def create_lion_mdp():
     )
     lion.add_self_loops()
 
-    reward_model = lion.add_rewards("R")
+    reward_model = lion.new_reward_model("R")
     reward_model.set_state_action_reward(full, rawr, 100)
     reward_model.set_unset_rewards(0)
     return lion

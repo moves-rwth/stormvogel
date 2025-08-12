@@ -43,7 +43,7 @@ class Scheduler:
 
             # we initialize the reward models
             for reward_model in self.model.rewards:
-                induced_dtmc.add_rewards(reward_model.name)
+                induced_dtmc.new_reward_model(reward_model.name)
 
             # we add all the states and transitions according to the choices
             for _, state in self.model:

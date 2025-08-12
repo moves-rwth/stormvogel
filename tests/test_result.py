@@ -959,7 +959,7 @@ def test_induced_dtmc():
     mdp.add_self_loops()
 
     # we set rewards (because we must also check if they are carried over)
-    rewardmodel = mdp.add_rewards("r1")
+    rewardmodel = mdp.new_reward_model("r1")
     for i in range(4):
         pair = mdp.get_state_action_pair(i)
         assert pair is not None
@@ -988,7 +988,7 @@ def test_induced_dtmc():
     other_dtmc.add_self_loops()
 
     # and the rewards of the induced dtmc
-    rewardmodel = other_dtmc.add_rewards("r1")
+    rewardmodel = other_dtmc.new_reward_model("r1")
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(0), 0)
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(1), 2)
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(2), 3)

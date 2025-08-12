@@ -78,7 +78,7 @@ class Path:
         res: list[stormvogel.model.Action | stormvogel.model.State] = [
             self.model.get_initial_state()
         ]
-        for _, v in self:
+        for _, v in self.path.items():
             if isinstance(v, tuple):
                 res += list(v)
             else:
@@ -122,9 +122,6 @@ class Path:
 
     def __len__(self):
         return len(self.path)
-
-    def __iter__(self):
-        return iter(self.path.items())
 
 
 def get_action(
@@ -280,7 +277,7 @@ def simulate(
     # we add each (empty) rewardmodel to the partial model
     if model.rewards:
         for index, reward in enumerate(model.rewards):
-            reward_model = partial_model.add_rewards(model.rewards[index].name)
+            reward_model = partial_model.new_reward_model(model.rewards[index].name)
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
@@ -345,7 +342,9 @@ def simulate(
 
                     # we calculate the transition probability
                     probability = 0
-                    for tuple in transitions[stormvogel.model.EmptyAction]:
+                    for tuple in transitions.transition[
+                        stormvogel.model.EmptyAction
+                    ].branch:
                         if tuple[1].id == state_id:
                             assert isinstance(tuple[0], float) or isinstance(
                                 tuple[0], int
