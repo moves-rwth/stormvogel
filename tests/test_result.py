@@ -967,7 +967,7 @@ def test_induced_dtmc():
 
     # we create the induced dtmc
     chosen_actions = dict()
-    for state_id, state in mdp.states.items():
+    for state_id, state in mdp:
         chosen_actions[state_id] = state.available_actions()[0]
     scheduler = stormvogel.result.Scheduler(mdp, chosen_actions)
 

@@ -66,7 +66,7 @@ def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float
         RuntimeError("Only works for DTMC")
 
     # Create a matrix and set the value for the starting state to 1 on the first step.
-    matrix_steps_states = [[0.0 for s in model.states] for x in range(steps)]
+    matrix_steps_states = [[0.0 for s in model.get_states()] for x in range(steps)]
     matrix_steps_states[0][model.get_initial_state().id] = 1
 
     # Apply the updated values for each step.

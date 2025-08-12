@@ -329,10 +329,10 @@ def test_pgc_dtmc():
     )
 
     rewardmodel = regular_model.add_rewards("r1")
-    for state in regular_model.states.values():
+    for _, state in regular_model:
         rewardmodel.set_state_reward(state, 1)
     rewardmodel = regular_model.add_rewards("r2")
-    for state in regular_model.states.values():
+    for _, state in regular_model:
         rewardmodel.set_state_reward(state, 2)
 
     assert pgc_model == regular_model
@@ -520,7 +520,7 @@ def test_pgc_pomdp():
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 2)
 
-    for state in regular_model.states.values():
+    for _, state in regular_model:
         state.set_observation(5)
 
     assert regular_model == pgc_model

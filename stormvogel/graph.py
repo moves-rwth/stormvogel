@@ -158,7 +158,7 @@ class ModelGraph(DiGraph):
             {'type': <NodeType.STATE: 0>, 'labels': ['init']}
         """
         G = cls()
-        for state in model.states.values():
+        for _, state in model:
             props = dict()
             if state_properties is not None:
                 props = state_properties(state)

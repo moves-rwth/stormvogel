@@ -771,7 +771,7 @@ class Model:
     def get_state_action_id(self, state: State, action: Action) -> int | None:
         """we calculate the appropriate state action id for a given state and action"""
         id = 0
-        for _,s in self:
+        for _, s in self:
             for a in s.available_actions():
                 if a == action and action in s.available_actions() and s == state:
                     return id
@@ -780,7 +780,7 @@ class Model:
     def get_state_action_pair(self, id: int) -> tuple[State, Action] | None:
         """Given an id, we return the corresponding state action pair"""
         i = 0
-        for _,s in self:
+        for _, s in self:
             for a in s.available_actions():
                 if id == i:
                     return (s, a)
@@ -796,7 +796,7 @@ class Model:
 
     def add_self_loops(self):
         """adds self loops to all states that do not have an outgoing transition"""
-        for id, state in self.states.items():
+        for id, state in self:
             if self.transitions.get(id) is None:
                 self.set_transitions(
                     state, [(float(0) if self.supports_rates() else float(1), state)]
@@ -814,7 +814,7 @@ class Model:
             v = variables
 
         # we set the values
-        for _,state in self:
+        for _, state in self:
             for var in v:
                 if var not in state.valuations.keys():
                     state.valuations[var] = value
@@ -829,7 +829,7 @@ class Model:
             return False
 
         # we check all variables in all states
-        for _,state in self:
+        for _, state in self:
             for variable in variables:
                 if variable not in state.valuations.keys():
                     return True
@@ -837,8 +837,8 @@ class Model:
 
     def all_states_outgoing_transition(self) -> bool:
         """checks if all states have an outgoing transition"""
-        for state in self.states.items():
-            if self.transitions.get(state[0]) is None:
+        for id, _ in self:
+            if self.transitions.get(id) is None:
                 return False
         return True
 
@@ -1104,7 +1104,7 @@ class Model:
         """Get all states with a given label."""
         # TODO: slow, not sure if that will become a problem though
         collected_states = []
-        for _id, state in self.states.items():
+        for _id, state in self:
             if label in state.labels:
                 collected_states.append(state)
         return collected_states
@@ -1137,7 +1137,7 @@ class Model:
     def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
         collected_labels: set[str] = set()
-        for _id, state in self.states.items():
+        for _id, state in self:
             collected_labels = collected_labels | set(state.labels)
         return collected_labels
 
