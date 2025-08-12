@@ -31,7 +31,7 @@ def naive_value_iteration(
     while not terminate:
         old_values = values_matrix[len(values_matrix) - 1]
         new_values = [None for state in model.get_states()]
-        for sid, state in model.get_states().items():
+        for sid, state in model:
             transitions = model.get_transitions(state)
             # Now we have to take a decision for an action.
             action_values = {}
@@ -72,7 +72,7 @@ def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float
     # Apply the updated values for each step.
     for current_step in range(steps - 1):
         next_step = current_step + 1
-        for s_id, s in model.get_states().items():
+        for s_id, s in model:
             branch = model.get_branch(s)
             for transition_prob, target in branch:
                 current_prob = matrix_steps_states[current_step][s_id]
@@ -172,7 +172,7 @@ def policy_iteration(
                 ],
                 s1.available_actions(),
             )
-            for i, s1 in model.get_states().items()
+            for i, s1 in model
         }
         new = stormvogel.Scheduler(model, choices)
     if visualize:

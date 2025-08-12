@@ -77,9 +77,7 @@ class Scheduler:
 
 def random_scheduler(model: stormvogel.model.Model) -> Scheduler:
     """Create a random scheduler for the provided model."""
-    choices = {
-        i: random.choice(s.available_actions()) for (i, s) in model.get_states().items()
-    }
+    choices = {i: random.choice(s.available_actions()) for (i, s) in model}
     return Scheduler(model, taken_actions=choices)
 
 

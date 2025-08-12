@@ -1130,9 +1130,7 @@ class Model:
     def get_ordered_labels(self) -> list[list[str]]:
         """Get all the labels of this model, ordered by id.
         IMPORTANT: If a state has no label, then a value '' is inserted!"""
-        return [
-            (s.labels if len(s.labels) > 0 else []) for s in self.get_states().values()
-        ]
+        return [(s.labels if len(s.labels) > 0 else []) for s in self.get_states()]
 
     def get_labels(self) -> set[str]:
         """Get all labels in states of this Model."""
@@ -1171,8 +1169,8 @@ class Model:
                         parameters = parameters.union(tup[0].get_variables())
         return parameters
 
-    def get_states(self) -> dict[int, State]:
-        return self.states
+    def get_states(self) -> list[State]:
+        return list(self.states.values())
 
     def add_rewards(self, name: str) -> RewardModel:
         """Creates a reward model with the specified name, adds it and returns it."""
