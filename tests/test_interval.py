@@ -2,6 +2,11 @@ import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.parametric
 import stormvogel.model
 
+try:
+    import stormpy
+except ImportError:
+    stormpy = None
+
 
 def test_convert_imc():
     imc = stormvogel.model.new_dtmc()
