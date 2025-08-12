@@ -158,7 +158,7 @@ class ModelGraph(DiGraph):
             {'type': <NodeType.STATE: 0>, 'labels': ['init']}
         """
         G = cls()
-        for state in model.states.values():
+        for _, state in model:
             props = dict()
             if state_properties is not None:
                 props = state_properties(state)
@@ -171,7 +171,7 @@ class ModelGraph(DiGraph):
                 if action_properties is not None:
                     action_props = action_properties(state, action)
                 G.add_action(state_id, action, **action_props)
-                for probability, target in branch.branch:
+                for probability, target in branch:
                     transition_props = dict()
                     if transition_properties is not None:
                         transition_props = transition_properties(state, action, target)

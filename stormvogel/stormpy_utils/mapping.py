@@ -143,9 +143,9 @@ def stormvogel_to_stormpy(
         for transition in sorted(model.transitions.items()):
             if nondeterministic:
                 builder.new_row_group(row_index)
-            for action in transition[1].transition.items():
+            for action in transition[1]:
                 action[1].sort_states()
-                for tuple in action[1].branch:
+                for tuple in action[1]:
                     val = value_to_stormpy(tuple[0], variables, model)
                     builder.add_next_value(
                         row=row_index,

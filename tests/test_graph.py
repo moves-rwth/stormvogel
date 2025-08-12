@@ -19,7 +19,7 @@ from stormvogel.model import EmptyAction
 )
 def test_graph_creation(model):
     G = ModelGraph.from_model(model)
-    for state in model.states.values():
+    for _, state in model:
         assert state.id in G.nodes, f"Missing state {state.id} in ModelGraph"
         for action in state.available_actions():
             if action == EmptyAction:

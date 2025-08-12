@@ -118,10 +118,10 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
 
         # we test if rewardmodels work:
         rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
-        for stateid in stormvogel_dtmc.states.keys():
+        for stateid, _ in stormvogel_dtmc:
             rewardmodel.rewards[(stateid, stormvogel.model.EmptyAction)] = 1
         rewardmodel2 = stormvogel_dtmc.add_rewards("rewardmodel2")
-        for stateid in stormvogel_dtmc.states.keys():
+        for stateid, _ in stormvogel_dtmc:
             rewardmodel2.rewards[(stateid, stormvogel.model.EmptyAction)] = 2
 
         # print(stormvogel_dtmc)
