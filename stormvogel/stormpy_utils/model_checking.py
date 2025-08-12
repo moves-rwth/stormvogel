@@ -20,6 +20,11 @@ def model_checking(
 
     assert stormpy is not None
 
+    if not model.is_stochastic():
+        raise RuntimeError(
+            "We can only do model checking on stochastic models. Make sure that all outgoing transition probabilities sum to one in each state."
+        )
+
     # the user must provide a property string, otherwise we provide the widget for building one
     if prop:
         # we first map the model to a stormpy model
@@ -59,9 +64,9 @@ if __name__ == "__main__":
 
     mdp = examples.monty_hall.create_monty_hall_mdp()
 
-    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel = mdp.new_reward_model("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
-    rewardmodel2 = mdp.add_rewards("rewardmodel2")
+    rewardmodel2 = mdp.new_reward_model("rewardmodel2")
     rewardmodel2.set_from_rewards_vector(list(range(67)))
 
     print(model_checking(mdp))
