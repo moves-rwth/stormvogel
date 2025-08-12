@@ -1178,7 +1178,7 @@ class Model:
     def get_states(self) -> list[State]:
         return list(self.states.values())
 
-    def add_rewards(self, name: str) -> RewardModel:
+    def new_reward_model(self, name: str) -> RewardModel:
         """Creates a reward model with the specified name, adds it and returns it."""
         for model in self.rewards:
             if model.name == name:

@@ -43499,7 +43499,7 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
 // exports.Element = SVGCanvasElement;
 </script>
     <style type="text/css">
-      #lHxydpATDZ {
+      #qUsSkBxDeo {
         width: 800px;
         height: 600px;
         border: 1px solid lightgray;
@@ -43507,7 +43507,7 @@ SVGCanvasElement.prototype.setAttribute = function(prop, val) {
     </style>
   </head>
   <body>
-    <div id="lHxydpATDZ"></div>
+    <div id="qUsSkBxDeo"></div>
     <script type="text/javascript">
         //js
 class NetworkWrapper {
@@ -43617,25 +43617,15 @@ class NetworkWrapper {
     <script type="text/javascript">
         //js
     var nodes_local = new vis.DataSet([{ id: 0, label: `init`, group: "states" },
-{ id: 1, label: `rolled1`, group: "states" },
-{ id: 2, label: `rolled2`, group: "states" },
-{ id: 3, label: `rolled3`, group: "states" },
-{ id: 4, label: `rolled4`, group: "states" },
-{ id: 5, label: `rolled5`, group: "states" },
-{ id: 6, label: `rolled6`, group: "states" },
+{ id: 1, label: `mec1,mec2`, group: "states" },
+{ id: 10000000000, label: `one`, group: "actions" },
+{ id: 10000000001, label: `two`, group: "actions" },
 ]);
-    var edges_local = new vis.DataSet([{ from: 0, to: 1, label: "1/6" },
-{ from: 0, to: 2, label: "1/6" },
-{ from: 0, to: 3, label: "1/6" },
-{ from: 0, to: 4, label: "1/6" },
-{ from: 0, to: 5, label: "1/6" },
-{ from: 0, to: 6, label: "1/6" },
+    var edges_local = new vis.DataSet([{ from: 0, to: 10000000000 },
+{ from: 0, to: 10000000001 },
 { from: 1, to: 1, label: "1" },
-{ from: 2, to: 2, label: "1" },
-{ from: 3, to: 3, label: "1" },
-{ from: 4, to: 4, label: "1" },
-{ from: 5, to: 5, label: "1" },
-{ from: 6, to: 6, label: "1" },
+{ from: 10000000000, to: 1, label: "1" },
+{ from: 10000000001, to: 1, label: "1" },
 ]);
     var options_local = {
   "__fake_macros": {
@@ -43659,7 +43649,6 @@ class NetworkWrapper {
   },
   "edit_groups": {
     "groups": [
-      "r",
       "states",
       "actions"
     ]
@@ -43703,24 +43692,7 @@ class NetworkWrapper {
       "mass": 1,
       "font": {
         "color": "black",
-        "size": 21
-      }
-    },
-    "r": {
-      "borderWidth": 1,
-      "color": {
-        "background": "#ff6666",
-        "border": "black",
-        "highlight": {
-          "background": "white",
-          "border": "red"
-        }
-      },
-      "shape": "ellipse",
-      "mass": 1,
-      "font": {
-        "color": "black",
-        "size": 21
+        "size": 14
       }
     }
   },
@@ -43756,9 +43728,7 @@ class NetworkWrapper {
     "reward_symbol": "\u20ac",
     "show_zero_rewards": true,
     "show_observations": true,
-    "observation_symbol": "\u0298",
-    "show_results": true,
-    "result_symbol": "\u2606"
+    "observation_symbol": "\u0298"
   },
   "layout": {
     "randomSeed": 5
@@ -43771,70 +43741,17 @@ class NetworkWrapper {
   },
   "saving": {
     "relative_path": true,
-    "filename": "layouts/die.json",
+    "filename": "layouts/NAME.json",
     "save_button": false,
     "load_button": false
   },
-  "positions": {
-    "0": {
-      "x": 73,
-      "y": 22
-    },
-    "1": {
-      "x": 118,
-      "y": 151
-    },
-    "2": {
-      "x": -26,
-      "y": -61
-    },
-    "3": {
-      "x": 240,
-      "y": 150
-    },
-    "4": {
-      "x": -12,
-      "y": 231
-    },
-    "5": {
-      "x": 20,
-      "y": -198
-    },
-    "6": {
-      "x": -133,
-      "y": -19
-    },
-    "7": {
-      "x": 367,
-      "y": 109
-    },
-    "8": {
-      "x": -144,
-      "y": 198
-    },
-    "9": {
-      "x": -40,
-      "y": 364
-    },
-    "10": {
-      "x": 145,
-      "y": -246
-    },
-    "11": {
-      "x": -88,
-      "y": -278
-    },
-    "12": {
-      "x": -263,
-      "y": -14
-    }
-  },
+  "positions": {},
   "physics": true,
   "autoResize": true
 };
-    var container_local = document.getElementById("lHxydpATDZ");
-    var nw_lHxydpATDZ = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
-
+    var container_local = document.getElementById("qUsSkBxDeo");
+    var nw_qUsSkBxDeo = new NetworkWrapper(nodes_local, edges_local, options_local, container_local)
+    
     </script>
   </body>
 </html>

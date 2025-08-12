@@ -277,7 +277,7 @@ def simulate(
     # we add each (empty) rewardmodel to the partial model
     if model.rewards:
         for index, reward in enumerate(model.rewards):
-            reward_model = partial_model.add_rewards(model.rewards[index].name)
+            reward_model = partial_model.new_reward_model(model.rewards[index].name)
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():

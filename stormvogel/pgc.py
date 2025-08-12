@@ -282,7 +282,7 @@ def build_pgc(
             for reward in rewards(
                 initial_state_pgc, available_actions(initial_state_pgc)[0]
             ).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             # we take the initial state reward to compare later
             action = available_actions(initial_state_pgc)[0]
@@ -322,7 +322,7 @@ def build_pgc(
             # we first create the right number of reward models
             rewards = cast(Callable[[Any], dict[str, stormvogel.model.Value]], rewards)
             for reward in rewards(initial_state_pgc).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             initial_state_rewards = rewards(initial_state_pgc)
             for state, s in state_lookup.items():

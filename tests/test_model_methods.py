@@ -386,7 +386,7 @@ def test_get_state_action_reward():
     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     # we add a reward model:
-    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel = mdp.new_reward_model("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
 
     state = mdp.get_state_by_id(2)
@@ -403,7 +403,7 @@ def test_get_state_action_reward():
 #     mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
 
 #     # we make a reward model using the set_state_action_reward method:
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
 
 #     # we make a reward model manually:
@@ -420,7 +420,7 @@ def test_get_state_action_reward():
 #     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
 #     # we add a reward model with only one reward
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     state = mdp.get_state_by_id(2)
 #     action = state.available_actions()[1]
 #     rewardmodel.set_state_action_reward(state, action, 3)

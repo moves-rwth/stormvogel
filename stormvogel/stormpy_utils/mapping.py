@@ -183,7 +183,7 @@ def stormvogel_to_stormpy(
 
         return state_labeling
 
-    def add_rewards(
+    def new_reward_model(
         model: stormvogel.model.Model,
     ) -> dict[str, stormpy.SparseRewardModel]:
         """
@@ -242,7 +242,7 @@ def stormvogel_to_stormpy(
         state_labeling = add_labels(model)
 
         # then we add the rewards
-        reward_models = add_rewards(model)
+        reward_models = new_reward_model(model)
 
         # we add the valuations
         valuations = add_valuations(model)
@@ -303,7 +303,7 @@ def stormvogel_to_stormpy(
         state_labeling = add_labels(model)
 
         # then we add the rewards
-        reward_models = add_rewards(model)
+        reward_models = new_reward_model(model)
 
         # we add the valuations
         valuations = add_valuations(model)
@@ -351,7 +351,7 @@ def stormvogel_to_stormpy(
         state_labeling = add_labels(model)
 
         # then we add the rewards
-        reward_models = add_rewards(model)
+        reward_models = new_reward_model(model)
 
         # we add the valuations
         valuations = add_valuations(model)
@@ -424,7 +424,7 @@ def stormvogel_to_stormpy(
         state_labeling = add_labels(model)
 
         # then we add the rewards
-        reward_models = add_rewards(model)
+        reward_models = new_reward_model(model)
 
         # we add the valuations
         valuations = add_valuations(model)
@@ -518,7 +518,7 @@ def stormvogel_to_stormpy(
         state_labeling = add_labels(model)
 
         # then we add the rewards
-        reward_models = add_rewards(model)
+        reward_models = new_reward_model(model)
 
         # we add the valuations
         valuations = add_valuations(model)
@@ -735,7 +735,7 @@ def stormpy_to_stormvogel(
             if state.id > 0:
                 model.new_state(labels=list(state.labels))
 
-    def add_rewards(
+    def new_reward_model(
         model: stormvogel.model.Model,
         sparsemodel: stormpy.storage.SparseDtmc | stormpy.storage.SparseMdp,
     ):
@@ -744,7 +744,7 @@ def stormpy_to_stormvogel(
         """
         for reward_model_name in sparsemodel.reward_models:
             rewards = sparsemodel.get_reward_model(reward_model_name)
-            rewardmodel = model.add_rewards(reward_model_name)
+            rewardmodel = model.new_reward_model(reward_model_name)
             get_reward_vector = (
                 rewards.state_action_rewards
                 if rewards.has_state_action_rewards
@@ -802,7 +802,7 @@ def stormpy_to_stormvogel(
         model.add_self_loops()
 
         # we add the reward models to the states
-        add_rewards(model, sparsedtmc)
+        new_reward_model(model, sparsedtmc)
 
         return model
 
@@ -856,7 +856,7 @@ def stormpy_to_stormvogel(
         model.add_self_loops()
 
         # we add the reward models to the state action pairs
-        add_rewards(model, sparsemdp)
+        new_reward_model(model, sparsemdp)
 
         # we add the valuations
         add_valuations(model, sparsemdp)
@@ -897,7 +897,7 @@ def stormpy_to_stormvogel(
         model.add_self_loops()
 
         # we add the reward models to the states
-        add_rewards(model, sparsectmc)
+        new_reward_model(model, sparsectmc)
 
         # we add the valuations
         add_valuations(model, sparsectmc)
@@ -958,7 +958,7 @@ def stormpy_to_stormvogel(
         model.add_self_loops()
 
         # we add the reward models to the state action pairs
-        add_rewards(model, sparsepomdp)
+        new_reward_model(model, sparsepomdp)
 
         # we add the valuations
         add_valuations(model, sparsepomdp)
@@ -1019,7 +1019,7 @@ def stormpy_to_stormvogel(
         model.add_self_loops()
 
         # we add the reward models to the state action pairs
-        add_rewards(model, sparsema)
+        new_reward_model(model, sparsema)
 
         # we add the valuations
         add_valuations(model, sparsema)

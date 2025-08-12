@@ -25,7 +25,7 @@ def create_study_mdp():
     pass_test.set_transitions([(1, end)])
     fail_test.set_transitions([(1, end)])
 
-    reward_model = mdp.add_rewards("R")
+    reward_model = mdp.new_reward_model("R")
     reward_model.set_state_action_reward(pass_test, EmptyAction, 100)
     reward_model.set_state_action_reward(fail_test, EmptyAction, 0)
     reward_model.set_state_action_reward(not_studied, EmptyAction, 15)
