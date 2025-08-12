@@ -741,7 +741,7 @@ class JSVisualization(VisualizationBase):
 
     def clear_highlighting(self):
         """Clear all highlighting that is currently active, returing all states to their original colors."""
-        for s_id in self.model.get_states():
+        for s_id, _ in self.model:
             self.set_node_color(s_id, None)
         for a_id in self.G.state_action_id_map.values():
             self.set_node_color(a_id, None)
