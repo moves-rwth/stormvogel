@@ -6,7 +6,7 @@ import inspect
 
 @dataclass
 class State:
-    """Bird state object. Can contain any number of any type of arguments"""
+    """pgc state object. Can contain any number of any type of arguments"""
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -29,7 +29,7 @@ type Action = list[str]
 
 def valid_input(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
-    init,
+    init: Any,
     rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
     | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
@@ -157,9 +157,13 @@ def build_bird(
                 if not isinstance(tup, tuple):
                     s = tup
                     val = 1
-                else:
+                elif len(tup) == 2:
                     s = tup[1]
                     val = tup[0]
+                else:
+                    raise ValueError(
+                        f"Invalid transition tuple {tup}. Expected (probability, state) or (state)."
+                    )
 
                 if s not in state_lookup:
                     new_state = model.new_state(id=len(model.states))
@@ -187,12 +191,12 @@ def build_bird(
 
     # we create the model with the given type and initial state
     model = stormvogel.model.new_model(modeltype=modeltype, create_initial_state=False)
-    init = model.new_state(labels=["init"])
+    init_state = model.new_state(labels=["init"])
 
     # we continue calling delta and adding new states until no states are
     # left to be visited
     states_to_be_visited = [init]
-    state_lookup = {init: init}
+    state_lookup = {init: init_state}
     while len(states_to_be_visited) > 0:
         state = states_to_be_visited.pop(0)
         transition = {}
@@ -277,7 +281,7 @@ def build_bird(
             # we first create the right number of reward models
             assert available_actions is not None
             rewards = cast(
-                Callable[[Any, action], dict[str, stormvogel.model.Value]], rewards
+                Callable[[Any, Action], dict[str, stormvogel.model.Value]], rewards
             )
             for reward in rewards(init, available_actions(init)[0]).items():
                 model.add_rewards(reward[0])
