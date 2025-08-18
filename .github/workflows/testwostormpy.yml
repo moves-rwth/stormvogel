@@ -1,4 +1,4 @@
-name: Lint
+name: Test without stormpy
 
 on:
   push:
@@ -13,13 +13,11 @@ concurrency:
 
 env:
   PYTHON_VERSION: '3.11'
-  PRECOMMIT_VERSION: '3.7.1'
+  POETRY_VERSION: '1.8.3'
 
 jobs:
-  pre-commit:
+  test:
     runs-on: ubuntu-22.04
-    container:
-      image: movesrwth/stormpy:ci-debug
     steps:
       - uses: actions/checkout@v4
 
@@ -48,14 +46,15 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Git thinks the directories are sus
-        run: git config --global --add safe.directory '*'
+      - name: Run tests
+        run: poetry run pytest -vv
 
-      - name: Cache pre-commit
-        uses: actions/cache@v4
+      - name: List kernels
+        run: poetry run jupyter kernelspec list
+
+      - name: Glob notebooks in docs folder
+        uses: tj-actions/glob@v22
+        id: glob
         with:
-          path: ~/.cache/pre-commit
-          key: precommit-${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - name: Run pre-commit
-        run: poetry run pre-commit run --all-files
+          files: |
+            docs/**/*.ipynb
