@@ -49,7 +49,7 @@ jobs:
         run: poetry install
 
       - name: Run tests
-        run: poetry run pytest -vv
+        run: poetry run pytest -vv --exclude-tags stormpy
 
       - name: List kernels
         run: poetry run jupyter kernelspec list

@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "stormvogel"
 version = "0.9.3"
-description = "User-friendly frontend to the Storm model checker"
+description = "Probabilistic Model Checking for almost everyone"
 authors = ["The stormvogel team"]
 license = "GPLv3"
 readme = "README.md"
@@ -35,6 +35,7 @@ networkx = "^3.4.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.2.2"
+pytest_tagging = "^1.6.0"
 
 [tool.poetry.group.lint.dependencies]
 pre-commit = "^3.7.1"

@@ -56,7 +56,9 @@ Notice that part of the tests will fail if stormpy is not installed.
 pytest
 ```
 ## Authors
-Stormvogel was mainly developped at Radboud University by Linus Heck, Pim Leerkes, and Ivo Melse under supervision from Sebastian Junges and Matthias Volk.
+Stormvogel was mainly developed at Radboud University by Linus Heck, Pim Leerkes, and Ivo Melse under supervision from Sebastian Junges and Matthias Volk.
+
+Thank you to our contributors: Luko van der Maas, Nicklas Osmers.
 
 ## License
 Stormvogel is licenced under the [GPL-3.0 license](https://github.com/moves-rwth/stormvogel?tab=GPL-3.0-1-ov-file).
