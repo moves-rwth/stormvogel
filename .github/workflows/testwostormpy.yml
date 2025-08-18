@@ -18,6 +18,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-22.04
+    container:
+      image: python:3.11
     steps:
       - uses: actions/checkout@v4
 
