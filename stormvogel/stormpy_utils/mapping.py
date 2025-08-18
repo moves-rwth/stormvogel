@@ -12,7 +12,7 @@ except ImportError:
 
 
 def value_to_stormpy(
-    value, variables: list[stormpy.pycarl.Variable], model: stormvogel.model.Model
+    value, variables: list["stormpy.pycarl.Variable"], model: stormvogel.model.Model
 ) -> "stormpy.pycarl.cln.FactorizedRationalFunction":
     """converts a stormvogel transition value to a stormpy (pycarl) value"""
 
