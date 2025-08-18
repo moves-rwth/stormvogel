@@ -1,6 +1,6 @@
 import stormvogel.stormpy_utils.mapping as mapping
-import stormvogel.parametric
 import stormvogel.model
+import pytest
 
 try:
     import stormpy
@@ -8,6 +8,7 @@ except ImportError:
     stormpy = None
 
 
+@pytest.mark.tags("stormpy")
 def test_convert_imc():
     imc = stormvogel.model.new_dtmc()
     init = imc.get_initial_state()

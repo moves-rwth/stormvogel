@@ -1,8 +1,10 @@
 import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.parametric
 import stormvogel.model
+import pytest
 
 
+@pytest.mark.tags("stormpy")
 def test_pmc_conversion():
     # Create a new model with the name "simple pmc"
     pmc = stormvogel.model.new_dtmc("simple pmc")
@@ -44,6 +46,7 @@ def test_pmc_conversion():
     assert pmc == new_pmc
 
 
+@pytest.mark.tags("stormpy")
 def test_pmdp_conversion():
     # Create a new model with the name "simple pmdp"
     pmdp = stormvogel.model.new_mdp("simple pmdp")
