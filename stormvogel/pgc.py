@@ -6,7 +6,7 @@ import inspect
 
 @dataclass
 class State:
-    """pgc state object. Can contain any number of any type of arguments"""
+    """bird state object. Can contain any number of any type of arguments"""
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -29,7 +29,7 @@ type Action = list[str]
 
 def valid_input(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
-    initial_state_pgc,
+    init,
     rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
     | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
@@ -41,7 +41,7 @@ def valid_input(
     modeltype: stormvogel.model.ModelType = stormvogel.model.ModelType.MDP,
 ):
     """
-    function that checks if the input for the pgc model builder is valid
+    function that checks if the input for the bird model builder is valid
     it will give a runtime error if it isn't.
     """
 
@@ -123,9 +123,9 @@ def valid_input(
             )
 
 
-def build_pgc(
+def build_bird(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
-    initial_state_pgc: Any,
+    init: Any,
     rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
     | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
@@ -143,7 +143,7 @@ def build_pgc(
 
     this works analogous to a prism file, where the delta is the module in this case.
 
-    (this function uses the pgc classes state and action instead of the ones from stormvogel.model)
+    (this function uses the bird classes state and action instead of the ones from stormvogel.model)
     """
 
     def add_new_transitions(tuples, state):
@@ -175,7 +175,7 @@ def build_pgc(
 
     valid_input(
         delta,
-        initial_state_pgc,
+        init,
         rewards,
         labels,
         available_actions,
@@ -191,8 +191,8 @@ def build_pgc(
 
     # we continue calling delta and adding new states until no states are
     # left to be visited
-    states_to_be_visited = [initial_state_pgc]
-    state_lookup = {initial_state_pgc: init}
+    states_to_be_visited = [init]
+    state_lookup = {init: init}
     while len(states_to_be_visited) > 0:
         state = states_to_be_visited.pop(0)
         transition = {}
@@ -279,14 +279,12 @@ def build_pgc(
             rewards = cast(
                 Callable[[Any, action], dict[str, stormvogel.model.Value]], rewards
             )
-            for reward in rewards(
-                initial_state_pgc, available_actions(initial_state_pgc)[0]
-            ).items():
+            for reward in rewards(init, available_actions(init)[0]).items():
                 model.add_rewards(reward[0])
 
             # we take the initial state reward to compare later
-            action = available_actions(initial_state_pgc)[0]
-            initial_state_rewards = rewards(initial_state_pgc, action)
+            action = available_actions(init)[0]
+            initial_state_rewards = rewards(init, action)
 
             for state, s in state_lookup.items():
                 assert available_actions is not None
@@ -321,10 +319,10 @@ def build_pgc(
         else:
             # we first create the right number of reward models
             rewards = cast(Callable[[Any], dict[str, stormvogel.model.Value]], rewards)
-            for reward in rewards(initial_state_pgc).items():
+            for reward in rewards(init).items():
                 model.add_rewards(reward[0])
 
-            initial_state_rewards = rewards(initial_state_pgc)
+            initial_state_rewards = rewards(init)
             for state, s in state_lookup.items():
                 rewarddict = rewards(state)
 
@@ -378,7 +376,7 @@ def build_pgc(
 
     # we add the valuations
     if valuations is not None:
-        initial_state_valuations = valuations(initial_state_pgc)
+        initial_state_valuations = valuations(init)
         for state, s in state_lookup.items():
             valuation_list = valuations(state)
             if valuation_list is None:
