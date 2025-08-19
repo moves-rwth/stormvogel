@@ -43,10 +43,10 @@ class Scheduler:
 
             # we initialize the reward models
             for reward_model in self.model.rewards:
-                induced_dtmc.add_rewards(reward_model.name)
+                induced_dtmc.new_reward_model(reward_model.name)
 
             # we add all the states and transitions according to the choices
-            for state in self.model.states.values():
+            for _, state in self.model:
                 induced_dtmc.new_state(labels=state.labels, valuations=state.valuations)
                 action = self.get_choice_of_state(state)
                 transitions = state.get_outgoing_transitions(action)
@@ -77,9 +77,7 @@ class Scheduler:
 
 def random_scheduler(model: stormvogel.model.Model) -> Scheduler:
     """Create a random scheduler for the provided model."""
-    choices = {
-        i: random.choice(s.available_actions()) for (i, s) in model.get_states().items()
-    }
+    choices = {i: random.choice(s.available_actions()) for (i, s) in model}
     return Scheduler(model, taken_actions=choices)
 
 
@@ -94,13 +92,13 @@ class Result:
 
     model: stormvogel.model.Model
     # values are hashed by the state id:
-    values: dict[int, stormvogel.model.Number]
+    values: dict[int, stormvogel.model.Value]
     scheduler: Scheduler | None
 
     def __init__(
         self,
         model: stormvogel.model.Model,
-        values: dict[int, stormvogel.model.Number],
+        values: dict[int, stormvogel.model.Value],
         scheduler: Scheduler | None = None,
     ):
         self.model = model
@@ -113,7 +111,7 @@ class Result:
 
     def get_result_of_state(
         self, state: stormvogel.model.State | int
-    ) -> stormvogel.model.Number | None:
+    ) -> stormvogel.model.Value | None:
         """returns the model checking result for a given state"""
         if isinstance(state, int) and state in self.model.states.keys():
             return self.values[state]
@@ -138,11 +136,26 @@ class Result:
             + str(self.scheduler)
         )
 
-    def maximum_result(self) -> stormvogel.model.Number:
+    def maximum_result(self) -> stormvogel.model.Value:
         """Return the maximum result."""
-        return max(self.values.values())
+        values = list(self.values.values())
+        max_val = values[0]
+        for v in values:
+            if isinstance(v, stormvogel.model.Interval) or isinstance(
+                v, stormvogel.parametric.Parametric
+            ):
+                raise RuntimeError(
+                    "maximum result function does not work for interval/parametric models"
+                )
+            assert isinstance(v, stormvogel.model.Number)
+            if v > max_val:
+                max_val = v
+        return max_val
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Result):
             return self.values == other.values and self.scheduler == other.scheduler
         return False
+
+    def __iter__(self):
+        return iter(self.values.items())

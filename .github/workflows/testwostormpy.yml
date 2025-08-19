@@ -1,0 +1,62 @@
+name: Test without stormpy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+  POETRY_VERSION: '1.8.3'
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    container:
+      image: python:3.12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get -y install curl
+          apt-get -y install git
+          apt-get -y install libcairo2-dev
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load existing venv
+        run: poetry env use system
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run tests
+        run: poetry run pytest -vv --exclude-tags stormpy
+
+      - name: List kernels
+        run: poetry run jupyter kernelspec list
+
+      - name: Glob notebooks in docs folder
+        uses: tj-actions/glob@v22
+        id: glob
+        with:
+          files: |
+            docs/**/*.ipynb

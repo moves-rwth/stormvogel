@@ -61,7 +61,7 @@ def test_transition_from_shorthand():
     transition_shorthand = [(1 / 2, state)]
     branch = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             transition_shorthand,
         )
     )
@@ -71,7 +71,7 @@ def test_transition_from_shorthand():
     assert (
         stormvogel.model.transition_from_shorthand(
             cast(
-                list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+                list[tuple[stormvogel.model.Value, stormvogel.model.State]],
                 transition_shorthand,
             )
         )
@@ -84,7 +84,7 @@ def test_transition_from_shorthand():
     action = mdp.new_action(frozenset({"action"}))
     transition_shorthand = [(action, state)]
     branch = stormvogel.model.Branch(
-        cast(list[tuple[stormvogel.model.Number, stormvogel.model.State]], [(1, state)])
+        cast(list[tuple[stormvogel.model.Value, stormvogel.model.State]], [(1, state)])
     )
     transition = stormvogel.model.Transition({action: branch})
 
@@ -181,13 +181,13 @@ def test_remove_state():
     action1 = mdp.new_action("1")
     branch0 = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             [(1 / 2, state1), (1 / 2, state2)],
         )
     )
     branch1 = stormvogel.model.Branch(
         cast(
-            list[tuple[stormvogel.model.Number, stormvogel.model.State]],
+            list[tuple[stormvogel.model.Value, stormvogel.model.State]],
             [(1 / 4, state1), (3 / 4, state2)],
         )
     )
@@ -386,7 +386,7 @@ def test_get_state_action_reward():
     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     # we add a reward model:
-    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel = mdp.new_reward_model("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
 
     state = mdp.get_state_by_id(2)
@@ -403,7 +403,7 @@ def test_get_state_action_reward():
 #     mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
 
 #     # we make a reward model using the set_state_action_reward method:
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
 
 #     # we make a reward model manually:
@@ -420,7 +420,7 @@ def test_get_state_action_reward():
 #     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
 #     # we add a reward model with only one reward
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     state = mdp.get_state_by_id(2)
 #     action = state.available_actions()[1]
 #     rewardmodel.set_state_action_reward(state, action, 3)
@@ -433,8 +433,8 @@ def test_get_state_action_reward():
 
 def test_valuation_methods():
     # first we test the get_variables function
-    dtmc = stormvogel.examples.monty_hall.create_monty_hall_mdp()
-    assert dtmc.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
+    mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
+    assert mdp.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
 
     # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
     dtmc = stormvogel.model.new_dtmc()

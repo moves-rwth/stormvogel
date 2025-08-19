@@ -30,10 +30,10 @@ type Action = list[str]
 def valid_input(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc,
-    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
-    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
+    | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,
@@ -126,10 +126,10 @@ def valid_input(
 def build_pgc(
     delta: Callable[[Any, Action], Any] | Callable[[Any], Any],
     initial_state_pgc: Any,
-    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Number]]
-    | Callable[[Any], dict[str, stormvogel.model.Number]]
+    rewards: Callable[[Any, Action], dict[str, stormvogel.model.Value]]
+    | Callable[[Any], dict[str, stormvogel.model.Value]]
     | None = None,
-    labels: Callable[[Any], list[str]] | None = None,
+    labels: Callable[[Any], list[str] | str | None] | None = None,
     available_actions: Callable[[Any], list[Action]] | None = None,
     observations: Callable[[Any], int] | None = None,
     rates: Callable[[Any], float] | None = None,
@@ -162,7 +162,7 @@ def build_pgc(
                     val = tup[0]
 
                 if s not in state_lookup:
-                    new_state = model.new_state(id=len(model.states))
+                    new_state = model.new_state(id=len(model.get_states()))
                     state_lookup[s] = new_state
                     branch.append((val, new_state))
                     states_to_be_visited.append(s)
@@ -277,12 +277,12 @@ def build_pgc(
             # we first create the right number of reward models
             assert available_actions is not None
             rewards = cast(
-                Callable[[Any, action], dict[str, stormvogel.model.Number]], rewards
+                Callable[[Any, action], dict[str, stormvogel.model.Value]], rewards
             )
             for reward in rewards(
                 initial_state_pgc, available_actions(initial_state_pgc)[0]
             ).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             # we take the initial state reward to compare later
             action = available_actions(initial_state_pgc)[0]
@@ -320,9 +320,9 @@ def build_pgc(
                         )
         else:
             # we first create the right number of reward models
-            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Number]], rewards)
+            rewards = cast(Callable[[Any], dict[str, stormvogel.model.Value]], rewards)
             for reward in rewards(initial_state_pgc).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             initial_state_rewards = rewards(initial_state_pgc)
             for state, s in state_lookup.items():
@@ -370,7 +370,7 @@ def build_pgc(
     if rates is not None:
         for state, s in state_lookup.items():
             r = rates(state)
-            if not isinstance(r, stormvogel.model.Number):
+            if not isinstance(r, stormvogel.model.Value):
                 raise ValueError(
                     f"On input {state}, the rates function does not return a number"
                 )
@@ -427,13 +427,15 @@ def build_pgc(
                         f"On input {state}, the labels function does not return a string or a list of strings"
                     )
                 # if we don't get a list, we assume there is just one label
-                s.add_label(labellist)
+                if labellist not in s.labels:
+                    s.add_label(labellist)
             else:
                 for label in labellist:
                     if not isinstance(label, str):
                         raise ValueError(
                             f"On input {state}, the labels function does not return a string or a list of strings"
                         )
-                    s.add_label(label)
+                    if label not in s.labels:
+                        s.add_label(label)
 
     return model

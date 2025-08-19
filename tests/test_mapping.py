@@ -9,7 +9,6 @@ import stormvogel.examples.stormpy_examples.stormpy_pomdp
 import stormvogel.examples.nuclear_fusion_ctmc
 import stormvogel.examples.monty_hall_pomdp
 import stormvogel.examples.stormpy_examples.stormpy_ma
-import stormvogel.examples.simple_ma
 from typing import Union
 
 try:
@@ -118,11 +117,11 @@ def test_stormvogel_to_stormpy_and_back_dtmc():
         stormvogel_dtmc = stormvogel.examples.die.create_die_dtmc()
 
         # we test if rewardmodels work:
-        rewardmodel = stormvogel_dtmc.add_rewards("rewardmodel")
-        for stateid in stormvogel_dtmc.states.keys():
+        rewardmodel = stormvogel_dtmc.new_reward_model("rewardmodel")
+        for stateid, _ in stormvogel_dtmc:
             rewardmodel.rewards[(stateid, stormvogel.model.EmptyAction)] = 1
-        rewardmodel2 = stormvogel_dtmc.add_rewards("rewardmodel2")
-        for stateid in stormvogel_dtmc.states.keys():
+        rewardmodel2 = stormvogel_dtmc.new_reward_model("rewardmodel2")
+        for stateid, _ in stormvogel_dtmc:
             rewardmodel2.rewards[(stateid, stormvogel.model.EmptyAction)] = 2
 
         # print(stormvogel_dtmc)
@@ -156,9 +155,9 @@ def test_stormvogel_to_stormpy_and_back_mdp():
         stormvogel_mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
         # we additionally test if reward models work
-        rewardmodel = stormvogel_mdp.add_rewards("rewardmodel")
+        rewardmodel = stormvogel_mdp.new_reward_model("rewardmodel")
         rewardmodel.set_from_rewards_vector(list(range(67)))
-        rewardmodel2 = stormvogel_mdp.add_rewards("rewardmodel2")
+        rewardmodel2 = stormvogel_mdp.new_reward_model("rewardmodel2")
         rewardmodel2.set_from_rewards_vector(list(range(67)))
 
         # print(stormvogel_mdp)
@@ -253,13 +252,40 @@ def test_stormpy_to_stormvogel_and_back_pomdp():
 # TODO for some reason, this test crashes but only in Github workflows?
 # def test_stormvogel_to_stormpy_and_back_ma():
 #     # we create a stormpy representation of an example ma
-#     stormvogel_ma = stormvogel.examples.simple_ma.create_simple_ma()
+#     import stormvogel.model
+#     # Create a new model
+#     stormvogel_ma = stormvogel.model.new_ma("example ma")
+#
+#     init = stormvogel_ma.get_initial_state()
+#
+#     # We have 5 actions
+#     init.set_transitions(
+#         [
+#             (
+#                 stormvogel_ma.action(f"{i}"),
+#                 stormvogel_ma.new_state(),
+#             )
+#             for i in range(5)
+#         ]
+#     )
+#
+#     # We add the rates and markovian states
+#     stormvogel_ma.markovian_states = [
+#         stormvogel_ma.get_state_by_id(0),
+#         stormvogel_ma.get_state_by_id(3),
+#         stormvogel_ma.get_state_by_id(4),
+#     ]
+#     stormvogel_ma.exit_rates = {i: 0 for i in range(6)}
+#
+#     # we add self loops to all states with no outgoing transitions
+#     stormvogel_ma.add_self_loops()
+#
 #     # print(stormvogel_ma)
 #     stormpy_ma = mapping.stormvogel_to_stormpy(stormvogel_ma)
 #     # print(stormpy_ma)
 #     new_stormvogel_ma = mapping.stormpy_to_stormvogel(stormpy_ma)
 #     # print(new_stormvogel_ma)
-
+#
 #     assert new_stormvogel_ma == stormvogel_ma
 
 

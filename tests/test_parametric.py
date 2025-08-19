@@ -1,8 +1,10 @@
 import stormvogel.stormpy_utils.mapping as mapping
 import stormvogel.parametric
 import stormvogel.model
+import pytest
 
 
+@pytest.mark.tags("stormpy")
 def test_pmc_conversion():
     # Create a new model with the name "simple pmc"
     pmc = stormvogel.model.new_dtmc()
@@ -18,6 +20,7 @@ def test_pmc_conversion():
     # p3 = stormvogel.parametric.Polynomial(["z"])
     p2.add_term((2, 0), 1)
     p2.add_term((2, 2), -1)
+
     # p3.add_term((2,), 2)
     # r1 = stormvogel.parametric.RationalFunction(p2,p3)
 
@@ -43,6 +46,7 @@ def test_pmc_conversion():
     assert pmc == new_pmc
 
 
+@pytest.mark.tags("stormpy")
 def test_pmdp_conversion():
     # Create a new model with the name "simple pmdp"
     pmdp = stormvogel.model.new_mdp()

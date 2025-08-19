@@ -1,29 +1,84 @@
-.. stormvogel documentation master file, created by
-   sphinx-quickstart on Mon Jul  8 16:33:42 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Stormvogel Documentation
+=============================
 
-Welcome to stormvogel's documentation!
-======================================
-Last update: |today|.
 
-Current version: |version|.
+Stormvogel provides easy and user-friendly APIs for creating, visualizing, and debugging probabilistic Markov models.
 
-Get started here:
+**Get started here!**
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started
+   :glob:
+
+   *
+
+**Source Code Repository and Issue Tracker:**
+
+.. raw:: html
+
+   <div style="margin-bottom: 1em;">
+      <a href="https://github.com/moves-rwth/stormvogel" target="_blank">
+         <img src="https://img.shields.io/github/stars/moves-rwth/stormvogel?style=social" alt="GitHub">
+         GitHub Repository
+      </a>
+   </div>
+
+**PyPI Package:**
+
+.. raw:: html
+
+   <div style="margin-bottom: 1em;">
+      <a href="https://pypi.org/project/stormvogel/" target="_blank">
+         <img src="https://img.shields.io/pypi/v/stormvogel.svg" alt="PyPI">
+         PyPI Package
+      </a>
+   </div>
+
+
+**Documentation Index:**
 
 .. toctree::
    :maxdepth: 2
+   :caption: Model Construction
    :glob:
 
-   1-introduction/*
-   2-extensions/*
+   1-Model-Construction/*
 
-Package documentation:
+.. toctree::
+   :maxdepth: 2
+   :caption: Visualization
+   :glob:
 
-.. autosummary::
-   :toctree: _autosummary
-   :template: custom-module-template.rst
-   :recursive:
+   2-Visualization/*
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Model Analysis
+   :glob:
+
+   3-Model-Analysis/*
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reinforcement Learning
+   :glob:
+
+   4-Reinforcement-Learning/*
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tools and Utilities
+   :glob:
+
+   5-Tools-and-Utilities/*
+
+Version info:
+===========================
+
+Last update: |today|.
+
+Current version: |version|.
 
 Search for a specific page:
 ===========================

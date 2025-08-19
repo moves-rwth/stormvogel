@@ -15,7 +15,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
     def __init__(
         self,
         layout: stormvogel.layout.Layout,
-        visualization: stormvogel.visualization.Visualization | None = None,
+        visualization: stormvogel.visualization.JSVisualization | None = None,
         output: widgets.Output | None = None,
         do_display: bool = True,
         debug_output: widgets.Output = widgets.Output(),
@@ -29,7 +29,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
             debug_output (widgets.Output, optional): Debug information is displayed in this output. Leave to default if that doesn't interest you.
         """
         super().__init__(output, do_display, debug_output)
-        self.vis: stormvogel.visualization.Visualization | None = visualization
+        self.vis: stormvogel.visualization.JSVisualization | None = visualization
         self.layout: stormvogel.layout.Layout = layout
         self.try_show_vis()
         self.loaded: bool = False  # True iff the layout is done loading.
@@ -92,7 +92,7 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         except OSError:
             with self.output:
                 print(
-                    f'Bad or inaccessible path or filename: {self.layout.layout["saving"]["filename"]}'
+                    f"Bad or inaccessible path or filename: {self.layout.layout['saving']['filename']}"
                 )
 
     def process_load_button(self):
@@ -161,5 +161,5 @@ class LayoutEditor(stormvogel.displayable.Displayable):
         self.loaded = True
 
     def __warn_failed_positions_save(self):
-        print(f"""Could not save the node positions of this graph in {self.layout.layout['saving']['filename']}
-Sorry for the inconvenience. See 'Communication server remark' in docs.""")
+        print(f"""Could not save the node positions of this graph in {self.layout.layout["saving"]["filename"]}
+Sorry for the inconvenience. See 'Implementation details' in docs.""")

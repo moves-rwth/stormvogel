@@ -11,14 +11,14 @@ import stormvogel.simulator as simulator
 def test_simulate():
     # we make a die dtmc and run the simulator with it
     dtmc = stormvogel.examples.die.create_die_dtmc()
-    rewardmodel = dtmc.add_rewards("rewardmodel")
-    for stateid in dtmc.states.keys():
+    rewardmodel = dtmc.new_reward_model("rewardmodel")
+    for stateid, _ in dtmc:
         rewardmodel.rewards[(stateid, EmptyAction)] = 3
-    rewardmodel2 = dtmc.add_rewards("rewardmodel2")
-    for stateid in dtmc.states.keys():
+    rewardmodel2 = dtmc.new_reward_model("rewardmodel2")
+    for stateid, _ in dtmc:
         rewardmodel2.rewards[(stateid, EmptyAction)] = 2
-    rewardmodel3 = dtmc.add_rewards("rewardmodel3")
-    for stateid in dtmc.states.keys():
+    rewardmodel3 = dtmc.new_reward_model("rewardmodel3")
+    for stateid, _ in dtmc:
         rewardmodel3.rewards[(stateid, EmptyAction)] = 1
     partial_model = simulator.simulate(dtmc, runs=5, steps=1, seed=3)
 
@@ -34,27 +34,27 @@ def test_simulate():
         ]
     )
 
-    rewardmodel = other_dtmc.add_rewards("rewardmodel")
-    for stateid in other_dtmc.states.keys():
+    rewardmodel = other_dtmc.new_reward_model("rewardmodel")
+    for stateid, _ in other_dtmc:
         rewardmodel.rewards[(stateid, EmptyAction)] = float(3)
-    rewardmodel2 = other_dtmc.add_rewards("rewardmodel2")
-    for stateid in other_dtmc.states.keys():
+    rewardmodel2 = other_dtmc.new_reward_model("rewardmodel2")
+    for stateid, _ in other_dtmc:
         rewardmodel2.rewards[(stateid, EmptyAction)] = float(2)
-    rewardmodel3 = other_dtmc.add_rewards("rewardmodel3")
-    for stateid in other_dtmc.states.keys():
+    rewardmodel3 = other_dtmc.new_reward_model("rewardmodel3")
+    for stateid, _ in other_dtmc:
         rewardmodel3.rewards[(stateid, EmptyAction)] = float(1)
 
     assert partial_model == other_dtmc
     ######################################################################################################################
     # we make a monty hall mdp and run the simulator with it
     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
-    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel = mdp.new_reward_model("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
-    rewardmodel2 = mdp.add_rewards("rewardmodel2")
+    rewardmodel2 = mdp.new_reward_model("rewardmodel2")
     rewardmodel2.set_from_rewards_vector(list(range(67)))
 
     taken_actions = {}
-    for id, state in mdp.states.items():
+    for id, state in mdp:
         taken_actions[id] = state.available_actions()[0]
     scheduler = stormvogel.result.Scheduler(mdp, taken_actions)
 
@@ -102,13 +102,13 @@ def test_simulate():
         ]
     )
 
-    rewardmodel = other_mdp.add_rewards("rewardmodel")
+    rewardmodel = other_mdp.new_reward_model("rewardmodel")
     rewardmodel.rewards = {
         (0, stormvogel.model.EmptyAction): 0,
         (1, action1): 1,
         (4, stormvogel.model.EmptyAction): 10,
     }
-    rewardmodel2 = other_mdp.add_rewards("rewardmodel2")
+    rewardmodel2 = other_mdp.new_reward_model("rewardmodel2")
     rewardmodel2.rewards = {
         (0, stormvogel.model.EmptyAction): 0,
         (1, action1): 1,
@@ -220,14 +220,14 @@ def test_simulate():
     starving.set_transitions(
         stormvogel.model.Transition(
             {
-                hunt: stormvogel.model.Branch([(0.2, hungry)]),
+                hunt: stormvogel.model.Branch(0.2, hungry),
             }
         )
     )
 
     lion.add_self_loops()
 
-    reward_model = lion.add_rewards("R")
+    reward_model = lion.new_reward_model("R")
     reward_model.set_unset_rewards(0)
 
     assert lion == partial_model
@@ -254,7 +254,7 @@ def test_simulate_path():
     # we make the monty hall pomdp and run simulate path with it
     pomdp = stormvogel.examples.monty_hall_pomdp.create_monty_hall_pomdp()
     taken_actions = {}
-    for id, state in pomdp.states.items():
+    for id, state in pomdp:
         taken_actions[id] = state.available_actions()[
             len(state.available_actions()) - 1
         ]
