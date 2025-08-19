@@ -771,7 +771,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsedtmcs)
-        model = stormvogel.model.new_dtmc(name=None, create_initial_state=False)
+        model = stormvogel.model.new_dtmc(create_initial_state=False)
 
         # we add the states
         add_states(model, sparsedtmc)
@@ -812,7 +812,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model
-        model = stormvogel.model.new_mdp(name=None, create_initial_state=False)
+        model = stormvogel.model.new_mdp(create_initial_state=False)
 
         # we add the states
         add_states(model, sparsemdp)
@@ -869,7 +869,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model
-        model = stormvogel.model.new_ctmc(name=None, create_initial_state=False)
+        model = stormvogel.model.new_ctmc(create_initial_state=False)
 
         # we add the states
         add_states(model, sparsectmc)
@@ -914,7 +914,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsepomdps)
-        model = stormvogel.model.new_pomdp(name=None, create_initial_state=False)
+        model = stormvogel.model.new_pomdp(create_initial_state=False)
 
         # we add the states
         add_states(model, sparsepomdp)
@@ -975,7 +975,7 @@ def stormpy_to_stormvogel(
         """
 
         # we create the model (it seems names are not stored in sparsemas)
-        model = stormvogel.model.new_ma(name=None, create_initial_state=False)
+        model = stormvogel.model.new_ma(create_initial_state=False)
 
         # we add the states
         add_states(model, sparsema)
@@ -1057,7 +1057,7 @@ def from_prism(prism_code="stormpy.storage.storage.PrismProgram"):
 
 
 if __name__ == "__main__":
-    dtmc = stormvogel.model.new_dtmc("Die")
+    dtmc = stormvogel.model.new_dtmc()
     init = dtmc.get_initial_state()
     init.set_transitions(
         [(1 / 6, dtmc.new_state(f"rolled{i}", {"rolled": i})) for i in range(6)]

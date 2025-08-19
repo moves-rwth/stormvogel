@@ -582,7 +582,6 @@ class Model:
         markovian_states: list of markovian states in the case of a ma.
     """
 
-    name: str | None
     type: ModelType
     # Both of these are hashed by the id of the state (=number in the matrix)
     states: dict[int, State]
@@ -594,10 +593,7 @@ class Model:
     # In ma's we keep track of markovian states
     markovian_states: list[State] | None
 
-    def __init__(
-        self, name: str | None, model_type: ModelType, create_initial_state: bool = True
-    ):
-        self.name = name
+    def __init__(self, model_type: ModelType, create_initial_state: bool = True):
         self.type = model_type
         self.transitions = {}
         self.states = {}
@@ -640,7 +636,7 @@ class Model:
             f"{len(self.actions)} actions, " if self.actions is not None else ""
         )
         return (
-            f"{self.type} model with name {self.name}, {len(self.get_states())} states, "
+            f"{self.type} model with {len(self.get_states())} states, "
             + actions_bit
             + f"and {len(self.get_labels())} distinct labels."
         )
@@ -1284,33 +1280,31 @@ class Model:
         return iter(self.states.items())
 
 
-def new_dtmc(name: str | None = None, create_initial_state: bool = True) -> Model:
+def new_dtmc(create_initial_state: bool = True) -> Model:
     """Creates a DTMC."""
-    return Model(name, ModelType.DTMC, create_initial_state)
+    return Model(ModelType.DTMC, create_initial_state)
 
 
-def new_mdp(name: str | None = None, create_initial_state: bool = True) -> Model:
+def new_mdp(create_initial_state: bool = True) -> Model:
     """Creates an MDP."""
-    return Model(name, ModelType.MDP, create_initial_state)
+    return Model(ModelType.MDP, create_initial_state)
 
 
-def new_ctmc(name: str | None = None, create_initial_state: bool = True) -> Model:
+def new_ctmc(create_initial_state: bool = True) -> Model:
     """Creates a CTMC."""
-    return Model(name, ModelType.CTMC, create_initial_state)
+    return Model(ModelType.CTMC, create_initial_state)
 
 
-def new_pomdp(name: str | None = None, create_initial_state: bool = True) -> Model:
+def new_pomdp(create_initial_state: bool = True) -> Model:
     """Creates a POMDP."""
-    return Model(name, ModelType.POMDP, create_initial_state)
+    return Model(ModelType.POMDP, create_initial_state)
 
 
-def new_ma(name: str | None = None, create_initial_state: bool = True) -> Model:
+def new_ma(create_initial_state: bool = True) -> Model:
     """Creates a MA."""
-    return Model(name, ModelType.MA, create_initial_state)
+    return Model(ModelType.MA, create_initial_state)
 
 
-def new_model(
-    modeltype: ModelType, name: str | None = None, create_initial_state: bool = True
-) -> Model:
+def new_model(modeltype: ModelType, create_initial_state: bool = True) -> Model:
     """More general model creation function"""
-    return Model(name, modeltype, create_initial_state)
+    return Model(modeltype, create_initial_state)

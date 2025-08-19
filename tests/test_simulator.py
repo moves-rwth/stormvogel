@@ -176,7 +176,7 @@ def test_simulate():
     lion = create_lion_mdp()
     partial_model = simulator.simulate(lion, steps=100, seed=1, scheduler=scheduler)
 
-    lion = stormvogel.model.new_mdp(name="lion")
+    lion = stormvogel.model.new_mdp()
     init = lion.get_initial_state()
     hungry = lion.new_state("hungry :(")
     satisfied = init
