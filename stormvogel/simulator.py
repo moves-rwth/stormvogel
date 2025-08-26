@@ -149,7 +149,7 @@ def step(
     """given a state, action and seed we simulate a step and return information on the state we discover"""
 
     # we go to the next state according to the probability distribution of the transition
-    choices = state.get_outgoing_choices(action)
+    choices = state.get_outgoing_choice(action)
     assert choices is not None  # what if there are no choices?
 
     # we build the probability distribution
@@ -418,7 +418,7 @@ def simulate(
                 # we also add the choices that we travelled through, so we need to keep track of the last state
                 # and of the discovered choices so that we don't add duplicates
                 if (last_state_id, state_id, action) not in discovered_choices:
-                    choices = model.get_state_by_id(last_state_id).get_outgoing_choices(
+                    choices = model.get_state_by_id(last_state_id).get_outgoing_choice(
                         action
                     )
                     discovered_choices.add((last_state_id, state_id, action))

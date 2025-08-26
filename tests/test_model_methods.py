@@ -21,10 +21,10 @@ def test_available_actions():
     assert mdp.get_initial_state().available_actions()
 
 
-def test_get_outgoing_choices():
+def test_get_outgoing_choice():
     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
-    choices = mdp.get_initial_state().get_outgoing_choices(stormvogel.model.EmptyAction)
+    choices = mdp.get_initial_state().get_outgoing_choice(stormvogel.model.EmptyAction)
 
     probabilities, states = zip(*choices)  # type: ignore
 

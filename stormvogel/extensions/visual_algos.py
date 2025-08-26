@@ -165,7 +165,7 @@ def policy_iteration(
                     lambda a: sum(
                         [
                             (p * dtmc_result.get_result_of_state(s2.id))  # type: ignore
-                            for p, s2 in s1.get_outgoing_choices(a)  # type: ignore
+                            for p, s2 in s1.get_outgoing_choice(a)  # type: ignore
                         ]
                     )
                     for _ in s1.available_actions()

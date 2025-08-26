@@ -315,7 +315,7 @@ class VisualizationBase:
                   Otherwise, the dictionary will be empty.
         """
         properties = dict()
-        choices = state.get_outgoing_choices(action)
+        choices = state.get_outgoing_choice(action)
         if choices is None:
             return properties
         for prob, target in choices:

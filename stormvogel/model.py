@@ -212,7 +212,7 @@ class State:
         else:
             return [EmptyAction]
 
-    def get_outgoing_choices(
+    def get_outgoing_choice(
         self, action: "Action | None" = None
     ) -> list[tuple[Value, "State"]] | None:
         """gets the outgoing choices of this state"""
@@ -234,7 +234,7 @@ class State:
 
         # for all actions we check if the state has outgoing choices to a different state with value != 0
         for action in self.available_actions():
-            choices = self.get_outgoing_choices(action)
+            choices = self.get_outgoing_choice(action)
             if choices is not None:
                 for transition in choices:
                     assert isinstance(transition[0], (int, float))
@@ -691,7 +691,7 @@ class Model:
             for _, state in self:
                 for action in state.available_actions():
                     sum_rates = 0
-                    choices = state.get_outgoing_choices(action)
+                    choices = state.get_outgoing_choice(action)
                     assert choices is not None
                     for transition in choices:
                         if (
@@ -713,7 +713,7 @@ class Model:
                 for action in state.available_actions():
                     # we first calculate the sum
                     sum_prob = 0
-                    choices = state.get_outgoing_choices(action)
+                    choices = state.get_outgoing_choice(action)
                     assert choices is not None
                     for tuple in choices:
                         if (

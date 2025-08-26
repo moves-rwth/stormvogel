@@ -49,7 +49,7 @@ class Scheduler:
             for _, state in self.model:
                 induced_dtmc.new_state(labels=state.labels, valuations=state.valuations)
                 action = self.get_choice_of_state(state)
-                choices = state.get_outgoing_choices(action)
+                choices = state.get_outgoing_choice(action)
                 assert choices is not None
                 induced_dtmc.add_choice(s=state, choices=choices)
 
