@@ -6,7 +6,7 @@ import inspect
 
 @dataclass
 class State:
-    """pgc state object. Can contain any number of any type of arguments"""
+    """bird state object. Can contain any number of any type of arguments"""
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
