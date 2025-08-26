@@ -338,7 +338,7 @@ def simulate(
                 # and of the discovered choices so that we don't add duplicates
                 if (last_state_id, state_id) not in discovered_choices:
                     discovered_choices.add((last_state_id, state_id))
-                    choices = model.get_choices(last_state_id)
+                    choices = model.get_choice(last_state_id)
 
                     # we calculate the transition probability
                     probability = 0

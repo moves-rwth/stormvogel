@@ -345,9 +345,9 @@ def test_add_choice():
     action6b = mdp6.new_action("b")
     mdp6.set_choice(mdp6.get_initial_state(), [(action6a, state6)])
     mdp6.add_choice(mdp6.get_initial_state(), [(action6b, state6)])
-    # print(mdp6.get_choices(mdp6.get_initial_state()).transition)
+    # print(mdp6.get_choice(mdp6.get_initial_state()).transition)
     # print([(action6a, state6), (action6b, state6)])
-    assert len(mdp6.get_choices(mdp6.get_initial_state()).transition) == 2
+    assert len(mdp6.get_choice(mdp6.get_initial_state()).transition) == 2
 
 
 def test_get_sub_model():

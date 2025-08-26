@@ -32,7 +32,7 @@ def naive_value_iteration(
         old_values = values_matrix[len(values_matrix) - 1]
         new_values = [None for state in model.get_states()]
         for sid, state in model:
-            choices = model.get_choices(state)
+            choices = model.get_choice(state)
             # Now we have to take a decision for an action.
             action_values = {}
             for action, branch in choices:

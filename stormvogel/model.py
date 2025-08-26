@@ -681,7 +681,7 @@ class Model:
         if not self.supports_rates():
             return all(
                 [
-                    self.get_choices(id).is_stochastic(epsilon)
+                    self.get_choice(id).is_stochastic(epsilon)
                     for id, _ in self
                     if id in self.choices
                 ]
@@ -866,7 +866,7 @@ class Model:
             choices = choice_from_shorthand(choices)
 
         try:
-            existing_choices = self.get_choices(s)
+            existing_choices = self.get_choice(s)
         except KeyError:
             # Empty choices case, act like set_choice.
             self.set_choice(s, choices)
@@ -897,7 +897,7 @@ class Model:
                         self.actions.add(action)
                     self.choices[s.id].transition[action] = branch
 
-    def get_choices(self, state_or_id: State | int) -> Choice:
+    def get_choice(self, state_or_id: State | int) -> Choice:
         """Get the transition at state s. Throws a KeyError if not present."""
         if isinstance(state_or_id, State):
             return self.choices[state_or_id.id]
