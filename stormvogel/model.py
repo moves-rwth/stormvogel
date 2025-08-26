@@ -422,7 +422,7 @@ class Choice:
 ChoiceShorthand = list[tuple[Value, State]] | list[tuple[Action, State]]
 
 
-def transition_from_shorthand(shorthand: ChoiceShorthand) -> Choice:
+def choice_from_shorthand(shorthand: ChoiceShorthand) -> Choice:
     """Get a Choice object from a ChoiceShorthand. Use for all choices in DTMCs and for empty actions in MDPs.
 
     There are two possible ways to define a ChoiceShorthand.
@@ -854,7 +854,7 @@ class Model:
     def set_choice(self, s: State, choices: Choice | ChoiceShorthand) -> None:
         """Set the transition from a state."""
         if not isinstance(choices, Choice):
-            choices = transition_from_shorthand(choices)
+            choices = choice_from_shorthand(choices)
         if self.actions is not None and EmptyAction in choices.transition.keys():
             self.actions.add(EmptyAction)
         self.choices[s.id] = choices
@@ -863,7 +863,7 @@ class Model:
         """Add new choices from a state to the model. If no transition currently exists, the result will be the same as set_choice."""
 
         if not isinstance(choices, Choice):
-            choices = transition_from_shorthand(choices)
+            choices = choice_from_shorthand(choices)
 
         try:
             existing_choices = self.get_choices(s)
