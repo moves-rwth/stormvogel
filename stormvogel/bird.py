@@ -166,7 +166,7 @@ def build_bird(
                     )
 
                 if s not in state_lookup:
-                    new_state = model.new_state(id=len(model.states))
+                    new_state = model.new_state(id=len(model.get_states()))
                     state_lookup[s] = new_state
                     branch.append((val, new_state))
                     states_to_be_visited.append(s)
@@ -284,7 +284,7 @@ def build_bird(
                 Callable[[Any, Action], dict[str, stormvogel.model.Value]], rewards
             )
             for reward in rewards(init, available_actions(init)[0]).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             # we take the initial state reward to compare later
             action = available_actions(init)[0]
@@ -324,7 +324,7 @@ def build_bird(
             # we first create the right number of reward models
             rewards = cast(Callable[[Any], dict[str, stormvogel.model.Value]], rewards)
             for reward in rewards(init).items():
-                model.add_rewards(reward[0])
+                model.new_reward_model(reward[0])
 
             initial_state_rewards = rewards(init)
             for state, s in state_lookup.items():

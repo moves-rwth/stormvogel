@@ -31,13 +31,13 @@ def naive_value_iteration(
     while not terminate:
         old_values = values_matrix[len(values_matrix) - 1]
         new_values = [None for state in model.get_states()]
-        for sid, state in model.get_states().items():
+        for sid, state in model:
             transitions = model.get_transitions(state)
             # Now we have to take a decision for an action.
             action_values = {}
-            for action, branch in transitions.transition.items():
+            for action, branch in transitions:
                 branch_value = sum(
-                    [prob * old_values[state.id] for (prob, state) in branch.branch]  # type: ignore
+                    [prob * old_values[state.id] for (prob, state) in branch]  # type: ignore
                 )
                 action_values[action] = branch_value
             # We take the action with the highest value.
@@ -66,15 +66,15 @@ def dtmc_evolution(model: stormvogel.model.Model, steps: int) -> list[list[float
         RuntimeError("Only works for DTMC")
 
     # Create a matrix and set the value for the starting state to 1 on the first step.
-    matrix_steps_states = [[0.0 for s in model.states] for x in range(steps)]
+    matrix_steps_states = [[0.0 for s in model.get_states()] for x in range(steps)]
     matrix_steps_states[0][model.get_initial_state().id] = 1
 
     # Apply the updated values for each step.
     for current_step in range(steps - 1):
         next_step = current_step + 1
-        for s_id, s in model.get_states().items():
+        for s_id, s in model:
             branch = model.get_branch(s)
-            for transition_prob, target in branch.branch:
+            for transition_prob, target in branch:
                 current_prob = matrix_steps_states[current_step][s_id]
                 assert isinstance(transition_prob, (int, float))
                 matrix_steps_states[next_step][target.id] += current_prob * float(
@@ -172,7 +172,7 @@ def policy_iteration(
                 ],
                 s1.available_actions(),
             )
-            for i, s1 in model.get_states().items()
+            for i, s1 in model
         }
         new = stormvogel.Scheduler(model, choices)
     if visualize:

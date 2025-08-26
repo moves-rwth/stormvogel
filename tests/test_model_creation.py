@@ -3,7 +3,7 @@ import stormvogel.model
 
 
 def test_mdp_creation():
-    dtmc = stormvogel.model.new_dtmc("Die")
+    dtmc = stormvogel.model.new_dtmc()
 
     init = dtmc.get_initial_state()
 

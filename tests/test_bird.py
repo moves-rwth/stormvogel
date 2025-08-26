@@ -73,12 +73,12 @@ def test_bird_mdp():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -159,12 +159,12 @@ def test_bird_mdp_int():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
@@ -328,11 +328,11 @@ def test_bird_dtmc():
         regular_model.get_state_by_id(13), [(1, regular_model.get_state_by_id(13))]
     )
 
-    rewardmodel = regular_model.add_rewards("r1")
-    for state in regular_model.states.values():
+    rewardmodel = regular_model.new_reward_model("r1")
+    for _, state in regular_model:
         rewardmodel.set_state_reward(state, 1)
-    rewardmodel = regular_model.add_rewards("r2")
-    for state in regular_model.states.values():
+    rewardmodel = regular_model.new_reward_model("r2")
+    for _, state in regular_model:
         rewardmodel.set_state_reward(state, 2)
 
     assert bird_model == regular_model
@@ -507,18 +507,18 @@ def test_bird_pomdp():
     regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
     regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
 
-    rewardmodel = regular_model.add_rewards("r1")
+    rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 1)
-    rewardmodel = regular_model.add_rewards("r2")
+    rewardmodel = regular_model.new_reward_model("r2")
     for i in range(2 * N):
         pair = regular_model.get_state_action_pair(i)
         assert pair is not None
         rewardmodel.set_state_action_reward(pair[0], pair[1], 2)
 
-    for state in regular_model.states.values():
+    for _, state in regular_model:
         state.set_observation(5)
 
     assert regular_model == bird_model

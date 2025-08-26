@@ -43,10 +43,10 @@ class Scheduler:
 
             # we initialize the reward models
             for reward_model in self.model.rewards:
-                induced_dtmc.add_rewards(reward_model.name)
+                induced_dtmc.new_reward_model(reward_model.name)
 
             # we add all the states and transitions according to the choices
-            for state in self.model.states.values():
+            for _, state in self.model:
                 induced_dtmc.new_state(labels=state.labels, valuations=state.valuations)
                 action = self.get_choice_of_state(state)
                 transitions = state.get_outgoing_transitions(action)
@@ -77,9 +77,7 @@ class Scheduler:
 
 def random_scheduler(model: stormvogel.model.Model) -> Scheduler:
     """Create a random scheduler for the provided model."""
-    choices = {
-        i: random.choice(s.available_actions()) for (i, s) in model.get_states().items()
-    }
+    choices = {i: random.choice(s.available_actions()) for (i, s) in model}
     return Scheduler(model, taken_actions=choices)
 
 
@@ -158,3 +156,6 @@ class Result:
         if isinstance(other, Result):
             return self.values == other.values and self.scheduler == other.scheduler
         return False
+
+    def __iter__(self):
+        return iter(self.values.items())

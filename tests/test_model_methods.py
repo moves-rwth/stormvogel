@@ -160,7 +160,7 @@ def test_remove_state():
     ctmc.remove_state(ctmc.get_state_by_id(3), reassign_ids=True)
 
     # we make a ctmc with the state already missing
-    new_ctmc = stormvogel.model.new_ctmc("Nuclear fusion")
+    new_ctmc = stormvogel.model.new_ctmc()
     new_ctmc.get_state_by_id(0).set_transitions([(3, new_ctmc.new_state("helium"))])
     new_ctmc.get_state_by_id(1).set_transitions([(2, new_ctmc.new_state("carbon"))])
 
@@ -359,7 +359,7 @@ def test_get_sub_model():
     sub_model = dtmc.get_sub_model(states)
 
     # we build what the submodel should look like
-    new_dtmc = stormvogel.model.new_dtmc("Die")
+    new_dtmc = stormvogel.model.new_dtmc()
     init = new_dtmc.get_initial_state()
     init.valuations = {"rolled": 0}
     init.set_transitions(
@@ -386,7 +386,7 @@ def test_get_state_action_reward():
     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
     # we add a reward model:
-    rewardmodel = mdp.add_rewards("rewardmodel")
+    rewardmodel = mdp.new_reward_model("rewardmodel")
     rewardmodel.set_from_rewards_vector(list(range(67)))
 
     state = mdp.get_state_by_id(2)
@@ -403,7 +403,7 @@ def test_get_state_action_reward():
 #     mdp.add_transitions(mdp.get_initial_state(), [(action, mdp.get_initial_state())])
 
 #     # we make a reward model using the set_state_action_reward method:
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     rewardmodel.set_state_action_reward(mdp.get_initial_state(), action, 5)
 
 #     # we make a reward model manually:
@@ -420,7 +420,7 @@ def test_get_state_action_reward():
 #     mdp = stormvogel.examples.monty_hall.create_monty_hall_mdp()
 
 #     # we add a reward model with only one reward
-#     rewardmodel = mdp.add_rewards("rewardmodel")
+#     rewardmodel = mdp.new_reward_model("rewardmodel")
 #     state = mdp.get_state_by_id(2)
 #     action = state.available_actions()[1]
 #     rewardmodel.set_state_action_reward(state, action, 3)
@@ -437,7 +437,7 @@ def test_valuation_methods():
     assert mdp.get_variables() == {"car_pos", "chosen_pos", "reveal_pos"}
 
     # we test the unassigned_variables function + the set_valuation_at_remaining_states function on the die model
-    dtmc = stormvogel.model.new_dtmc("Die")
+    dtmc = stormvogel.model.new_dtmc()
     init = dtmc.get_initial_state()
     init.set_transitions(
         [

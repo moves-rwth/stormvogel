@@ -277,7 +277,7 @@ def simulate(
     # we add each (empty) rewardmodel to the partial model
     if model.rewards:
         for index, reward in enumerate(model.rewards):
-            reward_model = partial_model.add_rewards(model.rewards[index].name)
+            reward_model = partial_model.new_reward_model(model.rewards[index].name)
 
             # we already set the rewards for the initial state/stateaction
             if model.supports_actions():
@@ -445,7 +445,7 @@ def simulate(
                         branch.branch.append((probability, new_state))
                     else:
                         discovered_actions.add((last_state_id, action))
-                        branch = stormvogel.model.Branch([(probability, new_state)])
+                        branch = stormvogel.model.Branch(probability, new_state)
                         trans = stormvogel.model.Transition({action: branch})
                         assert trans is not None
                         s = partial_model.get_state_by_name(str(last_state_id))

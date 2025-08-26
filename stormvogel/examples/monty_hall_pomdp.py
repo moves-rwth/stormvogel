@@ -3,7 +3,7 @@ import stormvogel.model
 
 def create_monty_hall_pomdp():
     # Create a new model
-    pomdp = stormvogel.model.new_pomdp("")
+    pomdp = stormvogel.model.new_pomdp()
 
     init = pomdp.get_initial_state()
 
@@ -73,7 +73,7 @@ def create_monty_hall_pomdp():
     pomdp.set_valuation_at_remaining_states(value=-1)
 
     # we add the observations TODO: let it make sense
-    for state in pomdp.states.values():
+    for _, state in pomdp:
         state.set_observation(state.id)
 
     return pomdp

@@ -959,7 +959,7 @@ def test_induced_dtmc():
     mdp.add_self_loops()
 
     # we set rewards (because we must also check if they are carried over)
-    rewardmodel = mdp.add_rewards("r1")
+    rewardmodel = mdp.new_reward_model("r1")
     for i in range(4):
         pair = mdp.get_state_action_pair(i)
         assert pair is not None
@@ -967,7 +967,7 @@ def test_induced_dtmc():
 
     # we create the induced dtmc
     chosen_actions = dict()
-    for state_id, state in mdp.states.items():
+    for state_id, state in mdp:
         chosen_actions[state_id] = state.available_actions()[0]
     scheduler = stormvogel.result.Scheduler(mdp, chosen_actions)
 
@@ -988,7 +988,7 @@ def test_induced_dtmc():
     other_dtmc.add_self_loops()
 
     # and the rewards of the induced dtmc
-    rewardmodel = other_dtmc.add_rewards("r1")
+    rewardmodel = other_dtmc.new_reward_model("r1")
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(0), 0)
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(1), 2)
     rewardmodel.set_state_reward(other_dtmc.get_state_by_id(2), 3)
@@ -999,5 +999,5 @@ def test_induced_dtmc():
 def test_random_scheduler():
     lion = stormvogel.examples.create_lion_mdp()
     sched = stormvogel.result.random_scheduler(lion)
-    for i in lion.get_states().keys():
+    for i, _ in lion:
         sched.get_choice_of_state(i)
