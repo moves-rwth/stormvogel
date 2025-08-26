@@ -67,11 +67,11 @@ def test_bird_mdp():
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
-    regular_model.add_transitions(
-        state1, model.Transition({other_left: branch12, other_right: branch10})
+    regular_model.add_choice(
+        state1, model.Choice({other_left: branch12, other_right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
+    regular_model.add_choice(state2, model.Choice({other_right: branch21}))
+    regular_model.add_choice(state0, model.Choice({other_left: branch01}))
 
     rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
@@ -150,14 +150,14 @@ def test_bird_mdp_int():
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
-    regular_model.add_transitions(
+    regular_model.add_choice(
         state1,
-        model.Transition(
+        model.Choice(
             {other_right: branch10, other_left: branch12}
-        ),  # state1, model.Transition({left: branch12, right: branch10})
+        ),  # state1, model.Choice({left: branch12, right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
+    regular_model.add_choice(state2, model.Choice({other_right: branch21}))
+    regular_model.add_choice(state0, model.Choice({other_left: branch01}))
 
     rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
@@ -256,75 +256,75 @@ def test_bird_dtmc():
     regular_model.states[0].valuations = {"s": 0}
     init = regular_model.get_initial_state()
     init.valuations = {"s": 0, "d": -1}
-    regular_model.set_transitions(
+    regular_model.set_choice(
         init,
         [
             (1 / 2, regular_model.new_state(valuations={"s": 1, "d": -1})),
             (1 / 2, regular_model.new_state(valuations={"s": 2, "d": -1})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(1),
         [
             (1 / 2, regular_model.new_state(valuations={"s": 3, "d": -1})),
             (1 / 2, regular_model.new_state(valuations={"s": 4, "d": -1})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(2),
         [
             (1 / 2, regular_model.new_state(valuations={"s": 5, "d": -1})),
             (1 / 2, regular_model.new_state(valuations={"s": 6, "d": -1})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(3),
         [
             (1 / 2, regular_model.get_state_by_id(1)),
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 1})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(4),
         [
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 2})),
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 3})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(5),
         [
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 4})),
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 5})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(6),
         [
             (1 / 2, regular_model.get_state_by_id(2)),
             (1 / 2, regular_model.new_state(valuations={"s": 7, "d": 6})),
         ],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(7),
         [(1, regular_model.new_state(valuations={"s": 7, "d": 0}))],
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(8), [(1, regular_model.get_state_by_id(13))]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(9), [(1, regular_model.get_state_by_id(13))]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(10), [(1, regular_model.get_state_by_id(13))]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(11), [(1, regular_model.get_state_by_id(13))]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(12), [(1, regular_model.get_state_by_id(13))]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(13), [(1, regular_model.get_state_by_id(13))]
     )
 
@@ -349,10 +349,10 @@ def test_bird_dtmc_arbitrary():
     bird_model = bird.build_bird(delta, init="hungry", modeltype=model.ModelType.DTMC)
 
     regular_model = model.new_dtmc()
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_initial_state(), [(1, regular_model.new_state())]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(1), [(1, regular_model.get_initial_state())]
     )
 
@@ -379,10 +379,10 @@ def test_bird_mdp_empty_action():
     )
 
     regular_model = model.new_mdp()
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_initial_state(), [(1, regular_model.new_state())]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(1), [(1, regular_model.get_initial_state())]
     )
 
@@ -501,11 +501,11 @@ def test_bird_pomdp():
     branch01 = model.Branch([(0.5, state0), (0.5, state1)])
     branch21 = model.Branch([(0.5, state2), (0.5, state1)])
 
-    regular_model.add_transitions(
-        state1, model.Transition({other_left: branch12, other_right: branch10})
+    regular_model.add_choice(
+        state1, model.Choice({other_left: branch12, other_right: branch10})
     )
-    regular_model.add_transitions(state2, model.Transition({other_right: branch21}))
-    regular_model.add_transitions(state0, model.Transition({other_left: branch01}))
+    regular_model.add_choice(state2, model.Choice({other_right: branch21}))
+    regular_model.add_choice(state0, model.Choice({other_left: branch01}))
 
     rewardmodel = regular_model.new_reward_model("r1")
     for i in range(2 * N):
@@ -546,10 +546,10 @@ def test_bird_ctmc():
     )
 
     regular_model = model.new_ctmc()
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_initial_state(), [(5, regular_model.new_state())]
     )
-    regular_model.set_transitions(
+    regular_model.set_choice(
         regular_model.get_state_by_id(1), [(3, regular_model.get_initial_state())]
     )
     regular_model.set_rate(regular_model.get_initial_state(), 5)

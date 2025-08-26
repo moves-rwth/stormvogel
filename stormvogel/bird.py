@@ -146,9 +146,9 @@ def build_bird(
     (this function uses the bird classes state and action instead of the ones from stormvogel.model)
     """
 
-    def add_new_transitions(tuples, state):
+    def add_new_choices(tuples, state):
         """
-        helper function to add all the newly found transitions and states to the model
+        helper function to add all the newly found choices and states to the model
         """
         branch = []
         if tuples is not None:
@@ -242,7 +242,7 @@ def build_bird(
                         f"On input pair {state} {action}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                     )
 
-                branch = add_new_transitions(tuples, state)
+                branch = add_new_choices(tuples, state)
 
                 if branch != []:
                     transition[stormvogel_action] = stormvogel.model.Branch(branch)
@@ -255,7 +255,7 @@ def build_bird(
                     f"On input {state}, the delta function does not return a list. Make sure to change the format to [(<value>,<state>),...]"
                 )
 
-            branch = add_new_transitions(tuples, state)
+            branch = add_new_choices(tuples, state)
 
             if branch != []:
                 transition[stormvogel.model.EmptyAction] = stormvogel.model.Branch(
@@ -264,9 +264,9 @@ def build_bird(
 
         s = state_lookup[state]
         assert s is not None
-        model.add_transitions(
+        model.add_choice(
             s,
-            stormvogel.model.Transition(transition),
+            stormvogel.model.Choice(transition),
         )
 
         # if at some point we discovered more than max_size states, we complain
