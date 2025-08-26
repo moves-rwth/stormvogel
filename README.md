@@ -17,9 +17,12 @@ Check out the [the stormvogel documentation](https://moves-rwth.github.io/stormv
 
 There are different ways to install stormvogel, depending on your needs. If you do not have stormpy installed, we recommend installing with Docker. If you already have stormpy, or are not interested in features that rely on stormpy, then we recommend installing without docker.
 
-Note: We are currently working on making stormpy easy to install with pip, which would make a direct installation preferable on Linux/macOS. This README will be updated when this is working.
+### Pip (release version, recommended for users)
 
-### Docker (release version, recommended for users)
+1. Run `pip install stormvogel`.
+2. To also install stormpy, run `pip install stormpy`.
+
+### Docker (release version)
 
 1. Install `docker`. Run:
 2. `docker run -it -p 8080:8080 stormvogel/stormvogel`
