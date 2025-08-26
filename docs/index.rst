@@ -73,6 +73,14 @@ Stormvogel provides easy and user-friendly APIs for creating, visualizing, and d
 
    5-Tools-and-Utilities/*
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Tips and Tricks
+   :glob:
+
+   6-Tips-and-Tricks/*
+
+
 Version info:
 ===========================
 
