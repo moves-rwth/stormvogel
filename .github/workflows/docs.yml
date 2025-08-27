@@ -61,7 +61,7 @@ jobs:
         with:
           files: |
             docs/**/*.py
-          exclude: |
+          exclude-files: |
             docs/conf.py
 
       - name: Generate documentation notebooks from jupytext
