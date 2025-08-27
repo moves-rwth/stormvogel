@@ -100,5 +100,3 @@ favorite_door = 2 # 0, 1, or 2
 new_mdp = examples.create_monty_hall_mdp2()
 result = model_checking(new_mdp,f'Pmax=? [((("init" | "carchosen" | "o_{favorite_door}") U "should_switch"))]')
 vis5 = show(new_mdp, layout=Layout("layouts/monty2.json"), result=result)
-
-# %%

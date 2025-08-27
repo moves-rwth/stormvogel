@@ -143,5 +143,3 @@ extensions.display_value_iteration_result(res3, 10, labels)
 # %%
 res4 = extensions.dtmc_evolution(stormvogel_dtmc, 15)
 res3 == res4
-
-# %%

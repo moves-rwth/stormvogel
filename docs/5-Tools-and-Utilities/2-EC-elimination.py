@@ -164,5 +164,3 @@ vis = show(sv_mdp_elim)
 sp_mdp_elim2 = extensions.simple_ec_elimination(sp_mdp)
 sv_mdp_elim2 = stormpy_utils.mapping.stormpy_to_stormvogel(sp_mdp_elim2)
 sv_mdp_elim == sv_mdp_elim2
-
-# %%

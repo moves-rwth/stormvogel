@@ -43,5 +43,3 @@ vis = show(stormvogel_model2, layout=Layout("layouts/car.json"))
 
 # %%
 stormvogel_model == stormvogel_model2
-
-# %%

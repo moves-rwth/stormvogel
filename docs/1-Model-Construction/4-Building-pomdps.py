@@ -100,5 +100,3 @@ values = [50, 50, 50, 100.0, 0.0]
 result2 = stormvogel.result.Result(coin_pomdp, values, scheduler2)
 
 vis4 = show(coin_pomdp, result=result2)
-
-# %%

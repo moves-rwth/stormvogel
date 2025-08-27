@@ -74,5 +74,3 @@ bird_star = bird.build_bird(
 )
 
 vis2 = show(bird_star, layout=Layout("layouts/star.json"))
-
-# %%

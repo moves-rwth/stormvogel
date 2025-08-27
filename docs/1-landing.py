@@ -102,9 +102,3 @@ vis = show(examples.create_car_mdp(), layout=stormvogel.layout.Layout("layouts/c
 
 # %%
 bird = show_bird()
-
-# %% [markdown]
-# See the [file listing](contents.html).
-
-# %% [raw]
-# .. include:: contents.rst

@@ -126,5 +126,3 @@ res = model_checking(sv_model, f'Rmax=? [S]')
 gs = to_gymnasium_scheduler(sv_model, res.scheduler, GRID_ACTION_LABEL_MAP)
 filename = gymnasium_render_model_gif(env, gs, filename="taxi")
 extensions.embed_gif(filename)
-
-# %%

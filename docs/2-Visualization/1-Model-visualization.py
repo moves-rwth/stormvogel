@@ -82,5 +82,3 @@ vis = show(examples.create_car_mdp(), layout=my_layout)
 import IPython.display as ipd
 # ipd.display(ipd.Javascript(
 # f"""{vis.nt.network_wrapper}.network.destroy()"""))
-
-# %%

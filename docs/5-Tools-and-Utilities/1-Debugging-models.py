@@ -87,5 +87,3 @@ vis.highlight_state_set(min_1, color="pink")
 
 # %%
 vis.clear_highlighting()
-
-# %%

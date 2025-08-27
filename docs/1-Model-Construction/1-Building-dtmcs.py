@@ -161,5 +161,3 @@ for sid in range(0,4):
         [(p,die_model.get_state_by_id(sid_)) for p,sid_ in TRANSITIONS[sid]])
 
 vis4 = show(commu_model, layout=Layout("layouts/commu.json"))
-
-# %%

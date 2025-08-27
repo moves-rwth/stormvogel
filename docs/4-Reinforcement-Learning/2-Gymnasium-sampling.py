@@ -57,5 +57,3 @@ def convert_obs(xs):
 model = extensions.sample_gym_to_stormvogel(env, no_samples=10, sample_length=5, convert_obs=convert_obs, max_size=10000)
 print(model.summary())
 show(model)
-
-# %%

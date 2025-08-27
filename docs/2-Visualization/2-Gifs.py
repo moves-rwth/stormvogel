@@ -50,5 +50,3 @@ vis = show(mdp, layout=Layout("layouts/die.json"))
 import IPython.display as ipd
 filename = extensions.render_model_gif(mdp, state_to_image, filename="die")
 extensions.embed_gif(filename)
-
-# %%

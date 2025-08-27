@@ -130,5 +130,3 @@ q = bird.build_bird(
     labels=labels,
     delta=delta)
 vis_q = show(q)
-
-# %%

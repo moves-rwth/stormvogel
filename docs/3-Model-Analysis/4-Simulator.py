@@ -52,5 +52,3 @@ vis.highlight_path(path2, "red", 1, clear=True)
 # %%
 partial_model = stormvogel.simulator.simulate(lion, steps=5, scheduler=scheduler, seed=1234)
 vis2 = show(partial_model)
-
-# %%

@@ -185,5 +185,3 @@ for x in range(N):
             target_state = grid_model.get_states_with_label(target_tile_label)[0]
             state.add_choice([(grid_model.action(a), target_state)])
 vis4 = show(grid_model)
-
-# %%
