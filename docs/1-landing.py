@@ -98,7 +98,7 @@ vis = show(examples.create_car_mdp(), layout=stormvogel.layout.Layout("layouts/c
 #
 # Stormvogel was developed at the Radboud University in 2024-2025 by Linus Heck, Pim Leerkes and Ivo Melse under the supervision of Sebastian Junges (Radboud) and Matthias Volk (Eindhoven University of Technology). We would like to thank the Dutch Research Council (NWO) for providing funding for the project via the NWO Open Science Fund Grant StormAE.
 #
-# Good luck using stormvogel! And if you ever get bored or frustrated, the bird is here to cheer you up! (This bird is in fact a singleton DTMC)
+# Good luck using stormvogel! And if you ever get bored or frustrated, the bird is here to cheer you up! (This bird is in fact a singleton DTMC!)
 
 # %%
 bird = show_bird()
