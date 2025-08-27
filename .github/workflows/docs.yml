@@ -62,7 +62,7 @@ jobs:
           files: |
             docs/**/*.py
           exclude: |
-            docs/**/conf.py
+            docs/conf.py
 
       - name: Generate documentation notebooks from jupytext
         run: |
