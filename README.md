@@ -11,7 +11,7 @@ The state-of-the-art model checking tools that are currently available are optim
 * Support for gymnasium environments
 * An extensive documentation with clear examples.
 
-Check out the [the stormvogel documentation](https://moves-rwth.github.io/stormvogel/) for examples of how to use stormvogel.
+Check out the [the stormvogel documentation](https://stormchecker.github.io/stormvogel/) for examples of how to use stormvogel.
 
 ## Installation
 
@@ -52,4 +52,4 @@ Stormvogel was mainly developed at Radboud University by Linus Heck, Pim Leerkes
 Thank you to our contributors: Luko van der Maas, Nicklas Osmers.
 
 ## License
-Stormvogel is licenced under the [GPL-3.0 license](https://github.com/moves-rwth/stormvogel?tab=GPL-3.0-1-ov-file).
+Stormvogel is licenced under the [GPL-3.0 license](https://github.com/stormchecker/stormvogel?tab=GPL-3.0-1-ov-file).
