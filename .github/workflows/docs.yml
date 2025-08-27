@@ -64,6 +64,10 @@ jobs:
           exclude: |
             docs/landing.ipynb
 
+      - name: Generate documentation notebooks from jupytext
+        run: |
+          poetry run jupytext --to notebook ${{ steps.glob.outputs.paths }}
+
       - name: Run documentation notebooks
         run: |
          poetry run jupyter nbconvert --execute --to notebook --inplace ${{ steps.glob.outputs.paths }} --ExecutePreprocessor.kernel_name=python3
