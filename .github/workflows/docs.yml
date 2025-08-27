@@ -57,14 +57,14 @@ jobs:
 
       - name: Glob python files in docs folder
         uses: tj-actions/glob@v22
-        id: glob
+        id: globpy
         with:
           files: |
             docs/**/*.py
 
       - name: Generate documentation notebooks from jupytext
         run: |
-          poetry run jupytext --to notebook ${{ steps.glob.outputs.paths }}
+          poetry run jupytext --to notebook ${{ steps.globpy.outputs.paths }}
 
       - name: Glob notebooks in docs folder
         uses: tj-actions/glob@v22
