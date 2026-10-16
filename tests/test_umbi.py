@@ -99,6 +99,26 @@ def test_ctmc_file_roundtrip():
 # ---------------------------------------------------------------------------
 
 
+def test_init_label_not_exported():
+    m = sv.new_dtmc(create_initial_state=False)
+    other = m.new_state("other")
+    init = m.new_state(["init", "start"])
+    other.set_choices([(1.0, other)])
+    init.set_choices([(1.0, other)])
+
+    ats = svu.translate_to_umbi(m)
+    ats.validate()
+    assert ats.initial_states == [1]
+    assert set(ats.ap_annotations) == {"other", "start"}
+    assert list(ats.ap_annotations["start"].state_values) == [False, True]
+    assert init.has_label("init")  # Export must not mutate the source model.
+
+    for restored in (svu.translate_to_stormvogel(ats), _file_roundtrip(m)):
+        assert restored.initial_state == restored.states[1]
+        assert restored.initial_state.has_label("init")
+        assert restored.initial_state.has_label("start")
+
+
 def test_labels_preserved():
     m = ex.create_die_dtmc()
     m2 = _roundtrip(m)
@@ -362,12 +382,12 @@ def _make_ats_with_choice_annotations():
     ats.new_states(2)
     ats.initial_states = [0]
     ats.num_choice_actions = 1
-    ats.new_choice_action_to_name()
+    ats.add_choice_action_to_name()
     ats.choice_action_to_name[0] = "a"
-    c0 = ats.new_state_choice(0)
+    c0 = ats.new_choice(0)
     ats.choice_to_choice_action[c0] = 0
     ats.new_choice_branch(c0, 1, 1)
-    c1 = ats.new_state_choice(1)
+    c1 = ats.new_choice(1)
     ats.choice_to_choice_action[c1] = 0
     ats.new_choice_branch(c1, 1, 1)
     vv = ats.add_variable_valuations()
@@ -389,9 +409,9 @@ def _make_ats_with_branch_annotations():
     ats.num_players = 0
     ats.new_states(2)
     ats.initial_states = [0]
-    c0 = ats.new_state_choice(0)
+    c0 = ats.new_choice(0)
     b0 = ats.new_choice_branch(c0, 1, 1)
-    c1 = ats.new_state_choice(1)
+    c1 = ats.new_choice(1)
     b1 = ats.new_choice_branch(c1, 1, 1)
     vv = ats.add_variable_valuations()
     bv = vv.add_branch_valuations()

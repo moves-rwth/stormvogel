@@ -160,7 +160,7 @@ def translate_to_umbi(
     if model.supports_actions():
         all_actions = list(model.actions)
         ats.num_choice_actions = len(all_actions)
-        ats.new_choice_action_to_name()
+        ats.add_choice_action_to_name()
         for ca_id, action in enumerate(all_actions):
             action_to_ca[action] = ca_id
             ats.choice_action_to_name[ca_id] = none_to_empty_string(action.label)
@@ -172,7 +172,7 @@ def translate_to_umbi(
             continue
         exit_rate = ats.state_to_exit_rate[s_id] if model.supports_rates() else None
         for action, branch in state.choices:
-            choice = ats.new_state_choice(s_id)
+            choice = ats.new_choice(s_id)
             if action_to_ca:
                 ats.choice_to_choice_action[choice] = action_to_ca[action]
             for value, target in branch:
@@ -185,8 +185,10 @@ def translate_to_umbi(
                     prob = value
                 ats.new_choice_branch(choice, t_id, prob)
 
-    # AP labels
     for label, labeled_states in model.state_labels.items():
+        # Skip the initial state label, as it's handled separately.
+        if label == "init":
+            continue
         ann = ats.new_ap_annotation(name=label)
         ids = {state_to_id[s] for s in labeled_states}
         ann.state_values = [i in ids for i in range(ats.num_states)]

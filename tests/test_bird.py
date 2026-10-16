@@ -420,6 +420,44 @@ def test_bird_dtmc_arbitrary():
     assert_models_equal(bird_model, regular_model)
 
 
+def test_bird_partial_rewards_default_to_zero():
+    def delta(s):
+        if s == "init":
+            return [(0.5, "rewarded"), (0.5, "other")]
+        return None
+
+    def rewards(s) -> dict[str, model.Value] | None:
+        if s == "rewarded":
+            return {"R": 100}
+        if s == "other":
+            return {"cost": 5}
+        # A missing return is a partial reward definition.
+
+    bird_model = bird.build_bird(
+        delta,
+        init="init",
+        rewards=rewards,
+        labels=lambda s: s,
+        modeltype=model.ModelType.DTMC,
+    )
+
+    by_label = {
+        label: state
+        for state in bird_model.states
+        for label in state.labels
+        if label in {"init", "rewarded", "other"}
+    }
+    reward_model = bird_model.get_rewards("R")
+    cost_model = bird_model.get_rewards("cost")
+
+    assert reward_model.get_state_reward(by_label["init"]) == 0
+    assert reward_model.get_state_reward(by_label["rewarded"]) == 100
+    assert reward_model.get_state_reward(by_label["other"]) == 0
+    assert cost_model.get_state_reward(by_label["init"]) == 0
+    assert cost_model.get_state_reward(by_label["rewarded"]) == 0
+    assert cost_model.get_state_reward(by_label["other"]) == 5
+
+
 def test_bird_mdp_empty_action():
     # we test if we can also provide empty actions
     def available_actions(s):
@@ -584,7 +622,7 @@ def test_bird_pomdp():
         return [str(s.x)]
 
     def observations(s: bird.BirdState):
-        return 5
+        return "5"
 
     def delta(s: bird.BirdState, action: bird.BirdAction):
         if action == left:
@@ -723,9 +761,9 @@ def test_bird_stochastic_observations():
 
     def observations(s: bird.BirdState):
         if s.x == 0:
-            return [(0.6, 0), (0.4, 1)]
+            return [(0.6, "0"), (0.4, "1")]
         else:
-            return 2
+            return "2"
 
     bird_model = bird.build_bird(
         delta=delta,
@@ -772,9 +810,9 @@ def test_bird_stochastic_observations_make_deterministic():
 
     def observations(s: bird.BirdState):
         if s.x == 0:
-            return [(0.3, 0), (0.7, 1)]
+            return [(0.3, "0"), (0.7, "1")]
         else:
-            return 2
+            return "2"
 
     bird_model = bird.build_bird(
         delta=delta,
