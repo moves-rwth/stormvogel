@@ -323,12 +323,12 @@ def _make_ats_with_choice_annotations():
     ats.new_states(2)
     ats.initial_states = [0]
     ats.num_choice_actions = 1
-    ats.new_choice_action_to_name()
+    ats.add_choice_action_to_name()
     ats.choice_action_to_name[0] = "a"
-    c0 = ats.new_state_choice(0)
+    c0 = ats.new_choice(0)
     ats.choice_to_choice_action[c0] = 0
     ats.new_choice_branch(c0, 1, 1)
-    c1 = ats.new_state_choice(1)
+    c1 = ats.new_choice(1)
     ats.choice_to_choice_action[c1] = 0
     ats.new_choice_branch(c1, 1, 1)
     vv = ats.add_variable_valuations()
@@ -350,9 +350,9 @@ def _make_ats_with_branch_annotations():
     ats.num_players = 0
     ats.new_states(2)
     ats.initial_states = [0]
-    c0 = ats.new_state_choice(0)
+    c0 = ats.new_choice(0)
     b0 = ats.new_choice_branch(c0, 1, 1)
-    c1 = ats.new_state_choice(1)
+    c1 = ats.new_choice(1)
     b1 = ats.new_choice_branch(c1, 1, 1)
     vv = ats.add_variable_valuations()
     bv = vv.add_branch_valuations()
