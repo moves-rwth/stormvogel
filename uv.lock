@@ -3432,8 +3432,8 @@ requires-dist = [
     { name = "stormpy", marker = "extra == 'storm'", specifier = ">=1.13.2,<2" },
     { name = "svgpathtools", marker = "extra == 'viz'", specifier = ">=1.6.1,<2" },
     { name = "sympy", specifier = ">=1.14.0,<2" },
-    { name = "umbi", specifier = ">=0.2.12,<0.3.0" },
-    { name = "umbi", marker = "extra == 'io'", specifier = ">=0.2.10,<0.3" },
+    { name = "umbi", specifier = ">=0.2.14,<0.3.0" },
+    { name = "umbi", marker = "extra == 'io'", specifier = ">=0.2.14,<0.3" },
     { name = "z3-solver", marker = "extra == 'solvers'", specifier = ">=4.0,<5" },
 ]
 provides-extras = ["storm", "paynt", "gym", "io", "viz", "solvers"]
@@ -3632,7 +3632,7 @@ wheels = [
 
 [[package]]
 name = "umbi"
-version = "0.2.12"
+version = "0.2.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bitstring" },
@@ -3641,9 +3641,9 @@ dependencies = [
     { name = "marshmallow" },
     { name = "marshmallow-oneofschema" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/35/8b4951659a79adc92f0984c607bebfa08a7ab5fd2eb0b2d7001d3e4db06d/umbi-0.2.12.tar.gz", hash = "sha256:e6804cace37f35ef43fe63bd94e852cac43d3e3557105b0b20d3f3557d49d957", size = 63454, upload-time = "2026-06-01T15:14:27.993Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/73/34/b33f9a8dc786da489034895ff493d472eeb43f2a43af448c25fd35ce09af/umbi-0.2.14.tar.gz", hash = "sha256:f0da681b0e1945585e11b83489270ee43fdb981a0c4c33e6997c1d95ca09bfe3", size = 64445, upload-time = "2026-10-16T06:07:15.082Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fe/7d/a2bd0769c06ed0d3ed19c05a9f432ba82111e0f96506d41707da08358735/umbi-0.2.12-py3-none-any.whl", hash = "sha256:df211da9bea84899efb06836d9334eb2f5993c5b26b471146292d64a133f72cb", size = 80511, upload-time = "2026-06-01T15:14:26.672Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/1e/f00bc46328706413836ef30dfb33cb9d39eb8620e92934471a40a1837233/umbi-0.2.14-py3-none-any.whl", hash = "sha256:1b68e492a903482a7fd8e0fbf110e25e7f75ce3ba04869ea59e1a3bbe30b84ec", size = 81296, upload-time = "2026-10-16T06:07:13.446Z" },
 ]
 
 [[package]]
