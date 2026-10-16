@@ -438,6 +438,7 @@ def plot_model_pydot(
     highlight_state: "stormvogel.model.State | None" = None,
     self_loop_position: "str | dict[stormvogel.model.State, str] | None" = None,
     color_by_observation: bool = True,
+    adapt_to_dark_mode: bool = True,
 ) -> None:
     """Render a stormvogel model to SVG/PDF using pydot.
 
@@ -487,6 +488,13 @@ def plot_model_pydot(
         automatically chosen muted pastel colors, one distinct color per
         observation. ``state_colors`` (label-based) still takes priority.
         Has no effect on models that do not support observations.
+    :param adapt_to_dark_mode: When ``True`` (default), SVG output carries CSS
+        that inverts the lightness of all colors and turns labels white when the
+        operating system or browser prefers a dark color scheme (or the page has
+        the class ``dark``), assuming a dark page behind the transparent SVG.
+        Set to ``False`` to always draw black-on-white: the plot then gets a
+        white background and looks the same on any page. Has no effect on PDF
+        output.
     """
     use_positions = bool(positions)
     prog = "neato" if use_positions else "dot"
@@ -648,11 +656,18 @@ def plot_model_pydot(
                         edge_attrs["tailport"] = port
                 graph.add_edge(pydot.Edge(src_id, node_id[target], **edge_attrs))
 
+    if not adapt_to_dark_mode:
+        graph.set_bgcolor("white")
+
     graph.set_prog(prog)
     if output_file:
         if output_file.lower().endswith(".svg"):
             with open(output_file, "wb") as _f:
-                _f.write(_dark_mode_svg(graph.create_svg()))
+                _f.write(
+                    _dark_mode_svg(graph.create_svg())
+                    if adapt_to_dark_mode
+                    else graph.create_svg()
+                )
         elif output_file.lower().endswith(".pdf"):
             graph.write_pdf(output_file)
         else:
@@ -664,7 +679,11 @@ def plot_model_pydot(
                 self._g = g
 
             def _repr_html_(self):
-                svg = _dark_mode_html(self._g.create_svg())
+                svg = (
+                    _dark_mode_html(self._g.create_svg())
+                    if adapt_to_dark_mode
+                    else self._g.create_svg().decode("utf-8")
+                )
                 uid = f"sv-{uuid4().hex[:8]}"
                 return (
                     f'<div style="display:inline-block;max-width:100%">'
