@@ -1486,7 +1486,7 @@ def test_add_observation_valuations_maze():
     options = stormpy.BuilderOptions()
     options.set_build_observation_valuations()
     options.set_build_choice_labels()
-    pomdp_sparse = stormpy.build_sparse_model_with_options(prism_program, options)
+    pomdp_sparse = stormpy.build_model(prism_program, options=options)
     pomdp_sparse = stormpy_pomdp.make_canonic(pomdp_sparse)
 
     sv_model = mapping.stormpy_to_stormvogel(pomdp_sparse)
@@ -1519,7 +1519,7 @@ def test_add_observation_valuations_no_obs_valuations():
     # build WITHOUT observation_valuations
     options = stormpy.BuilderOptions()
     options.set_build_choice_labels()
-    pomdp_sparse = stormpy.build_sparse_model_with_options(prism_program, options)
+    pomdp_sparse = stormpy.build_model(prism_program, options=options)
     pomdp_sparse = stormpy_pomdp.make_canonic(pomdp_sparse)
 
     sv_model = mapping.stormpy_to_stormvogel(pomdp_sparse)

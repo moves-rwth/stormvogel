@@ -59,7 +59,7 @@ orchard_prism, _ = build_prism()
 # Probability of winning the simple game
 prob_players_won = 'Pmax=? [F "PlayersWon"]'
 result = stormvogel.model_checking(orchard_simple, prob_players_won)
-print(result.at(orchard_simple.initial_state))
+print(result.get_value(orchard_simple.initial_state))
 
 # %% [markdown]
 # The resulting winning probability is $0.5712$.
@@ -97,7 +97,7 @@ vis = stormvogel.show(orchard_simple, result=result)
 # Probability of winning the full game
 prob_players_won = 'Pmax=? [F "PlayersWon"]'
 result = stormvogel.model_checking(orchard, prob_players_won)
-print(result.at(orchard.initial_state))
+print(result.get_value(orchard.initial_state))
 
 # %% [markdown]
 # The wininng probabilty is $0.6313$.
@@ -135,7 +135,7 @@ print(stormvogel.model_checking(orchard, reward_prop).at(orchard.initial_state))
 def model_check(model, prop):
     formula = stormpy.parse_properties(prop)[0]
     result = stormpy.model_checking(model, formula, only_initial_states=True)
-    return result.at(model.initial_states[0])
+    return result.get_value(model.initial_states[0])
 
 
 # %% [markdown]

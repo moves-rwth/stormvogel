@@ -220,3 +220,26 @@ def test_enumerate_ecs_buchi_satisfies(buchi_mdp):
 def test_enumerate_ecs_mixed_mec_count(mixed_mec_mdp):
     ecs = enumerate_ecs(mixed_mec_mdp)
     assert len(ecs) == 4
+
+
+def test_eliminate_singleton_mec_keeps_exit():
+    """The stay choice must not overwrite a singleton MEC's exit choice."""
+    pytest.importorskip("stormpy")
+    mdp = sv_model.new_mdp()
+    initial = mdp.initial_state
+    target = mdp.new_state("target")
+    initial.set_choices(
+        {
+            mdp.action("exit"): [(1.0, target)],
+            mdp.action("wait"): [(1.0, initial)],
+        }
+    )
+    target.set_choices([(1.0, target)])
+
+    _, state_map = eliminate_mecs(mdp)
+    choices = {
+        action.label: distribution
+        for action, distribution in state_map[initial].choices
+    }
+    assert choices["exit"].support == {state_map[target]}
+    assert choices["wait"].support == {state_map[initial]}

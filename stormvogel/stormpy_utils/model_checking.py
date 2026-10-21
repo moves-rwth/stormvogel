@@ -46,7 +46,7 @@ def model_checking(
         prop = stormpy.parse_properties(prop)
         assert prop is not None
 
-        if prop[0].raw_formula.is_multi_objective_formula:
+        if prop[0].get_raw_formula().is_multi_objective_formula:
             stormpy_result = stormpy.model_checking(stormpy_model, prop[0])
             return convert_results.convert_pareto_result(stormpy_result, prop[0])
 
@@ -63,12 +63,10 @@ def model_checking(
                     "is not fixed and stormpy model checking may be ill-supported.",
                     stacklevel=2,
                 )
-            task = stormpy.CheckTask(prop[0].raw_formula, True)
-            task.set_uncertainty_resolution_mode(
-                stormpy.UncertaintyResolutionMode.ROBUST
-            )
-            stormpy_result = stormpy.check_interval_mdp(
-                stormpy_model, task, stormpy.Environment()
+            stormpy_result = stormpy.model_checking(
+                stormpy_model,
+                prop[0],
+                uncertainty_resolution_mode=stormpy.UncertaintyResolutionMode.ROBUST,
             )
         elif model.supports_actions() and scheduler:
             stormpy_result = stormpy.model_checking(

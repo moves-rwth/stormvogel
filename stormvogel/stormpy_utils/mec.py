@@ -9,75 +9,12 @@ except ImportError:
     stormpy = None  # type: ignore[assignment]
 
 import stormvogel.model as model
-from stormvogel.model.action import Action
-from stormvogel.model.choices import Choices
+from stormvogel.model.distribution import Distribution
 from stormvogel.stormpy_utils import mapping
 
 
 def _sv_state_name(s: model.State, sp_id: int) -> str:
     return s.friendly_name if s.friendly_name is not None else str(sp_id)
-
-
-def _relabel_actions(
-    sv_new: model.Model,
-    mdp: model.Model,
-    new_id_to_old_sp_ids: dict[int, list[int]],
-    sp_id_to_sv_old: dict[int, model.State],
-) -> None:
-    """Restore meaningful action labels on *sv_new* after MEC elimination.
-
-    Pass-through states get their original labels back (matched by position).
-    MEC representatives get exit choices labelled ``{action}_{origstate}``
-    (the textbook $a_s$ notation); the stormpy-added self-loop is labelled
-    ``stay``.
-    """
-    for nid, old_sp_ids in new_id_to_old_sp_ids.items():
-        s_new = sv_new.states[nid]
-        if s_new not in sv_new.transitions:
-            continue
-
-        current_choices = list(sv_new.transitions[s_new])  # [(action, dist)]
-
-        if len(old_sp_ids) == 1:
-            # Pass-through: restore original labels by position.
-            s_old = sp_id_to_sv_old[old_sp_ids[0]]
-            if s_old not in mdp.transitions:
-                continue
-            orig_choices = list(mdp.transitions[s_old])
-            if len(orig_choices) != len(current_choices):
-                continue
-            new_dict = {
-                orig_action: new_dist
-                for (orig_action, _), (_, new_dist) in zip(
-                    orig_choices, current_choices
-                )
-            }
-            sv_new.set_choices(s_new, Choices(new_dict))
-
-        else:
-            # MEC representative: build exit labels in sorted stormpy-ID order.
-            mec_sp_ids = frozenset(old_sp_ids)
-            exit_labels: list[str] = []
-            for sp_id in sorted(old_sp_ids):
-                s_old = sp_id_to_sv_old[sp_id]
-                if s_old not in mdp.transitions:
-                    continue
-                for a_old, dist_old in mdp.transitions[s_old]:
-                    succ_sp_ids = {mdp.stormpy_id[succ] for _, succ in dist_old}
-                    if succ_sp_ids - mec_sp_ids:  # choice exits the MEC
-                        base = a_old.label if a_old.label is not None else "exit"
-                        exit_labels.append(f"{base}_{_sv_state_name(s_old, sp_id)}")
-
-            new_dict = {}
-            exit_idx = 0
-            for _, new_dist in current_choices:
-                if all(succ is s_new for _, succ in new_dist):
-                    new_dict[Action("stay")] = new_dist
-                else:
-                    if exit_idx < len(exit_labels):
-                        new_dict[Action(exit_labels[exit_idx])] = new_dist
-                        exit_idx += 1
-            sv_new.set_choices(s_new, Choices(new_dict))
 
 
 def detect_mecs(
@@ -101,7 +38,7 @@ def detect_mecs(
 
     return [
         frozenset(sp_id_to_sv[s_id] for s_id, _ in mec)
-        for mec in stormpy.get_maximal_end_components(sp_model)
+        for mec in stormpy.analysis.get_maximal_end_components(sp_model)
     ]
 
 
@@ -144,86 +81,66 @@ def eliminate_mecs(
     if stormpy is None:
         raise RuntimeError("stormpy is required for MEC elimination.")
 
-    sp_model = mapping.stormvogel_to_stormpy(mdp)
+    # Storm's API exposes MEC decomposition, but no longer a matrix-level
+    # eliminator. Build the quotient directly and retain the original state map.
+    mecs = detect_mecs(mdp)
+    containing = {state: mec for mec in mecs for state in mec}
+    quotient = model.new_mdp(create_initial_state=False)
+    for parameter in mdp.parameters:
+        quotient.declare_parameter(parameter)
+    state_map: dict[model.State, model.State] = {}
+    groups: list[list[model.State]] = []
+    state_order = {state: index for index, state in enumerate(mdp.states)}
+    for state in mdp.states:
+        if state in state_map:
+            continue
+        group = (
+            sorted(containing[state], key=state_order.__getitem__)
+            if state in containing
+            else [state]
+        )
+        labels = sorted({label for s in group for label in s.labels})
+        representative = quotient.new_state(labels)
+        if len(group) > 1:
+            representative.set_friendly_name(f"_mec_{sum(len(g) > 1 for g in groups)}")
+        elif state.friendly_name is not None:
+            representative.set_friendly_name(state.friendly_name)
+        for old in group:
+            state_map[old] = representative
+        groups.append(group)
 
-    subsystem = stormpy.BitVector(sp_model.nr_states, True)
-    possible_ec_rows = stormpy.BitVector(sp_model.nr_choices, True)
-    res = stormpy.eliminate_ECs(
-        matrix=sp_model.transition_matrix,
-        subsystem=subsystem,
-        possible_ecs=possible_ec_rows,
-        add_sink_row_states=subsystem,
-        add_self_loop_at_sink_states=True,
-    )
+    for group in groups:
+        representative = state_map[group[0]]
+        in_mec = group[0] in containing
+        merged = len(group) > 1
+        choices = {}
+        for old in group:
+            for action, distribution in mdp.transitions.get(old, []):
+                # Internal actions are replaced by the representative's stay action.
+                if in_mec and distribution.support <= set(group):
+                    continue
+                label = action.label
+                if merged:
+                    label = f"{label if label is not None else 'exit'}_{_sv_state_name(old, mdp.get_state_index(old))}"
+                new_action = quotient.action(label) if label is not None else action
+                choices[new_action] = Distribution(
+                    [
+                        (probability, state_map[successor])
+                        for probability, successor in distribution
+                    ]
+                )
+        if in_mec:
+            if merged and make_representatives_absorbing:
+                choices.clear()
+            if not (merged and remove_representative_selfloops and choices):
+                # Preserve the label of a trivial sink's sole action.
+                stay = quotient.action("stay")
+                if not merged:
+                    for action, distribution in mdp.transitions.get(group[0], []):
+                        if distribution.support <= set(group):
+                            stay = action
+                            break
+                choices[stay] = Distribution([(1.0, representative)])
+        representative.set_choices(choices)
 
-    # Build state labeling for the new model: each new state receives the
-    # union of labels from all old states that map to it.
-    sl = stormpy.StateLabeling(res.matrix.nr_columns)
-    for s_old in range(sp_model.nr_states):
-        s_new = res.old_to_new_state_mapping[s_old]
-        for label in sp_model.labeling.get_labels_of_state(s_old):
-            sl.add_label(label)
-            sl.add_label_to_state(label, s_new)
-
-    components = stormpy.SparseModelComponents(
-        transition_matrix=res.matrix,
-        state_labeling=sl,
-    )
-    sv_new = mapping.stormpy_to_stormvogel(stormpy.storage.SparseMdp(components))
-
-    # stormvogel_to_stormpy assigns stormpy ID i to mdp.states[i].
-    # stormpy_to_stormvogel adds states in stormpy ID order, so sv_new.states[j]
-    # corresponds to new stormpy state j.
-    state_map: dict[model.State, model.State] = {
-        sv_old: sv_new.states[res.old_to_new_state_mapping[sp_id]]
-        for sv_old, sp_id in mdp.stormpy_id.items()
-    }
-
-    # Assign friendly names.  Build a reverse map sp_id → old sv State.
-    sp_id_to_sv_old: dict[int, model.State] = {
-        sp_id: sv_old for sv_old, sp_id in mdp.stormpy_id.items()
-    }
-    # Group old stormpy IDs by the new state they map to.
-    new_id_to_old_sp_ids: dict[int, list[int]] = {}
-    for sp_id in range(sp_model.nr_states):
-        nid = res.old_to_new_state_mapping[sp_id]
-        new_id_to_old_sp_ids.setdefault(nid, []).append(sp_id)
-
-    mec_counter = 0
-    for nid, old_sp_ids in new_id_to_old_sp_ids.items():
-        s_new = sv_new.states[nid]
-        if len(old_sp_ids) == 1:
-            # Pass-through state: inherit the original friendly name.
-            old_name = sp_id_to_sv_old[old_sp_ids[0]].friendly_name
-            if old_name is not None:
-                s_new.set_friendly_name(old_name)
-        else:
-            # Representative of a non-trivial MEC.
-            s_new.set_friendly_name(f"_mec_{mec_counter}")
-            mec_counter += 1
-
-    _relabel_actions(sv_new, mdp, new_id_to_old_sp_ids, sp_id_to_sv_old)
-
-    if remove_representative_selfloops or make_representatives_absorbing:
-        # Collect representative states: new states that multiple old states map to.
-        new_id_count: dict[int, int] = {}
-        for sp_id in range(sp_model.nr_states):
-            nid = res.old_to_new_state_mapping[sp_id]
-            new_id_count[nid] = new_id_count.get(nid, 0) + 1
-        representative_new_ids = {nid for nid, cnt in new_id_count.items() if cnt > 1}
-
-        for new_id in representative_new_ids:
-            s = sv_new.states[new_id]
-            is_selfloop = lambda branch: all(succ is s for _, succ in branch)  # noqa: E731
-            to_shorthand = lambda branch: list(branch)  # noqa: E731
-            if remove_representative_selfloops:
-                filtered = [(a, b) for a, b in s.choices if not is_selfloop(b)]
-                if filtered:
-                    s.set_choices({a: to_shorthand(b) for a, b in filtered})
-            else:
-                # make_representatives_absorbing: keep only the self-loop.
-                selfloops = [(a, b) for a, b in s.choices if is_selfloop(b)]
-                if selfloops:
-                    s.set_choices({a: to_shorthand(b) for a, b in selfloops[:1]})
-
-    return sv_new, state_map
+    return quotient, state_map

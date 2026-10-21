@@ -21,7 +21,7 @@ else:
 
 
 def convert_scheduler_to_stormvogel(
-    model: stormvogel.model.Model, stormpy_scheduler: "stormpy.storage.Scheduler"
+    model: stormvogel.model.Model, stormpy_scheduler: "stormpy.models.Scheduler"
 ):
     """Convert a stormpy scheduler to a stormvogel scheduler.
 
@@ -41,9 +41,9 @@ def convert_scheduler_to_stormvogel(
 def convert_model_checking_result(
     model: stormvogel.model.Model,
     stormpy_result: Union[
-        "stormpy.ExplicitQuantitativeCheckResult",
-        "stormpy.ExplicitQualitativeCheckResult",
-        "stormpy.ExplicitParametricQuantitativeCheckResult",
+        "stormpy.results.ExplicitQuantitativeCheckResult[float]",
+        "stormpy.results.ExplicitQualitativeCheckResult[float]",
+        "stormpy.results.ExplicitQuantitativeCheckResult[stormpy.RationalFunction]",
     ],
     with_scheduler: bool = True,
 ) -> stormvogel.result.Result | None:
@@ -59,31 +59,40 @@ def convert_model_checking_result(
 
     # we distinguish between quantitative and qualitative results
     # (determines what kind of values our result contains)
-    if isinstance(stormpy_result, stormpy.ExplicitQuantitativeCheckResult):
+    if isinstance(
+        stormpy_result, stormpy.results.ExplicitQuantitativeCheckResult[float]
+    ):
         values = {
             model.states[index]: value
-            for (index, value) in enumerate(stormpy_result.get_values())
+            for (index, value) in enumerate(stormpy_result.get_value_vector())
         }
-    elif isinstance(stormpy_result, stormpy.ExplicitParametricQuantitativeCheckResult):
+    elif isinstance(
+        stormpy_result,
+        stormpy.results.ExplicitQuantitativeCheckResult[stormpy.RationalFunction],
+    ):
         backend = parametric.get_default()
         values = {
             model.states[index]: backend.from_pycarl(value.rational_function())
-            for (index, value) in enumerate(stormpy_result.get_values())
+            for (index, value) in enumerate(stormpy_result.get_value_vector())
         }
-    elif isinstance(stormpy_result, stormpy.ExplicitQualitativeCheckResult):
+    elif isinstance(
+        stormpy_result, stormpy.results.ExplicitQualitativeCheckResult[float]
+    ):
         values = {
-            model.states[i]: stormpy_result.at(i) for i in range(0, len(model.states))
+            model.states[i]: stormpy_result[i] for i in range(0, len(model.states))
         }
     else:
         raise RuntimeError("Unsupported result type")
 
     # we check if our results and expected converted results come with a scheduler
-    if stormpy_result.has_scheduler and with_scheduler:
+    if stormpy_result.has_scheduler() and with_scheduler:
         # we build the results object containing a converted scheduler
         stormvogel_result = stormvogel.result.Result(
             model,
             values,
-            scheduler=convert_scheduler_to_stormvogel(model, stormpy_result.scheduler),
+            scheduler=convert_scheduler_to_stormvogel(
+                model, stormpy_result.get_scheduler()
+            ),
         )
     else:
         # we build the results object without a scheduler
@@ -148,8 +157,8 @@ def map_result_to_original_model(
 
 
 def convert_pareto_result(
-    stormpy_result: "stormpy.ExplicitParetoCurveCheckResultDouble",
-    stormpy_property: "stormpy.Property",
+    stormpy_result: "stormpy.results.ExplicitParetoCurveCheckResult[float]",
+    stormpy_property: "stormpy.logic.Property",
 ) -> stormvogel.result.ParetoResult:
     """Convert a stormpy Pareto curve result to a :class:`~stormvogel.result.ParetoResult`.
 
@@ -157,14 +166,14 @@ def convert_pareto_result(
     :param stormpy_property: The parsed property, used to extract objective labels.
     :returns: A :class:`~stormvogel.result.ParetoResult` with vertices and labels.
     """
-    formula = stormpy_property.raw_formula
+    formula = stormpy_property.get_raw_formula()
     labels = [str(sf) for sf in formula.subformulas]
 
     lower_points: list[list[float]] = list(
-        stormpy_result.get_underapproximation().vertices
+        stormpy_result.get_under_approximation().vertices
     )
     upper_points: list[list[float]] = list(
-        stormpy_result.get_overapproximation().vertices
+        stormpy_result.get_over_approximation().vertices
     )
 
     return stormvogel.result.ParetoResult(

@@ -6,7 +6,7 @@ from stormvogel.model.action import EmptyAction
 from stormvogel.model.distribution import Distribution
 from stormvogel.model.model import Model, ModelType
 from stormvogel.model.value import Number, Value, Interval
-from stormvogel.model.variable import Variable, BoolDomain, CategoricalDomain
+from stormvogel.model.variable import Variable, BoolDomain, IntDomain, CategoricalDomain
 
 if TYPE_CHECKING:
     import stormpy
@@ -17,11 +17,33 @@ else:
         stormpy = None
 
 
+def _value_type(model: Model):
+    """Select the Storm numeric type for every component of a model."""
+    assert stormpy is not None
+    if model.is_parametric():
+        return stormpy.RationalFunction
+    if model.is_interval_model():
+        return stormpy.Interval
+    return float
+
+
+def _parameter_variables(model: Model):
+    """Reuse named parameters without resetting Storm's global variable pool."""
+    assert stormpy is not None
+    variables = []
+    for name in model.parameters:
+        variable = stormpy.numbers.variable_with_name(name)
+        if variable.is_no_variable:
+            variable = stormpy.numbers.Variable(name)
+        variables.append(variable)
+    return variables
+
+
 def value_to_stormpy(
     value: Value,
-    variables: list["stormpy.pycarl.Variable"],
+    variables: list["stormpy.numbers.Variable"],
     model: Model,
-) -> "stormpy.pycarl.cln.FactorizedRationalFunction | stormpy.pycarl.Interval | Value":
+) -> "stormpy.RationalFunction | stormpy.Interval | Value":
     """Convert a stormvogel transition value to a stormpy value.
 
     Parametric values are delegated to the active parametric backend's
@@ -41,15 +63,8 @@ def value_to_stormpy(
     if model.is_parametric():
         # we have a special case for numbers as they are not just a specific case of a polynomial in stormvogel
         if isinstance(value, Number):
-            rational = stormpy.pycarl.cln.Rational(Fraction(value))
-            polynomial = stormpy.pycarl.cln.Polynomial(rational)
-            factorized_polynomial = stormpy.pycarl.cln.FactorizedPolynomial(
-                polynomial, stormpy.pycarl.cln.factorization_cache
-            )
-            factorized_rational = stormpy.pycarl.cln.FactorizedRationalFunction(
-                factorized_polynomial
-            )
-            return factorized_rational
+            rational = stormpy.RationalFunctionCoefficient(Fraction(value))
+            return stormpy.RationalFunction(stormpy.Polynomial(rational))
 
         # Parametric values are handled by the active backend. We pass in
         # pycarl variables keyed by parameter name (in the model's declared
@@ -61,9 +76,9 @@ def value_to_stormpy(
         # in the case of interval models, we convert intervals, and regular values are converted
         # to intervals where the lower and upper value are the same
         if isinstance(value, Interval):
-            interval = stormpy.pycarl.Interval(value.lower, value.upper)
+            interval = stormpy.Interval(value.lower, value.upper)
         else:
-            interval = stormpy.pycarl.Interval(value, value)
+            interval = stormpy.Interval(value, value)
 
         return interval
     else:
@@ -74,7 +89,7 @@ def build_matrix(
     model: Model,
     choice_labeling,
     variables: list,
-) -> "stormpy.storage.SparseMatrix":
+) -> "stormpy.datastructures.SparseMatrix":
     """Build a stormpy sparse matrix from a stormvogel model.
 
     Also populate the choice labeling by reference.
@@ -89,37 +104,14 @@ def build_matrix(
 
     # we precompute the following two values
     nondeterministic = model.supports_actions()
-    is_parametric = model.is_parametric()
-    is_interval = model.is_interval_model()
-
-    # we distinguish between parametric, interval and regular models
-    if is_parametric:
-        builder = stormpy.ParametricSparseMatrixBuilder(
-            rows=0,
-            columns=0,
-            entries=0,
-            force_dimensions=False,
-            has_custom_row_grouping=nondeterministic,
-            row_groups=0,
-        )
-    elif is_interval:
-        builder = stormpy.IntervalSparseMatrixBuilder(
-            rows=0,
-            columns=0,
-            entries=0,
-            force_dimensions=False,
-            has_custom_row_grouping=nondeterministic,
-            row_groups=0,
-        )
-    else:
-        builder = stormpy.SparseMatrixBuilder(
-            rows=0,
-            columns=0,
-            entries=0,
-            force_dimensions=False,
-            has_custom_row_grouping=nondeterministic,
-            row_groups=0,
-        )
+    builder = stormpy.datastructures.SparseMatrixBuilder[_value_type(model)](
+        rows=0,
+        columns=0,
+        entries=0,
+        force_dimensions=False,
+        has_custom_row_grouping=nondeterministic,
+        row_groups=0,
+    )
 
     # we build the matrix
     row_index = 0
@@ -180,14 +172,14 @@ def build_choice_labeling(model: Model):
     assert stormpy is not None
 
     # we add the labels to the choice labeling object
-    choice_labeling = stormpy.storage.ChoiceLabeling(choice_count)
+    choice_labeling = stormpy.models.ChoiceLabeling(choice_count)
     for label in labels:
         choice_labeling.add_label(label)
 
     return choice_labeling
 
 
-def build_state_labeling(model: Model) -> "stormpy.storage.StateLabeling":
+def build_state_labeling(model: Model) -> "stormpy.models.StateLabeling":
     """Build a stormpy state labeling object from a stormvogel model.
 
     :param model: The stormvogel model.
@@ -196,7 +188,7 @@ def build_state_labeling(model: Model) -> "stormpy.storage.StateLabeling":
     assert stormpy is not None
 
     # we first initialize all labels
-    state_labeling = stormpy.storage.StateLabeling(len(model.states))
+    state_labeling = stormpy.models.StateLabeling(len(model.states))
     for label in model.state_labels:
         state_labeling.add_label(label)
 
@@ -210,7 +202,7 @@ def build_state_labeling(model: Model) -> "stormpy.storage.StateLabeling":
 
 def build_reward_models(
     model: Model,
-) -> "dict[str, stormpy.SparseRewardModel]":
+) -> "dict[str, stormpy.models.SparseRewardModel]":
     """Build stormpy reward models from a stormvogel model.
 
     :param model: The stormvogel model.
@@ -219,19 +211,30 @@ def build_reward_models(
     assert stormpy is not None
 
     reward_models = {}
+    variables = _parameter_variables(model)
     for rewardmodel in model.rewards:
         if model.supports_actions():
-            reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
-                optional_state_action_reward_vector=rewardmodel.get_reward_vector()
+            reward_models[rewardmodel.name] = stormpy.models.SparseRewardModel[
+                _value_type(model)
+            ](
+                optional_state_action_reward_vector=[
+                    value_to_stormpy(v, variables, model)
+                    for v in rewardmodel.get_reward_vector()
+                ]
             )
         else:
-            reward_models[rewardmodel.name] = stormpy.SparseRewardModel(
-                optional_state_reward_vector=rewardmodel.get_reward_vector()
+            reward_models[rewardmodel.name] = stormpy.models.SparseRewardModel[
+                _value_type(model)
+            ](
+                optional_state_reward_vector=[
+                    value_to_stormpy(v, variables, model)
+                    for v in rewardmodel.get_reward_vector()
+                ]
             )
     return reward_models
 
 
-def build_state_valuations(model: Model) -> "stormpy.storage.StateValuation | None":
+def build_state_valuations(model: Model) -> "stormpy.models.Valuations | None":
     """Build a stormpy state valuations object from a stormvogel model.
 
     Only variables with a declared domain are exported. Variables without a
@@ -271,14 +274,25 @@ def build_state_valuations(model: Model) -> "stormpy.storage.StateValuation | No
     if not bool_vars and not int_vars:
         return None
 
-    manager = stormpy.ExpressionManager()
-    builder = stormpy.storage.StateValuationsBuilder()
+    manager = stormpy.expressions.ExpressionManager()
+    builder = stormpy.models.ValuationDescriptionBuilder(manager)
 
     for var in bool_vars:
-        builder.add_variable(manager.create_boolean_variable(var.label))
+        builder.add_boolean_variable(manager.declare_boolean_variable(var.label))
     for var in int_vars:
-        builder.add_variable(manager.create_integer_variable(var.label))
+        domain = var.domain
+        if isinstance(domain, CategoricalDomain):
+            lower, upper = 0, len(domain.values) - 1
+        else:
+            assert isinstance(domain, IntDomain)
+            lower, upper = domain.lo, domain.hi
+        builder.add_integer_variable(
+            manager.declare_integer_variable(var.label), lower, upper
+        )
 
+    valuations = stormpy.models.Valuations(
+        builder.build_class_description(), manager, len(model.states)
+    )
     for state in model.states:
         vals = state.valuations
         bool_values = []
@@ -302,13 +316,12 @@ def build_state_valuations(model: Model) -> "stormpy.storage.StateValuation | No
                 int_values.append(var.domain.values.index(v))
             else:
                 int_values.append(int(v))
-        builder.add_state(
-            model.stormpy_id[state],
-            boolean_values=bool_values,
-            integer_values=int_values,
-        )
+        for var, value in zip(bool_vars + int_vars, bool_values + int_values):
+            valuations.write_value(
+                model.stormpy_id[state], manager.get_variable(var.label), value
+            )
 
-    return builder.build()
+    return valuations
 
 
 def _apply_state_valuations(components, state_valuations) -> None:
@@ -362,7 +375,9 @@ def build_observations(model: Model) -> list[int]:
     return observations
 
 
-def build_markovian_states_bitvector(model: Model) -> "stormpy.BitVector":
+def build_markovian_states_bitvector(
+    model: Model,
+) -> "stormpy.datastructures.BitVector":
     """Build a bitvector indicating which states are Markovian.
 
     :param model: The stormvogel MA model.
@@ -376,12 +391,12 @@ def build_markovian_states_bitvector(model: Model) -> "stormpy.BitVector":
 
     markovian_state_ids = [model.stormpy_id[state] for state in model.markovian_states]
     if isinstance(markovian_state_ids, list):
-        markovian_states_bitvector = stormpy.storage.BitVector(
+        markovian_states_bitvector = stormpy.datastructures.BitVector(
             max(markovian_state_ids) + 1,
             markovian_state_ids,
         )
     else:
-        markovian_states_bitvector = stormpy.storage.BitVector(0)
+        markovian_states_bitvector = stormpy.datastructures.BitVector(0)
 
     return markovian_states_bitvector
 
@@ -398,30 +413,14 @@ def build_dtmc(model: Model, matrix, state_labeling, reward_models, state_valuat
     """
     assert stormpy is not None
 
-    if model.is_parametric():
-        components = stormpy.SparseParametricModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        dtmc = stormpy.storage.SparseParametricDtmc(components)
-    elif model.is_interval_model():
-        components = stormpy.SparseIntervalModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        dtmc = stormpy.storage.SparseIntervalDtmc(components)
-    else:
-        components = stormpy.SparseModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        dtmc = stormpy.storage.SparseDtmc(components)
+    value_type = _value_type(model)
+    components = stormpy.models.SparseModelComponents[value_type](
+        transition_matrix=matrix,
+        state_labeling=state_labeling,
+        reward_models=reward_models,
+    )
+    _apply_state_valuations(components, state_valuations)
+    dtmc = stormpy.models.SparseDtmc[value_type](components)
 
     return dtmc
 
@@ -446,33 +445,15 @@ def build_mdp(
     """
     assert stormpy is not None
 
-    if model.is_parametric():
-        components = stormpy.SparseParametricModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        mdp = stormpy.storage.SparseParametricMdp(components)
-    elif model.is_interval_model():
-        components = stormpy.SparseIntervalModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        mdp = stormpy.storage.SparseIntervalMdp(components)
-    else:
-        components = stormpy.SparseModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        mdp = stormpy.storage.SparseMdp(components)
+    value_type = _value_type(model)
+    components = stormpy.models.SparseModelComponents[value_type](
+        transition_matrix=matrix,
+        state_labeling=state_labeling,
+        reward_models=reward_models,
+    )
+    _apply_state_valuations(components, state_valuations)
+    components.choice_labeling = choice_labeling
+    mdp = stormpy.models.SparseMdp[value_type](components)
 
     return mdp
 
@@ -489,33 +470,15 @@ def build_ctmc(model: Model, matrix, state_labeling, reward_models, state_valuat
     """
     assert stormpy is not None
 
-    if model.is_parametric():
-        components = stormpy.SparseParametricModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            rate_choices=True,
-        )
-        _apply_state_valuations(components, state_valuations)
-        ctmc = stormpy.storage.SparseParametricCtmc(components)
-    elif model.is_interval_model():
-        components = stormpy.SparseIntervalModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            rate_transitions=True,
-        )
-        _apply_state_valuations(components, state_valuations)
-        ctmc = stormpy.storage.SparseIntervalCtmc(components)
-    else:
-        components = stormpy.SparseModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            rate_transitions=True,
-        )
-        _apply_state_valuations(components, state_valuations)
-        ctmc = stormpy.storage.SparseCtmc(components)
+    value_type = _value_type(model)
+    components = stormpy.models.SparseModelComponents[value_type](
+        transition_matrix=matrix,
+        state_labeling=state_labeling,
+        reward_models=reward_models,
+        rate_transitions=True,
+    )
+    _apply_state_valuations(components, state_valuations)
+    ctmc = stormpy.models.SparseCtmc[value_type](components)
 
     return ctmc
 
@@ -542,36 +505,16 @@ def build_pomdp(
     """
     assert stormpy is not None
 
-    if model.is_parametric():
-        components = stormpy.SparseParametricModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.observability_classes = observations
-        components.choice_labeling = choice_labeling
-        pomdp = stormpy.storage.SparseParametricPomdp(components)
-    elif model.is_interval_model():
-        components = stormpy.SparseIntervalModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.observability_classes = observations
-        components.choice_labeling = choice_labeling
-        pomdp = stormpy.storage.SparseIntervalPomdp(components)
-    else:
-        components = stormpy.SparseModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-        )
-        _apply_state_valuations(components, state_valuations)
-        components.observability_classes = observations
-        components.choice_labeling = choice_labeling
-        pomdp = stormpy.storage.SparsePomdp(components)
+    value_type = _value_type(model)
+    components = stormpy.models.SparseModelComponents[value_type](
+        transition_matrix=matrix,
+        state_labeling=state_labeling,
+        reward_models=reward_models,
+    )
+    _apply_state_valuations(components, state_valuations)
+    components.observability_classes = observations
+    components.choice_labeling = choice_labeling
+    pomdp = stormpy.models.SparsePomdp[value_type](components)
 
     return pomdp
 
@@ -612,39 +555,17 @@ def build_ma(
         else:
             exit_rates.append(0.0)
 
-    if model.is_parametric():
-        components = stormpy.SparseParametricModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            markovian_states=markovian_states_bitvector,
-        )
-        components.exit_rates = exit_rates
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        ma = stormpy.storage.SparseParametricMA(components)
-    elif model.is_interval_model():
-        components = stormpy.SparseIntervalModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            markovian_states=markovian_states_bitvector,
-        )
-        components.exit_rates = exit_rates
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        ma = stormpy.storage.SparseIntervalMA(components)
-    else:
-        components = stormpy.SparseModelComponents(
-            transition_matrix=matrix,
-            state_labeling=state_labeling,
-            reward_models=reward_models,
-            markovian_states=markovian_states_bitvector,
-        )
-        components.exit_rates = exit_rates
-        _apply_state_valuations(components, state_valuations)
-        components.choice_labeling = choice_labeling
-        ma = stormpy.storage.SparseMA(components)
+    value_type = _value_type(model)
+    components = stormpy.models.SparseModelComponents[value_type](
+        transition_matrix=matrix,
+        state_labeling=state_labeling,
+        reward_models=reward_models,
+    )
+    _apply_state_valuations(components, state_valuations)
+    components.markovian_states = markovian_states_bitvector
+    components.exit_rates = [value_to_stormpy(v, [], model) for v in exit_rates]
+    components.choice_labeling = choice_labeling
+    ma = stormpy.models.SparseMA[value_type](components)
 
     return ma
 
@@ -715,11 +636,8 @@ def stormvogel_to_stormpy(
     # declared parameter names (deterministic, insertion-ordered) rather than
     # re-scanning transitions, so the resulting pycarl variable list matches
     # model.parameter_symbols() index-for-index.
-    stormpy.pycarl.clear_variable_pool()
-    variables = []
-    for p in model.parameters:
-        var = stormpy.pycarl.Variable(p)
-        variables.append(var)
+
+    variables = _parameter_variables(model)
 
     if model.supports_actions():
         choice_labeling = build_choice_labeling(model)

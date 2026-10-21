@@ -70,13 +70,11 @@ def build_prism():
     """
     prism_program = stormpy.parse_prism_program("orchard/orchard_stormvogel.pm")
     constants = "NUM_FRUIT=4,DISTANCE_RAVEN=5"
-    prism_program = stormpy.preprocess_symbolic_input(prism_program, [], constants)[
-        0
-    ].as_prism_program()
+    prism_program = stormpy.instantiate_constants(prism_program, constants)[0]
     options = stormpy.BuilderOptions()
     options.set_build_state_valuations()
     options.set_build_all_labels()
     options.set_build_choice_labels()
-    options.set_build_with_choice_origins()
-    orchard_prism = stormpy.build_sparse_model_with_options(prism_program, options)
+    options.set_build_choice_origins()
+    orchard_prism = stormpy.build_model(prism_program, options=options)
     return orchard_prism, prism_program

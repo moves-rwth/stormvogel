@@ -28,13 +28,10 @@ stormpy = pytest.importorskip("stormpy")
 def _check(sp_model, formula: str, mode) -> float:
     """Run interval model checking and return the result at the initial state."""
     props = stormpy.parse_properties(formula)
-    task = stormpy.CheckTask(props[0].raw_formula, only_initial_states=False)
-    task.set_uncertainty_resolution_mode(mode)
-    if sp_model.model_type == stormpy.ModelType.DTMC:
-        result = stormpy.check_interval_dtmc(sp_model, task, stormpy.Environment())
-    else:
-        result = stormpy.check_interval_mdp(sp_model, task, stormpy.Environment())
-    return result.at(sp_model.initial_states[0])
+    result = stormpy.model_checking(
+        sp_model, props[0], uncertainty_resolution_mode=mode
+    )
+    return result.get_value(sp_model.initial_states[0])
 
 
 # ---------------------------------------------------------------------------

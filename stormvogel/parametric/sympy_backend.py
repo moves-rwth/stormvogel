@@ -1,7 +1,7 @@
 """Sympy implementation of the parametric backend.
 
 Registers itself on import. Works whether or not pycarl / stormpy is
-available: the pycarl bridge methods import ``stormpy.pycarl`` lazily and
+available: the pycarl bridge methods import ``stormpy.numbers`` lazily and
 only when called.
 """
 
@@ -135,37 +135,37 @@ class SympyBackend:
         exponent tuples produced by :func:`sympy.Poly.terms` line up with
         the pycarl variable map.
         """
-        import stormpy  # noqa: F401  (re-export check)
-        from stormpy import pycarl
+        import stormpy
+
+        # Factorization caches belong to the coefficient backend selected by Storm.
+        from importlib import import_module
+
+        package = import_module(stormpy.RawPolynomial.__module__)
 
         expr = sp.sympify(value)
         num_expr, den_expr = sp.fraction(sp.together(expr))
 
         num_poly = self._poly_to_pycarl(num_expr, var_map)
-        factorized_num = pycarl.cln.FactorizedPolynomial(
-            num_poly, pycarl.cln.factorization_cache
-        )
+        factorized_num = package.create_factorized_polynomial(num_poly)
         if den_expr == 1:
-            return pycarl.cln.FactorizedRationalFunction(factorized_num)
+            return stormpy.RationalFunction(factorized_num)
 
         den_poly = self._poly_to_pycarl(den_expr, var_map)
-        factorized_den = pycarl.cln.FactorizedPolynomial(
-            den_poly, pycarl.cln.factorization_cache
-        )
-        return pycarl.cln.FactorizedRationalFunction(factorized_num, factorized_den)
+        factorized_den = package.create_factorized_polynomial(den_poly)
+        return stormpy.RationalFunction(factorized_num, factorized_den)
 
     @staticmethod
     def _poly_to_pycarl(expr: sp.Expr, var_map: dict[str, Any]) -> Any:
         """Build a pycarl polynomial from a sympy polynomial expression,
         using the pycarl :class:`Variable`\\s in ``var_map`` in insertion
         order."""
-        from stormpy import pycarl
+        import stormpy
 
         # A constant polynomial — no need to call sp.Poly.
         expr_symbols = {s.name for s in expr.free_symbols}
         if not expr_symbols:
-            rational = pycarl.cln.Rational(sp.Rational(expr))
-            return pycarl.cln.Polynomial(rational)
+            rational = stormpy.RationalFunctionCoefficient(str(sp.Rational(expr)))
+            return stormpy.RawPolynomial(rational)
 
         # Use the actual Symbol objects from the expression rather than
         # creating fresh sp.Symbol(name) objects.  Symbols declared with
@@ -178,22 +178,19 @@ class SympyBackend:
         poly = sp.Poly(expr, *active)
         pycarl_vars = [var_map[name] for name in active_names]
 
-        terms = []
+        result = stormpy.RawPolynomial(stormpy.RationalFunctionCoefficient(0))
         for exponents, coeff in poly.terms():
             # coeff is a sp.Rational / sp.Integer / sp.Float in general.
             if isinstance(coeff, sp.Float):
                 rat = sp.Rational(coeff).limit_denominator(10**12)
             else:
                 rat = sp.Rational(coeff)
-            pycarl_coeff = pycarl.cln.Rational(
-                pycarl.cln.Integer(int(rat.p)), pycarl.cln.Integer(int(rat.q))
-            )
-            term = pycarl.cln.Term(pycarl_coeff)
+            coefficient = stormpy.RationalFunctionCoefficient(str(rat))
+            term = stormpy.RawPolynomial(coefficient)
             for var, exp in zip(pycarl_vars, exponents):
-                for _ in range(int(exp)):
-                    term = term * var
-            terms.append(term)
-        return pycarl.cln.Polynomial(terms)
+                term = term * stormpy.RawPolynomial(var) ** int(exp)
+            result = result + term
+        return result
 
     def from_pycarl(self, pycarl_value: Any) -> sp.Expr:
         """Convert a pycarl ``FactorizedRationalFunction`` (or bare
