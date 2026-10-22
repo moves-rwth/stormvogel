@@ -3235,7 +3235,7 @@ wheels = [
 
 [[package]]
 name = "stormvogel"
-version = "0.12.6"
+version = "0.13"
 source = { editable = "." }
 dependencies = [
     { name = "bidict" },

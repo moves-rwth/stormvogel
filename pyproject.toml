@@ -10,7 +10,7 @@ default-groups = ["dev", "test", "lint", "doc"]
 
 [project]
 name = "stormvogel"
-version = "0.12.6"
+version = "0.13"
 description = "Probabilistic Model Checking for almost everyone"
 authors = [{name = "The stormvogel team"}]
 license = "GPL-3.0-or-later"
