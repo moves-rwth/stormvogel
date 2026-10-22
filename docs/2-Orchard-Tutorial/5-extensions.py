@@ -91,7 +91,7 @@ print(
 # Change precision
 env = stormpy.Environment()
 prec = stormpy.Rational(0.1)
-env.solver_environment.minmax_solver_environment.precision = prec
+env.solver().min_max().precision = prec
 result = stormpy.model_checking(orchard_prism, formula[0], environment=env)
 print(result.get_value(orchard_prism.initial_states[0]))
 
@@ -112,7 +112,7 @@ methods = [
 ]
 for m in methods:
     env = stormpy.Environment()
-    env.solver_environment.minmax_solver_environment.method = m
+    env.solver().min_max().method = m
     start = time.time()
     result = stormpy.model_checking(
         orchard_prism, formula[0], environment=env, extract_scheduler=True

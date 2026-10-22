@@ -172,9 +172,7 @@ properties = stormpy.parse_properties('Pmax=? [F "PlayersWon"]')
 # Prepare model checking
 env = stormpy.Environment()
 # Set VI algorithm to plain VI
-env.solver_environment.minmax_solver_environment.method = (
-    stormpy.environments.MinMaxMethod.VALUE_ITERATION
-)
+env.solver().min_max().method = stormpy.environments.MinMaxMethod.VALUE_ITERATION
 # Check model
 stormpy_result = stormpy.model_checking(
     orchard_storm,
@@ -374,13 +372,13 @@ print(pomdp)
 # The semantics of a POMDP can be given in terms of a **belief MDP**, which we can partially explore and verify.
 
 # %%
-belexpl_options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
-belexpl_options.use_clipping = False
-belexpl_options.refine = True
-
-belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp, belexpl_options)
-result = belmc.check(properties[0].get_raw_formula(), [])
-print(f"Result in: [{result.lower_bound}, {result.upper_bound}]")
+lower_result = stormpy.pomdp.verify_with_belief_unfolding(
+    pomdp, properties[0], cut_zero_gap=True
+)
+upper_result = stormpy.pomdp.verify_with_belief_discretization(
+    pomdp, properties[0], cut_zero_gap=True
+)
+print(f"Result in: [{lower_result.value}, {upper_result.value}]")
 
 # %% [markdown]
 # First, note that the result approximates the true optimum from below and above.
@@ -417,13 +415,13 @@ mdp_res = stormpy.model_checking(
 print(mdp_res.get_value(pomdp_steal.initial_states[0]))
 
 # %%
-belexpl_options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
-belexpl_options.use_clipping = False
-belexpl_options.refine = True
-
-belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp_steal, belexpl_options)
-result = belmc.check(properties[0].get_raw_formula(), [])
-print(f"Result in: [{result.lower_bound}, {result.upper_bound}]")
+lower_result = stormpy.pomdp.verify_with_belief_unfolding(
+    pomdp_steal, properties[0], cut_zero_gap=True
+)
+upper_result = stormpy.pomdp.verify_with_belief_discretization(
+    pomdp_steal, properties[0], cut_zero_gap=True
+)
+print(f"Result in: [{lower_result.value}, {upper_result.value}]")
 
 # %% [markdown]
 # We see that stealing fruits makes the game easier to win, but now an observation-based policy will perform worse than the state-based policies.

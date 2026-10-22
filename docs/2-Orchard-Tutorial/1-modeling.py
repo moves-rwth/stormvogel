@@ -469,7 +469,7 @@ print(orchard_storm)
 prism_program = stormpy.parse_prism_program("orchard/orchard_stormvogel.pm")
 constants = "NUM_FRUIT=4, DISTANCE_RAVEN=5"
 prism_program = stormpy.instantiate_constants(prism_program, constants)[0]
-options = stormpy.BuilderOptions()
+options = stormpy.BuilderOptions(build_full=True)
 options.set_build_state_valuations()
 options.set_build_choice_labels()
 options.set_build_choice_origins()
