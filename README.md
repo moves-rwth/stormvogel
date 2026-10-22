@@ -39,9 +39,8 @@ Contributors need [uv](https://docs.astral.sh/uv/getting-started/installation/) 
     uv sync --locked --extra storm
     uv run jupyter lab
     ```
-    This creates `.venv` and installs the project plus development, test, lint, and documentation tools. Omit `--extra storm` for core-only development, or use `--all-extras` for all optional integrations (needed for documentation builds). Some extras require system libraries such as Cairo and Graphviz; docs also need Pandoc.
+    This creates `.venv` and installs the project plus development, test, lint, and documentation tools. Omit `--extra storm` for core-only development, or use `--all-extras` for all integrations (needed for documentation builds). Some extras require system libraries such as Cairo and Graphviz; docs also need Pandoc.
 
-    The Storm integration uses the redesigned stormpy API. `uv.lock` pins a commit from stormpy's `dev` branch, and the build settings pin the corresponding Storm source. Until matching wheels are available, installing the `storm` extra compiles native code and requires a C++20 compiler, CMake, and Storm's build dependencies. An existing Storm 2.0 installation can be selected with `--config-settings-package stormpy:cmake.define.STORM_DIR_HINT=/path/to/storm/lib/cmake/storm`.
 3. Install the `pre-commit` hook: `uv run pre-commit install`
 
 Commit `uv.lock` when changing dependencies with `uv add` or `uv remove`. Use `uv lock --upgrade` to update locked versions and `uv sync --locked` to install them.

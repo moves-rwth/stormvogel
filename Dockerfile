@@ -3,27 +3,17 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /bin/
 
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-ENV CMAKE_BUILD_PARALLEL_LEVEL=4
 
-# Native build dependencies for the pinned stormpy dev API and Storm.
+# Install dependencies.
 RUN apt-get update && \
-    apt-get -y install curl git vim nano libcairo2-dev graphviz \
-        build-essential cmake ninja-build automake autoconf libtool pkg-config \
-        libboost-all-dev libcln-dev libginac-dev libgmp-dev libglpk-dev \
-        libhwloc-dev libarchive-dev libxerces-c-dev libz3-dev
+    apt-get -y install curl git vim nano libcairo2-dev graphviz
 
 # Copy the project files into the container
 COPY . /app
 WORKDIR /app
 
 # Install locked dependencies, including Jupyter Lab, into the container venv.
-# When EXPERIMENTAL=1, replace paynt with a local experimental wheel.
-# Keep the pinned stormpy build: older nightly wheels use a different API.
-ARG EXPERIMENTAL=0
-RUN uv sync --locked --no-default-groups --group dev --all-extras --no-editable && \
-    if [ "$EXPERIMENTAL" = "1" ]; then \
-        uv pip install --python /opt/venv/bin/python --no-deps --reinstall paynt_wheel/*cp313*.whl; \
-    fi
+RUN uv sync --locked --no-default-groups --group dev --all-extras --no-editable
 
 # create /root/.jupyter directory
 RUN mkdir -p /root/.jupyter

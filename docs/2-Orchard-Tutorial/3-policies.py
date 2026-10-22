@@ -309,7 +309,10 @@ new_mdp = stormpy.transformations.set_state_valuations(
 # We are now ready to run synthesis of decision tree policies. We use the tool PAYNT.
 
 # %%
-import paynt
+try:
+    import paynt
+except ImportError:
+    paynt = None
 
 # %% [markdown]
 # We distinguish two versions of decision tree synthesis:
@@ -337,18 +340,21 @@ mc_result = stormpy.model_checking(
 print(f"Overall optimal result: {mc_result.get_value(new_mdp.initial_states[0])}")
 # Paynt considers synthesis via annotated MDPs called coloured MDPs.
 # For synthesis of decision trees, we use paynt.dt.
-colored_mdp_factory = paynt.dt.DtColoredMdpFactory(new_mdp)
-# We now set the task as specified in the hyperparameters above.
-task = paynt.dt.DtTask([formula], tree_depth)
-if match_fixed_policy:
-    task.set_scheduler_to_map(mc_result.get_scheduler())
-# With the synthesis task specified, we run the synthesis routine.
-result = paynt.dt.synthesize(colored_mdp_factory, task)
-print("success:", result.success)
+if paynt is not None:
+    colored_mdp_factory = paynt.dt.DtColoredMdpFactory(new_mdp)
+    # We now set the task as specified in the hyperparameters above.
+    task = paynt.dt.DtTask([formula], tree_depth)
+    if match_fixed_policy:
+        task.set_scheduler_to_map(mc_result.get_scheduler())
+    # With the synthesis task specified, we run the synthesis routine.
+    result = paynt.dt.synthesize(colored_mdp_factory, task)
+    print("success:", result.success)
+else:
+    result = None
 
 # %%
 # If successful, we display the obtained result.
-if result.success:
+if result is not None and result.success:
     tree = result.tree
     print("value:", result.value)
     print("decision tree:\n", result.tree.to_string())

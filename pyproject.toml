@@ -8,14 +8,6 @@ packages = ["stormvogel"]
 [tool.uv]
 default-groups = ["dev", "test", "lint", "doc"]
 
-[tool.uv.sources]
-# The redesigned API is currently available on stormpy's dev branch.
-stormpy = { git = "https://github.com/stormchecker/stormpy.git", rev = "e39ff8e2cf347085b9266d026419461dc1cd0e23" }
-
-[tool.uv.config-settings-package.stormpy]
-# This API also needs Storm's reorganized storage and result classes.
-"cmake.define.STORM_GIT_TAG" = "44567cd73fd907f963248fe3652022fba4524869"
-
 [project]
 name = "stormvogel"
 version = "0.12.6"
@@ -39,8 +31,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-storm  = ["stormpy>=1.14.0,<2"]
-paynt   = ["paynt>=0.4.3,<0.5"]
+storm  = ["stormpy>=2.0.0,<3"]
 gym     = ["gymnasium>=1.1.1,<2"]
 io      = ["umbi>=0.2.14,<0.3"]
 viz     = ["cairosvg>=2.8.2,<3", "pygame>=2.6.1,<3", "imageio>=2.37.0,<3", "pillow>=12.1.1,<13", "svgpathtools>=1.6.1,<2"]
