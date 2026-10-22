@@ -45,10 +45,10 @@ def rectangular_region_to_stormpy(
     for name, (lo, hi) in region.bounds.items():
         var = name_to_var[name]
         bounds[var] = (
-            stormpy.pycarl.cln.Rational(Fraction(lo)),
-            stormpy.pycarl.cln.Rational(Fraction(hi)),
+            stormpy.RationalFunctionCoefficient(Fraction(lo)),
+            stormpy.RationalFunctionCoefficient(Fraction(hi)),
         )
-    return stormpy.pars.ParameterRegion(bounds)
+    return stormpy.pars.create_region(bounds)
 
 
 class AnalyseParametric:
@@ -89,7 +89,7 @@ class AnalyseParametric:
         )
 
         props = stormpy.parse_properties(prop)
-        self._formula = props[0].raw_formula
+        self._formula = props[0].get_raw_formula()
 
         # Build name → pycarl Variable mapping from the converted stormpy model.
         # collect_all_parameters() returns the Variable objects that were placed
@@ -99,12 +99,11 @@ class AnalyseParametric:
             var.name: var for var in self._sp_model.collect_all_parameters()
         }
 
-        _checker_cls = {
-            stormvogel.model.ModelType.DTMC: stormpy.pars.PDtmcInstantiationChecker,
-            stormvogel.model.ModelType.MDP: stormpy.pars.PMdpInstantiationChecker,
-            stormvogel.model.ModelType.CTMC: stormpy.pars.PCtmcInstantiationChecker,
-        }.get(model.model_type)
-        if _checker_cls is None:
+        if model.model_type not in {
+            stormvogel.model.ModelType.DTMC,
+            stormvogel.model.ModelType.MDP,
+            stormvogel.model.ModelType.CTMC,
+        }:
             raise ValueError(
                 f"AnalyseParametric does not support model type {model.model_type}."
             )
@@ -114,13 +113,20 @@ class AnalyseParametric:
                 f"{model.model_type} support is experimental and assumptions "
                 f"may be violated."
             )
-        self._instantiation_checker = _checker_cls(self._sp_model)
+        self._instantiation_checker = (
+            stormpy.pars.developer.SparseInstantiationModelChecker(
+                self.env, self._sp_model
+            )
+        )
         self._instantiation_checker.specify_formula(
-            stormpy.ParametricCheckTask(self._formula, only_initial_states=True)
+            stormpy.developer.CheckTask[stormpy.RationalFunction](self._formula, True)
         )
 
-        self._region_checker = stormpy.pars.create_region_checker(
-            self.env, self._sp_model, self._formula, allow_model_simplification=True
+        self._region_checker = stormpy.pars.developer.initialize_region_model_checker(
+            self.env,
+            self._sp_model,
+            stormpy.developer.CheckTask[stormpy.RationalFunction](self._formula, True),
+            allow_model_simplification=True,
         )
 
     @property
@@ -145,11 +151,11 @@ class AnalyseParametric:
         """
         assert stormpy is not None
         instantiation: dict = {
-            self._name_to_var[name]: stormpy.pycarl.cln.Rational(Fraction(val))
+            self._name_to_var[name]: stormpy.RationalFunctionCoefficient(Fraction(val))
             for name, val in valuation.items()
         }
         result = self._instantiation_checker.check(self.env, instantiation)
-        return float(result.at(0))
+        return float(result.get_value(0))
 
     def get_region_bound(
         self,
@@ -180,7 +186,13 @@ class AnalyseParametric:
                 "transition probability reaches 0 somewhere within the region."
             )
         sp_region = rectangular_region_to_stormpy(self._name_to_var, region)
-        bound = self._region_checker.get_bound(self.env, sp_region, maximize)
+        bound = self._region_checker.get_bound_at_init_state(
+            self.env,
+            sp_region,
+            stormpy.logic.OptimizationDirection.MAXIMIZE
+            if maximize
+            else stormpy.logic.OptimizationDirection.MINIMIZE,
+        )
         return Fraction(str(bound))
 
     def annotate_region(

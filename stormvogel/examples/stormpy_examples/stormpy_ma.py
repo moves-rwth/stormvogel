@@ -18,11 +18,13 @@ def example_building_mas_01():
     )
 
     # Build matrix and define indices of row groups (ascending order)
-    transition_matrix = stormpy.build_sparse_matrix(transitions, [0, 2, 3, 4, 5])
+    transition_matrix = stormpy.datastructures.build_sparse_matrix(
+        transitions, [0, 2, 3, 4, 5]
+    )
     # print(transition_matrix)
 
     # StateLabeling
-    state_labeling = stormpy.storage.StateLabeling(5)
+    state_labeling = stormpy.models.StateLabeling(5)
     # Add labels
     state_labels = {"init", "deadlock"}
     # Set labeling of states
@@ -31,7 +33,7 @@ def example_building_mas_01():
     state_labeling.add_label_to_state("init", 0)
 
     # Choice labeling
-    choice_labeling = stormpy.storage.ChoiceLabeling(6)
+    choice_labeling = stormpy.models.ChoiceLabeling(6)
     # Add labels
     choice_labels = {"alpha", "beta"}
     # Set labeling of choices
@@ -43,10 +45,10 @@ def example_building_mas_01():
     # Provide exit rates (for Markovian states)
     exit_rates = [0.0, 10.0, 12.0, 1.0, 1.0]
 
-    markovian_states = stormpy.BitVector(5, [1, 2, 3, 4])
+    markovian_states = stormpy.datastructures.BitVector(5, [1, 2, 3, 4])
 
     # Collect components
-    components = stormpy.SparseModelComponents(
+    components = stormpy.models.SparseModelComponents(
         transition_matrix=transition_matrix,
         state_labeling=state_labeling,
         markovian_states=markovian_states,
@@ -55,7 +57,7 @@ def example_building_mas_01():
     components.exit_rates = exit_rates
 
     # Build the model
-    ma = stormpy.storage.SparseMA(components)
+    ma = stormpy.models.SparseMA(components)
     return ma
 
 

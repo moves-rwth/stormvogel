@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = [
     "stormvogel_to_stormpy",
     "value_to_stormvogel",
@@ -67,7 +69,7 @@ def value_to_stormvogel(value, sparsemodel) -> Value:
         return backend.from_pycarl(regular_form)
     else:
         # we check if our value is an interval
-        if isinstance(value, stormpy.pycarl.Interval):
+        if isinstance(value, stormpy.Interval):
             # if lower and upper are the same, we return a singular value
             lower = float(value.lower())
             upper = float(value.upper())
@@ -82,11 +84,11 @@ def value_to_stormvogel(value, sparsemodel) -> Value:
 
 def stormpy_to_stormvogel(
     sparsemodel: Union[
-        "stormpy.storage.SparseDtmc",
-        "stormpy.storage.SparseMdp",
-        "stormpy.storage.SparseCtmc",
-        "stormpy.storage.SparsePomdp",
-        "stormpy.storage.SparseMA",
+        "stormpy.models.SparseDtmc",
+        "stormpy.models.SparseMdp",
+        "stormpy.models.SparseCtmc",
+        "stormpy.models.SparsePomdp",
+        "stormpy.models.SparseMA",
     ],
 ) -> Model:
     """Convert a stormpy sparse model to a stormvogel model.
@@ -100,11 +102,11 @@ def stormpy_to_stormvogel(
     def add_states(
         model: Model,
         sparsemodel: (
-            stormpy.storage.SparseDtmc
-            | stormpy.storage.SparseMdp
-            | stormpy.storage.SparseCtmc
-            | stormpy.storage.SparsePomdp
-            | stormpy.storage.SparseMA
+            stormpy.models.SparseDtmc
+            | stormpy.models.SparseMdp
+            | stormpy.models.SparseCtmc
+            | stormpy.models.SparsePomdp
+            | stormpy.models.SparseMA
         ),
     ):
         """Add states from the sparse model to the stormvogel model.
@@ -145,11 +147,11 @@ def stormpy_to_stormvogel(
     def new_reward_model(
         model: Model,
         sparsemodel: (
-            stormpy.storage.SparseDtmc
-            | stormpy.storage.SparseMdp
-            | stormpy.storage.SparseCtmc
-            | stormpy.storage.SparsePomdp
-            | stormpy.storage.SparseMA
+            stormpy.models.SparseDtmc
+            | stormpy.models.SparseMdp
+            | stormpy.models.SparseCtmc
+            | stormpy.models.SparsePomdp
+            | stormpy.models.SparseMA
         ),
     ):
         """Add reward models from the sparse model to the stormvogel model.
@@ -170,11 +172,11 @@ def stormpy_to_stormvogel(
     def add_valuations(
         model: Model,
         sparsemodel: (
-            stormpy.storage.SparseDtmc
-            | stormpy.storage.SparseMdp
-            | stormpy.storage.SparseCtmc
-            | stormpy.storage.SparsePomdp
-            | stormpy.storage.SparseMA
+            stormpy.models.SparseDtmc
+            | stormpy.models.SparseMdp
+            | stormpy.models.SparseCtmc
+            | stormpy.models.SparsePomdp
+            | stormpy.models.SparseMA
         ),
     ):
         """Add state valuations from the sparse model to the stormvogel model.
@@ -188,127 +190,39 @@ def stormpy_to_stormvogel(
         """
         if not sparsemodel.has_state_valuations():
             return
-        sv = sparsemodel.state_valuations
-        storm_vars = list(sv.manager.get_variables())
-        if not storm_vars:
-            return
-
-        # TODO: stormpy's state_valuations API is under active development.
-        # sv.manager.get_variables() returns *all* expression-manager variables
-        # (constants, auxiliary variables, etc.), not only those stored in the
-        # state valuation table.  Calling get_*_values_states on a variable
-        # that is absent triggers a fatal SIGABRT inside the C++ layer, so we
-        # cannot catch it.  As a workaround we parse the string representation
-        # of state 0 to discover which variables are actually stored.
-        # Format example: '[!start\t& ax=0\t& ay=0]'
-        # Update this once the stormpy API exposes a reliable variable list.
-        stored_names: set[str] = set()
-        if sparsemodel.nr_states > 0:
-            raw = sv.get_string(0).strip("[]")
-            for token in raw.split("\t& "):
-                token = token.strip()
-                if "=" in token:
-                    stored_names.add(token.split("=")[0])
-                elif token.startswith("!"):
-                    stored_names.add(token[1:])
-                elif token:
-                    stored_names.add(token)
-
-        var_info: list[tuple[Variable, list]] = []
-        for storm_var in storm_vars:
-            if storm_var.name not in stored_names:
-                continue
-            if storm_var.has_boolean_type():
-                true_states = set(sv.get_boolean_values_states(storm_var))
-                values = [i in true_states for i in range(sparsemodel.nr_states)]
-                domain: BoolDomain | IntDomain = BoolDomain()
-            elif storm_var.has_integer_type():
-                values = list(sv.get_values_states(storm_var))
-                domain = IntDomain(min(values), max(values))
-            else:
-                continue
-            var_info.append((Variable(storm_var.name, domain), values))
-
+        var_info = valuation_variables(sparsemodel.state_valuations)
         for state_id, state in enumerate(model.states):
-            state.valuations = {sv_var: values[state_id] for sv_var, values in var_info}
+            state.valuations = {var: values[state_id] for var, values in var_info}
 
-    def add_observation_valuations(
-        model: Model,
-        sparsepomdp: "stormpy.storage.SparsePomdp",
-    ):
-        """Add observation valuations from a stormpy POMDP to the stormvogel model.
-
-        Only observable variables (from the ``observables ... endobservables`` block)
-        are imported; named predicate observables (``observable "name" = expr;``)
-        require a stormpy API that is not yet available and are therefore skipped.
-
-        For each variable present in the observation valuations, the domain is
-        inferred from all observed values: ``BoolDomain`` for boolean variables,
-        ``IntDomain(min, max)`` for integer variables.
-
-        :param model: The stormvogel POMDP model to populate.
-        :param sparsepomdp: The stormpy sparse POMDP containing the observation valuations.
-        """
-        if not sparsepomdp.has_observation_valuations():
-            return
-        ov = sparsepomdp.observation_valuations
-        storm_vars = list(ov.manager.get_variables())
-        if not storm_vars:
-            return
-
-        nr_obs = sparsepomdp.nr_observations
-
-        # Parse observation 0's string to find which variables are actually stored.
-        # ov.manager.get_variables() returns all expression-manager variables, but
-        # calling _get_*_values_states on an absent variable triggers a fatal SIGABRT
-        # in the C++ layer that cannot be caught by Python. Format: '[o=5\t& ...]'
-        stored_names: set[str] = set()
-        if nr_obs > 0:
-            raw = ov.get_string(0).strip("[]")
-            for token in raw.split("\t& "):
-                token = token.strip()
-                if "=" in token:
-                    stored_names.add(token.split("=")[0])
-                elif token.startswith("!"):
-                    stored_names.add(token[1:])
-                elif token:
-                    stored_names.add(token)
-
-        var_info: list[tuple[Variable, list]] = []
-        for storm_var in storm_vars:
-            if storm_var.name not in stored_names:
+    def valuation_variables(valuations):
+        """Read only variables stored in the valuation table."""
+        var_info = []
+        for storm_var in valuations.get_all_variables():
+            if not (storm_var.has_boolean_type() or storm_var.has_integer_type()):
                 continue
-            is_bool = storm_var.has_boolean_type()
-            is_int = storm_var.has_integer_type()
-            if not (is_bool or is_int):
+            values = list(valuations.get_values_states(storm_var))
+            if not values:
                 continue
-            try:
-                if is_bool:
-                    values = [bool(v) for v in ov._get_boolean_values_states(storm_var)]
-                else:
-                    values = list(ov._get_integer_values_states(storm_var))
-            except (IndexError, KeyError):
-                # TODO: named predicate observables (observable "name" = expr;) will
-                # become accessible here once the stormpy API is extended.
-                continue
-            if len(values) != nr_obs:
-                continue
-            domain: BoolDomain | IntDomain = (
-                BoolDomain() if is_bool else IntDomain(min(values), max(values))
+            domain = (
+                BoolDomain()
+                if storm_var.has_boolean_type()
+                else IntDomain(min(values), max(values))
             )
             var_info.append((Variable(storm_var.name, domain), values))
+        return var_info
 
-        if not var_info:
+    def add_observation_valuations(model: Model, sparsepomdp):
+        """Import boolean and integer observation valuations."""
+        if not sparsepomdp.has_observation_valuations():
             return
-
-        # observations are stored as model.observation(str(obs_class_idx))
-        for obs_idx in range(nr_obs):
+        var_info = valuation_variables(sparsepomdp.observation_valuations)
+        for obs_idx in range(sparsepomdp.nr_observations):
             obs = model.get_observation(str(obs_idx))
             model.observation_valuations[obs] = {
-                sv_var: values[obs_idx] for sv_var, values in var_info
+                var: values[obs_idx] for var, values in var_info
             }
 
-    def map_dtmc(sparsedtmc: stormpy.storage.SparseDtmc) -> Model:
+    def map_dtmc(sparsedtmc: stormpy.models.SparseDtmc) -> Model:
         """Convert a stormpy DTMC to a stormvogel model.
 
         :param sparsedtmc: The stormpy sparse DTMC to convert.
@@ -332,7 +246,7 @@ def stormpy_to_stormvogel(
             row = matrix.get_row(state.id)
             choiceshorthand = [
                 (
-                    value_to_stormvogel(x.value(), sparsedtmc),
+                    value_to_stormvogel(x.value, sparsedtmc),
                     model.states[x.column],
                 )
                 for x in row
@@ -351,7 +265,7 @@ def stormpy_to_stormvogel(
 
         return model
 
-    def map_mdp(sparsemdp: stormpy.storage.SparseMdp) -> Model:
+    def map_mdp(sparsemdp: stormpy.models.SparseMdp) -> Model:
         """Convert a stormpy MDP to a stormvogel model.
 
         :param sparsemdp: The stormpy sparse MDP to convert.
@@ -390,7 +304,7 @@ def stormpy_to_stormvogel(
                     action = model.action(str(i))
                 branch = [
                     (
-                        value_to_stormvogel(x.value(), sparsemdp),
+                        value_to_stormvogel(x.value, sparsemdp),
                         model.states[x.column],
                     )
                     for x in row
@@ -414,7 +328,7 @@ def stormpy_to_stormvogel(
 
         return model
 
-    def map_ctmc(sparsectmc: stormpy.storage.SparseCtmc) -> Model:
+    def map_ctmc(sparsectmc: stormpy.models.SparseCtmc) -> Model:
         """Convert a stormpy CTMC to a stormvogel model.
 
         :param sparsectmc: The stormpy sparse CTMC to convert.
@@ -435,7 +349,7 @@ def stormpy_to_stormvogel(
             # No need to multiply by exit_rate again
             choiceshorthand: list[tuple[Value, State]] = []
             for x in row:
-                value = value_to_stormvogel(x.value(), sparsectmc)
+                value = value_to_stormvogel(x.value, sparsectmc)
                 if value == 0:
                     continue
                 choiceshorthand.append((value, model.states[x.column]))
@@ -454,7 +368,7 @@ def stormpy_to_stormvogel(
 
         return model
 
-    def map_pomdp(sparsepomdp: stormpy.storage.SparsePomdp) -> Model:
+    def map_pomdp(sparsepomdp: stormpy.models.SparsePomdp) -> Model:
         """Convert a stormpy POMDP to a stormvogel model.
 
         :param sparsepomdp: The stormpy sparse POMDP to convert.
@@ -494,7 +408,7 @@ def stormpy_to_stormvogel(
                     action = model.action(str(i))
                 branch = [
                     (
-                        value_to_stormvogel(x.value(), sparsepomdp),
+                        value_to_stormvogel(x.value, sparsepomdp),
                         model.states[x.column],
                     )
                     for x in row
@@ -528,7 +442,7 @@ def stormpy_to_stormvogel(
 
         return model
 
-    def map_ma(sparsema: stormpy.storage.SparseMA) -> Model:
+    def map_ma(sparsema: stormpy.models.SparseMA) -> Model:
         """Convert a stormpy MA to a stormvogel model.
 
         :param sparsema: The stormpy sparse MA to convert.
@@ -562,7 +476,7 @@ def stormpy_to_stormvogel(
                     action = model.action(str(i))
                 branch = [
                     (
-                        value_to_stormvogel(x.value(), sparsema),
+                        value_to_stormvogel(x.value, sparsema),
                         model.states[x.column],
                     )
                     for x in row
@@ -607,9 +521,7 @@ def stormpy_to_stormvogel(
         )
 
 
-def from_prism(
-    program: "stormpy.storage.storage.PrismProgram | str", valuations: bool = True
-):
+def from_prism(program: "stormpy.io.PrismProgram | str", valuations: bool = True):
     """Create a stormvogel model from a PRISM program.
 
     :param program: The PRISM program stored as a PrismProgram or file name.
@@ -623,7 +535,7 @@ def from_prism(
         options = stormpy.BuilderOptions()
         options.set_build_state_valuations(True)
 
-        sp_model = stormpy.build_sparse_model_with_options(program, options)
+        sp_model = stormpy.build_model(program, options=options)
     else:
         sp_model = stormpy.build_model(program)
 

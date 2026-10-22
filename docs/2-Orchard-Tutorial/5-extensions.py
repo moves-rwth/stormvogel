@@ -51,7 +51,7 @@ formula = stormpy.parse_properties('Pmax=? [F "PlayersWon"]')[0]
 symbolic_result = stormpy.model_checking(
     orchard_symbolic, formula, only_initial_states=True
 )
-filter = stormpy.create_filter_initial_states_symbolic(orchard_symbolic)
+filter = stormpy.create_filter_initial_states(orchard_symbolic)
 symbolic_result.filter(filter)
 print("Maximal probability: {}".format(symbolic_result))
 
@@ -66,8 +66,10 @@ print(
         orchard_prism.nr_states, orchard_prism.nr_transitions
     )
 )
-orchard_bisim = stormpy.perform_bisimulation(
-    orchard_prism, formula, stormpy.BisimulationType.STRONG
+orchard_bisim = stormpy.transformations.perform_bisimulation(
+    orchard_prism,
+    formula,
+    bisimulation_type=stormpy.transformations.BisimulationType.STRONG,
 )
 print(
     "Model with {} states and {} transitions".format(
@@ -89,9 +91,9 @@ print(
 # Change precision
 env = stormpy.Environment()
 prec = stormpy.Rational(0.1)
-env.solver_environment.minmax_solver_environment.precision = prec
+env.solver().min_max().precision = prec
 result = stormpy.model_checking(orchard_prism, formula[0], environment=env)
-print(result.at(orchard_prism.initial_states[0]))
+print(result.get_value(orchard_prism.initial_states[0]))
 
 # %% [markdown]
 # We can see that the resulting probability $0.5815$ is within the precision guarantee of $0.1$.
@@ -104,19 +106,19 @@ print(result.at(orchard_prism.initial_states[0]))
 import time
 
 methods = [
-    stormpy.MinMaxMethod.value_iteration,
-    stormpy.MinMaxMethod.policy_iteration,
-    stormpy.MinMaxMethod.optimistic_value_iteration,
+    stormpy.environments.MinMaxMethod.VALUE_ITERATION,
+    stormpy.environments.MinMaxMethod.POLICY_ITERATION,
+    stormpy.environments.MinMaxMethod.OPTIMISTIC_VALUE_ITERATION,
 ]
 for m in methods:
     env = stormpy.Environment()
-    env.solver_environment.minmax_solver_environment.method = m
+    env.solver().min_max().method = m
     start = time.time()
     result = stormpy.model_checking(
         orchard_prism, formula[0], environment=env, extract_scheduler=True
     )
     print(f"Method: {m}")
-    print(f"Result: {result.at(orchard_prism.initial_states[0])}")
+    print(f"Result: {result.get_value(orchard_prism.initial_states[0])}")
     print(f"Time: {time.time() - start:.2}s")
 
 # %% [markdown]
@@ -151,13 +153,15 @@ for m in methods:
 
 # %%
 # These are the target states
-players_won = stormpy.parse_properties('"PlayersWon"')[0].raw_formula
-psi_states = stormpy.model_checking(orchard_prism, players_won).get_truth_values()
+players_won = stormpy.parse_properties('"PlayersWon"')[0].get_raw_formula()
+psi_states = stormpy.model_checking(
+    orchard_prism, players_won
+).get_truth_values_vector()
 
 # These are the states that can never reach the target states
-phi_states = stormpy.BitVector(orchard_prism.nr_states, True)
-prob0max_states = stormpy.compute_prob01max_states(
-    orchard_prism, phi_states, psi_states
+phi_states = stormpy.datastructures.BitVector(orchard_prism.nr_states, True)
+prob0max_states = stormpy.analysis.compute_prob01_states(
+    orchard_prism, stormpy.parse_property('Pmax=? [F "PlayersWon"]')
 )[0]
 
 # SCIP is an LP solver
@@ -179,7 +183,7 @@ for state in range(num_states):
         for row in orchard_prism.transition_matrix.get_rows_for_group(state):
             summed_prob = 0
             for transition in orchard_prism.transition_matrix.get_row(row):
-                prob = transition.value()
+                prob = transition.value
                 next_state = transition.column
                 summed_prob += prob * state_vars[next_state]
             m.addCons(state_vars[state] >= summed_prob)
@@ -196,9 +200,9 @@ sol = m.getBestSol()
 result_lp = sol[state_vars[orchard_prism.initial_states[0]]]
 
 # Compare with default VI
-properties = stormpy.parse_properties_without_context('Pmax=? [F "PlayersWon"]')
-vi_result = stormpy.model_checking(orchard_prism, properties[0].raw_formula)
-result_vi = vi_result.at(orchard_prism.initial_states[0])
+properties = stormpy.parse_properties('Pmax=? [F "PlayersWon"]')
+vi_result = stormpy.model_checking(orchard_prism, properties[0].get_raw_formula())
+result_vi = vi_result.get_value(orchard_prism.initial_states[0])
 
 print(result_lp, result_vi)
 assert abs(result_lp - result_vi) < 1e-6  # => True

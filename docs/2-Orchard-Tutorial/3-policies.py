@@ -46,7 +46,7 @@ formula = stormpy.parse_properties('Pmax=? [F "PlayersWon"]')[0]
 def model_check(model, prop):
     formula = stormpy.parse_properties(prop)[0]
     result = stormpy.model_checking(model, formula, only_initial_states=True)
-    return result.at(model.initial_states[0])
+    return result.get_value(model.initial_states[0])
 
 
 # %% [markdown]
@@ -62,7 +62,7 @@ result = stormpy.model_checking(orchard_prism, formula, extract_scheduler=True)
 # The output of the model checking call is a quantitative `result`, which now also holds a policy (also called scheduler).
 
 # %%
-string_scheduler = str(result.scheduler)
+string_scheduler = str(result.get_scheduler())
 
 # %% [markdown]
 # Policies for maximal reachability probabilities as in the `formula` are memoryless and
@@ -88,7 +88,7 @@ print(os.linesep.join(string_scheduler.split(os.linesep)[:max_lines]))
 # %%
 i = 0
 for state in orchard_prism.states:
-    choice = result.scheduler.get_choice(state)
+    choice = result.get_scheduler().get_choice(state)
     action_index = choice.get_deterministic_choice()
     action = state.actions[action_index]
     print(f"In state {state.valuations} choose action {action.labels}")
@@ -103,7 +103,7 @@ for state in orchard_prism.states:
 # %%
 i = 0
 for state in orchard_prism.states:
-    choice = result.scheduler.get_choice(state)
+    choice = result.get_scheduler().get_choice(state)
     action_index = choice.get_deterministic_choice()
     action = state.actions[action_index]
     action_name = next(iter(action.labels))
@@ -131,7 +131,7 @@ for state in orchard_prism.states:
 
 # %%
 # Get induced model
-induced = orchard_prism.apply_scheduler(result.scheduler, True)
+induced = orchard_prism.apply_scheduler(result.get_scheduler(), True)
 # Analysis
 all_cherries = 'Pmax=? [F "AllCherriesPicked"]'
 print(f"Prob for fixed: {model_check(induced, all_cherries)}")
@@ -156,25 +156,25 @@ print(f"Prob for optimal: {model_check(orchard_prism, all_cherries)}")
 
 # %%
 def _declare_extra_orchard_variables(manager):
-    apple_variable: stormpy.Variable = manager.get_variable("apple")
-    plum_variable: stormpy.Variable = manager.get_variable("plum")
-    pear_variable: stormpy.Variable = manager.get_variable("pear")
-    cherry_variable: stormpy.Variable = manager.get_variable("cherry")
+    apple_variable: stormpy.expressions.Variable = manager.get_variable("apple")
+    plum_variable: stormpy.expressions.Variable = manager.get_variable("plum")
+    pear_variable: stormpy.expressions.Variable = manager.get_variable("pear")
+    cherry_variable: stormpy.expressions.Variable = manager.get_variable("cherry")
     # The else cases below are only relevant for rerunning this function multiple times.
     if not manager.has_variable("most_apples"):
-        most_apples_variable = manager.create_boolean_variable("most_apples")
+        most_apples_variable = manager.declare_boolean_variable("most_apples")
     else:
         most_apples_variable = manager.get_variable("most_apples")
     if not manager.has_variable("most_pears"):
-        most_pears_variable = manager.create_boolean_variable("most_pears")
+        most_pears_variable = manager.declare_boolean_variable("most_pears")
     else:
         most_pears_variable = manager.get_variable("most_pears")
     if not manager.has_variable("most_plums"):
-        most_plums_variable = manager.create_boolean_variable("most_plums")
+        most_plums_variable = manager.declare_boolean_variable("most_plums")
     else:
         most_plums_variable = manager.get_variable("most_plums")
     if not manager.has_variable("most_cherries"):
-        most_cherries_variable = manager.create_boolean_variable("most_cherries")
+        most_cherries_variable = manager.declare_boolean_variable("most_cherries")
     else:
         most_cherries_variable = manager.get_variable("most_cherries")
 
@@ -187,15 +187,15 @@ def _declare_extra_orchard_variables(manager):
     extra_definitions.append(
         (
             most_apples_variable,
-            stormpy.Expression.Conjunction(
+            stormpy.expressions.Expression.Conjunction(
                 [
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         apple_variable_expression, plum_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         apple_variable_expression, cherry_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         apple_variable_expression, pear_variable_expression
                     ),
                 ]
@@ -205,15 +205,15 @@ def _declare_extra_orchard_variables(manager):
     extra_definitions.append(
         (
             most_pears_variable,
-            stormpy.Expression.Conjunction(
+            stormpy.expressions.Expression.Conjunction(
                 [
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         pear_variable_expression, plum_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         pear_variable_expression, cherry_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         pear_variable_expression, apple_variable_expression
                     ),
                 ]
@@ -223,15 +223,15 @@ def _declare_extra_orchard_variables(manager):
     extra_definitions.append(
         (
             most_plums_variable,
-            stormpy.Expression.Conjunction(
+            stormpy.expressions.Expression.Conjunction(
                 [
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         plum_variable_expression, pear_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         plum_variable_expression, cherry_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         plum_variable_expression, apple_variable_expression
                     ),
                 ]
@@ -241,15 +241,15 @@ def _declare_extra_orchard_variables(manager):
     extra_definitions.append(
         (
             most_cherries_variable,
-            stormpy.Expression.Conjunction(
+            stormpy.expressions.Expression.Conjunction(
                 [
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         cherry_variable_expression, pear_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         cherry_variable_expression, plum_variable_expression
                     ),
-                    stormpy.Expression.Geq(
+                    stormpy.expressions.Expression.Geq(
                         cherry_variable_expression, apple_variable_expression
                     ),
                 ]
@@ -273,35 +273,35 @@ copy_fruit_amounts = False
 assert not maintain_old_valuations or not copy_fruit_amounts
 
 # Create the transformer.
-svt = stormpy.StateValuationTransformer(orchard_prism.state_valuations)
+svt = stormpy.models.ValuationTransformer(orchard_prism.state_valuations)
 # Add extra Boolean definitions:
 if add_additional_definitions:
     extra_definitions = _declare_extra_orchard_variables(
         prism_program.expression_manager
     )
     for v, definition in extra_definitions:
-        svt.add_boolean_expression(v, definition)
+        svt.add_expression(v, definition)
 # Add integer definitions. Here, we consider copies of the number of items, only useful we do not maintain the old variables.
 if copy_fruit_amounts:
     manager = prism_program.expression_manager
-    svt.add_integer_expression(
-        manager.create_integer_variable("nr_apples"),
+    svt.add_expression(
+        manager.declare_integer_variable("nr_apples"),
         manager.get_variable("apple").get_expression(),
     )
-    svt.add_integer_expression(
-        manager.create_integer_variable("nr_plums"),
+    svt.add_expression(
+        manager.declare_integer_variable("nr_plums"),
         manager.get_variable("plum").get_expression(),
     )
-    svt.add_integer_expression(
-        manager.create_integer_variable("nr_cherries"),
+    svt.add_expression(
+        manager.declare_integer_variable("nr_cherries"),
         manager.get_variable("cherry").get_expression(),
     )
-    svt.add_integer_expression(
-        manager.create_integer_variable("nr_pears"),
+    svt.add_expression(
+        manager.declare_integer_variable("nr_pears"),
         manager.get_variable("pear").get_expression(),
     )
 # Create a new MDP.
-new_mdp = stormpy.set_state_valuations(
+new_mdp = stormpy.transformations.set_state_valuations(
     orchard_prism, svt.build(maintain_old_valuations)
 )
 
@@ -309,7 +309,10 @@ new_mdp = stormpy.set_state_valuations(
 # We are now ready to run synthesis of decision tree policies. We use the tool PAYNT.
 
 # %%
-import paynt
+try:
+    import paynt
+except ImportError:
+    paynt = None
 
 # %% [markdown]
 # We distinguish two versions of decision tree synthesis:
@@ -334,21 +337,24 @@ pass
 mc_result = stormpy.model_checking(
     new_mdp, formula, extract_scheduler=match_fixed_policy
 )
-print(f"Overall optimal result: {mc_result.at(new_mdp.initial_states[0])}")
+print(f"Overall optimal result: {mc_result.get_value(new_mdp.initial_states[0])}")
 # Paynt considers synthesis via annotated MDPs called coloured MDPs.
 # For synthesis of decision trees, we use paynt.dt.
-colored_mdp_factory = paynt.dt.DtColoredMdpFactory(new_mdp)
-# We now set the task as specified in the hyperparameters above.
-task = paynt.dt.DtTask([formula], tree_depth)
-if match_fixed_policy:
-    task.set_scheduler_to_map(mc_result.scheduler)
-# With the synthesis task specified, we run the synthesis routine.
-result = paynt.dt.synthesize(colored_mdp_factory, task)
-print("success:", result.success)
+if paynt is not None:
+    colored_mdp_factory = paynt.dt.DtColoredMdpFactory(new_mdp)
+    # We now set the task as specified in the hyperparameters above.
+    task = paynt.dt.DtTask([formula], tree_depth)
+    if match_fixed_policy:
+        task.set_scheduler_to_map(mc_result.get_scheduler())
+    # With the synthesis task specified, we run the synthesis routine.
+    result = paynt.dt.synthesize(colored_mdp_factory, task)
+    print("success:", result.success)
+else:
+    result = None
 
 # %%
 # If successful, we display the obtained result.
-if result.success:
+if result is not None and result.success:
     tree = result.tree
     print("value:", result.value)
     print("decision tree:\n", result.tree.to_string())

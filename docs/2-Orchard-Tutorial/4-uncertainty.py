@@ -169,26 +169,29 @@ print(orchard_storm)
 # %%
 # Parse properties
 properties = stormpy.parse_properties('Pmax=? [F "PlayersWon"]')
-task = stormpy.CheckTask(properties[0].raw_formula)
-# Set cooperative resolution mode, alternatively: ROBUST
-task.set_uncertainty_resolution_mode(stormpy.UncertaintyResolutionMode.COOPERATIVE)
-
 # Prepare model checking
 env = stormpy.Environment()
 # Set VI algorithm to plain VI
-env.solver_environment.minmax_solver_environment.method = (
-    stormpy.MinMaxMethod.value_iteration
-)
+env.solver().min_max().method = stormpy.environments.MinMaxMethod.VALUE_ITERATION
 # Check model
-stormpy_result = stormpy.check_interval_mdp(orchard_storm, task, env)
-print(stormpy_result.at(orchard_storm.initial_states[0]))
+stormpy_result = stormpy.model_checking(
+    orchard_storm,
+    properties[0],
+    environment=env,
+    uncertainty_resolution_mode=stormpy.UncertaintyResolutionMode.COOPERATIVE,
+)
+print(stormpy_result.get_value(orchard_storm.initial_states[0]))
 
 # %%
 # Set robust resolution mode
-task.set_uncertainty_resolution_mode(stormpy.UncertaintyResolutionMode.ROBUST)
 # Check model
-stormpy_result = stormpy.check_interval_mdp(orchard_storm, task, env)
-print(stormpy_result.at(orchard_storm.initial_states[0]))
+stormpy_result = stormpy.model_checking(
+    orchard_storm,
+    properties[0],
+    environment=env,
+    uncertainty_resolution_mode=stormpy.UncertaintyResolutionMode.ROBUST,
+)
+print(stormpy_result.get_value(orchard_storm.initial_states[0]))
 
 # %% [markdown]
 # In the cooperative setting, the player can achieve a maximal winning probability of $0.7961$, while in
@@ -306,11 +309,11 @@ orchard_mdp_stormpy = stormvogel.stormpy_utils.mapping.stormvogel_to_stormpy(
     build_simple()
 )
 result = stormpy.model_checking(
-    orchard_mdp_stormpy, properties[0].raw_formula, extract_scheduler=True
+    orchard_mdp_stormpy, properties[0].get_raw_formula(), extract_scheduler=True
 )
 
 # Apply scheduler on pMDP
-scheduler = result.scheduler.cast_to_parametric_datatype()
+scheduler = result.get_scheduler().to_value_type(stormpy.RationalFunction)
 orchard_stormpy_pmc = orchard_stormpy_pmdp.apply_scheduler(scheduler)
 
 # %% [markdown]
@@ -319,8 +322,10 @@ orchard_stormpy_pmc = orchard_stormpy_pmdp.apply_scheduler(scheduler)
 # %%
 # Perform model checking
 properties2 = stormpy.parse_properties('P=? [F "PlayersWon"]')
-stormpy_result = stormpy.model_checking(orchard_stormpy_pmc, properties2[0].raw_formula)
-solution_function = stormpy_result.at(0)
+stormpy_result = stormpy.model_checking(
+    orchard_stormpy_pmc, properties2[0].get_raw_formula()
+)
+solution_function = stormpy_result.get_value(0)
 print(solution_function)
 
 # %% [markdown]
@@ -351,12 +356,9 @@ import stormpy.pomdp
 
 prism_program = stormpy.parse_prism_program("orchard/orchard_pomdp.pm")
 formula_str = 'Pmax=? [!"RavenWon" U "PlayersWon"]'
-properties = stormpy.parse_properties_for_prism_program(formula_str, prism_program)
-prism_program, properties = stormpy.preprocess_symbolic_input(
-    prism_program, properties, ""
-)
-prism_program = prism_program.as_prism_program()
-options = stormpy.BuilderOptions([p.raw_formula for p in properties])
+properties = stormpy.parse_properties(formula_str, prism_program)
+prism_program, properties = stormpy.instantiate_constants(prism_program, "", properties)
+options = stormpy.BuilderOptions([p.get_raw_formula() for p in properties])
 options.set_build_state_valuations()
 options.set_build_choice_labels()
 pomdp = stormpy.build_model(prism_program, properties)
@@ -370,13 +372,13 @@ print(pomdp)
 # The semantics of a POMDP can be given in terms of a **belief MDP**, which we can partially explore and verify.
 
 # %%
-belexpl_options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
-belexpl_options.use_clipping = False
-belexpl_options.refine = True
-
-belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp, belexpl_options)
-result = belmc.check(properties[0].raw_formula, [])
-print(f"Result in: [{result.lower_bound}, {result.upper_bound}]")
+lower_result = stormpy.pomdp.verify_with_belief_unfolding(
+    pomdp, properties[0], cut_zero_gap=True
+)
+upper_result = stormpy.pomdp.verify_with_belief_discretization(
+    pomdp, properties[0], cut_zero_gap=True
+)
+print(f"Result in: [{lower_result.value}, {upper_result.value}]")
 
 # %% [markdown]
 # First, note that the result approximates the true optimum from below and above.
@@ -393,12 +395,9 @@ print(f"Result in: [{result.lower_bound}, {result.upper_bound}]")
 # Load model with stealing
 prism_program = stormpy.parse_prism_program("orchard/orchard_pomdp_steal.pm")
 formula_str = 'Pmax=? [!"RavenWon" U "PlayersWon"]'
-properties = stormpy.parse_properties_for_prism_program(formula_str, prism_program)
-prism_program, properties = stormpy.preprocess_symbolic_input(
-    prism_program, properties, ""
-)
-prism_program = prism_program.as_prism_program()
-options = stormpy.BuilderOptions([p.raw_formula for p in properties])
+properties = stormpy.parse_properties(formula_str, prism_program)
+prism_program, properties = stormpy.instantiate_constants(prism_program, "", properties)
+options = stormpy.BuilderOptions([p.get_raw_formula() for p in properties])
 options.set_build_state_valuations()
 options.set_build_choice_labels()
 pomdp_steal = stormpy.build_model(prism_program, properties)
@@ -413,16 +412,16 @@ print(pomdp_steal)
 mdp_res = stormpy.model_checking(
     pomdp_steal, properties[0], force_fully_observable=True
 )
-print(mdp_res.at(pomdp_steal.initial_states[0]))
+print(mdp_res.get_value(pomdp_steal.initial_states[0]))
 
 # %%
-belexpl_options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
-belexpl_options.use_clipping = False
-belexpl_options.refine = True
-
-belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp_steal, belexpl_options)
-result = belmc.check(properties[0].raw_formula, [])
-print(f"Result in: [{result.lower_bound}, {result.upper_bound}]")
+lower_result = stormpy.pomdp.verify_with_belief_unfolding(
+    pomdp_steal, properties[0], cut_zero_gap=True
+)
+upper_result = stormpy.pomdp.verify_with_belief_discretization(
+    pomdp_steal, properties[0], cut_zero_gap=True
+)
+print(f"Result in: [{lower_result.value}, {upper_result.value}]")
 
 # %% [markdown]
 # We see that stealing fruits makes the game easier to win, but now an observation-based policy will perform worse than the state-based policies.

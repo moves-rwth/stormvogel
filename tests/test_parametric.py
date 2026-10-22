@@ -219,3 +219,23 @@ def test_instantiation_ignores_unknown_keys():
     partial = pmc.get_instantiated_model({"x": Fraction(1, 2), "bogus": 99})
     assert partial.parameters == ()
     assert not partial.is_parametric()
+
+
+def test_converting_models_keeps_existing_stormpy_parameters_valid():
+    """A second conversion must not reset Storm's global variable pool."""
+    first = stormvogel.model.new_dtmc()
+    p = first.declare_parameter("pool_parameter")
+    target = first.new_state("target")
+    first.initial_state.set_choices([(p, target), (1 - p, first.initial_state)])
+    first.add_self_loops()
+    native_first = mapping.stormvogel_to_stormpy(first)
+    original_parameter = next(iter(native_first.collect_all_parameters()))
+
+    second = stormvogel.model.new_dtmc()
+    q = second.declare_parameter("other_parameter")
+    second.initial_state.set_choices([(q + (1 - q), second.initial_state)])
+    mapping.stormvogel_to_stormpy(second)
+
+    native_again = mapping.stormvogel_to_stormpy(first)
+    assert next(iter(native_again.collect_all_parameters())) == original_parameter
+    assert_models_equal(first, mapping.stormpy_to_stormvogel(native_first))

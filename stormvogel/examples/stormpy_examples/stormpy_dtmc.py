@@ -7,7 +7,7 @@ def example_building_dtmcs_01():
     assert stormpy is not None
 
     # Use the SparseMatrixBuilder for constructing the transition matrix
-    builder = stormpy.SparseMatrixBuilder(
+    builder = stormpy.datastructures.SparseMatrixBuilder(
         rows=0,
         columns=0,
         entries=0,
@@ -40,7 +40,7 @@ def example_building_dtmcs_01():
     # print(transition_matrix)
 
     # State labeling
-    state_labeling = stormpy.storage.StateLabeling(13)
+    state_labeling = stormpy.models.StateLabeling(13)
 
     # Add labels
     labels = {"init", "one", "two", "three", "four", "five", "six", "done", "deadlock"}
@@ -60,24 +60,26 @@ def example_building_dtmcs_01():
     state_labeling.add_label_to_state("six", 12)
 
     # Set label 'done' for multiple states
-    state_labeling.set_states("done", stormpy.BitVector(13, [7, 8, 9, 10, 11, 12]))
+    state_labeling.set_states(
+        "done", stormpy.datastructures.BitVector(13, [7, 8, 9, 10, 11, 12])
+    )
     # print(state_labeling)
 
     # Reward models:
     reward_models = {}
     # Create a vector representing the state-action rewards
     action_reward = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    reward_models["coin_flips"] = stormpy.SparseRewardModel(
+    reward_models["coin_flips"] = stormpy.models.SparseRewardModel(
         optional_state_action_reward_vector=action_reward
     )
 
-    components = stormpy.SparseModelComponents(
+    components = stormpy.models.SparseModelComponents(
         transition_matrix=transition_matrix,
         state_labeling=state_labeling,
         reward_models=reward_models,
     )
 
-    dtmc = stormpy.storage.SparseDtmc(components)
+    dtmc = stormpy.models.SparseDtmc(components)
 
     return dtmc
 

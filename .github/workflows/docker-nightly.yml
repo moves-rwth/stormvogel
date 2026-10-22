@@ -58,15 +58,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Download paynt nightly wheel
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: create_wheel.yml
-          repo: randriu/paynt
-          name: paynt-wheels-linux-intel
-          path: paynt_wheel/
-
       - name: Log in to Docker Hub
         if: github.event_name == 'push'
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -83,7 +74,6 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           pull: true
           tags: stormvogel/stormvogel:experimental
-          build-args: EXPERIMENTAL=1
 
       - name: Generate artifact attestation
         if: github.event_name == 'push'

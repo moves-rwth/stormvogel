@@ -32,7 +32,7 @@ def _build(
     opts.set_build_choice_labels(choice_labels)
     if observation_valuations:
         opts.set_build_observation_valuations(True)
-    return stormpy.build_sparse_model_with_options(prog, opts)
+    return stormpy.build_model(prog, options=opts)
 
 
 def _via_umb(sp):
@@ -40,7 +40,7 @@ def _via_umb(sp):
     with tempfile.NamedTemporaryFile(suffix=".umb", delete=False) as f:
         path = f.name
     try:
-        stormpy.export_to_umb(sp, path)
+        stormpy.io.export_to_umb(sp, path)
         return svu.read_from_umb(path, ignore_unsupported_rewards=True)
     finally:
         os.unlink(path)

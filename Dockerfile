@@ -4,7 +4,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /bin/
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install dependencies
+# Install dependencies.
 RUN apt-get update && \
     apt-get -y install curl git vim nano libcairo2-dev graphviz
 
@@ -13,16 +13,7 @@ COPY . /app
 WORKDIR /app
 
 # Install locked dependencies, including Jupyter Lab, into the container venv.
-# When EXPERIMENTAL=1, install the nightly stormpy wheel from the stormpy wheel index
-# and replace paynt with a local experimental wheel.
-ARG EXPERIMENTAL=0
-RUN uv sync --locked --no-default-groups --group dev --all-extras --no-editable && \
-    if [ "$EXPERIMENTAL" = "1" ]; then \
-        uv pip install --python /opt/venv/bin/python --upgrade --prerelease allow stormpy \
-            --index-url https://stormchecker.github.io/stormpy-wheels/simple \
-            --extra-index-url https://pypi.org/simple --index-strategy unsafe-best-match && \
-        uv pip install --python /opt/venv/bin/python --no-deps --reinstall paynt_wheel/*cp313*.whl; \
-    fi
+RUN uv sync --locked --no-default-groups --group dev --all-extras --no-editable
 
 # create /root/.jupyter directory
 RUN mkdir -p /root/.jupyter

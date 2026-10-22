@@ -21,8 +21,8 @@ else:
 
 
 def sparse_equal(
-    m0: Union["stormpy.storage.SparseDtmc", "stormpy.storage.SparseMdp"],
-    m1: Union["stormpy.storage.SparseDtmc", "stormpy.storage.SparseMdp"],
+    m0: Union["stormpy.models.SparseDtmc", "stormpy.models.SparseMdp"],
+    m1: Union["stormpy.models.SparseDtmc", "stormpy.models.SparseMdp"],
 ) -> bool:
     """
     outputs true if the sparse models are the same and false otherwise
@@ -47,7 +47,7 @@ def sparse_equal(
                         actions_equal = False
                     else:
                         for e0, e1 in zip(t0, t1):
-                            if e0.column != e1.column or e0.value() != e1.value():
+                            if e0.column != e1.column or e0.value != e1.value:
                                 actions_equal = False
                                 break
         if not (
@@ -79,18 +79,19 @@ def sparse_equal(
 
     # check if exit rates are equal (in case of ctmcs):
     exit_rates_equal = (
-        not m0.model_type == stormpy.ModelType.CTMC or m0.exit_rates == m1.exit_rates
+        not m0.model_type == stormpy.models.ModelType.CTMC
+        or m0.exit_rates == m1.exit_rates
     )
 
     # check if observations are equal (in case of pomdps):
     observations_equal = (
-        not m0.model_type == stormpy.ModelType.POMDP
+        not m0.model_type == stormpy.models.ModelType.POMDP
         or m0.observations == m1.observations
     )
 
     # check if markovian states are equal (in case of mas):
     markovian_states_equal = (
-        not m0.model_type == stormpy.ModelType.MA
+        not m0.model_type == stormpy.models.ModelType.MA
         or m0.markovian_states == m1.markovian_states
     )
 
@@ -287,7 +288,7 @@ def test_stormpy_to_stormvogel_and_back_ma():
 
 def test_modified_stormpy_to_stormvogel_and_back():
     # we build a simple stormpy dtmc
-    builder = stormpy.SparseMatrixBuilder(
+    builder = stormpy.datastructures.SparseMatrixBuilder(
         rows=0,
         columns=0,
         entries=0,
@@ -301,7 +302,7 @@ def test_modified_stormpy_to_stormvogel_and_back():
     builder.add_next_value(2, 2, 1)
 
     transition_matrix = builder.build()
-    state_labeling = stormpy.storage.StateLabeling(3)
+    state_labeling = stormpy.models.StateLabeling(3)
 
     labels = {"init", "one", "two"}
     for label in labels:
@@ -311,12 +312,12 @@ def test_modified_stormpy_to_stormvogel_and_back():
     state_labeling.add_label_to_state("one", 1)
     state_labeling.add_label_to_state("two", 2)
 
-    components = stormpy.SparseModelComponents(
+    components = stormpy.models.SparseModelComponents(
         transition_matrix=transition_matrix,
         state_labeling=state_labeling,
     )
 
-    stormpy_dtmc = stormpy.storage.SparseDtmc(components)
+    stormpy_dtmc = stormpy.models.SparseDtmc(components)
 
     # we map it to stormvogel
     stormvogel_dtmc = mapping.stormpy_to_stormvogel(stormpy_dtmc)
@@ -331,7 +332,7 @@ def test_modified_stormpy_to_stormvogel_and_back():
     new_stormpy_dtmc = mapping.stormvogel_to_stormpy(stormvogel_dtmc)
 
     # we create the already modified stormpy model
-    builder = stormpy.SparseMatrixBuilder(
+    builder = stormpy.datastructures.SparseMatrixBuilder(
         rows=0,
         columns=0,
         entries=0,
@@ -344,7 +345,7 @@ def test_modified_stormpy_to_stormvogel_and_back():
     builder.add_next_value(2, 2, 1)
 
     transition_matrix = builder.build()
-    state_labeling = stormpy.storage.StateLabeling(3)
+    state_labeling = stormpy.models.StateLabeling(3)
 
     labels = {"one", "two", "three"}
     for label in labels:
@@ -354,12 +355,12 @@ def test_modified_stormpy_to_stormvogel_and_back():
     state_labeling.add_label_to_state("two", 1)
     state_labeling.add_label_to_state("three", 2)
 
-    components = stormpy.SparseModelComponents(
+    components = stormpy.models.SparseModelComponents(
         transition_matrix=transition_matrix,
         state_labeling=state_labeling,
     )
 
-    other_new_stormpy_dtmc = stormpy.storage.SparseDtmc(components)
+    other_new_stormpy_dtmc = stormpy.models.SparseDtmc(components)
 
     assert sparse_equal(new_stormpy_dtmc, other_new_stormpy_dtmc)
 
@@ -400,3 +401,38 @@ def test_labels():
         ),
     ):
         mapping.stormvogel_to_stormpy(model)
+
+
+def test_import_valuations_ignores_unused_expression_variables():
+    """Import the stored variables, including false boolean values."""
+    manager = stormpy.expressions.ExpressionManager()
+    manager.declare_integer_variable("unused")
+    flag = manager.declare_boolean_variable("flag")
+    counter = manager.declare_integer_variable("counter")
+    description = stormpy.models.ValuationDescriptionBuilder(manager)
+    description.add_boolean_variable(flag)
+    description.add_integer_variable(counter, -2, 3)
+    valuations = stormpy.models.Valuations(
+        description.build_class_description(), manager, 2
+    )
+    for index, (boolean, integer) in enumerate([(False, -2), (True, 3)]):
+        valuations.write_value(index, flag, boolean)
+        valuations.write_value(index, counter, integer)
+
+    builder = stormpy.datastructures.SparseMatrixBuilder()
+    builder.add_next_value(0, 1, 1.0)
+    builder.add_next_value(1, 1, 1.0)
+    labeling = stormpy.models.StateLabeling(2)
+    labeling.add_label("init")
+    labeling.add_label_to_state("init", 0)
+    components = stormpy.models.SparseModelComponents(
+        transition_matrix=builder.build(), state_labeling=labeling
+    )
+    components.state_valuations = valuations
+    native = stormpy.models.SparseDtmc(components)
+
+    imported = mapping.stormpy_to_stormvogel(native)
+    assert [
+        {variable.label: value for variable, value in state.valuations.items()}
+        for state in imported.states
+    ] == [{"flag": False, "counter": -2}, {"flag": True, "counter": 3}]

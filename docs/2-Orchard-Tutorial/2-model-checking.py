@@ -135,7 +135,7 @@ print(stormvogel.model_checking(orchard, reward_prop).at(orchard.initial_state))
 def model_check(model, prop):
     formula = stormpy.parse_properties(prop)[0]
     result = stormpy.model_checking(model, formula, only_initial_states=True)
-    return result.at(model.initial_states[0])
+    return result.get_value(model.initial_states[0])
 
 
 # %% [markdown]
